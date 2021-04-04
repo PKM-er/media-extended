@@ -1,19 +1,42 @@
-import {
-  MarkdownPostProcessor,
-  MarkdownPostProcessorContext,
-  Plugin,
-} from "obsidian";
+import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
+import { processInternalEmbeds, processExternalEmbeds } from "./processor";
 // import Plyr from "plyr"
 
-export default class MediaExtended extends Plugin {
+interface MxSettings {
+  enableMF: boolean;
+  allowEmbedMedia: boolean;
+}
 
+const DEFAULT_SETTINGS: MxSettings = {
+  enableMF: true,
+  allowEmbedMedia: false,
+};
+
+export default class MediaExtended extends Plugin {
+  settings: MxSettings;
   // player = Plyr;
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
 
   async onload(): Promise<void> {
     console.log("loading media-extended");
 
-    this.registerMarkdownPostProcessor(processInternalEmbeds);
-    this.registerMarkdownPostProcessor(processExternalEmbeds);
+    await this.loadSettings();
+
+    this.addSettingTab(new MESettingTab(this.app, this));
+
+    if (this.settings.enableMF){
+      this.registerMarkdownPostProcessor(processInternalEmbeds);
+    }
+    if (this.settings.allowEmbedMedia){
+      this.registerMarkdownPostProcessor(processExternalEmbeds);
+    }
 
     // this.registerMarkdownPostProcessor(processVideoPlayer.bind(this));
   }
@@ -27,73 +50,64 @@ export default class MediaExtended extends Plugin {
 //    this.player = new Plyr("span.internal-embed > video")
 // }
 
-const processExternalEmbeds: MarkdownPostProcessor = (el, ctx) => {
-  console.log(el.innerHTML);
-  for (const e of el.querySelectorAll("img[referrerpolicy]")) {
-    console.log(e.outerHTML);
-    const srcEl = e as HTMLImageElement;
-    const ext = new URL(srcEl.src).pathname.split(".").last();
+class MESettingTab extends PluginSettingTab {
+  plugin: MediaExtended;
 
-    let newEl: HTMLMediaElement;
-    let type: "audio" | "video";
-    switch (ext) {
-      case "mp3": case "wav": case "m4a": case "ogg": case "3gp": case "flac":
-        type = "audio";
-        break;
-      case "mp4": case "webm": case "ogv":
-        type = "video";
-        break;
-    }
-    console.log(ext);
-    if (type) {
-      console.log('hello');
-      newEl = createEl(type);
-      newEl.src=srcEl.src
-      newEl.controls=true;
-      srcEl.parentNode.replaceChild(newEl, srcEl);
-    }
+  constructor(app: App, plugin: MediaExtended) {
+    super(app, plugin);
+    this.plugin = plugin;
   }
-};
 
-const processInternalEmbeds: MarkdownPostProcessor = (el, ctx) => {
+  display(): void {
+    let { containerEl } = this;
 
-  const internalEmbedObs = new MutationObserver(
-  // Update embed's src to include temporal fragment when it is loaded
-  (mutationsList, observer) => {
-    // See also: https://www.w3.org/TR/media-frags/#valid-uri
-    const tFragRegex = /(?<=#)t=([\w:\.]*?)(?:,([\w:\.]+?))?$/;
-    for (const m of mutationsList) {
-      if (m.addedNodes.length) {
-        switch (m.addedNodes[0].nodeName) {
-          case "VIDEO":
-          case "AUDIO":
-            const matchArray = (m.target as HTMLSpanElement)
-              .getAttr("src")
-              .match(tFragRegex);
-            if (matchArray) {
-              const embed = m.addedNodes[0] as HTMLMediaElement;
-              const tFrag = matchArray[0];
-              const url = new URL(embed.src);
-              url.hash = tFrag;
-              embed.src = url.toString();
-            }
-            break;
-          case "IMG":
-            // Do nothing
-            break;
-          default:
-            throw new TypeError(
-              `Unexpected addnote type: ${m.addedNodes[0].nodeName}`
-            );
-        }
-        observer.disconnect();
+    containerEl.empty();
+
+    const options : option[] = [
+      {
+        k: "enableMF",
+        name: "Allow Timestamps for embeded video and audio",
+        desc: function(){
+          const descEl = document.createDocumentFragment();
+          descEl.appendText('If enabled, you can write ![[demo.mp4#t=10]] to start playing video/audio at that specific time. ');
+          descEl.appendChild(document.createElement('br'));
+          descEl.appendText("Restart the app to take effects")
+          return descEl;
+          }()
+      },
+      {
+        k: "allowEmbedMedia",
+        name: "Allow standard image embed syntax to be used on video and audio",
+        desc: function(){
+          const descEl = document.createDocumentFragment();
+          descEl.appendText('If enabled, you can write ![](link/to/demo.mp4) to embed video and audio.');
+          descEl.appendChild(document.createElement('br'));
+          descEl.appendText("Restart the app to take effects")
+          return descEl;
+          }()
       }
+    ]
+
+    for (const o of options) {
+      setOption(o,this)
     }
-  });
-
-  const obsConfig = { attributes: false, childList: true, subtree: false };
-
-  for (const span of el.querySelectorAll("span.internal-embed")) {
-    internalEmbedObs.observe(span, obsConfig);
   }
-};
+}
+
+type option = { k: keyof MxSettings; name: string; desc: string|DocumentFragment; }
+
+function setOption(
+  { k, name, desc, }: option,
+  tab:MESettingTab) {
+    new Setting(tab.containerEl).setName(name).setDesc(desc)
+      .addToggle(toggle => toggle
+        .setValue(tab.plugin.settings[k])
+        .onChange(async (value) => {
+          console.log("changeTO:"+value);
+          console.log("saved:"+tab.plugin.settings[k])
+          tab.plugin.settings[k] = value;
+          tab.plugin.saveData(tab.plugin.settings);
+          tab.display();
+        })
+      );
+}
