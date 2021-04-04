@@ -1,6 +1,6 @@
 import { MarkdownPostProcessor, MarkdownPostProcessorContext } from "obsidian";
 
-const tFragRegex = /(?<=#)t=(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/;
+const tFragRegex = /(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/;
 
 /**
  * HTMLMediaElement with temporal fragments
@@ -74,24 +74,29 @@ export function processInternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
           switch (m.addedNodes[0].nodeName) {
             case "VIDEO":
             case "AUDIO":
-              const matchArray = (m.target as HTMLSpanElement)
-                .getAttr("src")
-                .match(tFragRegex);
-              if (matchArray) {
-                const player = m.addedNodes[0] as HME_TF;
+              const url = (m.target as HTMLSpanElement).getAttr("src")
+              const hash = url.split('#').last();
+              const params = new URLSearchParams(hash);
+              const paramT = params.get('t')
+              const player = m.addedNodes[0] as HME_TF;
+              if (paramT!==null) {
+                let rawTime = paramT.match(tFragRegex).groups
                 const timeSpan = getTimeSpan(
-                  matchArray.groups.start,
-                  matchArray.groups.end
+                  rawTime.start,
+                  rawTime.end
                 );
-                // import timestamps to 
+                // import timestamps to player
                 Object.assign(player,timeSpan);
-                const tFrag = matchArray[0];
+                const tFrag = `t=${paramT}`;
                 const url = new URL(player.src);
                 url.hash = tFrag;
                 player.src = url.toString();
-                player.onplaying = onplaying;
-                player.ontimeupdate = ontimeupdate;
               }
+              if (params.get('loop')===""){
+                player.loop=true;
+              }
+              player.onplaying = onplaying;
+              player.ontimeupdate = ontimeupdate;
               break;
             case "IMG":
               // Do nothing
