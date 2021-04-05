@@ -1,14 +1,8 @@
 import MediaExtended from "main";
 import { FileView, MarkdownPostProcessorContext, WorkspaceLeaf } from "obsidian";
-import { parseUrl, parse, ParsedQuery } from "query-string";
+import { parseUrl } from "query-string";
+import { parseTF, bindTimeSpan, parseHash } from "./MFParse";
 // import Plyr from "plyr"
-
-const parseOpt = {parseFragmentIdentifier: true};
-
-/**
- * See also: https://www.w3.org/TR/media-frags/#valid-uri
- */
-const tFragRegex = /(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/;
 
 /**
  * HTMLMediaElement with temporal fragments
@@ -16,136 +10,6 @@ const tFragRegex = /(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/;
 interface HME_TF extends HTMLMediaElement{
   start:number;
   end:number;
-}
-
-function onplaying(this: any, event: Event) {
-  const player = this as HME_TF;
-  const { start,end, currentTime } = player;
-  // check if is HME_TF object
-  if (start||end){
-    if (currentTime>end||currentTime<start){
-      player.currentTime=start;
-    }
-  }
-}
-
-function ontimeupdate(this: any, event: Event) {
-  const player = this as HME_TF;
-  const { start,end, currentTime } = player;
-  // check if is HME_TF object
-  if ((start || end) && currentTime > end) {
-    if (!player.loop){
-      player.pause();
-    } else {
-      player.currentTime = start;
-    }  
-  }
-}
-
-function parseHash(url: string): ParsedQuery|null{
-  const hash = parseUrl(url,parseOpt).fragmentIdentifier
-  if(hash){
-    return parse(hash);
-  } else {
-    return null;
-  }
-}
-
-function parseTF(hash: string | undefined): TimeSpan | null {
-  if (hash) {
-    const params = parse(hash);
-    const paramT = params.t;
-    let match;
-    if (paramT && typeof paramT === "string" && (match = tFragRegex.exec(paramT))!==null) {
-      if (!match.groups) throw new Error("tFragRegex match error");
-      const { start, end } = match.groups;
-      const timeSpan = getTimeSpan(start, end);
-      if (timeSpan) return { ...timeSpan, raw: paramT };
-      else return null;
-    }
-  }
-  return null;
-}
-
-function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
-  if (timeSpan.end !== Infinity) {
-    player.ontimeupdate = function (e) {
-      const p = this as HTMLMediaElement;
-      if (p.currentTime >= timeSpan.end) {
-        p.pause();
-        p.ontimeupdate = null;
-      }
-    };
-  }
-  player.currentTime = timeSpan.start;
-  if (player.paused)
-    player.play();
-}
-
-interface TimeSpan {
-  end: number;
-  start: number;
-  /**
-   * raw value of key "t" in #t={value}
-   */
-  raw: string;
-}
-
-function getTimeSpan(
-  start: string | undefined,
-  end: string | undefined
-): Omit<TimeSpan,"raw"> | null {
-  // start may be an empty string
-  const startRaw = start ? start : null;
-  const endRaw = end ?? null;
-
-  let startTime, endTime;
-  if (startRaw && endRaw) {
-    startTime = convertTime(startRaw);
-    endTime = convertTime(endRaw);
-  } else if (startRaw) {
-    startTime = convertTime(startRaw);
-    endTime = Infinity;
-  } else if (endRaw) {
-    startTime = 0;
-    endTime = convertTime(endRaw);
-  } else {
-    throw new Error("Missing startTime and endTime");
-  }
-
-  if (startTime===null || endTime ===null) {
-    return null
-  } else {
-    return { start: startTime, end: endTime };
-  }
-}
-
-function convertTime(input: string): number | null {
-  const npttimedef = /^(?:npt:)?([\d\.:]+)$/;
-  if (npttimedef.test(input)) {
-    const rawTime = (input.match(npttimedef) as RegExpMatchArray)[1];
-
-    const npt_sec = /^\d+(?:\.\d+)?$/;
-    const npt_mmss = /^(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/;
-    const npt_hhmmss = /^(?<hh>\d+):(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/;
-
-    let match;
-
-    if ((match = npt_sec.exec(rawTime)) !== null) {
-      return +match[0];
-    } else if ((match = npt_mmss.exec(rawTime)) !== null) {
-      if (!match.groups) throw new Error("npt_mmss match error");
-      const { mm, ss } = match.groups;
-      return +mm * 60 + +ss;
-    } else if ((match = npt_hhmmss.exec(rawTime)) !== null) {
-      if (!match.groups) throw new Error("npt_hhmmss match error");
-      const { hh, mm, ss } = match.groups;
-      return +hh * 60 + +mm * 60 + +ss;
-    } else return null;
-  } else {
-    console.error("fail to parse npt: " + input);
-    return null;
-  }
 }
 
 export function processInternalLinks(this: MediaExtended, el:HTMLElement, ctx:MarkdownPostProcessorContext) {
@@ -267,7 +131,7 @@ export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement,
       console.error(m.target)
       throw new TypeError("src not found on container <span>")
     }
-    const hash = parseUrl(url,parseOpt).fragmentIdentifier
+    const hash = parseUrl(url,{parseFragmentIdentifier: true}).fragmentIdentifier
     const timeSpan = parseTF(hash);
     const player = m.addedNodes[0] as HME_TF;
     if (timeSpan!==null) {
@@ -282,8 +146,28 @@ export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement,
     if (parseHash(url)?.loop===null){
       player.loop=true;
     }
-    player.onplaying = onplaying;
-    player.ontimeupdate = ontimeupdate;
+    player.onplaying = e => {
+      const player = e.target as HME_TF;
+      const { start,end, currentTime } = player;
+      // check if is HME_TF object
+      if (start||end){
+        if (currentTime>end||currentTime<start){
+          player.currentTime=start;
+        }
+      }
+    };
+    player.ontimeupdate = e => {
+      const player = e.target as HME_TF;
+      const { start,end, currentTime } = player;
+      // check if is HME_TF object
+      if ((start || end) && currentTime > end) {
+        if (!player.loop){
+          player.pause();
+        } else {
+          player.currentTime = start;
+        }  
+      }
+    };
   }
 };
 
