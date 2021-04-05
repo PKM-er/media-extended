@@ -32,7 +32,7 @@ export default class MediaExtended extends Plugin {
     this.addSettingTab(new MESettingTab(this.app, this));
 
     if (this.settings.enableMF){
-      this.registerMarkdownPostProcessor(processInternalEmbeds);
+      this.registerMarkdownPostProcessor(processInternalEmbeds.bind(this));
     }
     if (this.settings.allowEmbedMedia){
       this.registerMarkdownPostProcessor(processExternalEmbeds);

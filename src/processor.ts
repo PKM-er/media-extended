@@ -1,104 +1,124 @@
-import { MarkdownPostProcessor, MarkdownPostProcessorContext } from "obsidian";
+import MediaExtended from "main";
+import { FileView, MarkdownPostProcessorContext, WorkspaceLeaf } from "obsidian";
+import { parseUrl, parse, ParsedQuery } from "query-string";
+// import Plyr from "plyr"
 
+const parseOpt = {parseFragmentIdentifier: true};
+
+/**
+ * See also: https://www.w3.org/TR/media-frags/#valid-uri
+ */
 const tFragRegex = /(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/;
 
 /**
  * HTMLMediaElement with temporal fragments
  */
 interface HME_TF extends HTMLMediaElement{
-  startTime:number;
-  endTime:number;
+  start:number;
+  end:number;
 }
 
-function onplaying(event: Event) {
-  const player = event.target as HME_TF;
-  const { startTime,endTime, currentTime } = player;
+function onplaying(this: any, event: Event) {
+  const player = this as HME_TF;
+  const { start,end, currentTime } = player;
   // check if is HME_TF object
-  if (startTime||endTime){
-    if (currentTime>endTime||currentTime<startTime){
-      player.currentTime=startTime;
+  if (start||end){
+    if (currentTime>end||currentTime<start){
+      player.currentTime=start;
     }
   }
 }
 
-function ontimeupdate(event: Event) {
-  const player = event.target as HME_TF;
-  const { startTime,endTime, currentTime } = player;
+function ontimeupdate(this: any, event: Event) {
+  const player = this as HME_TF;
+  const { start,end, currentTime } = player;
   // check if is HME_TF object
-  if ((startTime || endTime) && currentTime > endTime) {
+  if ((start || end) && currentTime > end) {
     if (!player.loop){
       player.pause();
     } else {
-      player.currentTime = startTime;
-    }
-    
+      player.currentTime = start;
+    }  
   }
 }
 
+function parseHash(url: string): ParsedQuery|null{
+  const hash = parseUrl(url,parseOpt).fragmentIdentifier
+  if(hash){
+    return parse(hash);
+  } else {
+    return null;
+  }
+}
 
+function parseTF(hash: string|undefined):TimeSpan|null{
 
-function getTimeSpan(start:string|undefined,end:string|undefined){
+  if (hash) {
+    const params = parse(hash)
+    const paramT = params.t
+    if (paramT && typeof paramT === "string" && tFragRegex.test(paramT)){
+      const {start,end} = paramT.match(tFragRegex)?.groups as {start:string;end:string}
+      const timeSpan = getTimeSpan(start,end);
+      return {...timeSpan, raw:paramT};
+    }
+  }
+
+  return null;
+}
+
+interface TimeSpan {
+  end: number;
+  start: number;
+  /**
+   * raw value of key "t" in #t={value}
+   */
+  raw: string;
+}
+
+function getTimeSpan(
+  start: string | undefined,
+  end: string | undefined
+): Omit<TimeSpan,"raw"> {
   // start may be an empty string
   const startRaw = start ? start : null;
   const endRaw = end ?? null;
 
-  let startTime, endTime
-  if (startRaw && endRaw){
-    startTime=convertTime(startRaw);
-    endTime=convertTime(endRaw);
+  let startTime, endTime;
+  if (startRaw && endRaw) {
+    startTime = convertTime(startRaw);
+    endTime = convertTime(endRaw);
+  } else if (startRaw) {
+    startTime = convertTime(startRaw);
+    endTime = Infinity;
+  } else if (endRaw) {
+    startTime = 0;
+    endTime = convertTime(endRaw);
+  } else {
+    throw new Error("Missing startTime and endTime");
   }
-  else if (startRaw){
-    startTime=convertTime(startRaw);
-    endTime=Infinity;
-  }
-  else if (endRaw){
-    startTime=0;
-    endTime=convertTime(endRaw);
-  } else {throw new Error("Missing startTime and endTime");}
 
-  return {startTime,endTime};
+  return { start: startTime, end: endTime };
 }
 
 function convertTime(input: string) {
   return +input;
 }
 
-export function processInternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorContext) {
+export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:MarkdownPostProcessorContext) {
+
+  const plugin = this;
+
+  const obsConfig = { attributes: false, childList: true, subtree: false };
 
   const internalEmbedObs = new MutationObserver(
     // Update embed's src to include temporal fragment when it is loaded
     (mutationsList, observer) => {
-      // See also: https://www.w3.org/TR/media-frags/#valid-uri
       for (const m of mutationsList) {
         if (m.addedNodes.length) {
           switch (m.addedNodes[0].nodeName) {
             case "VIDEO":
             case "AUDIO":
-              const url = (m.target as HTMLSpanElement).getAttr("src")
-              const hash = url?.split('#').last();
-              const params = new URLSearchParams(hash);
-              const paramT = params.get('t')
-              const player = m.addedNodes[0] as HME_TF;
-              if (paramT!==null) {
-                let rawTime = paramT.match(tFragRegex)?.groups
-                if (rawTime){
-                  const timeSpan = getTimeSpan(
-                    rawTime.start,
-                    rawTime.end
-                  );
-                  // import timestamps to player
-                  Object.assign(player,timeSpan);
-                  const tFrag = `t=${paramT}`;
-                  const url = new URL(player.src);
-                  url.hash = tFrag;
-                  player.src = url.toString();
-                }
-              }
-              if (params.get('loop')===""){
-                player.loop=true;
-              }
-              player.onplaying = onplaying;
-              player.ontimeupdate = ontimeupdate;
+              handleMedia(m);
               break;
             case "IMG":
               // Do nothing
@@ -111,14 +131,124 @@ export function processInternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
           observer.disconnect();
         }
       }
-    });
+    }
+  );
 
-  const obsConfig = { attributes: false, childList: true, subtree: false };
+  function handleMedia(m:MutationRecord){
+    const url = (m.target as HTMLSpanElement).getAttr("src");
+    if (!url){
+      console.error(m.target)
+      throw new TypeError("src not found on container <span>")
+    }
+    const hash = parseUrl(url,parseOpt).fragmentIdentifier
+    const timeSpan = parseTF(hash);
+    const player = m.addedNodes[0] as HME_TF;
+    if (timeSpan!==null) {
+      // import timestamps to player
+      player.start=timeSpan.start;
+      player.end=timeSpan.end;
+      // inject media fragment into player's src
+      const url = new URL(player.src);
+      url.hash = `t=${timeSpan.raw}`;
+      player.src = url.toString();
+    }
+    if (parseHash(url)?.loop===null){
+      player.loop=true;
+    }
+    player.onplaying = onplaying;
+    player.ontimeupdate = ontimeupdate;
+  }
+
+  function handleLink() {
+    for (const e of el.querySelectorAll("a.internal-link")) {
+      const oldLink = e as HTMLLinkElement;
+      if (oldLink.href) {
+        const urlParsed = new URL(oldLink.href)
+        const timeSpan = parseTF(urlParsed.hash);
+        // remove leading '/'
+        const pathname = urlParsed.pathname.substring(1);
+  
+        if (timeSpan) {
+          const newLink = createEl("a", {
+            cls: "internal-link",
+            text: oldLink.innerText,
+          });
+          newLink.onclick = (e) => {
+            const workspace = plugin.app.workspace;
+  
+            let openedMedia: HTMLElement[] = [];
+  
+            workspace.iterateAllLeaves((l) => {
+              const viewState = l.getViewState();
+              switch (viewState.type) {
+                case "video":
+                case "audio":
+                  const filePath = viewState.state.file 
+                  console.log(filePath+";"+pathname);
+                  if (filePath && (filePath as string)?.contains(pathname)) {
+                    openedMedia.push((l.view as FileView).contentEl);
+                  }
+                  break;
+              }
+            });
+  
+            if (openedMedia.length) {
+              for (const e of openedMedia) {
+                const player = e.querySelector(
+                  "div.video-container > video, div.video-container > audio"
+                ) as HTMLMediaElement;
+                bindTimeSpan(timeSpan, player);
+              }
+            } else {
+
+              let file = plugin.app.metadataCache.getFirstLinkpathDest(pathname,ctx.sourcePath);
+              let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+              console.log(file);
+              fileLeaf.openFile(file).then(()=>{
+                const player = (fileLeaf.view as FileView).contentEl.querySelector(
+                  "div.video-container > video, div.video-container > audio"
+                ) as HTMLMediaElement;
+                bindTimeSpan(timeSpan, player);
+              });
+
+            }
+          };
+          if (oldLink.parentNode) {
+            oldLink.parentNode.replaceChild(newLink, oldLink);
+          } else {
+            console.error(oldLink);
+            throw new Error("parentNode not found");
+          }
+        }
+        //
+      }
+    }
+  }
 
   for (const span of el.querySelectorAll("span.internal-embed")) {
     internalEmbedObs.observe(span, obsConfig);
   }
+
+  handleLink();
+
 };
+
+
+
+function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
+  if (timeSpan.end !== Infinity) {
+    player.ontimeupdate = function (e) {
+      const p = this as HTMLMediaElement;
+      if (p.currentTime >= timeSpan.end) {
+        p.pause();
+        p.ontimeupdate = null;
+      }
+    };
+  }
+  player.currentTime = timeSpan.start;
+  if (player.paused)
+    player.play();
+}
 
 export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorContext) {
   console.log(el.innerHTML);
