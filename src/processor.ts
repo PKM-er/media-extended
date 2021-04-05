@@ -62,8 +62,22 @@ function parseTF(hash: string|undefined):TimeSpan|null{
       return {...timeSpan, raw:paramT};
     }
   }
-
   return null;
+}
+
+function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
+  if (timeSpan.end !== Infinity) {
+    player.ontimeupdate = function (e) {
+      const p = this as HTMLMediaElement;
+      if (p.currentTime >= timeSpan.end) {
+        p.pause();
+        p.ontimeupdate = null;
+      }
+    };
+  }
+  player.currentTime = timeSpan.start;
+  if (player.paused)
+    player.play();
 }
 
 interface TimeSpan {
@@ -108,7 +122,81 @@ export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:M
 
   const plugin = this;
 
-  const obsConfig = { attributes: false, childList: true, subtree: false };
+  // process internal links with hash
+
+  const internalLinkObs = new MutationObserver(
+    (mutationsList, observer) => {
+      for (const m of mutationsList) {
+        const oldLink = m.target as HTMLLinkElement;
+        if (!oldLink.hasClass("is-unresolved") && oldLink.href) {
+          const urlParsed = new URL(oldLink.href)
+          const timeSpan = parseTF(urlParsed.hash);
+          // remove leading '/'
+          const pathname = urlParsed.pathname.substring(1);
+    
+          if (timeSpan) {
+            const newLink = createEl("a", {
+              cls: "internal-link",
+              text: oldLink.innerText,
+            });
+            newLink.onclick = (e) => {
+              const workspace = plugin.app.workspace;
+    
+              let openedMedia: HTMLElement[] = [];
+    
+              workspace.iterateAllLeaves((l) => {
+                const viewState = l.getViewState();
+                switch (viewState.type) {
+                  case "video":
+                  case "audio":
+                    const filePath = viewState.state.file 
+                    console.log(filePath+";"+pathname);
+                    if (filePath && (filePath as string)?.contains(pathname)) {
+                      openedMedia.push((l.view as FileView).contentEl);
+                    }
+                    break;
+                }
+              });
+    
+              if (openedMedia.length) {
+                for (const e of openedMedia) {
+                  const player = e.querySelector(
+                    "div.video-container > video, div.video-container > audio"
+                  ) as HTMLMediaElement;
+                  bindTimeSpan(timeSpan, player);
+                }
+              } else {
+                let file = plugin.app.metadataCache.getFirstLinkpathDest(pathname,ctx.sourcePath);
+                let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+                console.log(file);
+                fileLeaf.openFile(file).then(()=>{
+                  const player = (fileLeaf.view as FileView).contentEl.querySelector(
+                    "div.video-container > video, div.video-container > audio"
+                  ) as HTMLMediaElement;
+                  bindTimeSpan(timeSpan, player);
+                });
+  
+              }
+            };
+            if (oldLink.parentNode) {
+              oldLink.parentNode.replaceChild(newLink, oldLink);
+            } else {
+              console.error(oldLink);
+              throw new Error("parentNode not found");
+            }
+          }
+          //
+        }
+        observer.disconnect();
+      }
+    }
+  )
+  for (const link of el.querySelectorAll("a.internal-link")) {
+    console.log(link)
+    internalLinkObs.observe(link, { attributeFilter: ["class"] });
+  }
+
+  // Process internal embeds with hash
 
   const internalEmbedObs = new MutationObserver(
     // Update embed's src to include temporal fragment when it is loaded
@@ -134,6 +222,10 @@ export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:M
     }
   );
 
+  for (const span of el.querySelectorAll("span.internal-embed")) {
+    internalEmbedObs.observe(span, { childList: true });
+  }
+
   function handleMedia(m:MutationRecord){
     const url = (m.target as HTMLSpanElement).getAttr("src");
     if (!url){
@@ -158,97 +250,7 @@ export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:M
     player.onplaying = onplaying;
     player.ontimeupdate = ontimeupdate;
   }
-
-  function handleLink() {
-    for (const e of el.querySelectorAll("a.internal-link")) {
-      const oldLink = e as HTMLLinkElement;
-      if (oldLink.href) {
-        const urlParsed = new URL(oldLink.href)
-        const timeSpan = parseTF(urlParsed.hash);
-        // remove leading '/'
-        const pathname = urlParsed.pathname.substring(1);
-  
-        if (timeSpan) {
-          const newLink = createEl("a", {
-            cls: "internal-link",
-            text: oldLink.innerText,
-          });
-          newLink.onclick = (e) => {
-            const workspace = plugin.app.workspace;
-  
-            let openedMedia: HTMLElement[] = [];
-  
-            workspace.iterateAllLeaves((l) => {
-              const viewState = l.getViewState();
-              switch (viewState.type) {
-                case "video":
-                case "audio":
-                  const filePath = viewState.state.file 
-                  console.log(filePath+";"+pathname);
-                  if (filePath && (filePath as string)?.contains(pathname)) {
-                    openedMedia.push((l.view as FileView).contentEl);
-                  }
-                  break;
-              }
-            });
-  
-            if (openedMedia.length) {
-              for (const e of openedMedia) {
-                const player = e.querySelector(
-                  "div.video-container > video, div.video-container > audio"
-                ) as HTMLMediaElement;
-                bindTimeSpan(timeSpan, player);
-              }
-            } else {
-
-              let file = plugin.app.metadataCache.getFirstLinkpathDest(pathname,ctx.sourcePath);
-              let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-              console.log(file);
-              fileLeaf.openFile(file).then(()=>{
-                const player = (fileLeaf.view as FileView).contentEl.querySelector(
-                  "div.video-container > video, div.video-container > audio"
-                ) as HTMLMediaElement;
-                bindTimeSpan(timeSpan, player);
-              });
-
-            }
-          };
-          if (oldLink.parentNode) {
-            oldLink.parentNode.replaceChild(newLink, oldLink);
-          } else {
-            console.error(oldLink);
-            throw new Error("parentNode not found");
-          }
-        }
-        //
-      }
-    }
-  }
-
-  for (const span of el.querySelectorAll("span.internal-embed")) {
-    internalEmbedObs.observe(span, obsConfig);
-  }
-
-  handleLink();
-
 };
-
-
-
-function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
-  if (timeSpan.end !== Infinity) {
-    player.ontimeupdate = function (e) {
-      const p = this as HTMLMediaElement;
-      if (p.currentTime >= timeSpan.end) {
-        p.pause();
-        p.ontimeupdate = null;
-      }
-    };
-  }
-  player.currentTime = timeSpan.start;
-  if (player.paused)
-    player.play();
-}
 
 export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorContext) {
   console.log(el.innerHTML);
