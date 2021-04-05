@@ -1,14 +1,17 @@
 import { App, Plugin, PluginSettingTab, Setting } from "obsidian";
-import { processInternalEmbeds, processExternalEmbeds } from "./processor";
+import { processInternalEmbeds, processExternalEmbeds, processInternalLinks } from "./processor";
 // import Plyr from "plyr"
 
 interface MxSettings {
-  enableMF: boolean;
+  enableInLinkMF: boolean;
+  enableInEmbedMF: boolean;
   allowEmbedMedia: boolean;
+
 }
 
 const DEFAULT_SETTINGS: MxSettings = {
-  enableMF: true,
+  enableInEmbedMF: true,
+  enableInLinkMF: false,
   allowEmbedMedia: false,
 };
 
@@ -31,8 +34,11 @@ export default class MediaExtended extends Plugin {
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
-    if (this.settings.enableMF){
-      this.registerMarkdownPostProcessor(processInternalEmbeds.bind(this));
+    if (this.settings.enableInEmbedMF){
+      this.registerMarkdownPostProcessor(processInternalEmbeds);
+    }
+    if (this.settings.enableInLinkMF){
+      this.registerMarkdownPostProcessor(processInternalLinks.bind(this));
     }
     if (this.settings.allowEmbedMedia){
       this.registerMarkdownPostProcessor(processExternalEmbeds);
@@ -65,11 +71,26 @@ class MESettingTab extends PluginSettingTab {
 
     const options : option[] = [
       {
-        k: "enableMF",
-        name: "Allow Timestamps for embeded video and audio",
+        k: "enableInEmbedMF",
+        name: "Allow embeded video and audio fragments",
         desc: function(){
           const descEl = document.createDocumentFragment();
-          descEl.appendText('If enabled, you can write ![[demo.mp4#t=10]] to start playing video/audio at that specific time. ');
+          descEl.appendText('If enabled, you can write ![[demo.mp4#t=10]] to embed the specific fragment of video/audio. ');
+          descEl.appendChild(document.createElement('br'));
+          descEl.appendText('Loop is also available by append #loop or #t=...&loop to the end of filename');
+          descEl.appendChild(document.createElement('br'));
+          descEl.appendText("Restart the app to take effects")
+          return descEl;
+          }()
+      },
+      {
+        k: "enableInLinkMF",
+        name: "Allow timestamps for video and audio",
+        desc: function(){
+          const descEl = document.createDocumentFragment();
+          descEl.appendText("If enabled, you can write [[demo.mp4#t=10]] to create timestamp link to the video/audio. Click on the link would open the media file if it's not opened yet. ");
+          descEl.appendChild(document.createElement('br'));
+          descEl.appendText("PS: Only works in preview mode, hover preview on link is not available");
           descEl.appendChild(document.createElement('br'));
           descEl.appendText("Restart the app to take effects")
           return descEl;

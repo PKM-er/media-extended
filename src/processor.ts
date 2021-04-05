@@ -148,7 +148,7 @@ function convertTime(input: string): number | null {
   }
 }
 
-export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:MarkdownPostProcessorContext) {
+export function processInternalLinks(this: MediaExtended, el:HTMLElement, ctx:MarkdownPostProcessorContext) {
 
   const plugin = this;
 
@@ -225,6 +225,11 @@ export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:M
     console.log(link)
     internalLinkObs.observe(link, { attributeFilter: ["class"] });
   }
+}
+
+export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement, ctx:MarkdownPostProcessorContext) {
+
+  // const plugin = this;
 
   // Process internal embeds with hash
 
