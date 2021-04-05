@@ -51,15 +51,17 @@ function parseHash(url: string): ParsedQuery|null{
   }
 }
 
-function parseTF(hash: string|undefined):TimeSpan|null{
-
+function parseTF(hash: string | undefined): TimeSpan | null {
   if (hash) {
-    const params = parse(hash)
-    const paramT = params.t
-    if (paramT && typeof paramT === "string" && tFragRegex.test(paramT)){
-      const {start,end} = paramT.match(tFragRegex)?.groups as {start:string;end:string}
-      const timeSpan = getTimeSpan(start,end);
-      return {...timeSpan, raw:paramT};
+    const params = parse(hash);
+    const paramT = params.t;
+    let match;
+    if (paramT && typeof paramT === "string" && (match = tFragRegex.exec(paramT))!==null) {
+      if (!match.groups) throw new Error("tFragRegex match error");
+      const { start, end } = match.groups;
+      const timeSpan = getTimeSpan(start, end);
+      if (timeSpan) return { ...timeSpan, raw: paramT };
+      else return null;
     }
   }
   return null;
@@ -92,7 +94,7 @@ interface TimeSpan {
 function getTimeSpan(
   start: string | undefined,
   end: string | undefined
-): Omit<TimeSpan,"raw"> {
+): Omit<TimeSpan,"raw"> | null {
   // start may be an empty string
   const startRaw = start ? start : null;
   const endRaw = end ?? null;
@@ -111,11 +113,39 @@ function getTimeSpan(
     throw new Error("Missing startTime and endTime");
   }
 
-  return { start: startTime, end: endTime };
+  if (startTime===null || endTime ===null) {
+    return null
+  } else {
+    return { start: startTime, end: endTime };
+  }
 }
 
-function convertTime(input: string) {
-  return +input;
+function convertTime(input: string): number | null {
+  const npttimedef = /^(?:npt:)?([\d\.:]+)$/;
+  if (npttimedef.test(input)) {
+    const rawTime = (input.match(npttimedef) as RegExpMatchArray)[1];
+
+    const npt_sec = /^\d+(?:\.\d+)?$/;
+    const npt_mmss = /^(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/;
+    const npt_hhmmss = /^(?<hh>\d+):(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/;
+
+    let match;
+
+    if ((match = npt_sec.exec(rawTime)) !== null) {
+      return +match[0];
+    } else if ((match = npt_mmss.exec(rawTime)) !== null) {
+      if (!match.groups) throw new Error("npt_mmss match error");
+      const { mm, ss } = match.groups;
+      return +mm * 60 + +ss;
+    } else if ((match = npt_hhmmss.exec(rawTime)) !== null) {
+      if (!match.groups) throw new Error("npt_hhmmss match error");
+      const { hh, mm, ss } = match.groups;
+      return +hh * 60 + +mm * 60 + +ss;
+    } else return null;
+  } else {
+    console.error("fail to parse npt: " + input);
+    return null;
+  }
 }
 
 export function processInternalEmbeds(this: MediaExtended, el:HTMLElement, ctx:MarkdownPostProcessorContext) {
