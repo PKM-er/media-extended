@@ -75,22 +75,24 @@ export function processInternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
             case "VIDEO":
             case "AUDIO":
               const url = (m.target as HTMLSpanElement).getAttr("src")
-              const hash = url.split('#').last();
+              const hash = url?.split('#').last();
               const params = new URLSearchParams(hash);
               const paramT = params.get('t')
               const player = m.addedNodes[0] as HME_TF;
               if (paramT!==null) {
-                let rawTime = paramT.match(tFragRegex).groups
-                const timeSpan = getTimeSpan(
-                  rawTime.start,
-                  rawTime.end
-                );
-                // import timestamps to player
-                Object.assign(player,timeSpan);
-                const tFrag = `t=${paramT}`;
-                const url = new URL(player.src);
-                url.hash = tFrag;
-                player.src = url.toString();
+                let rawTime = paramT.match(tFragRegex)?.groups
+                if (rawTime){
+                  const timeSpan = getTimeSpan(
+                    rawTime.start,
+                    rawTime.end
+                  );
+                  // import timestamps to player
+                  Object.assign(player,timeSpan);
+                  const tFrag = `t=${paramT}`;
+                  const url = new URL(player.src);
+                  url.hash = tFrag;
+                  player.src = url.toString();
+                }
               }
               if (params.get('loop')===""){
                 player.loop=true;
@@ -126,7 +128,7 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
     const ext = new URL(srcEl.src).pathname.split(".").last();
 
     let newEl: HTMLMediaElement;
-    let type: "audio" | "video";
+    let type: "audio" | "video" | null;
     switch (ext) {
       case "mp3": case "wav": case "m4a": case "ogg": case "3gp": case "flac":
         type = "audio";
@@ -134,6 +136,8 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
       case "mp4": case "webm": case "ogv":
         type = "video";
         break;
+      default:
+        type = null;
     }
     console.log(ext);
     if (type) {
@@ -141,7 +145,7 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
       newEl = createEl(type);
       newEl.src = srcEl.src;
       newEl.controls = true;
-      srcEl.parentNode.replaceChild(newEl, srcEl);
+      srcEl.parentNode?.replaceChild(newEl, srcEl);
     }
   }
 }

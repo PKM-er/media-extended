@@ -13,11 +13,11 @@ const DEFAULT_SETTINGS: MxSettings = {
 };
 
 export default class MediaExtended extends Plugin {
-  settings: MxSettings;
+  settings: MxSettings = DEFAULT_SETTINGS;
   // player = Plyr;
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+     Object.assign(this.settings, await this.loadData());
   }
 
   async saveSettings() {

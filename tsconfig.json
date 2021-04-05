@@ -10,6 +10,7 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
+    "strict": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
       "dom",
