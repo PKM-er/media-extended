@@ -5,12 +5,14 @@
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
-    "build": "rollup --config rollup.config.js"
+    "build": "rollup --config rollup.config.js",
+    "release": "release-it"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@release-it/bumper": "^2.0.0",
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-typescript": "^6.0.0",
@@ -18,8 +20,34 @@
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "plyr": "^3.6.4",
     "query-string": "^7.0.0",
+    "release-it": "^14.5.1",
     "rollup": "^2.32.1",
     "tslib": "^2.0.3",
     "typescript": "^4.0.3"
+  },
+  "release-it": {
+    "hooks": {
+      "before:bump": "jq .\\\"$npm_package_version\\\"=\\\"0.10.12\\\" versions.json | sponge versions.json && git add versions.json",
+      "after:bump": "npm run build",
+      "after:git:release": "echo After git push, before github release",
+      "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
+    },
+    "npm": {
+      "publish": false
+    },
+    "github": {
+      "release": true,
+      "assets": [
+        "main.js",
+        "manifest.json"
+      ],
+      "proxy": "http://127.0.0.1:7890",
+      "releaseName": "${version}"
+    },
+    "plugins": {
+      "@release-it/bumper": {
+        "out": "manifest.json"
+      }
+    }
   }
 }
