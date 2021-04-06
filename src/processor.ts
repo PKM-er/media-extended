@@ -44,7 +44,6 @@ export function processInternalLinks(this: MediaExtended, el:HTMLElement, ctx:Ma
                   case "video":
                   case "audio":
                     const filePath = viewState.state.file 
-                    console.log(filePath+";"+pathname);
                     if (filePath && (filePath as string)?.contains(pathname)) {
                       openedMedia.push((l.view as FileView).contentEl);
                     }
@@ -62,7 +61,6 @@ export function processInternalLinks(this: MediaExtended, el:HTMLElement, ctx:Ma
               } else {
                 let file = plugin.app.metadataCache.getFirstLinkpathDest(pathname,ctx.sourcePath);
                 let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-                console.log(file);
                 fileLeaf.openFile(file).then(()=>{
                   const player = (fileLeaf.view as FileView).contentEl.querySelector(
                     "div.video-container > video, div.video-container > audio"
@@ -86,7 +84,6 @@ export function processInternalLinks(this: MediaExtended, el:HTMLElement, ctx:Ma
     }
   )
   for (const link of el.querySelectorAll("a.internal-link")) {
-    console.log(link)
     internalLinkObs.observe(link, { attributeFilter: ["class"] });
   }
 }
@@ -172,9 +169,7 @@ export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement,
 };
 
 export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorContext) {
-  console.log(el.innerHTML);
   for (const e of el.querySelectorAll("img[referrerpolicy]")) {
-    console.log(e.outerHTML);
     const srcEl = e as HTMLImageElement;
     const ext = new URL(srcEl.src).pathname.split(".").last();
 
@@ -190,9 +185,7 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
       default:
         type = null;
     }
-    console.log(ext);
     if (type) {
-      console.log('hello');
       newEl = createEl(type);
       newEl.src = srcEl.src;
       newEl.controls = true;

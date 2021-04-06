@@ -124,8 +124,6 @@ function setOption(
       .addToggle(toggle => toggle
         .setValue(tab.plugin.settings[k])
         .onChange(async (value) => {
-          console.log("changeTO:"+value);
-          console.log("saved:"+tab.plugin.settings[k])
           tab.plugin.settings[k] = value;
           tab.plugin.saveData(tab.plugin.settings);
           tab.display();
