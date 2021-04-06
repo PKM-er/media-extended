@@ -1,7 +1,7 @@
 {
   "name": "media-extended",
   "version": "1.0.0",
-  "description": "",
+  "description": "Improve media (video/audio) playing in Obsidian",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",

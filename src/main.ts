@@ -3,16 +3,16 @@ import { processInternalEmbeds, processExternalEmbeds, processInternalLinks } fr
 // import Plyr from "plyr"
 
 interface MxSettings {
-  enableInLinkMF: boolean;
-  enableInEmbedMF: boolean;
-  allowEmbedMedia: boolean;
+  mediaFragmentsEmbed: boolean;
+  timestampLink: boolean;
+  extendedImageEmbedSyntax: boolean;
 
 }
 
 const DEFAULT_SETTINGS: MxSettings = {
-  enableInEmbedMF: true,
-  enableInLinkMF: false,
-  allowEmbedMedia: false,
+  mediaFragmentsEmbed: true,
+  timestampLink: false,
+  extendedImageEmbedSyntax: false,
 };
 
 export default class MediaExtended extends Plugin {
@@ -34,13 +34,13 @@ export default class MediaExtended extends Plugin {
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
-    if (this.settings.enableInEmbedMF){
+    if (this.settings.mediaFragmentsEmbed){
       this.registerMarkdownPostProcessor(processInternalEmbeds);
     }
-    if (this.settings.enableInLinkMF){
+    if (this.settings.timestampLink){
       this.registerMarkdownPostProcessor(processInternalLinks.bind(this));
     }
-    if (this.settings.allowEmbedMedia){
+    if (this.settings.extendedImageEmbedSyntax){
       this.registerMarkdownPostProcessor(processExternalEmbeds);
     }
 
@@ -71,8 +71,8 @@ class MESettingTab extends PluginSettingTab {
 
     const options : option[] = [
       {
-        k: "enableInEmbedMF",
-        name: "Allow embeded video and audio fragments",
+        k: "mediaFragmentsEmbed",
+        name: "Embed Media Fragments",
         desc: function(){
           const descEl = document.createDocumentFragment();
           descEl.appendText('If enabled, you can write ![[demo.mp4#t=10]] to embed the specific fragment of video/audio. ');
@@ -84,8 +84,8 @@ class MESettingTab extends PluginSettingTab {
           }()
       },
       {
-        k: "enableInLinkMF",
-        name: "Allow timestamps for video and audio",
+        k: "timestampLink",
+        name: "Timestamps for Media",
         desc: function(){
           const descEl = document.createDocumentFragment();
           descEl.appendText("If enabled, you can write [[demo.mp4#t=10]] to create timestamp link to the video/audio. Click on the link would open the media file if it's not opened yet. ");
@@ -97,8 +97,8 @@ class MESettingTab extends PluginSettingTab {
           }()
       },
       {
-        k: "allowEmbedMedia",
-        name: "Allow standard image embed syntax to be used on video and audio",
+        k: "extendedImageEmbedSyntax",
+        name: "Extended Image Embed Syntax",
         desc: function(){
           const descEl = document.createDocumentFragment();
           descEl.appendText('If enabled, you can write ![](link/to/demo.mp4) to embed video and audio.');
