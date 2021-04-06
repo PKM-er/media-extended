@@ -21,8 +21,6 @@ export function parseTF(hash: string | undefined): TimeSpan | null {
       const timeSpan = getTimeSpan(start, end);
       if (timeSpan)
         return { ...timeSpan, raw: paramT };
-      else
-        return null;
     }
   }
   return null;
@@ -68,6 +66,7 @@ function getTimeSpan(
     startTime = 0;
     endTime = convertTime(endRaw);
   } else {
+    console.error(start,end);
     throw new Error("Missing startTime and endTime");
   }
 
