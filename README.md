@@ -6,9 +6,9 @@ Improve media (video/audio) playing in Obsidian.
 
 This plugin introduce some new features that improve media (video/audio) playing: 
 
-- [x] [Embed video/audio fragments](#Embed Media Fragments), instead of the whole file.
-- [x] [Allow timestamps for video/audio](#Timestamps for Media) in internal links (disabled by default)
-- [x] [Extended image embed syntax](#Extended Image Embed Syntax) that allows video/audio embeds (disabled by default)
+- [x] [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
+- [x] [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
+- [x] [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
 - [ ] External subtitle support for videos
 - [ ] Create timestamps from player and insert link to notes
 - [ ] Improved pictrue-in-pictrue support
@@ -17,18 +17,18 @@ This plugin introduce some new features that improve media (video/audio) playing
 
 ### Embed Media Fragments
 
-Just append [Media Fragment URI](#Media Fragment URI) to the embeded internal link and see the results: 
+Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal link and see the results: 
 
-<video src="https://img.aidenlx.top/picgo/EmbedMediaFragmentsDemo.mp4" autoplay loop/>
+![EmbedMediaFragmentsDemo](https://img.aidenlx.top/picgo/EmbedMediaFragmentsDemo.gif)
 
 Also, loop is support by append `loop` to the hashtag like
 `#t=60&loop` or just `#loop`
 
 ### Timestamps for Media
 
-Just append [Media Fragment URI](#Media Fragment URI) to the regular internal link and see the results: 
+Just append [Media Fragment URI](#media-fragment-uri) to the regular internal link and see the results: 
 
-<video src="https://img.aidenlx.top/picgo/TimestampsForMediaDemo.mp4" autoplay loop/>
+![TimestampsForMediaDemo](https://img.aidenlx.top/picgo/TimestampsForMediaDemo.gif)
 
 ### Extended Image Embed Syntax
 
