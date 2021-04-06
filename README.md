@@ -73,8 +73,8 @@ A time range is specified using the syntax:
 The time can be specified as:
 
 - a number of seconds (as a floating-point value), such as `121.12`
-- as an hours/minutes/seconds or minutes/seconds time separated with colons, such as `02:1.12`
-  - Hour and minute should be within 0-59 and written in two digits, for example, `1:20` or `3:2:3` is invaild.
+- as an hours/minutes/seconds or minutes/seconds time separated with colons, such as `02:01.12`
+  - Minutes and seconds should be within 0-59 and written in two digits, for example, `1:20` or `10:3` is invaild.
 
 when the `starttime` is absent, it is set to the beginning of the video/audio, while `endtime` is set to the end by default if absent.
 
