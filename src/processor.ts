@@ -175,8 +175,16 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
   for (const e of el.querySelectorAll("img[referrerpolicy]")) {
     const srcEl = e as HTMLImageElement;
     const ext = new URL(srcEl.src).pathname.split(".").last();
+    const replaceWith = (newEl:HTMLElement) =>{
+      if (srcEl.parentNode){
+        srcEl.parentNode.replaceChild(newEl, srcEl);
+      } else {
+        console.error(srcEl);
+        throw new Error("parentNode of image not found");
+      }
+    }
 
-    let newEl: HTMLMediaElement;
+    let newEl: HTMLMediaElement|HTMLIFrameElement|null = null;
     let type: "audio" | "video" | null;
     switch (ext) {
       case "mp3": case "wav": case "m4a": case "ogg": case "3gp": case "flac":
@@ -192,7 +200,72 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
       newEl = createEl(type);
       newEl.src = srcEl.src;
       newEl.controls = true;
-      srcEl.parentNode?.replaceChild(newEl, srcEl);
+      replaceWith(newEl);
+    } else if (newEl = getEmbedFrom(srcEl.src)){
+      replaceWith(newEl);
     }
   }
+}
+
+function convertToEmbedUrl(src: URL): string | null {
+  switch (src.hostname) {
+    case "www.bilibili.com":
+      if (src.pathname.startsWith("/video")) {
+        let videoId = src.pathname.replace("/video/", "");
+        let queryStr: string;
+        if (/^bv/i.test(videoId)) {
+          queryStr = `?bvid=${videoId}`;
+        } else if (/^av/i.test(videoId)) {
+          queryStr = `?aid=${videoId}`;
+        } else {
+          console.error(`invaild bilibili video-id: ${videoId}`);
+          return null;
+        }
+        return `https://player.bilibili.com/player.html${queryStr}`;
+      } else {
+        console.log("not recognized as bilibili video");
+        return null;
+      }
+      break;
+    case "www.youtube.com":
+      if (src.pathname === "/watch") {
+        let videoId = src.searchParams.get("v");
+        if (videoId) {
+          return `https://www.youtube.com/embed/${videoId}`;
+        } else {
+          console.log(`invalid video id from: ${src.toString()}`);
+          return null;
+        }
+      } else {
+        console.log("not recognized as youtube video");
+        return null;
+      }
+      break;
+    default:
+      console.log("unsupported video host");
+      return null;
+  }
+}
+
+function getEmbedFrom(url:string): HTMLIFrameElement | null {
+  let embedUrl = convertToEmbedUrl(new URL(url));
+
+  if (embedUrl){
+    return createEl("iframe", {
+      attr: {
+        class: "external-video",
+        src: embedUrl,
+        scrolling: "no",
+        border: "0",
+        frameborder: "no",
+        framespacing: "0",
+        allowfullscreen: false,
+        sandbox: "allow-forms allow-presentation allow-same-origin allow-scripts allow-modals"
+      },
+    });
+  }
+  else {
+    return null
+  }
+
 }
