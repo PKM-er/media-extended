@@ -112,7 +112,6 @@ export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement,
                 `Unexpected addnote type: ${m.addedNodes[0].nodeName}`
               );
           }
-          observer.disconnect();
         }
       }
     }
@@ -120,6 +119,10 @@ export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement,
 
   for (const span of el.querySelectorAll("span.internal-embed")) {
     internalEmbedObs.observe(span, { childList: true });
+    setTimeout( ()=>{
+      internalEmbedObs.disconnect();
+      console.log('internalEmbedObs disconnected');
+    } , 1500);
   }
 
   function handleMedia(m:MutationRecord){
