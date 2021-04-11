@@ -2,7 +2,8 @@ import { parseUrl, parse, ParsedQuery } from "query-string";
 import MFDefs from "./MFDefs";
 
 export function parseHash(url: string): ParsedQuery | null {
-  const hash = parseUrl(url, { parseFragmentIdentifier: true }).fragmentIdentifier;
+  const hash = parseUrl(url, { parseFragmentIdentifier: true })
+    .fragmentIdentifier;
   if (hash) {
     return parse(hash);
   } else {
@@ -14,13 +15,15 @@ export function parseTF(hash: string | undefined): TimeSpan | null {
     const params = parse(hash);
     const paramT = params.t;
     let match;
-    if (paramT && typeof paramT === "string" && (match = MFDefs.tFrag.exec(paramT)) !== null) {
-      if (!match.groups)
-        throw new Error("tFragRegex match error");
+    if (
+      paramT &&
+      typeof paramT === "string" &&
+      (match = MFDefs.tFrag.exec(paramT)) !== null
+    ) {
+      if (!match.groups) throw new Error("tFragRegex match error");
       const { start, end } = match.groups;
       const timeSpan = getTimeSpan(start, end);
-      if (timeSpan)
-        return { ...timeSpan, raw: paramT };
+      if (timeSpan) return { ...timeSpan, raw: paramT };
     }
   }
   return null;
@@ -36,8 +39,7 @@ export function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
     };
   }
   player.currentTime = timeSpan.start;
-  if (player.paused)
-    player.play();
+  if (player.paused) player.play();
 }
 interface TimeSpan {
   end: number;
@@ -66,7 +68,7 @@ function getTimeSpan(
     startTime = 0;
     endTime = convertTime(endRaw);
   } else {
-    console.error(start,end);
+    console.error(start, end);
     throw new Error("Missing startTime and endTime");
   }
 
@@ -86,17 +88,14 @@ function convertTime(input: string): number | null {
     if ((match = MFDefs.npt_sec.exec(rawTime)) !== null) {
       return +match[0];
     } else if ((match = MFDefs.npt_mmss.exec(rawTime)) !== null) {
-      if (!match.groups)
-        throw new Error("npt_mmss match error");
+      if (!match.groups) throw new Error("npt_mmss match error");
       const { mm, ss } = match.groups;
       return +mm * 60 + +ss;
     } else if ((match = MFDefs.npt_hhmmss.exec(rawTime)) !== null) {
-      if (!match.groups)
-        throw new Error("npt_hhmmss match error");
+      if (!match.groups) throw new Error("npt_hhmmss match error");
       const { hh, mm, ss } = match.groups;
       return +hh * 60 + +mm * 60 + +ss;
-    } else
-      return null;
+    } else return null;
   } else {
     console.error("fail to parse npt: " + input);
     return null;
