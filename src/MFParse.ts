@@ -19,7 +19,8 @@ export function parseTF(hash: string | undefined): TimeSpan | null {
   }
   return null;
 }
-export function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
+export function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement|null) {
+  if (!player) return; 
   if (timeSpan.end !== Infinity) {
     player.ontimeupdate = function (e) {
       const p = this as HTMLMediaElement;

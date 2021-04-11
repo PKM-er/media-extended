@@ -76,9 +76,7 @@ export function processInternalLinks(
 
         if (openedMedia.length)
           openedMedia.forEach((e) => {
-            let player; 
-            if (player = getPlayer(e))
-              bindTimeSpan(timeSpan, player);
+            bindTimeSpan(timeSpan, getPlayer(e));
           });
         else {
           const file = plugin.app.metadataCache.getFirstLinkpathDest(
@@ -89,12 +87,8 @@ export function processInternalLinks(
 
           const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
           fileLeaf.openFile(file).then(() => {
-            let player;
-            if (
-              fileLeaf.view instanceof FileView &&
-              (player = getPlayer(fileLeaf.view.contentEl))
-            )
-              bindTimeSpan(timeSpan, player);
+            if (fileLeaf.view instanceof FileView)
+              bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
           });
         }
       };
