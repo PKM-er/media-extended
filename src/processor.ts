@@ -5,16 +5,12 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { parseTF, bindTimeSpan } from "./MFParse";
+import { parseTF, bindTimeSpan, HTMLMediaEl_TF, TimeSpan, isHTMLMediaEl_TF } from "./MFParse";
 // import Plyr from "plyr"
 
 /**
  * HTMLMediaElement with temporal fragments
  */
-interface HME_TF extends HTMLMediaElement {
-  start: number;
-  end: number;
-}
 
 export function processInternalLinks(
   this: MediaExtended,
@@ -150,43 +146,64 @@ export function processInternalEmbeds(
     const { subpath: hash } = parseLinktext(srcLinktext);
     const timeSpan = parseTF(hash);
 
-    const player = m.addedNodes[0] as HME_TF;
+    const player = m.addedNodes[0] as HTMLMediaEl_TF;
     if (timeSpan !== null) {
       // import timestamps to player
-      player.start = timeSpan.start;
-      player.end = timeSpan.end;
-      // inject media fragment into player's src
-      const { path, subpath: hash } = parseLinktext(player.src);
-      let hashObj = parse(hash);
-      hashObj.t = timeSpan.raw;
-      player.src = path + "#" + stringify(hashObj);
+      injectTimestamp(player, timeSpan);
     }
+    // null: exist, with no value (#loop)
     if (parse(hash).loop === null) {
       player.loop = true;
     }
-    player.onplaying = (e) => {
-      const player = e.target as HME_TF;
-      const { start, end, currentTime } = player;
-      // check if is HME_TF object
-      if (start || end) {
-        if (currentTime > end || currentTime < start) {
-          player.currentTime = start;
-        }
+
+  }
+}
+
+function injectTimestamp(player: HTMLMediaElement, timeSpan: TimeSpan) {
+  (player as HTMLMediaEl_TF).timeSpan = timeSpan;
+
+  // inject media fragment into player's src
+  const { path, subpath: hash } = parseLinktext(player.src);
+  let hashObj = parse(hash);
+  hashObj.t = timeSpan.raw;
+  player.src = path + "#" + stringify(hashObj);
+
+  // inject event handler to restrict play range
+  player.onplaying = (e) => {
+    const player = e.target as HTMLMediaElement;
+    if (isHTMLMediaEl_TF(player)) {
+      const {
+        timeSpan: { start, end },
+        currentTime,
+      } = player;
+      if (currentTime > end || currentTime < start) {
+        player.currentTime = start;
       }
-    };
-    player.ontimeupdate = (e) => {
-      const player = e.target as HME_TF;
-      const { start, end, currentTime } = player;
-      // check if is HME_TF object
-      if ((start || end) && currentTime > end) {
+    } else {
+      console.error(player);
+      throw new Error("missing timeSpan in HTMLMediaEl_TF");     
+    }
+  };
+  player.ontimeupdate = (e) => {
+    const player = e.target as HTMLMediaElement;
+    if (isHTMLMediaEl_TF(player)) {
+      const {
+        timeSpan: { start, end },
+        currentTime,
+      } = player;
+      // check if is HTMLMediaEl_TF object
+      if (currentTime > end) {
         if (!player.loop) {
           player.pause();
         } else {
           player.currentTime = start;
         }
       }
-    };
-  }
+    } else {
+      console.error(player);
+      throw new Error("missing timeSpan in HTMLMediaEl_TF");     
+    }
+  };
 }
 
 export function processExternalEmbeds(

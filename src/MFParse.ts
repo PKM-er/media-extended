@@ -32,7 +32,16 @@ export function bindTimeSpan(timeSpan: TimeSpan, player: HTMLMediaElement) {
   player.currentTime = timeSpan.start;
   if (player.paused) player.play();
 }
-interface TimeSpan {
+
+export interface HTMLMediaEl_TF extends HTMLMediaElement {
+  timeSpan: TimeSpan;
+}
+
+export function isHTMLMediaEl_TF(el:HTMLMediaElement): el is HTMLMediaEl_TF{
+  return (el as HTMLMediaEl_TF).timeSpan !== undefined;
+}
+
+export interface TimeSpan {
   end: number;
   start: number;
   /**
