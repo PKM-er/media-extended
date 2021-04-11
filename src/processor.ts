@@ -60,24 +60,26 @@ export function processInternalLinks(
             openedMedia.push(leaf.view.contentEl);
         });
 
-        if (openedMedia.length) {
-          for (const e of openedMedia) {
-            const player = e.querySelector(
-              "div.video-container > video, div.video-container > audio"
-            ) as HTMLMediaElement;
-            bindTimeSpan(timeSpan, player);
-          }
-        } else {
-          let file = plugin.app.metadataCache.getFirstLinkpathDest(
+        function getPlayer(e:HTMLElement): HTMLMediaElement {
+          return e.querySelector(
+            "div.video-container > video, div.video-container > audio"
+          ) as HTMLMediaElement;
+        }
+
+        if (openedMedia.length) 
+          openedMedia.forEach((e) => bindTimeSpan(timeSpan, getPlayer(e)));
+        else {
+          const file = plugin.app.metadataCache.getFirstLinkpathDest(
             linktext,
             ctx.sourcePath
           );
           let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+
+          const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
           fileLeaf.openFile(file).then(() => {
-            const player = (fileLeaf.view as FileView).contentEl.querySelector(
-              "div.video-container > video, div.video-container > audio"
-            ) as HTMLMediaElement;
-            bindTimeSpan(timeSpan, player);
+
+            const containerEl = (fileLeaf.view as FileView).contentEl
+            bindTimeSpan(timeSpan, getPlayer(containerEl));
           });
         }
       };
