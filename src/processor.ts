@@ -1,6 +1,10 @@
 import MediaExtended from "main";
 import { parse, stringify } from "query-string";
-import { FileView, MarkdownPostProcessorContext, parseLinktext } from "obsidian";
+import {
+  FileView,
+  MarkdownPostProcessorContext,
+  parseLinktext,
+} from "obsidian";
 import { parseTF, bindTimeSpan } from "./MFParse";
 // import Plyr from "plyr"
 
@@ -24,7 +28,7 @@ export function processInternalLinks(
       observer.disconnect();
     }
   });
-  
+
   for (const link of el.querySelectorAll("a.internal-link")) {
     internalLinkObs.observe(link, { attributeFilter: ["class"] });
   }
@@ -34,7 +38,7 @@ export function processInternalLinks(
    */
   function handleLink(oldLink: HTMLLinkElement) {
     if (oldLink.hasClass("is-unresolved")) return;
-    let srcLinktext = oldLink.dataset.href
+    let srcLinktext = oldLink.dataset.href;
     if (!srcLinktext) {
       console.error(oldLink);
       throw new Error("no href found in a.internal-link");
@@ -53,20 +57,23 @@ export function processInternalLinks(
 
         let openedMedia: HTMLElement[] = [];
 
-        const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(linktext,ctx.sourcePath)
+        const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(
+          linktext,
+          ctx.sourcePath
+        );
 
         workspace.iterateAllLeaves((leaf) => {
           if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
             openedMedia.push(leaf.view.contentEl);
         });
 
-        function getPlayer(e:HTMLElement): HTMLMediaElement {
+        function getPlayer(e: HTMLElement): HTMLMediaElement {
           return e.querySelector(
             "div.video-container > video, div.video-container > audio"
           ) as HTMLMediaElement;
         }
 
-        if (openedMedia.length) 
+        if (openedMedia.length)
           openedMedia.forEach((e) => bindTimeSpan(timeSpan, getPlayer(e)));
         else {
           const file = plugin.app.metadataCache.getFirstLinkpathDest(
@@ -79,10 +86,7 @@ export function processInternalLinks(
           fileLeaf.openFile(file).then(() => {
             if (fileLeaf.view instanceof FileView)
               bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
-            else
-              throw new Error("file failed to open: no FileView found");
-              
-            
+            else throw new Error("file failed to open: no FileView found");
           });
         }
       };
@@ -136,13 +140,13 @@ export function processInternalEmbeds(
    */
   function handleMedia(m: MutationRecord) {
     /** src="linktext" */
-    const span = m.target as HTMLSpanElement
-    const srcLinktext  = span.getAttr("src")
+    const span = m.target as HTMLSpanElement;
+    const srcLinktext = span.getAttr("src");
     if (srcLinktext === null) {
       console.error(span);
       throw new TypeError("src not found on container <span>");
     }
-    
+
     const { subpath: hash } = parseLinktext(srcLinktext);
     const timeSpan = parseTF(hash);
 
@@ -194,7 +198,7 @@ export function processExternalEmbeds(
 
     let url: URL;
     try {
-      url = new URL(srcEl.src)
+      url = new URL(srcEl.src);
     } catch (error) {
       // if url is invaild, do nothing and break current loop
       console.error(error, srcEl);
@@ -202,7 +206,7 @@ export function processExternalEmbeds(
     }
 
     // if url contains no extension, do nothing and break current loop
-    if(!url.pathname.includes('.')) break;
+    if (!url.pathname.includes(".")) break;
 
     const ext = url.pathname.split(".").pop() as string;
 
