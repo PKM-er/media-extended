@@ -1,7 +1,7 @@
 import MediaExtended from "main";
-import { FileView, MarkdownPostProcessorContext } from "obsidian";
-import { parseUrl } from "query-string";
-import { parseTF, bindTimeSpan, parseHash } from "./MFParse";
+import { parse, stringify } from "query-string";
+import { FileView, MarkdownPostProcessorContext, parseLinktext } from "obsidian";
+import { parseTF, bindTimeSpan } from "./MFParse";
 // import Plyr from "plyr"
 
 /**
@@ -34,15 +34,14 @@ export function processInternalLinks(
    */
   function handleLink(oldLink: HTMLLinkElement) {
     if (oldLink.hasClass("is-unresolved")) return;
-    if (!oldLink.href) {
+    let srcLinktext = oldLink.dataset.href
+    if (!srcLinktext) {
       console.error(oldLink);
       throw new Error("no href found in a.internal-link");
     }
 
-    const urlParsed = new URL(oldLink.href);
-    const timeSpan = parseTF(urlParsed.hash);
-    // remove leading '/'
-    const pathname = urlParsed.pathname.substring(1);
+    const { path: linktext, subpath: hash } = parseLinktext(srcLinktext);
+    const timeSpan = parseTF(hash);
 
     if (timeSpan) {
       const newLink = createEl("a", {
@@ -60,7 +59,7 @@ export function processInternalLinks(
             case "video":
             case "audio":
               const filePath = viewState.state.file;
-              if (filePath && (filePath as string)?.contains(pathname)) {
+              if (filePath && (filePath as string)?.contains(linktext)) {
                 openedMedia.push((l.view as FileView).contentEl);
               }
               break;
@@ -76,7 +75,7 @@ export function processInternalLinks(
           }
         } else {
           let file = plugin.app.metadataCache.getFirstLinkpathDest(
-            pathname,
+            linktext,
             ctx.sourcePath
           );
           let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
@@ -137,25 +136,29 @@ export function processInternalEmbeds(
    * Update media embeds to respond to temporal fragments
    */
   function handleMedia(m: MutationRecord) {
-    const url = (m.target as HTMLSpanElement).getAttr("src");
-    if (!url) {
-      console.error(m.target);
+    /** src="linktext" */
+    const span = m.target as HTMLSpanElement
+    const srcLinktext  = span.getAttr("src")
+    if (srcLinktext === null) {
+      console.error(span);
       throw new TypeError("src not found on container <span>");
     }
-    const hash = parseUrl(url, { parseFragmentIdentifier: true })
-      .fragmentIdentifier;
+    
+    const { subpath: hash } = parseLinktext(srcLinktext);
     const timeSpan = parseTF(hash);
+
     const player = m.addedNodes[0] as HME_TF;
     if (timeSpan !== null) {
       // import timestamps to player
       player.start = timeSpan.start;
       player.end = timeSpan.end;
       // inject media fragment into player's src
-      const url = new URL(player.src);
-      url.hash = `t=${timeSpan.raw}`;
-      player.src = url.toString();
+      const { path, subpath: hash } = parseLinktext(player.src);
+      let hashObj = parse(hash);
+      hashObj.t = timeSpan.raw;
+      player.src = path + "#" + stringify(hashObj);
     }
-    if (parseHash(url)?.loop === null) {
+    if (parse(hash).loop === null) {
       player.loop = true;
     }
     player.onplaying = (e) => {

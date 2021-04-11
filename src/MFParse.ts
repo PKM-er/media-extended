@@ -1,15 +1,6 @@
-import { parseUrl, parse, ParsedQuery } from "query-string";
+import { parse } from "query-string";
 import MFDefs from "./MFDefs";
 
-export function parseHash(url: string): ParsedQuery | null {
-  const hash = parseUrl(url, { parseFragmentIdentifier: true })
-    .fragmentIdentifier;
-  if (hash) {
-    return parse(hash);
-  } else {
-    return null;
-  }
-}
 export function parseTF(hash: string | undefined): TimeSpan | null {
   if (hash) {
     const params = parse(hash);
