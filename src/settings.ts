@@ -31,15 +31,15 @@ export class MESettingTab extends PluginSettingTab {
         k: "mediaFragmentsEmbed",
         name: "Embed Media Fragments",
         desc: (function () {
-          const descEl = document.createDocumentFragment();
+          const descEl = createFragment();
           descEl.appendText(
             "If enabled, you can write ![[demo.mp4#t=10]] to embed the specific fragment of video/audio. "
           );
-          descEl.appendChild(document.createElement("br"));
+          descEl.appendChild(createEl("br"));
           descEl.appendText(
             "Loop is also available by append #loop or #t=...&loop to the end of filename"
           );
-          descEl.appendChild(document.createElement("br"));
+          descEl.appendChild(createEl("br"));
           descEl.appendText("Restart the app to take effects");
           return descEl;
         })(),
@@ -48,15 +48,15 @@ export class MESettingTab extends PluginSettingTab {
         k: "timestampLink",
         name: "Timestamps for Media",
         desc: (function () {
-          const descEl = document.createDocumentFragment();
+          const descEl = createFragment();
           descEl.appendText(
             "If enabled, you can write [[demo.mp4#t=10]] to create timestamp link to the video/audio. Click on the link would open the media file if it's not opened yet. "
           );
-          descEl.appendChild(document.createElement("br"));
+          descEl.appendChild(createEl("br"));
           descEl.appendText(
             "PS: Only works in preview mode, hover preview on link is not available"
           );
-          descEl.appendChild(document.createElement("br"));
+          descEl.appendChild(createEl("br"));
           descEl.appendText("Restart the app to take effects");
           return descEl;
         })(),
@@ -65,11 +65,11 @@ export class MESettingTab extends PluginSettingTab {
         k: "extendedImageEmbedSyntax",
         name: "Extended Image Embed Syntax",
         desc: (function () {
-          const descEl = document.createDocumentFragment();
+          const descEl = createFragment();
           descEl.appendText(
             "If enabled, you can write ![](link/to/demo.mp4) to embed video and audio."
           );
-          descEl.appendChild(document.createElement("br"));
+          descEl.appendChild(createEl("br"));
           descEl.appendText("Restart the app to take effects");
           return descEl;
         })(),
