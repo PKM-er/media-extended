@@ -53,17 +53,11 @@ export function processInternalLinks(
 
         let openedMedia: HTMLElement[] = [];
 
-        workspace.iterateAllLeaves((l) => {
-          const viewState = l.getViewState();
-          switch (viewState.type) {
-            case "video":
-            case "audio":
-              const filePath = viewState.state.file;
-              if (filePath && (filePath as string)?.contains(linktext)) {
-                openedMedia.push((l.view as FileView).contentEl);
-              }
-              break;
-          }
+        const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(linktext,ctx.sourcePath)
+
+        workspace.iterateAllLeaves((leaf) => {
+          if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
+            openedMedia.push(leaf.view.contentEl);
         });
 
         if (openedMedia.length) {
