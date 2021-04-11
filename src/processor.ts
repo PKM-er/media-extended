@@ -1,104 +1,116 @@
 import MediaExtended from "main";
-import { FileView, MarkdownPostProcessorContext, WorkspaceLeaf } from "obsidian";
-import { parseUrl } from "query-string";
-import { parseTF, bindTimeSpan, parseHash } from "./MFParse";
+import { parse, stringify } from "query-string";
+import {
+  FileView,
+  MarkdownPostProcessorContext,
+  parseLinktext,
+} from "obsidian";
+import { parseTF, bindTimeSpan } from "./MFParse";
 // import Plyr from "plyr"
 
 /**
  * HTMLMediaElement with temporal fragments
  */
-interface HME_TF extends HTMLMediaElement{
-  start:number;
-  end:number;
+interface HME_TF extends HTMLMediaElement {
+  start: number;
+  end: number;
 }
 
-export function processInternalLinks(this: MediaExtended, el:HTMLElement, ctx:MarkdownPostProcessorContext) {
-
+export function processInternalLinks(
+  this: MediaExtended,
+  el: HTMLElement,
+  ctx: MarkdownPostProcessorContext
+) {
   const plugin = this;
-
-  // process internal links with hash
-
-  const internalLinkObs = new MutationObserver(
-    (mutationsList, observer) => {
-      for (const m of mutationsList) {
-        const oldLink = m.target as HTMLLinkElement;
-        if (!oldLink.hasClass("is-unresolved") && oldLink.href) {
-          const urlParsed = new URL(oldLink.href)
-          const timeSpan = parseTF(urlParsed.hash);
-          // remove leading '/'
-          const pathname = urlParsed.pathname.substring(1);
-    
-          if (timeSpan) {
-            const newLink = createEl("a", {
-              cls: "internal-link",
-              text: oldLink.innerText,
-            });
-            newLink.onclick = (e) => {
-              const workspace = plugin.app.workspace;
-    
-              let openedMedia: HTMLElement[] = [];
-    
-              workspace.iterateAllLeaves((l) => {
-                const viewState = l.getViewState();
-                switch (viewState.type) {
-                  case "video":
-                  case "audio":
-                    const filePath = viewState.state.file 
-                    if (filePath && (filePath as string)?.contains(pathname)) {
-                      openedMedia.push((l.view as FileView).contentEl);
-                    }
-                    break;
-                }
-              });
-    
-              if (openedMedia.length) {
-                for (const e of openedMedia) {
-                  const player = e.querySelector(
-                    "div.video-container > video, div.video-container > audio"
-                  ) as HTMLMediaElement;
-                  bindTimeSpan(timeSpan, player);
-                }
-              } else {
-                let file = plugin.app.metadataCache.getFirstLinkpathDest(pathname,ctx.sourcePath);
-                let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-                fileLeaf.openFile(file).then(()=>{
-                  const player = (fileLeaf.view as FileView).contentEl.querySelector(
-                    "div.video-container > video, div.video-container > audio"
-                  ) as HTMLMediaElement;
-                  bindTimeSpan(timeSpan, player);
-                });
-  
-              }
-            };
-            if (oldLink.parentNode) {
-              oldLink.parentNode.replaceChild(newLink, oldLink);
-            } else {
-              console.error(oldLink);
-              throw new Error("parentNode not found");
-            }
-          }
-          //
-        }
-        observer.disconnect();
-      }
+  const internalLinkObs = new MutationObserver((mutationsList, observer) => {
+    for (const m of mutationsList) {
+      handleLink(m.target as HTMLLinkElement);
+      observer.disconnect();
     }
-  )
+  });
+
   for (const link of el.querySelectorAll("a.internal-link")) {
     internalLinkObs.observe(link, { attributeFilter: ["class"] });
   }
+
+  /**
+   * Update internal links to media file to respond to temporal fragments
+   */
+  function handleLink(oldLink: HTMLLinkElement) {
+    if (oldLink.hasClass("is-unresolved")) return;
+    let srcLinktext = oldLink.dataset.href;
+    if (!srcLinktext) {
+      console.error(oldLink);
+      throw new Error("no href found in a.internal-link");
+    }
+
+    const { path: linktext, subpath: hash } = parseLinktext(srcLinktext);
+    const timeSpan = parseTF(hash);
+
+    if (timeSpan) {
+      const newLink = createEl("a", {
+        cls: "internal-link",
+        text: oldLink.innerText,
+      });
+      newLink.onclick = (e) => {
+        const workspace = plugin.app.workspace;
+
+        let openedMedia: HTMLElement[] = [];
+
+        const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(
+          linktext,
+          ctx.sourcePath
+        );
+
+        workspace.iterateAllLeaves((leaf) => {
+          if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
+            openedMedia.push(leaf.view.contentEl);
+        });
+
+        function getPlayer(e: HTMLElement): HTMLMediaElement {
+          return e.querySelector(
+            "div.video-container > video, div.video-container > audio"
+          ) as HTMLMediaElement;
+        }
+
+        if (openedMedia.length)
+          openedMedia.forEach((e) => bindTimeSpan(timeSpan, getPlayer(e)));
+        else {
+          const file = plugin.app.metadataCache.getFirstLinkpathDest(
+            linktext,
+            ctx.sourcePath
+          );
+          if (!file) throw new Error("file not found from resolved linktext");
+
+          const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+          fileLeaf.openFile(file).then(() => {
+            if (fileLeaf.view instanceof FileView)
+              bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
+            else throw new Error("file failed to open: no FileView found");
+          });
+        }
+      };
+      if (oldLink.parentNode) {
+        oldLink.parentNode.replaceChild(newLink, oldLink);
+      } else {
+        console.error(oldLink);
+        throw new Error("parentNode not found");
+      }
+    }
+  }
 }
 
-export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement, ctx:MarkdownPostProcessorContext) {
-
+// Process internal embeds with hash
+export function processInternalEmbeds(
+  /* this: MediaExtended,  */ el: HTMLElement,
+  ctx: MarkdownPostProcessorContext
+) {
   // const plugin = this;
 
-  // Process internal embeds with hash
-
   const internalEmbedObs = new MutationObserver(
-    // Update embed's src to include temporal fragment when it is loaded
-    (mutationsList, observer) => {
-      for (const m of mutationsList) {
-        if (m.addedNodes.length) {
+    (mutationsList: MutationRecord[]) =>
+      mutationsList.forEach((m) => {
+        if (m.addedNodes.length)
           switch (m.addedNodes[0].nodeName) {
             case "VIDEO":
             case "AUDIO":
@@ -112,69 +124,77 @@ export function processInternalEmbeds(/* this: MediaExtended,  */el:HTMLElement,
                 `Unexpected addnote type: ${m.addedNodes[0].nodeName}`
               );
           }
-        }
-      }
-    }
+      })
   );
 
   for (const span of el.querySelectorAll("span.internal-embed")) {
     internalEmbedObs.observe(span, { childList: true });
-    setTimeout( ()=>{
+    setTimeout(() => {
       internalEmbedObs.disconnect();
-      console.log('internalEmbedObs disconnected');
-    } , 1500);
+      console.log("internalEmbedObs disconnected");
+    }, 1500);
   }
 
-  function handleMedia(m:MutationRecord){
-    const url = (m.target as HTMLSpanElement).getAttr("src");
-    if (!url){
-      console.error(m.target)
-      throw new TypeError("src not found on container <span>")
+  /**
+   * Update media embeds to respond to temporal fragments
+   */
+  function handleMedia(m: MutationRecord) {
+    /** src="linktext" */
+    const span = m.target as HTMLSpanElement;
+    const srcLinktext = span.getAttr("src");
+    if (srcLinktext === null) {
+      console.error(span);
+      throw new TypeError("src not found on container <span>");
     }
-    const hash = parseUrl(url,{parseFragmentIdentifier: true}).fragmentIdentifier
+
+    const { subpath: hash } = parseLinktext(srcLinktext);
     const timeSpan = parseTF(hash);
+
     const player = m.addedNodes[0] as HME_TF;
-    if (timeSpan!==null) {
+    if (timeSpan !== null) {
       // import timestamps to player
-      player.start=timeSpan.start;
-      player.end=timeSpan.end;
+      player.start = timeSpan.start;
+      player.end = timeSpan.end;
       // inject media fragment into player's src
-      const url = new URL(player.src);
-      url.hash = `t=${timeSpan.raw}`;
-      player.src = url.toString();
+      const { path, subpath: hash } = parseLinktext(player.src);
+      let hashObj = parse(hash);
+      hashObj.t = timeSpan.raw;
+      player.src = path + "#" + stringify(hashObj);
     }
-    if (parseHash(url)?.loop===null){
-      player.loop=true;
+    if (parse(hash).loop === null) {
+      player.loop = true;
     }
-    player.onplaying = e => {
+    player.onplaying = (e) => {
       const player = e.target as HME_TF;
-      const { start,end, currentTime } = player;
+      const { start, end, currentTime } = player;
       // check if is HME_TF object
-      if (start||end){
-        if (currentTime>end||currentTime<start){
-          player.currentTime=start;
+      if (start || end) {
+        if (currentTime > end || currentTime < start) {
+          player.currentTime = start;
         }
       }
     };
-    player.ontimeupdate = e => {
+    player.ontimeupdate = (e) => {
       const player = e.target as HME_TF;
-      const { start,end, currentTime } = player;
+      const { start, end, currentTime } = player;
       // check if is HME_TF object
       if ((start || end) && currentTime > end) {
-        if (!player.loop){
+        if (!player.loop) {
           player.pause();
         } else {
           player.currentTime = start;
-        }  
+        }
       }
     };
   }
-};
+}
 
-export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorContext) {
+export function processExternalEmbeds(
+  el: HTMLElement,
+  ctx: MarkdownPostProcessorContext
+) {
   for (const e of el.querySelectorAll("img[referrerpolicy]")) {
-    const srcEl = e as HTMLImageElement;
-    const ext = new URL(srcEl.src).pathname.split(".").last();
+
     const replaceWith = (newEl:HTMLElement) =>{
       if (srcEl.parentNode){
         srcEl.parentNode.replaceChild(newEl, srcEl);
@@ -184,24 +204,40 @@ export function processExternalEmbeds(el:HTMLElement, ctx:MarkdownPostProcessorC
       }
     }
 
-    let newEl: HTMLMediaElement|HTMLIFrameElement|null = null;
-    let type: "audio" | "video" | null;
-    switch (ext) {
-      case "mp3": case "wav": case "m4a": case "ogg": case "3gp": case "flac":
-        type = "audio";
-        break;
-      case "mp4": case "webm": case "ogv":
-        type = "video";
-        break;
-      default:
-        type = null;
+    const srcEl = e as HTMLImageElement;
+
+    let url: URL;
+    try {
+      url = new URL(srcEl.src);
+    } catch (error) {
+      // if url is invaild, do nothing and break current loop
+      console.error(error, srcEl);
+      break;
     }
+
+    // if url contains no extension, type = null
+    let type: "audio" | "video" | null = null;
+    if (!url.pathname.includes(".")) {
+      const ext = url.pathname.split(".").pop() as string;
+      switch (ext) {
+        case "mp3": case "wav": case "m4a": 
+        case "ogg": case "3gp": case "flac":
+          type = "audio";
+          break;
+        case "mp4": case "webm": case "ogv":
+          type = "video";
+          break;
+      }
+    } 
+
+    let newEl: HTMLMediaElement | HTMLIFrameElement | null = null;
+
     if (type) {
       newEl = createEl(type);
       newEl.src = srcEl.src;
       newEl.controls = true;
       replaceWith(newEl);
-    } else if (newEl = getEmbedFrom(srcEl.src)){
+    } else if (newEl = getEmbedFrom(url)){
       replaceWith(newEl);
     }
   }
@@ -247,8 +283,8 @@ function convertToEmbedUrl(src: URL): string | null {
   }
 }
 
-function getEmbedFrom(url:string): HTMLIFrameElement | null {
-  let embedUrl = convertToEmbedUrl(new URL(url));
+function getEmbedFrom(url:URL): HTMLIFrameElement | null {
+  let embedUrl = convertToEmbedUrl(url);
 
   if (embedUrl){
     return createEl("iframe", {
