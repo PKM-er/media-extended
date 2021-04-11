@@ -73,13 +73,16 @@ export function processInternalLinks(
             linktext,
             ctx.sourcePath
           );
-          let fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+          if (!file) throw new Error("file not found from resolved linktext");
 
           const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
           fileLeaf.openFile(file).then(() => {
-
-            const containerEl = (fileLeaf.view as FileView).contentEl
-            bindTimeSpan(timeSpan, getPlayer(containerEl));
+            if (fileLeaf.view instanceof FileView)
+              bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
+            else
+              throw new Error("file failed to open: no FileView found");
+              
+            
           });
         }
       };
@@ -188,7 +191,20 @@ export function processExternalEmbeds(
 ) {
   for (const e of el.querySelectorAll("img[referrerpolicy]")) {
     const srcEl = e as HTMLImageElement;
-    const ext = new URL(srcEl.src).pathname.split(".").last();
+
+    let url: URL;
+    try {
+      url = new URL(srcEl.src)
+    } catch (error) {
+      // if url is invaild, do nothing and break current loop
+      console.error(error, srcEl);
+      break;
+    }
+
+    // if url contains no extension, do nothing and break current loop
+    if(!url.pathname.includes('.')) break;
+
+    const ext = url.pathname.split(".").pop() as string;
 
     let newEl: HTMLMediaElement;
     let type: "audio" | "video" | null;
