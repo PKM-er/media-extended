@@ -276,7 +276,10 @@ function convertToEmbedUrl(src: URL): string | null {
           console.error(`invaild bilibili video-id: ${videoId}`);
           return null;
         }
-        return `https://player.bilibili.com/player.html${queryStr}`;
+        let page = src.searchParams.get("p");
+        if (page)
+          queryStr += `&page=${page}`
+        return `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`;
       } else {
         console.log("not recognized as bilibili video");
         return null;
