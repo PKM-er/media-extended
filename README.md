@@ -9,6 +9,8 @@ This plugin introduce some new features that improve media (video/audio) playing
 - [x] [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
 - [x] [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
 - [x] [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
+  - From external media files: `![](http://example.com/video.ogv#t=60)`
+  - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)` (Timestamps not yet supported)
 - [ ] External subtitle support for videos
 - [ ] Create timestamps from player and insert link to notes
 - [ ] Improved pictrue-in-pictrue support
@@ -32,7 +34,12 @@ Just append [Media Fragment URI](#media-fragment-uri) to the regular internal li
 
 ### Extended Image Embed Syntax
 
-Allow to write `![](http://example.com/video.ogv#t=60)` to embed audio/video
+Allow to write `![](http://example.com/video.ogv#t=60)` to embed audio/video files
+
+Now also support videos from different hosts (Timestamps not yet supported)
+
+- Youtube: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
+- Bilibili: `![](https://www.bilibili.com/video/BV17x411w7KC)`
 
 ## Compatibility
 

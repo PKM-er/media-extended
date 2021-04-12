@@ -65,6 +65,10 @@ export class MESettingTab extends PluginSettingTab {
             "If enabled, you can write ![](link/to/demo.mp4) to embed video and audio."
           );
           descEl.createEl('br');
+          descEl.appendText(
+            "Support direct file links (with file extension) and videos from video hosts (Youtube, Bilibili)"
+          );
+          descEl.createEl('br');
           descEl.appendText("Restart the app to take effects");
         })
       },
