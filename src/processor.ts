@@ -57,32 +57,34 @@ export function processInternalLinks(
           linktext,
           ctx.sourcePath
         );
+        if (!matchedFile) return;
 
         workspace.iterateAllLeaves((leaf) => {
           if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
             openedMedia.push(leaf.view.contentEl);
         });
 
-        function getPlayer(e: HTMLElement): HTMLMediaElement {
+        function getPlayer(e: HTMLElement): HTMLMediaElement | null {
           return e.querySelector(
             "div.video-container > video, div.video-container > audio"
-          ) as HTMLMediaElement;
+          );
         }
 
         if (openedMedia.length)
-          openedMedia.forEach((e) => bindTimeSpan(timeSpan, getPlayer(e)));
+          openedMedia.forEach((e) => {
+            bindTimeSpan(timeSpan, getPlayer(e));
+          });
         else {
           const file = plugin.app.metadataCache.getFirstLinkpathDest(
             linktext,
             ctx.sourcePath
           );
-          if (!file) throw new Error("file not found from resolved linktext");
+          if (!file) return;
 
           const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
           fileLeaf.openFile(file).then(() => {
             if (fileLeaf.view instanceof FileView)
               bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
-            else throw new Error("file failed to open: no FileView found");
           });
         }
       };
