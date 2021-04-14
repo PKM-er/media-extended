@@ -1,4 +1,4 @@
-import { HTMLMediaEl_TF, TimeSpan, isHTMLMediaEl_TF } from "./MFParse";
+import { HTMLMediaEl_TF, TimeSpan, isHTMLMediaEl_TF, parseTF } from "./MFParse";
 import { assertNever } from "assert-never";
 import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
@@ -88,10 +88,26 @@ export function getEmbedFrom(url:URL): HTMLDivElement | null {
 
   switch (info.host) {
     case Host.YouTube: {
+      const timeSpan = parseTF(url.hash);
+
+      let ytOpt = {} as any
+      if (timeSpan && timeSpan.start !== 0) ytOpt.start = timeSpan.start;
+
+      let isLoop = parse(url.hash).loop === null;
+      ytOpt.loop = +isLoop;
+
       container.addClass("plyr__video-embed");
-      new Plyr(container, {
+      // @ts-ignore
+      Plyr.timeSpan = null;
+      const player = new Plyr(container, {
         fullscreen: { enabled: false },
-      });
+        loop: { active: isLoop },
+        invertTime: false,
+        youtube: ytOpt,
+      }) as Plyr_TF;
+
+      if (timeSpan) injectTimestamp(player,timeSpan);
+
       return container;
     }
     case Host.Bilibili: {
@@ -105,31 +121,45 @@ export function getEmbedFrom(url:URL): HTMLDivElement | null {
 }
 
 export interface Plyr_TF extends Plyr {
-  timeSpan: TimeSpan;
+  timeSpan: TimeSpan | null;
 }
 
 type Player_TF = HTMLMediaEl_TF | Plyr_TF;
 type Player = HTMLMediaElement | Plyr;
 
-export function injectTimestamp(player: Player, timeSpan: TimeSpan) {
-  (<Player_TF>player).timeSpan = timeSpan;
 
-  // inject media fragment into player's src
-  if (player instanceof HTMLMediaElement){
-    const { path, subpath: hash } = parseLinktext(player.src);
-    let hashObj = parse(hash);
-    hashObj.t = timeSpan.raw;
-    player.src = path + "#" + stringify(hashObj);
-  } else {
-    if (player.isEmbed){
-      // todo
-    } else throw new Error("Plyr for native video not implemented");
-    
+/**
+ * inject media fragment into player's src
+ * @param player an <audio> or <video> element
+ */
+function setStartTime(player: HTMLMediaEl_TF): void
+function setStartTime(player: HTMLMediaElement, timeSpan: TimeSpan): void
+function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void{
+
+  if (isHTMLMediaEl_TF(player)){
+    timeSpan = player.timeSpan;
+  }
+  if (!timeSpan) throw new Error("timespan not found");
+
+  const { path, subpath: hash } = parseLinktext(player.src);
+  let hashObj = parse(hash);
+  hashObj.t = timeSpan.raw;
+  player.src = path + "#" + stringify(hashObj);
+
+}
+
+export function injectTimestamp(player: Player_TF, timeSpan: TimeSpan) {
+  player.timeSpan = timeSpan;
+  player = player as any;
+
+  if(player instanceof HTMLMediaElement){
+    setStartTime(player,timeSpan);
   }
 
   // inject event handler to restrict play range
   const onplaying = (e: Event) => {
-    const player = e.target as Player_TF;
+    if (!player.timeSpan) throw new Error("timeSpan not found");
+    
     const {
       timeSpan: { start, end },
       currentTime,
@@ -139,7 +169,8 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan) {
     }
   };
   const ontimeupdate = (e: Event) => {
-    const player = e.target as Player_TF;
+    if (!player.timeSpan) throw new Error("timeSpan not found");
+
     const {
       timeSpan: { start, end },
       currentTime,

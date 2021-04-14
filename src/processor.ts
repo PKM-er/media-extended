@@ -5,7 +5,7 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { parseTF, bindTimeSpan } from "./modules/MFParse";
+import { parseTF, bindTimeSpan, HTMLMediaEl_TF } from "./modules/MFParse";
 import { injectTimestamp, getEmbedFrom } from "./modules/embed-process";
 
 /**
@@ -151,7 +151,7 @@ export function processInternalEmbeds(
     const player = m.addedNodes[0] as HTMLMediaElement;
     if (timeSpan !== null) {
       // import timestamps to player
-      injectTimestamp(player, timeSpan);
+      injectTimestamp(player as HTMLMediaEl_TF, timeSpan);
     }
     // null: exist, with no value (#loop)
     if (parse(hash).loop === null) {
