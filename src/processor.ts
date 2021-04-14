@@ -5,9 +5,8 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { parseTF, bindTimeSpan, HTMLMediaEl_TF } from "./modules/MFParse";
+import { parseTF, bindTimeSpan } from "./modules/MFParse";
 import { injectTimestamp, getEmbedFrom } from "./modules/embed-process";
-// import Plyr from "plyr"
 
 /**
  * HTMLMediaElement with temporal fragments
@@ -149,7 +148,7 @@ export function processInternalEmbeds(
     const { subpath: hash } = parseLinktext(srcLinktext);
     const timeSpan = parseTF(hash);
 
-    const player = m.addedNodes[0] as HTMLMediaEl_TF;
+    const player = m.addedNodes[0] as HTMLMediaElement;
     if (timeSpan !== null) {
       // import timestamps to player
       injectTimestamp(player, timeSpan);
@@ -203,7 +202,7 @@ export function processExternalEmbeds(
       }
     } 
 
-    let newEl: HTMLMediaElement | HTMLIFrameElement | null = null;
+    let newEl: HTMLMediaElement | HTMLDivElement | null = null;
 
     if (type) {
       newEl = createEl(type);
