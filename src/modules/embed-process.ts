@@ -6,7 +6,8 @@ import Plyr from "plyr"
 
 enum Host {
   YouTube,
-  Bilibili
+  Bilibili,
+  Vimeo,
 }
 
 interface videoInfo {
@@ -39,7 +40,7 @@ export function getEmbedInfo(src: URL): videoInfo | null {
           ),
         };
       } else {
-        console.log("not recognized as bilibili video");
+        console.log("bilibili video url not supported or invalid");
         return null;
       }
       break;
@@ -57,10 +58,25 @@ export function getEmbedInfo(src: URL): videoInfo | null {
           return null;
         }
       } else {
-        console.log("not recognized as youtube video");
+        console.log("youtube video url not supported or invalid");
         return null;
       }
       break;
+    case "vimeo.com":
+      const path = src.pathname;
+      let match;
+      if (match = path.match(/^\/(\d+)$/)){
+        let videoId = match[1];
+        return {
+          host: Host.Vimeo,
+          id: videoId,
+          iframe: new URL(`https://player.vimeo.com/video/${videoId}`)
+        }
+      } else {
+        console.log("vimeo video url not supported or invalid");
+        return null;
+      }
+      
     default:
       console.log("unsupported video host");
       return null;
@@ -87,26 +103,30 @@ export function getEmbedFrom(url:URL): HTMLDivElement | null {
   const container = createDiv(undefined, (el) => el.appendChild(iframe));
 
   switch (info.host) {
-    case Host.YouTube: {
+    case Host.YouTube:
+    case Host.Vimeo: {
       const timeSpan = parseTF(url.hash);
+      const isLoop = parse(url.hash).loop === null;
 
-      let ytOpt = {} as any
-      if (timeSpan && timeSpan.start !== 0) ytOpt.start = timeSpan.start;
-
-      let isLoop = parse(url.hash).loop === null;
-      ytOpt.loop = +isLoop;
+      let ytOpt
+      if (info.host===Host.YouTube){
+        ytOpt = {} as any;
+        // set start time
+        if (timeSpan && timeSpan.start !== 0) ytOpt.start = timeSpan.start;
+        ytOpt.loop = +isLoop;
+      }  
 
       container.addClass("plyr__video-embed");
       // @ts-ignore
       Plyr.timeSpan = null;
       const player = new Plyr(container, {
         fullscreen: { enabled: false },
-        loop: { active: isLoop },
+        loop: { active: parse(url.hash).loop === null },
         invertTime: false,
         youtube: ytOpt,
       }) as Plyr_TF;
 
-      if (timeSpan) injectTimestamp(player,timeSpan);
+      if (timeSpan) injectTimestamp(player, timeSpan);
 
       return container;
     }
