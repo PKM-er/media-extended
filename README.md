@@ -6,11 +6,12 @@ Improve media (video/audio) playing in Obsidian.
 
 This plugin introduce some new features that improve media (video/audio) playing: 
 
-- [x] [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
-- [x] [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
-- [x] [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
+- [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
+- [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
+- [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
   - From external media files: `![](http://example.com/video.ogv#t=60)`
-  - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)` (Timestamps not yet supported)
+  - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
+    - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
 - [ ] External subtitle support for videos
 - [ ] Create timestamps from player and insert link to notes
 - [ ] Improved pictrue-in-pictrue support
@@ -36,10 +37,11 @@ Just append [Media Fragment URI](#media-fragment-uri) to the regular internal li
 
 Allow to write `![](http://example.com/video.ogv#t=60)` to embed audio/video files
 
-Now also support videos from different hosts (Timestamps not yet supported)
+Now also support videos from different hosts
 
 - Youtube: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
-- Bilibili: `![](https://www.bilibili.com/video/BV17x411w7KC)`
+- Bilibili: `![](https://www.bilibili.com/video/BV17x411w7KC)` (Timestamps not supported)
+- Vimeo: `![](https://vimeo.com/336812611)`
 
 ## Compatibility
 
