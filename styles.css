@@ -520,7 +520,7 @@ a.plyr__control::before {
   width: 13px;
   width: var(--plyr-range-thumb-height, 13px);
   -webkit-appearance: none;
-  margin-top: calc(((13px - 5px) / 2) * -1);
+  /* margin-top: calc(((13px - 5px) / 2) * -1);
   margin-top: calc(
     (
         (
@@ -528,7 +528,7 @@ a.plyr__control::before {
               var(--plyr-range-track-height, 5px)
           ) / 2
       ) * -1
-  );
+  ); */
 }
 .plyr--full-ui input[type="range"]::-moz-range-track {
   background: 0 0;
