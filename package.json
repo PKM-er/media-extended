@@ -18,6 +18,7 @@
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@rollup/plugin-typescript": "^6.0.0",
     "@types/node": "^14.14.2",
+    "assert-never": "^1.2.1",
     "cz-conventional-changelog": "^3.3.0",
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "plyr": "^3.6.4",

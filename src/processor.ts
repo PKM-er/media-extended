@@ -6,6 +6,7 @@ import {
   parseLinktext,
 } from "obsidian";
 import { parseTF, bindTimeSpan, HTMLMediaEl_TF, TimeSpan, isHTMLMediaEl_TF } from "./MFParse";
+import { assertNever } from "assert-never";
 // import Plyr from "plyr"
 
 /**
@@ -262,7 +263,18 @@ export function processExternalEmbeds(
   }
 }
 
-function convertToEmbedUrl(src: URL): string | null {
+enum Host {
+  YouTube,
+  Bilibili
+}
+
+interface videoInfo {
+  host: Host;
+  id: string;
+  iframe: URL;
+}
+
+function getEmbedInfo(src: URL): videoInfo | null {
   switch (src.hostname) {
     case "www.bilibili.com":
       if (src.pathname.startsWith("/video")) {
@@ -273,13 +285,18 @@ function convertToEmbedUrl(src: URL): string | null {
         } else if (/^av/i.test(videoId)) {
           queryStr = `?aid=${videoId}`;
         } else {
-          console.error(`invaild bilibili video-id: ${videoId}`);
+          console.log(`invaild bilibili video-id: ${videoId}`);
           return null;
         }
         let page = src.searchParams.get("p");
-        if (page)
-          queryStr += `&page=${page}`
-        return `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`;
+        if (page) queryStr += `&page=${page}`;
+        return {
+          host: Host.Bilibili,
+          id: videoId,
+          iframe: new URL(
+            `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`
+          ),
+        };
       } else {
         console.log("not recognized as bilibili video");
         return null;
@@ -289,9 +306,13 @@ function convertToEmbedUrl(src: URL): string | null {
       if (src.pathname === "/watch") {
         let videoId = src.searchParams.get("v");
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}`;
+          return {
+            host: Host.YouTube,
+            id: videoId,
+            iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
+          };
         } else {
-          console.log(`invalid video id from: ${src.toString()}`);
+          console.log(`invalid video id host: ${src.toString()}`);
           return null;
         }
       } else {
@@ -306,24 +327,26 @@ function convertToEmbedUrl(src: URL): string | null {
 }
 
 function getEmbedFrom(url:URL): HTMLIFrameElement | null {
-  let embedUrl = convertToEmbedUrl(url);
+  let info = getEmbedInfo(url);
+  if (!info) return null;
 
-  if (embedUrl){
-    return createEl("iframe", {
-      attr: {
-        class: "external-video",
-        src: embedUrl,
-        scrolling: "no",
-        border: "0",
-        frameborder: "no",
-        framespacing: "0",
-        allowfullscreen: false,
-        sandbox: "allow-forms allow-presentation allow-same-origin allow-scripts allow-modals"
-      },
-    });
-  }
-  else {
-    return null
+  switch (info.host) {
+    case Host.YouTube:
+    case Host.Bilibili:
+      return createEl("iframe", {
+        attr: {
+          class: "external-video",
+          src: info.iframe.toString(),
+          scrolling: "no",
+          border: "0",
+          frameborder: "no",
+          framespacing: "0",
+          allowfullscreen: false,
+          sandbox: "allow-forms allow-presentation allow-same-origin allow-scripts allow-modals"
+        },
+      });  
+    default:
+      assertNever(info.host)
   }
 
 }
