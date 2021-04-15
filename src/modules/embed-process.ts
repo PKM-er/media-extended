@@ -27,7 +27,7 @@ export function getEmbedInfo(src: URL): videoInfo | null {
         } else if (/^av/i.test(videoId)) {
           queryStr = `?aid=${videoId}`;
         } else {
-          console.log(`invaild bilibili video-id: ${videoId}`);
+          console.log(`invaild video id: ${videoId}`);
           return null;
         }
         let page = src.searchParams.get("p");
@@ -45,6 +45,7 @@ export function getEmbedInfo(src: URL): videoInfo | null {
       }
       break;
     case "www.youtube.com":
+    case "youtu.be":
       if (src.pathname === "/watch") {
         let videoId = src.searchParams.get("v");
         if (videoId) {
@@ -54,7 +55,19 @@ export function getEmbedInfo(src: URL): videoInfo | null {
             iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
           };
         } else {
-          console.log(`invalid video id host: ${src.toString()}`);
+          console.log(`invalid video id: ${src.toString()}`);
+          return null;
+        }
+      } else if (src.host==="youtu.be"){
+        if (/^\/[^\/]+$/.test(src.pathname)) {
+          let videoId = src.pathname.substring(1)
+          return {
+            host: Host.YouTube,
+            id: videoId,
+            iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
+          };
+        } else {
+          console.log(`invalid video id: ${src.toString()}`);
           return null;
         }
       } else {
