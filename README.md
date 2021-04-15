@@ -7,14 +7,15 @@ Improve media (video/audio) playing in Obsidian.
 This plugin introduce some new features that improve media (video/audio) playing: 
 
 - [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
+  - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
 - [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
 - [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
   - From external media files: `![](http://example.com/video.ogv#t=60)`
   - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
     - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
-- [ ] External subtitle support for videos
-- [ ] Create timestamps from player and insert link to notes
-- [ ] Improved pictrue-in-pictrue support
+- [ ] [External subtitle support for videos](https://github.com/alx-plugins/media-extended/issues/7)
+- [ ] [Create links for timestamps from player](https://github.com/alx-plugins/media-extended/issues/9)
+- [ ] [Improved pictrue-in-pictrue support](https://github.com/alx-plugins/media-extended/issues/8)
 
 ## How to use
 
@@ -26,6 +27,8 @@ Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal li
 
 Also, loop is support by append `loop` to the hashtag like
 `#t=60&loop` or just `#loop`
+
+
 
 ### Timestamps for Media
 
