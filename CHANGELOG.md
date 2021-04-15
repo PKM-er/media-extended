@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/alx-plugins/media-extended/compare/2.1.0...2.2.0) (2021-04-15)
+
+
+### Features
+
+* add youtube short link support ([18bef61](https://github.com/alx-plugins/media-extended/commit/18bef6158eb0001b7987886be694b167cc2e0b67))
+
 # [2.1.0](https://github.com/alx-plugins/media-extended/compare/2.0.0...2.1.0) (2021-04-14)
 
 
