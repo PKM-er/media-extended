@@ -36,16 +36,16 @@ const getUrl: RequestHandler = async (req,res,next) => {
   let page: number|null;
 
   let idValue = rawId.substring(2);
-  if (/^av/i.test(rawId) && parseInt(idValue))
-    id = { type: vidType.avid, value: parseInt(idValue) };
+  if (/^av/i.test(rawId) && parseInt(idValue,10))
+    id = { type: vidType.avid, value: parseInt(idValue,10) };
   else if (/^bv/i.test(rawId)) id = { type: vidType.bvid, value: idValue };
   else {
     throw new Error("invalid avid/bvid");
   }
       
   const p = req.query.p;
-  if (typeof p === "string" && parseInt(p)){
-    page = parseInt(p);
+  if (typeof p === "string" && parseInt(p,10)){
+    page = parseInt(p,10);
   } else {
     page = null;
     if (p) console.error("invalid p, ignored" + p);
