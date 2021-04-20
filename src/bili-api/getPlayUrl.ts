@@ -45,7 +45,7 @@ export const enum audio_quality {
   _192k = 30280,
 }
 
-interface PlayUrl_Basic {
+export interface PlayUrl_Basic {
   /** 作用尚不明确 */
   from: "local";
   /** 作用尚不明确 */
@@ -72,7 +72,7 @@ interface PlayUrl_Basic {
   seek_type: string;
 }
 
-interface PlayUrl_Trad extends PlayUrl_Basic{
+export interface PlayUrl_Trad extends PlayUrl_Basic{
   /** 视频分段 注：仅flv/mp4存在此项 仅flv方式具有分段(length>1) */
   durl: durlInfo[];
 }
@@ -94,15 +94,15 @@ interface durlInfo {
   backup_url: string[];
 }
 
-interface PlayUrl_Dash extends PlayUrl_Basic{
+export interface PlayUrl_Dash extends PlayUrl_Basic{
   /** dash音视频流信息 注：仅dash存在此项 */
   dash: {
     /** 作用尚不明确 */
-    duration: 677;
+    duration: number;
     /** 作用尚不明确 */
-    minBufferTime: 1.5;
+    minBufferTime: number;
     /** 作用尚不明确 */
-    min_buffer_time: 1.5;
+    min_buffer_time: number;
     /** 视频流信息 */
     video: videoInfo[];
     /** 音频流信息 */
@@ -110,14 +110,22 @@ interface PlayUrl_Dash extends PlayUrl_Basic{
   }
 }
 
-type PlayUrl = PlayUrl_Dash | PlayUrl_Trad;
+export type PlayUrl = PlayUrl_Dash | PlayUrl_Trad;
 
-interface audioInfo extends mediaInfo {
+export function isDash(obj: PlayUrl): obj is PlayUrl_Dash {
+  return (obj as PlayUrl_Dash).dash !== undefined;
+}
+
+export function isTrad(obj: PlayUrl): obj is PlayUrl_Trad {
+  return (obj as PlayUrl_Trad).durl !== undefined;
+}
+
+export interface audioInfo extends mediaInfo {
   /** 清晰度代码 */
   id: audio_quality;
 }
 
-interface videoInfo extends mediaInfo {
+export interface videoInfo extends mediaInfo {
   /** 清晰度代码 */
   id: video_quality;
   /** 视频宽度 单位为像素 */
@@ -130,7 +138,7 @@ interface videoInfo extends mediaInfo {
   frame_rate: string;
 }
 
-interface mediaInfo {
+export interface mediaInfo {
   /** 默认视频/音频流url 注：url内容存在转义符 有效时间为120min */
   baseUrl: string;
   /** 默认视频/音频流url 注：url内容存在转义符 有效时间为120min */
@@ -147,18 +155,24 @@ interface mediaInfo {
   mime_type: string;
   /** 编码/音频类型 */
   codecs: string;
-  /** 作用尚不明确 */
+  /** Dash参数 */
   sar: "1:1";
-  /** 作用尚不明确 */
-  startWithSap: 1;
-  /** 作用尚不明确 */
+  /** Dash参数 */
+  startWithSap: number;
+  /** Dash参数 */
   start_with_sap: number;
-  /** 作用尚不明确 */
-  SegmentBase: unknown;
-  /** 作用尚不明确 */
-  segment_base: unknown;
-  /** 作用尚不明确 */
-  codecid: 7;
+  /** Dash参数 */
+  SegmentBase: {
+    "Initialization": string;
+    "indexRange": string;
+  };
+  /** Dash参数 */
+  segment_base: {
+    "initialization": string;
+    "index_range": string;
+  };
+  /** Dash参数 */
+  codecid: number;
 }
 
 interface PlayUrlParams_Basics {
@@ -190,7 +204,7 @@ export type PlayUrlParams = PlayUrlParams_A | PlayUrlParams_B;
  * @param F = typeof args.fnval
  */
 export function getPlayUrl<F>(
-  args: PlayUrlParams
+  args: PlayUrlParams, cookie?:string
 ) {
   const url = "http://api.bilibili.com/x/player/playurl";
 
@@ -200,10 +214,15 @@ export function getPlayUrl<F>(
   if (
     (avid && isBiliVId(avid) === vidType.avid) ||
     (bvid && isBiliVId(bvid) === vidType.bvid)
-  )
-    return axios.get<F extends fetch_method.dash ? returnBody<PlayUrl_Dash> : returnBody<PlayUrl_Trad>>(
-      url,
-      { params: args,headers:{Cookie: "CURRENT_FNVAL=80; _uuid=BAA2BB27-2077-2889-284C-191D6461CB6B33768infoc; blackside_state=1; rpdid=|(RYJkkY|uJ0J'uYuu)JYRJ~; fingerprint=633e50d1c067c7de56e78224f1248c82; buvid_fp=E22B8924-56C3-8494-81F0-281CE1455F1C33338infoc; buvid_fp_plain=E22B8924-56C3-8494-81F0-281CE1455F1C33338infoc; DedeUserID=6976366; DedeUserID__ckMd5=a2095eaea30d2b21; SESSDATA=53bd492f,1627435984,a82dd*11; bili_jct=eb8e775bec5d79847cc54ff33802e1e8; LIVE_BUVID=AUTO4016121682434143; buvid3=CCACED5D-540B-4A55-96ED-5EF58D5AC78218536infoc; CURRENT_QUALITY=116; PVID=1; buvid_fp=CCACED5D-540B-4A55-96ED-5EF58D5AC78218536infoc; bp_video_offset_6976366=513041333931713544; bp_t_offset_6976366=513042278828717694; sid=5wcb0u8r; fingerprint=6f518c1717bd2b79b83f5b16cafed187; buvid_fp_plain=CCACED5D-540B-4A55-96ED-5EF58D5AC78218536infoc"} }
-    );
+  ){
+    let headers : any = {};
+    if (cookie) headers.Cookie = cookie;
+    return axios.get<
+      F extends fetch_method.dash
+        ? returnBody<PlayUrl_Dash>
+        : returnBody<PlayUrl_Trad>
+    >(url, { params: args, headers });
+  }
+
   else throw new TypeError(`Invalid avid ${avid}/bvid ${bvid}`);
 }
