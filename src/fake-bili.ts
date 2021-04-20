@@ -18,5 +18,5 @@ export function getServer(port: number) {
     res.status(500).send(err.message);
   });
 
-  return app;
+  return app.listen(port);
 }

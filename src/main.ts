@@ -5,14 +5,13 @@ import "./main.css";
 import { getEmbedProcessor } from "embeds";
 import { MediaView, MEDIA_VIEW_TYPE } from "./media-view";
 import { getCMLinkHandler, getLinkProcessor } from "links";
-import { Express } from "express";
 import { getServer } from "fake-bili";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
-  server: Express | undefined;
+  server: ReturnType<typeof getServer> | undefined;
 
   private cmLinkHandler = getCMLinkHandler(this);
 
@@ -86,5 +85,10 @@ export default class MediaExtended extends Plugin {
         },
       ],
     });
+  }
+  
+  onunload() {
+    console.log("unloading media-extended");
+    this.server?.close();
   }
 }
