@@ -1,15 +1,8 @@
-import { vidType, statusCode } from "../modules/bili-api/general";
-import { PageListParams, getPageList } from "../modules/bili-api/getPageList";
-import {
-  PlayUrlParams,
-  fetch_method,
-  getPlayUrl,
-  PlayUrl,
-  isDash,
-  isTrad,
-  mediaInfo,
-  PlayUrl_Dash,
-} from "../modules/bili-api/getPlayUrl";
+import { statusCode } from "bili-api/player/general";
+import { vidType, getPageList, getPlayUrl, isDash, isTrad } from "../modules/bili-tools"
+import * as Pagelist from "bili-api/player/pagelist";
+import * as PlayUrl from "bili-api/player/playurl";
+import { fetch_method } from "bili-api/player/playurl";
 import assertNever from "assert-never";
 import { toMPD } from "../modules/dash-tool";
 import { RequestHandler } from "express";
@@ -74,7 +67,7 @@ const getUrl: RequestHandler = async (req,res,next) => {
     throw new Error("failed to fetch playData, error:" + error);
   }
 
-  const mpd = toMPD(convertToFakeUrl(playData) as PlayUrl_Dash);
+  const mpd = toMPD(convertToFakeUrl(playData) as PlayUrl.DashData);
 
   res.set({
     "Content-Type": "application/dash+xml; charset=utf-8",
@@ -85,7 +78,7 @@ const getUrl: RequestHandler = async (req,res,next) => {
 } 
 
 async function getCid(id: vid, page: number | null) {
-  let argPl: PageListParams;
+  let argPl: Pagelist.Params;
 
   switch (id.type) {
     case vidType.avid:
@@ -112,7 +105,7 @@ async function getCid(id: vid, page: number | null) {
 }
 
 async function getPlayData(id: vid, cid: number) {
-  let argPu: PlayUrlParams;
+  let argPu: PlayUrl.Params;
   switch (id.type) {
     case vidType.avid:
       argPu = { avid: id.value, cid };
@@ -136,7 +129,7 @@ async function getPlayData(id: vid, cid: number) {
   return playUrlData.data;
 }
 
-function convertToFakeUrl(obj: PlayUrl) {
+function convertToFakeUrl(obj: PlayUrl.Data) {
 
   function toFakeUrl(src:string) {
     let {host, pathname, search} = new URL(src);
@@ -144,7 +137,7 @@ function convertToFakeUrl(obj: PlayUrl) {
   }
 
   if (isDash(obj)){
-    const irMediaInfo = (info:mediaInfo) => {
+    const irMediaInfo = (info:PlayUrl.mediaInfo) => {
       info.baseUrl = toFakeUrl(info.baseUrl);
       info.base_url = toFakeUrl(info.base_url);
       info.backup_url.forEach((v) => (v = toFakeUrl(v)));

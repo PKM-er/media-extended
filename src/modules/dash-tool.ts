@@ -1,7 +1,7 @@
 import { create } from "xmlbuilder2";
-import { PlayUrl_Dash } from "./bili-api/getPlayUrl";
+import { DashData } from "bili-api/player/playurl";
 
-export function toMPD(data: PlayUrl_Dash) {
+export function toMPD(data: DashData) {
   const d = data.dash;
 
   let videos = d.video.filter(v=>v.codecs.startsWith("avc1")).map((v) => ({
