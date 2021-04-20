@@ -1,4 +1,3 @@
-import assertNever from "assert-never";
 import MediaExtended from "main";
 import { getContainer, getPlyr, getPlyrForHost } from "modules/player-setup";
 import { SubtitleResource } from "modules/subtitle";
@@ -32,20 +31,12 @@ export const getEmbedProcessor = (
           const {
             useYoutubeControls: ytControls,
             thumbnailPlaceholder: thumbnail,
+            interalBiliPlayback: biliEnabled,
           } = plugin.settings;
           if (thumbnail) newEl = await setupThumbnail(info, ytControls);
-          else
-            switch (info.host) {
-              case Host.youtube:
-              case Host.vimeo:
-                newEl = getContainer(getPlyrForHost(info, ytControls));
-                break;
-              case Host.bili:
-                setupIFrame(newEl, info);
-                break;
-              default:
-                assertNever(info.host);
-            }
+          else if (!biliEnabled && info.host === Host.bili)
+            setupIFrame(newEl, info);
+          else newEl = getContainer(getPlyrForHost(info, ytControls));
         }
         if (newEl) el.replaceWith(newEl);
       } catch (error) {

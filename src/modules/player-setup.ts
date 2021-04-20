@@ -10,6 +10,7 @@ import {
   videoInfo_Host,
 } from "./video-info";
 import assertNever from "assert-never";
+import * as dashjs from "dashjs";
 
 /** Player with temporal fragments */
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
@@ -214,11 +215,21 @@ export const getPlyr = (info: videoInfo, options?: Plyr.Options): Plyr_TF => {
   else options = defaultPlyrOption;
 
   options.autoplay = is("autoplay");
-  const player = new Plyr(playerEl, options);
-  let source = infoToSource(info);
 
-  player.source = source;
-  (player as Plyr_TF).sourceBak = source;
+  const player = new Plyr(playerEl, options);
+
+  if (isHost(info) && info.host === Host.bili) {
+    const dash = dashjs.MediaPlayer().create();
+
+    const src =
+      "http://localhost:2233/geturl/" +
+      (info.iframe.searchParams.has("aid") ? "av" + info.id : info.id);
+    dash.initialize(playerEl, src, false);
+  } else {
+    const source = infoToSource(info);
+    player.source = source;
+    (player as Plyr_TF).sourceBak = source;
+  }
 
   setHashOpt(player);
   setPlayerTF(player);

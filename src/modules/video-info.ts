@@ -156,6 +156,7 @@ export async function getVideoInfo(
         if (/^bv/i.test(videoId)) {
           queryStr = `?bvid=${videoId}`;
         } else if (/^av/i.test(videoId)) {
+          videoId = videoId.substring(2);
           queryStr = `?aid=${videoId}`;
         } else {
           console.log(`invaild video id: ${videoId}`);
