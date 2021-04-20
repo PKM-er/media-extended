@@ -10,7 +10,7 @@ const proxyOpt = {
   changeOrigin: true, // needed for virtual hosted sites
   ws: true, // proxy websockets
   pathRewrite: {
-    "^/fake/.+?/": "", // rewrite path
+    "^/fake/.+?/": "/", // rewrite path
   },
   router(req: express.Request) {
     return "https://" + req.params.host;
