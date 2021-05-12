@@ -1,3 +1,12 @@
+## [2.2.1](https://github.com/alx-plugins/media-extended/compare/2.2.0...2.2.1) (2021-05-12)
+
+
+### Bug Fixes
+
+* **embed-process.ts:** player no longer paused when first loop ends ([d0f8e24](https://github.com/alx-plugins/media-extended/commit/d0f8e24686579bf31e79e67c66fad12a161e58ca)), closes [#21](https://github.com/alx-plugins/media-extended/issues/21)
+* **processor.ts:** fix loop tag not attached to player in processInternalLinks() ([8e933dd](https://github.com/alx-plugins/media-extended/commit/8e933dd3cdc962adc8b9314590789f7c559db8f1))
+* **processor.ts:** internal timestamp link now works with audio files again ([c5d5afa](https://github.com/alx-plugins/media-extended/commit/c5d5afaf74449d6cd36e386e8c73384b0cd87d3d)), closes [#20](https://github.com/alx-plugins/media-extended/issues/20)
+
 # [2.2.0](https://github.com/alx-plugins/media-extended/compare/2.1.0...2.2.0) (2021-04-15)
 
 
