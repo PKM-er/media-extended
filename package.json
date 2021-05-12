@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
     "build": "rollup --config rollup.config.js",
+    "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)'",
     "release": "release-it"
   },
   "keywords": [],
@@ -22,6 +23,7 @@
     "cz-conventional-changelog": "^3.3.0",
     "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
     "plyr": "^3.6.4",
+    "prettier": "^2.3.0",
     "query-string": "^7.0.0",
     "release-it": "^14.5.1",
     "rollup": "^2.32.1",
@@ -31,7 +33,7 @@
   },
   "release-it": {
     "hooks": {
-      "after:bump": "sh scripts/bump-version.sh && npm run build",
+      "after:bump": "sh scripts/bump-version.sh && npm run prettier && npm run build",
       "after:git:release": "echo After git push, before github release",
       "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
     },
