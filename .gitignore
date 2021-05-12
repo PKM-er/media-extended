@@ -9,6 +9,7 @@ package-lock.json
 # build
 main.js
 *.js.map
+styles.css
 
 # saved data
 data.json

@@ -5,7 +5,8 @@ import {
   processExternalEmbeds,
   processInternalLinks,
 } from "./processor";
-// import Plyr from "plyr"
+import "plyr/dist/plyr.css"
+import "./main.css"
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
