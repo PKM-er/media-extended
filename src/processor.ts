@@ -8,6 +8,11 @@ import {
 import { parseTF, bindTimeSpan, HTMLMediaEl_TF } from "./modules/MFParse";
 import { injectTimestamp, getEmbedFrom } from "./modules/embed-process";
 
+type mutationParam = {
+  callback: MutationCallback;
+  option: MutationObserverInit;
+};
+
 /**
  * HTMLMediaElement with temporal fragments
  */
@@ -18,22 +23,29 @@ export function processInternalLinks(
   ctx: MarkdownPostProcessorContext
 ) {
   const plugin = this;
-  const internalLinkObs = new MutationObserver((mutationsList, observer) => {
-    for (const m of mutationsList) {
-      handleLink(m.target as HTMLLinkElement);
-      observer.disconnect();
-    }
-  });
+
+  const internalLink: mutationParam = {
+    // check if link is resolved
+    callback: (list, obs) => {
+      for (const m of list) {
+        const a = m.target as HTMLAnchorElement;
+        if (!a.hasClass("is-unresolved"))
+          handleLink(m.target as HTMLAnchorElement);
+        obs.disconnect();
+      }
+    },
+    option: { attributeFilter: ["class"], attributeOldValue: true },
+  };
 
   for (const link of el.querySelectorAll("a.internal-link")) {
-    internalLinkObs.observe(link, { attributeFilter: ["class"] });
+    const ilObs = new MutationObserver(internalLink.callback);
+    ilObs.observe(link, internalLink.option);
   }
 
   /**
    * Update internal links to media file to respond to temporal fragments
    */
-  function handleLink(oldLink: HTMLLinkElement) {
-    if (oldLink.hasClass("is-unresolved")) return;
+  function handleLink(oldLink: HTMLAnchorElement) {
     let srcLinktext = oldLink.dataset.href;
     if (!srcLinktext) {
       console.error(oldLink);
@@ -105,59 +117,73 @@ export function processInternalEmbeds(
 ) {
   // const plugin = this;
 
-  const internalEmbedObs = new MutationObserver(
-    (mutationsList: MutationRecord[]) =>
-      mutationsList.forEach((m) => {
-        if (m.addedNodes.length)
-          switch (m.addedNodes[0].nodeName) {
-            case "VIDEO":
-            case "AUDIO":
-              handleMedia(m);
-              break;
-            case "IMG":
-              // Do nothing
-              break;
-            default:
-              throw new TypeError(
-                `Unexpected addnote type: ${m.addedNodes[0].nodeName}`
-              );
+  let allEmbeds;
+  if ((allEmbeds = el.querySelectorAll("span.internal-embed"))) {
+    const internalEmbed: mutationParam = {
+      callback: (list, obs) => {
+        for (const mutation of list) {
+          const span = mutation.target as HTMLSpanElement;
+          if (span.hasClass("is-loaded") && !span.hasClass("mod-empty")) {
+            if (span.hasClass("media-embed")) handleMedia(span);
+            obs.disconnect();
           }
-      })
-  );
+        }
+      },
+      option: { attributeFilter: ["class"] },
+    };
 
-  for (const span of el.querySelectorAll("span.internal-embed")) {
-    internalEmbedObs.observe(span, { childList: true });
-    setTimeout(() => {
-      internalEmbedObs.disconnect();
-      console.log("internalEmbedObs disconnected");
-    }, 1500);
+    for (const span of allEmbeds) {
+      const ieObs = new MutationObserver(internalEmbed.callback);
+      ieObs.observe(span, internalEmbed.option);
+    }
+  }
+}
+
+/**
+ * Update media embeds to respond to temporal fragments
+ */
+function handleMedia(span: HTMLSpanElement) {
+  /** src="linktext" */
+  const srcLinktext = span.getAttr("src");
+  if (srcLinktext === null) {
+    console.error(span);
+    throw new TypeError("src not found on container <span>");
   }
 
-  /**
-   * Update media embeds to respond to temporal fragments
-   */
-  function handleMedia(m: MutationRecord) {
-    /** src="linktext" */
-    const span = m.target as HTMLSpanElement;
-    const srcLinktext = span.getAttr("src");
-    if (srcLinktext === null) {
-      console.error(span);
-      throw new TypeError("src not found on container <span>");
-    }
+  const { subpath: hash } = parseLinktext(srcLinktext);
+  const timeSpan = parseTF(hash);
 
-    const { subpath: hash } = parseLinktext(srcLinktext);
-    const timeSpan = parseTF(hash);
-
-    const player = m.addedNodes[0] as HTMLMediaElement;
-    if (timeSpan !== null) {
-      // import timestamps to player
-      injectTimestamp(player as HTMLMediaEl_TF, timeSpan);
-    }
+  const setPlayer = (player: HTMLMediaElement) => {
+    // import timestamps to player
+    if (timeSpan !== null) injectTimestamp(player as HTMLMediaEl_TF, timeSpan);
     // null: exist, with no value (#loop)
-    if (parse(hash).loop === null) {
-      player.loop = true;
-    }
+    if (parse(hash).loop === null) player.loop = true;
+  };
 
+  const webmEmbed: mutationParam = {
+    option: {
+      childList: true,
+    },
+    callback: (list, obs) =>
+      list.forEach((m) =>
+        m.addedNodes.forEach((node) => {
+          if (node instanceof HTMLMediaElement) {
+            setPlayer(node);
+            obs.disconnect();
+          }
+        })
+      ),
+  };
+
+  if (!(span.firstElementChild instanceof HTMLMediaElement)) {
+    console.error("first element not player: %o", span.firstElementChild);
+    return;
+  }
+
+  setPlayer(span.firstElementChild);
+  if (span.getAttr("src")?.match(/\.webm$|\.webm#/)) {
+    const webmObs = new MutationObserver(webmEmbed.callback);
+    webmObs.observe(span, webmEmbed.option);
   }
 }
 
