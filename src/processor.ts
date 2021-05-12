@@ -5,12 +5,39 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { parseTF } from "./modules/MFParse";
+import { parseTF, TimeSpan } from "./modules/MFParse";
 import { injectTimestamp, getEmbedFrom } from "./modules/embed-process";
 
 type mutationParam = {
   callback: MutationCallback;
   option: MutationObserverInit;
+};
+
+/**
+ * 
+ * @param src raw linktext (may contain #hash)
+ * @returns setPlayer return null when timeSpan not parsed from srcLinktext
+ */
+function playerSetupTool(src: string): {
+  linktext: string;
+  setPlayer: ((player: HTMLMediaElement) => void) | null;
+} {
+  if (!src) throw new TypeError("srcLinktext empty");
+  const { path: linktext, subpath: hash } = parseLinktext(src);
+  const timeSpan = parseTF(hash);
+  
+  let setPlayer : ((player: HTMLMediaElement) => void) | null;
+  if (!timeSpan) 
+    setPlayer = null;
+  else
+    setPlayer = (player: HTMLMediaElement): void => {
+      // null: exist, with no value (#loop)
+      if (parse(hash).loop === null) player.loop = true;
+      // import timestamps to player
+      injectTimestamp(player, timeSpan);
+    };
+
+  return { linktext, setPlayer };
 };
 
 /**
@@ -51,10 +78,11 @@ export function processInternalLinks(
       console.error(oldLink);
       throw new Error("no href found in a.internal-link");
     }
+    
+    const { linktext, setPlayer:basicSetup } = playerSetupTool(srcLinktext);
 
-    const { path: linktext, subpath: hash } = parseLinktext(srcLinktext);
-    const timeSpan = parseTF(hash);
-    if (!timeSpan) return;
+    // skip if timeSpan is missing or invalid
+    if (!basicSetup) return;
     
     const newLink = createEl("a", {
       cls: "internal-link",
@@ -83,7 +111,7 @@ export function processInternalLinks(
           "div.video-container > audio" // for webm audio
         ) as HTMLMediaElement;
         if (!player) throw new Error("no player found in FileView");
-        injectTimestamp(player, timeSpan);
+        basicSetup(player);
         player.play();
       };
 
@@ -139,22 +167,17 @@ export function processInternalEmbeds(
  * Update media embeds to respond to temporal fragments
  */
 function handleMedia(span: HTMLSpanElement) {
-  /** src="linktext" */
+
   const srcLinktext = span.getAttr("src");
   if (srcLinktext === null) {
     console.error(span);
     throw new TypeError("src not found on container <span>");
   }
 
-  const { subpath: hash } = parseLinktext(srcLinktext);
-  const timeSpan = parseTF(hash);
+  const { setPlayer } = playerSetupTool(srcLinktext);
 
-  const setPlayer = (player: HTMLMediaElement) => {
-    // null: exist, with no value (#loop)
-    if (parse(hash).loop === null) player.loop = true;
-    // import timestamps to player
-    if (timeSpan !== null) injectTimestamp(player, timeSpan);
-  };
+  // skip if timeSpan is missing or invalid
+  if (!setPlayer) return;
 
   const webmEmbed: mutationParam = {
     option: {
