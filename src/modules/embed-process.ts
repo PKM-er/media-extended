@@ -190,6 +190,11 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
   }
 
   // inject event handler to restrict play range
+
+  /**
+   * if current is out of range when start playing, 
+   * move currentTime back to timeSpan.start
+   **/ 
   const onplaying = (e: Event) => {
     if (!playerTF.timeSpan) throw new Error("timeSpan not found");
 
@@ -201,6 +206,10 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
       playerTF.currentTime = start;
     }
   };
+  /**
+   * if currentTime reaches end, pause video 
+   * or play at start when loop is enabled
+   */
   const ontimeupdate = (e: Event) => {
     if (!playerTF.timeSpan) throw new Error("timeSpan not found");
 
@@ -213,6 +222,9 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
         playerTF.pause();
       } else {
         playerTF.currentTime = start;
+        // continue to play in loop 
+        // if temporal fragment (#t=,2 at the end of src) paused the video
+        if(playerTF.paused) playerTF.play();
       }
     }
   };
