@@ -23,7 +23,7 @@ export interface HTMLMediaEl_TF extends HTMLMediaElement {
   timeSpan: TimeSpan;
 }
 
-export function isHTMLMediaEl_TF(el:HTMLMediaElement): el is HTMLMediaEl_TF{
+export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
   return (el as HTMLMediaEl_TF).timeSpan !== undefined;
 }
 
@@ -37,7 +37,7 @@ export interface TimeSpan {
 }
 function getTimeSpan(
   start: string | undefined,
-  end: string | undefined
+  end: string | undefined,
 ): Omit<TimeSpan, "raw"> | null {
   // start may be an empty string
   const startRaw = start ? start : null;

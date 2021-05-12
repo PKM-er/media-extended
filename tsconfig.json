@@ -12,15 +12,7 @@
     "importHelpers": true,
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "lib": [
-      "dom",
-      "es5",
-      "scripthost",
-      "es2015",
-      "dom.iterable"
-    ]
+    "lib": ["dom", "es5", "scripthost", "es2015", "dom.iterable"]
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }

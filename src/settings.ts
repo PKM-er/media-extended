@@ -30,47 +30,47 @@ export class MESettingTab extends PluginSettingTab {
       {
         k: "mediaFragmentsEmbed",
         name: "Embed Media Fragments",
-        desc: createFragment(descEl => {
+        desc: createFragment((descEl) => {
           descEl.appendText(
-            "If enabled, you can write ![[demo.mp4#t=10]] to embed the specific fragment of video/audio. "
+            "If enabled, you can write ![[demo.mp4#t=10]] to embed the specific fragment of video/audio. ",
           );
-          descEl.createEl('br');
+          descEl.createEl("br");
           descEl.appendText(
-            "Loop is also available by append #loop or #t=...&loop to the end of filename"
+            "Loop is also available by append #loop or #t=...&loop to the end of filename",
           );
-          descEl.createEl('br');
+          descEl.createEl("br");
           descEl.appendText("Restart the app to take effects");
-        })
+        }),
       },
       {
         k: "timestampLink",
         name: "Timestamps for Media",
-        desc: createFragment(descEl => {
+        desc: createFragment((descEl) => {
           descEl.appendText(
-            "If enabled, you can write [[demo.mp4#t=10]] to create timestamp link to the video/audio. Click on the link would open the media file if it's not opened yet. "
+            "If enabled, you can write [[demo.mp4#t=10]] to create timestamp link to the video/audio. Click on the link would open the media file if it's not opened yet. ",
           );
-          descEl.createEl('br');
+          descEl.createEl("br");
           descEl.appendText(
-            "PS: Only works in preview mode, hover preview on link is not available"
+            "PS: Only works in preview mode, hover preview on link is not available",
           );
-          descEl.createEl('br');
+          descEl.createEl("br");
           descEl.appendText("Restart the app to take effects");
-        })
+        }),
       },
       {
         k: "extendedImageEmbedSyntax",
         name: "Extended Image Embed Syntax",
-        desc: createFragment(descEl => {
+        desc: createFragment((descEl) => {
           descEl.appendText(
-            "If enabled, you can write ![](link/to/demo.mp4) to embed video and audio."
+            "If enabled, you can write ![](link/to/demo.mp4) to embed video and audio.",
           );
-          descEl.createEl('br');
+          descEl.createEl("br");
           descEl.appendText(
-            "Support direct file links (with file extension) and videos from video hosts (Youtube, Bilibili)"
+            "Support direct file links (with file extension) and videos from video hosts (Youtube, Bilibili)",
           );
-          descEl.createEl('br');
+          descEl.createEl("br");
           descEl.appendText("Restart the app to take effects");
-        })
+        }),
       },
     ];
 
@@ -93,6 +93,6 @@ function setOption({ k, name, desc }: option, tab: MESettingTab) {
         tab.plugin.settings[k] = value;
         tab.plugin.saveData(tab.plugin.settings);
         tab.display();
-      })
+      }),
     );
 }

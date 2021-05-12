@@ -14,7 +14,7 @@ type mutationParam = {
 };
 
 /**
- * 
+ *
  * @param src raw linktext (may contain #hash)
  * @returns setPlayer return null when timeSpan not parsed from srcLinktext
  */
@@ -25,10 +25,9 @@ function playerSetupTool(src: string): {
   if (!src) throw new TypeError("srcLinktext empty");
   const { path: linktext, subpath: hash } = parseLinktext(src);
   const timeSpan = parseTF(hash);
-  
-  let setPlayer : ((player: HTMLMediaElement) => void) | null;
-  if (!timeSpan) 
-    setPlayer = null;
+
+  let setPlayer: ((player: HTMLMediaElement) => void) | null;
+  if (!timeSpan) setPlayer = null;
   else
     setPlayer = (player: HTMLMediaElement): void => {
       // null: exist, with no value (#loop)
@@ -38,7 +37,7 @@ function playerSetupTool(src: string): {
     };
 
   return { linktext, setPlayer };
-};
+}
 
 /**
  * HTMLMediaElement with temporal fragments
@@ -47,7 +46,7 @@ function playerSetupTool(src: string): {
 export function processInternalLinks(
   this: MediaExtended,
   el: HTMLElement,
-  ctx: MarkdownPostProcessorContext
+  ctx: MarkdownPostProcessorContext,
 ) {
   const plugin = this;
 
@@ -78,12 +77,12 @@ export function processInternalLinks(
       console.error(oldLink);
       throw new Error("no href found in a.internal-link");
     }
-    
-    const { linktext, setPlayer:basicSetup } = playerSetupTool(srcLinktext);
+
+    const { linktext, setPlayer: basicSetup } = playerSetupTool(srcLinktext);
 
     // skip if timeSpan is missing or invalid
     if (!basicSetup) return;
-    
+
     const newLink = createEl("a", {
       cls: "internal-link",
       text: oldLink.innerText,
@@ -95,7 +94,7 @@ export function processInternalLinks(
 
       const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(
         linktext,
-        ctx.sourcePath
+        ctx.sourcePath,
       );
       if (!matchedFile) return;
 
@@ -105,6 +104,7 @@ export function processInternalLinks(
       });
 
       const setPlayer = (e: HTMLElement): void => {
+        // prettier-ignore
         const player = e.querySelector(
           "div.video-container > video, " +
           "div.audio-container > audio, " +
@@ -115,8 +115,7 @@ export function processInternalLinks(
         player.play();
       };
 
-      if (openedMedia.length)
-        openedMedia.forEach((e) => setPlayer(e));
+      if (openedMedia.length) openedMedia.forEach((e) => setPlayer(e));
       else {
         const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
         fileLeaf.openFile(matchedFile).then(() => {
@@ -137,7 +136,7 @@ export function processInternalLinks(
 // Process internal embeds with hash
 export function processInternalEmbeds(
   /* this: MediaExtended,  */ el: HTMLElement,
-  ctx: MarkdownPostProcessorContext
+  ctx: MarkdownPostProcessorContext,
 ) {
   // const plugin = this;
 
@@ -167,7 +166,6 @@ export function processInternalEmbeds(
  * Update media embeds to respond to temporal fragments
  */
 function handleMedia(span: HTMLSpanElement) {
-
   const srcLinktext = span.getAttr("src");
   if (srcLinktext === null) {
     console.error(span);
@@ -190,7 +188,7 @@ function handleMedia(span: HTMLSpanElement) {
             setPlayer(node);
             obs.disconnect();
           }
-        })
+        }),
       ),
   };
 
@@ -208,18 +206,17 @@ function handleMedia(span: HTMLSpanElement) {
 
 export function processExternalEmbeds(
   el: HTMLElement,
-  ctx: MarkdownPostProcessorContext
+  ctx: MarkdownPostProcessorContext,
 ) {
   for (const e of el.querySelectorAll("img[referrerpolicy]")) {
-
-    const replaceWith = (newEl:HTMLElement) =>{
-      if (srcEl.parentNode){
+    const replaceWith = (newEl: HTMLElement) => {
+      if (srcEl.parentNode) {
         srcEl.parentNode.replaceChild(newEl, srcEl);
       } else {
         console.error(srcEl);
         throw new Error("parentNode of image not found");
       }
-    }
+    };
 
     const srcEl = e as HTMLImageElement;
 
@@ -232,32 +229,29 @@ export function processExternalEmbeds(
       break;
     }
 
+    type mediaType = "audio" | "video";
     // if url contains no extension, type = null
-    let type: "audio" | "video" | null = null;
+    let fileType: mediaType | null = null;
     if (!url.pathname.includes(".")) {
       const ext = url.pathname.split(".").pop() as string;
-      switch (ext) {
-        case "mp3": case "wav": case "m4a": 
-        case "ogg": case "3gp": case "flac":
-          type = "audio";
-          break;
-        case "mp4": case "webm": case "ogv":
-          type = "video";
-          break;
+      const acceptedExt: Map<mediaType, string[]> = new Map([
+        ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
+        ["video", ["mp4", "webm", "ogv"]],
+      ]);
+      for (const [type, extList] of acceptedExt) {
+        if (extList.includes(ext)) fileType = type;
       }
-    } 
+    }
 
     let newEl: HTMLMediaElement | HTMLDivElement | null = null;
 
-    if (type) {
-      newEl = createEl(type);
+    if (fileType) {
+      newEl = createEl(fileType);
       newEl.src = srcEl.src;
       newEl.controls = true;
       replaceWith(newEl);
-    } else if (newEl = getEmbedFrom(url)){
+    } else if ((newEl = getEmbedFrom(url))) {
       replaceWith(newEl);
     }
   }
 }
-
-

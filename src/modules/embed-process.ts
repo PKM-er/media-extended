@@ -2,7 +2,7 @@ import { HTMLMediaEl_TF, TimeSpan, isHTMLMediaEl_TF, parseTF } from "./MFParse";
 import { assertNever } from "assert-never";
 import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
-import Plyr from "plyr"
+import Plyr from "plyr";
 
 enum Host {
   YouTube,
@@ -36,7 +36,7 @@ export function getEmbedInfo(src: URL): videoInfo | null {
           host: Host.Bilibili,
           id: videoId,
           iframe: new URL(
-            `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`
+            `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`,
           ),
         };
       } else {
@@ -58,9 +58,9 @@ export function getEmbedInfo(src: URL): videoInfo | null {
           console.log(`invalid video id: ${src.toString()}`);
           return null;
         }
-      } else if (src.host==="youtu.be"){
+      } else if (src.host === "youtu.be") {
         if (/^\/[^\/]+$/.test(src.pathname)) {
-          let videoId = src.pathname.substring(1)
+          let videoId = src.pathname.substring(1);
           return {
             host: Host.YouTube,
             id: videoId,
@@ -78,25 +78,25 @@ export function getEmbedInfo(src: URL): videoInfo | null {
     case "vimeo.com":
       const path = src.pathname;
       let match;
-      if (match = path.match(/^\/(\d+)$/)){
+      if ((match = path.match(/^\/(\d+)$/))) {
         let videoId = match[1];
         return {
           host: Host.Vimeo,
           id: videoId,
-          iframe: new URL(`https://player.vimeo.com/video/${videoId}`)
-        }
+          iframe: new URL(`https://player.vimeo.com/video/${videoId}`),
+        };
       } else {
         console.log("vimeo video url not supported or invalid");
         return null;
       }
-      
+
     default:
       console.log("unsupported video host");
       return null;
   }
 }
 
-export function getEmbedFrom(url:URL): HTMLDivElement | null {
+export function getEmbedFrom(url: URL): HTMLDivElement | null {
   let info = getEmbedInfo(url);
   if (!info) return null;
 
@@ -109,9 +109,10 @@ export function getEmbedFrom(url:URL): HTMLDivElement | null {
       frameborder: "no",
       framespacing: "0",
       allowfullscreen: false,
-      sandbox: "allow-forms allow-presentation allow-same-origin allow-scripts allow-modals"
+      sandbox:
+        "allow-forms allow-presentation allow-same-origin allow-scripts allow-modals",
     },
-  }); 
+  });
 
   const container = createDiv(undefined, (el) => el.appendChild(iframe));
 
@@ -121,13 +122,13 @@ export function getEmbedFrom(url:URL): HTMLDivElement | null {
       const timeSpan = parseTF(url.hash);
       const isLoop = parse(url.hash).loop === null;
 
-      let ytOpt
-      if (info.host===Host.YouTube){
+      let ytOpt;
+      if (info.host === Host.YouTube) {
         ytOpt = {} as any;
         // set start time
         if (timeSpan && timeSpan.start !== 0) ytOpt.start = timeSpan.start;
         ytOpt.loop = +isLoop;
-      }  
+      }
 
       container.addClass("plyr__video-embed");
       // @ts-ignore
@@ -150,7 +151,6 @@ export function getEmbedFrom(url:URL): HTMLDivElement | null {
     default:
       assertNever(info.host);
   }
-
 }
 
 export interface Plyr_TF extends Plyr {
@@ -160,16 +160,14 @@ export interface Plyr_TF extends Plyr {
 type Player_TF = HTMLMediaEl_TF | Plyr_TF;
 type Player = HTMLMediaElement | Plyr;
 
-
 /**
  * inject media fragment into player's src
  * @param player an <audio> or <video> element
  */
-function setStartTime(player: HTMLMediaEl_TF): void
-function setStartTime(player: HTMLMediaElement, timeSpan: TimeSpan): void
-function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void{
-
-  if (isHTMLMediaEl_TF(player)){
+function setStartTime(player: HTMLMediaEl_TF): void;
+function setStartTime(player: HTMLMediaElement, timeSpan: TimeSpan): void;
+function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void {
+  if (isHTMLMediaEl_TF(player)) {
     timeSpan = player.timeSpan;
   }
   if (!timeSpan) throw new Error("timespan not found");
@@ -178,7 +176,6 @@ function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void{
   let hashObj = parse(hash);
   hashObj.t = timeSpan.raw;
   player.src = path + "#" + stringify(hashObj);
-
 }
 
 export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
@@ -192,9 +189,9 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
   // inject event handler to restrict play range
 
   /**
-   * if current is out of range when start playing, 
+   * if current is out of range when start playing,
    * move currentTime back to timeSpan.start
-   **/ 
+   **/
   const onplaying = (e: Event) => {
     if (!playerTF.timeSpan) throw new Error("timeSpan not found");
 
@@ -207,7 +204,7 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
     }
   };
   /**
-   * if currentTime reaches end, pause video 
+   * if currentTime reaches end, pause video
    * or play at start when loop is enabled
    */
   const ontimeupdate = (e: Event) => {
@@ -222,9 +219,9 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
         playerTF.pause();
       } else {
         playerTF.currentTime = start;
-        // continue to play in loop 
+        // continue to play in loop
         // if temporal fragment (#t=,2 at the end of src) paused the video
-        if(playerTF.paused) playerTF.play();
+        if (playerTF.paused) playerTF.play();
       }
     }
   };
