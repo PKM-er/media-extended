@@ -54,58 +54,53 @@ export function processInternalLinks(
 
     const { path: linktext, subpath: hash } = parseLinktext(srcLinktext);
     const timeSpan = parseTF(hash);
+    if (!timeSpan) return;
+    
+    const newLink = createEl("a", {
+      cls: "internal-link",
+      text: oldLink.innerText,
+    });
+    newLink.onclick = (e) => {
+      const workspace = plugin.app.workspace;
 
-    if (timeSpan) {
-      const newLink = createEl("a", {
-        cls: "internal-link",
-        text: oldLink.innerText,
+      const openedMedia: HTMLElement[] = [];
+
+      const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(
+        linktext,
+        ctx.sourcePath
+      );
+      if (!matchedFile) return;
+
+      workspace.iterateAllLeaves((leaf) => {
+        if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
+          openedMedia.push(leaf.view.contentEl);
       });
-      newLink.onclick = (e) => {
-        const workspace = plugin.app.workspace;
 
-        let openedMedia: HTMLElement[] = [];
-
-        const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(
-          linktext,
-          ctx.sourcePath
+      function getPlayer(e: HTMLElement): HTMLMediaElement | null {
+        return e.querySelector(
+          "div.video-container > video, " +
+          "div.audio-container > audio, " +
+          "div.video-container > audio" // for webm audio
         );
-        if (!matchedFile) return;
-
-        workspace.iterateAllLeaves((leaf) => {
-          if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
-            openedMedia.push(leaf.view.contentEl);
-        });
-
-        function getPlayer(e: HTMLElement): HTMLMediaElement | null {
-          return e.querySelector(
-            "div.video-container > video, div.video-container > audio"
-          );
-        }
-
-        if (openedMedia.length)
-          openedMedia.forEach((e) => {
-            bindTimeSpan(timeSpan, getPlayer(e));
-          });
-        else {
-          const file = plugin.app.metadataCache.getFirstLinkpathDest(
-            linktext,
-            ctx.sourcePath
-          );
-          if (!file) return;
-
-          const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-          fileLeaf.openFile(file).then(() => {
-            if (fileLeaf.view instanceof FileView)
-              bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
-          });
-        }
-      };
-      if (oldLink.parentNode) {
-        oldLink.parentNode.replaceChild(newLink, oldLink);
-      } else {
-        console.error(oldLink);
-        throw new Error("parentNode not found");
       }
+
+      if (openedMedia.length)
+        openedMedia.forEach((e) => {
+          bindTimeSpan(timeSpan, getPlayer(e));
+        });
+      else {
+        const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+        fileLeaf.openFile(matchedFile).then(() => {
+          if (fileLeaf.view instanceof FileView)
+            bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
+        });
+      }
+    };
+    if (oldLink.parentNode) {
+      oldLink.parentNode.replaceChild(newLink, oldLink);
+    } else {
+      console.error(oldLink);
+      throw new Error("parentNode not found");
     }
   }
 }
