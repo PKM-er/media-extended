@@ -181,46 +181,48 @@ function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void{
 
 }
 
-export function injectTimestamp(player: Player_TF, timeSpan: TimeSpan) {
-  player.timeSpan = timeSpan;
-  player = player as any;
+export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
+  const playerTF = player as Player_TF;
+  playerTF.timeSpan = timeSpan;
 
-  if(player instanceof HTMLMediaElement){
-    setStartTime(player,timeSpan);
+  if (playerTF instanceof HTMLMediaElement) {
+    setStartTime(playerTF, timeSpan);
   }
 
   // inject event handler to restrict play range
   const onplaying = (e: Event) => {
-    if (!player.timeSpan) throw new Error("timeSpan not found");
-    
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = player;
-    if (currentTime > end || currentTime < start) {
-      player.currentTime = start;
-    }
-  };
-  const ontimeupdate = (e: Event) => {
-    if (!player.timeSpan) throw new Error("timeSpan not found");
+    if (!playerTF.timeSpan) throw new Error("timeSpan not found");
 
     const {
       timeSpan: { start, end },
       currentTime,
-    } = player;
+    } = playerTF;
+    if (currentTime > end || currentTime < start) {
+      playerTF.currentTime = start;
+    }
+  };
+  const ontimeupdate = (e: Event) => {
+    if (!playerTF.timeSpan) throw new Error("timeSpan not found");
+
+    const {
+      timeSpan: { start, end },
+      currentTime,
+    } = playerTF;
     if (currentTime > end) {
-      if (!player.loop) {
-        player.pause();
+      if (!playerTF.loop) {
+        playerTF.pause();
       } else {
-        player.currentTime = start;
+        playerTF.currentTime = start;
       }
     }
   };
-  if (player instanceof HTMLMediaElement) {
-    player.onplaying = onplaying;
-    player.ontimeupdate = ontimeupdate;
+  if (playerTF instanceof HTMLMediaElement) {
+    playerTF.onplaying = onplaying;
+    playerTF.ontimeupdate = ontimeupdate;
   } else {
-    player.on("playing", onplaying);
-    player.on("timeupdate", ontimeupdate);
+    playerTF.on("playing", onplaying);
+    playerTF.on("timeupdate", ontimeupdate);
   }
+
+  return playerTF;
 }

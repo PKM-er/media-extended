@@ -1,11 +1,11 @@
 import MediaExtended from "main";
-import { parse, stringify } from "query-string";
+import { parse } from "query-string";
 import {
   FileView,
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { parseTF, bindTimeSpan, HTMLMediaEl_TF } from "./modules/MFParse";
+import { parseTF } from "./modules/MFParse";
 import { injectTimestamp, getEmbedFrom } from "./modules/embed-process";
 
 type mutationParam = {
@@ -76,23 +76,24 @@ export function processInternalLinks(
           openedMedia.push(leaf.view.contentEl);
       });
 
-      function getPlayer(e: HTMLElement): HTMLMediaElement | null {
-        return e.querySelector(
+      const setPlayer = (e: HTMLElement): void => {
+        const player = e.querySelector(
           "div.video-container > video, " +
           "div.audio-container > audio, " +
           "div.video-container > audio" // for webm audio
-        );
-      }
+        ) as HTMLMediaElement;
+        if (!player) throw new Error("no player found in FileView");
+        injectTimestamp(player, timeSpan);
+        player.play();
+      };
 
       if (openedMedia.length)
-        openedMedia.forEach((e) => {
-          bindTimeSpan(timeSpan, getPlayer(e));
-        });
+        openedMedia.forEach((e) => setPlayer(e));
       else {
         const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
         fileLeaf.openFile(matchedFile).then(() => {
           if (fileLeaf.view instanceof FileView)
-            bindTimeSpan(timeSpan, getPlayer(fileLeaf.view.contentEl));
+            setPlayer(fileLeaf.view.contentEl);
         });
       }
     };
@@ -149,10 +150,10 @@ function handleMedia(span: HTMLSpanElement) {
   const timeSpan = parseTF(hash);
 
   const setPlayer = (player: HTMLMediaElement) => {
-    // import timestamps to player
-    if (timeSpan !== null) injectTimestamp(player as HTMLMediaEl_TF, timeSpan);
     // null: exist, with no value (#loop)
     if (parse(hash).loop === null) player.loop = true;
+    // import timestamps to player
+    if (timeSpan !== null) injectTimestamp(player, timeSpan);
   };
 
   const webmEmbed: mutationParam = {
