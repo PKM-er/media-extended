@@ -5,7 +5,7 @@ import {
   Host,
   setupIFrame,
   playButtonHtml,
-} from "./videoHostTools";
+} from "./tools";
 import https from "https";
 
 export async function setupThumbnail(

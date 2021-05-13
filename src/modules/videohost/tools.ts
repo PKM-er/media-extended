@@ -1,6 +1,6 @@
 import { assertNever } from "assert-never";
 import Plyr from "plyr";
-import { getSetupTool, Plyr_TF } from "./playerSetup";
+import { getSetupTool, Plyr_TF } from "../playerSetup";
 import { setupThumbnail } from "./setupThumbnail";
 
 export enum Host {
@@ -99,26 +99,6 @@ export function getVideoInfo(src: URL): videoInfo | null {
       console.log("unsupported video host");
       return null;
   }
-}
-
-export function getPlayer(url: URL, thumbnail = false): HTMLDivElement | null {
-  let info = getVideoInfo(url);
-  if (!info) return null;
-  const container = createDiv({ cls: "external-video" });
-  switch (info.host) {
-    case Host.YouTube:
-    case Host.Vimeo:
-      if (thumbnail) setupThumbnail(container, info);
-      else setupPlyr(container, info);
-      break;
-    case Host.Bilibili:
-      if (thumbnail) setupThumbnail(container, info);
-      else setupIFrame(container, info);
-      break;
-    default:
-      assertNever(info.host);
-  }
-  return container;
 }
 
 function getIFrame(info: videoInfo) {

@@ -2,7 +2,7 @@ import MediaExtended from "main";
 import { FileView, MarkdownPostProcessorContext } from "obsidian";
 import { mutationParam } from "./misc";
 import { getSetupTool } from "./playerSetup";
-import { getPlayer } from "./videoHostTools";
+import { getPlayer } from "./videohost/getPlayer";
 
 type mediaType = "audio" | "video";
 const acceptedExt: Map<mediaType, string[]> = new Map([
