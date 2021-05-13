@@ -120,9 +120,12 @@ function getIFrame(info: videoInfo) {
 export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   const iframe = getIFrame(info);
 
-  container.appendChild(iframe);
+  const plyrDiv = container.appendChild(
+    createDiv({ cls: "plyr__video-embed" }),
+  );
+  plyrDiv.appendChild(iframe);
+
   const { isLoop, timeSpan, setPlayerTF } = getSetupTool(info.src);
-  container.addClass("plyr__video-embed");
   let youtube: any;
   if (info.host === Host.YouTube) {
     youtube = {
@@ -133,7 +136,7 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   }
   // @ts-ignore
   Plyr.timeSpan = null;
-  const player = new Plyr(container, {
+  const player = new Plyr(plyrDiv, {
     fullscreen: { enabled: false },
     loop: { active: isLoop },
     invertTime: false,
