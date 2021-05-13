@@ -26,8 +26,6 @@ type setupTool = {
  * @param src raw linktext (may contain #hash)
  * @returns setPlayer return null when timeSpan&loop not parsed from srcLinktext
  */
-export function getSetupTool(src: URL): setupTool;
-export function getSetupTool(src: string): setupTool;
 export function getSetupTool(src: string | URL): setupTool {
   if (!src) throw new TypeError("srcLinktext empty");
 
