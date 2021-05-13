@@ -1,11 +1,16 @@
+/* global div.external-video should be controlled in settings */
 div.external-video {
   min-height: 360px;
   min-width: 480px;
 }
 
-iframe.external-video {
+div.external-video > iframe.external-video,
+div.external-video > div.thumbnail,
+div.external-video > div.plyr {
   min-height: inherit;
   min-width: inherit;
+  width: 100%;
+  height: 100%;
 }
 
 .visuallyhidden:not(:focus):not(:active) {
@@ -26,8 +31,6 @@ iframe.external-video {
 div.thumbnail {
   background-repeat: no-repeat;
   background-size: cover;
-  min-width: inherit;
-  min-height: inherit;
 }
 
 /* hide recommended video in youtube */
