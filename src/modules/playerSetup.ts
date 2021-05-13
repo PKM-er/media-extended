@@ -1,4 +1,4 @@
-import { TimeSpan } from "./tfTools";
+import { parseTF, TimeSpan } from "./tfTools";
 import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
 
@@ -13,6 +13,31 @@ export interface HTMLMediaEl_TF extends HTMLMediaElement {
 }
 export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
   return (el as HTMLMediaEl_TF).timeSpan !== undefined;
+}
+
+/**
+ * @param src raw linktext (may contain #hash)
+ * @returns setPlayer return null when timeSpan not parsed from srcLinktext
+ */
+export function getSetupTool(src: string): {
+  linktext: string;
+  setPlayer: ((player: HTMLMediaElement) => void) | null;
+} {
+  if (!src) throw new TypeError("srcLinktext empty");
+  const { path: linktext, subpath: hash } = parseLinktext(src);
+  const timeSpan = parseTF(hash);
+
+  let setPlayer: ((player: HTMLMediaElement) => void) | null;
+  if (!timeSpan) setPlayer = null;
+  else
+    setPlayer = (player: HTMLMediaElement): void => {
+      // null: exist, with no value (#loop)
+      if (parse(hash).loop === null) player.loop = true;
+      // import timestamps to player
+      injectTimestamp(player, timeSpan);
+    };
+
+  return { linktext, setPlayer };
 }
 
 /**
