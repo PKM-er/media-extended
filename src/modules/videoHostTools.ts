@@ -2,7 +2,7 @@ import { parseTF } from "./tfTools";
 import { assertNever } from "assert-never";
 import { parse } from "query-string";
 import Plyr from "plyr";
-import { injectTimestamp, Plyr_TF } from "./playerSetup";
+import { getSetupTool, injectTimestamp, Plyr_TF } from "./playerSetup";
 
 enum Host {
   YouTube,
@@ -118,8 +118,7 @@ export function getPlayer(url: URL): HTMLDivElement | null {
   switch (info.host) {
     case Host.YouTube:
     case Host.Vimeo: {
-      const timeSpan = parseTF(url.hash);
-      const isLoop = parse(url.hash).loop === null;
+      const { timeSpan, isLoop, setPlayer } = getSetupTool(url.toString());
 
       let ytOpt;
       if (info.host === Host.YouTube) {
@@ -134,13 +133,11 @@ export function getPlayer(url: URL): HTMLDivElement | null {
       Plyr.timeSpan = null;
       const player = new Plyr(container, {
         fullscreen: { enabled: false },
-        loop: { active: parse(url.hash).loop === null },
+        loop: { active: isLoop },
         invertTime: false,
         youtube: ytOpt,
       }) as Plyr_TF;
-
-      if (timeSpan) injectTimestamp(player, timeSpan);
-
+      if (setPlayer) setPlayer(player);
       return container;
     }
     case Host.Bilibili: {

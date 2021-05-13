@@ -17,28 +17,30 @@ export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
 
 /**
  * @param src raw linktext (may contain #hash)
- * @returns setPlayer return null when timeSpan/loop not parsed from srcLinktext
+ * @returns setPlayer return null when timeSpan&loop not parsed from srcLinktext
  */
 export function getSetupTool(src: string): {
   linktext: string;
-  setPlayer: ((player: HTMLMediaElement) => void) | null;
+  timeSpan: TimeSpan | null;
+  isLoop: boolean;
+  setPlayer: ((player: Player) => void) | null;
 } {
   if (!src) throw new TypeError("srcLinktext empty");
   const { path: linktext, subpath: hash } = parseLinktext(src);
   const timeSpan = parseTF(hash);
   const isLoop = parse(hash).loop === null;
 
-  let setPlayer: ((player: HTMLMediaElement) => void) | null;
+  let setPlayer: ((player: Player) => void) | null;
   if (!timeSpan && !isLoop) setPlayer = null;
   else
-    setPlayer = (player: HTMLMediaElement): void => {
+    setPlayer = (player: Player): void => {
       // null: exist, with no value (#loop)
       if (isLoop) player.loop = true;
       // import timestamps to player
       if (timeSpan) injectTimestamp(player, timeSpan);
     };
 
-  return { linktext, setPlayer };
+  return { linktext, timeSpan, isLoop, setPlayer };
 }
 
 /**
