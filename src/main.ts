@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin, MarkdownPreviewRenderer } from "obsidian";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
 import {
   processInternalEmbeds,
@@ -10,7 +10,10 @@ import "./main.css";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
-  // player = Plyr;
+
+  processInternalEmbeds = processInternalEmbeds;
+  processInternalLinks = processInternalLinks.bind(this);
+  processExternalEmbeds = processExternalEmbeds;
 
   async loadSettings() {
     Object.assign(this.settings, await this.loadData());
@@ -28,13 +31,13 @@ export default class MediaExtended extends Plugin {
     this.addSettingTab(new MESettingTab(this.app, this));
 
     if (this.settings.mediaFragmentsEmbed) {
-      this.registerMarkdownPostProcessor(processInternalEmbeds);
+      this.registerMarkdownPostProcessor(this.processInternalEmbeds);
     }
     if (this.settings.timestampLink) {
-      this.registerMarkdownPostProcessor(processInternalLinks.bind(this));
+      this.registerMarkdownPostProcessor(this.processInternalLinks);
     }
     if (this.settings.extendedImageEmbedSyntax) {
-      this.registerMarkdownPostProcessor(processExternalEmbeds);
+      this.registerMarkdownPostProcessor(this.processExternalEmbeds);
     }
 
     // this.registerMarkdownPostProcessor(processVideoPlayer.bind(this));
@@ -42,6 +45,21 @@ export default class MediaExtended extends Plugin {
 
   onunload() {
     console.log("unloading media-extended");
+    if (this.settings.mediaFragmentsEmbed) {
+      MarkdownPreviewRenderer.unregisterPostProcessor(
+        this.processInternalEmbeds,
+      );
+    }
+    if (this.settings.timestampLink) {
+      MarkdownPreviewRenderer.unregisterPostProcessor(
+        this.processInternalLinks,
+      );
+    }
+    if (this.settings.extendedImageEmbedSyntax) {
+      MarkdownPreviewRenderer.unregisterPostProcessor(
+        this.processExternalEmbeds,
+      );
+    }
   }
 }
 
