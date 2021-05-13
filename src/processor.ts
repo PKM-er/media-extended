@@ -56,11 +56,14 @@ export function processInternalEmbeds(el: HTMLElement) {
   }
 }
 
-export function processExternalEmbeds(docEl: HTMLElement) {
+export function processExternalEmbeds(this: MediaExtended, docEl: HTMLElement) {
   const handler = new ExternalEmbedHandler();
   for (const el of docEl.querySelectorAll("img[referrerpolicy]")) {
     // <img src="" referrerpolicy="no-referrer">
     const img = el as HTMLImageElement;
-    handler.setTarget(img).doDirectLink()?.doVideoHost();
+    handler
+      .setTarget(img)
+      .doDirectLink()
+      ?.doVideoHost(this.settings.thumbnailPlaceholder);
   }
 }

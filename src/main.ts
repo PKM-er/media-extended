@@ -13,7 +13,7 @@ export default class MediaExtended extends Plugin {
 
   processInternalEmbeds = processInternalEmbeds;
   processInternalLinks = processInternalLinks.bind(this);
-  processExternalEmbeds = processExternalEmbeds;
+  processExternalEmbeds = processExternalEmbeds.bind(this);
 
   async loadSettings() {
     Object.assign(this.settings, await this.loadData());

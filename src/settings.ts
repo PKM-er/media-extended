@@ -5,12 +5,14 @@ export interface MxSettings {
   mediaFragmentsEmbed: boolean;
   timestampLink: boolean;
   extendedImageEmbedSyntax: boolean;
+  thumbnailPlaceholder: boolean;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
   mediaFragmentsEmbed: true,
   timestampLink: false,
   extendedImageEmbedSyntax: false,
+  thumbnailPlaceholder: false,
 };
 
 export class MESettingTab extends PluginSettingTab {
@@ -67,6 +69,23 @@ export class MESettingTab extends PluginSettingTab {
           descEl.createEl("br");
           descEl.appendText(
             "Support direct file links (with file extension) and videos from video hosts (Youtube, Bilibili)",
+          );
+          descEl.createEl("br");
+          descEl.appendText("Restart the app to take effects");
+        }),
+      },
+      {
+        k: "thumbnailPlaceholder",
+        name: "Placeholder in favor of full player",
+        desc: createFragment((descEl) => {
+          descEl.appendText(
+            "If enabled, thumbnail placeholder will be used in favor of full player when page loads",
+          );
+          descEl.createEl("br");
+          descEl.appendText("Works with for Youtube/Vimeo/Bilibili embeds");
+          descEl.createEl("br");
+          descEl.appendText(
+            "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
           );
           descEl.createEl("br");
           descEl.appendText("Restart the app to take effects");

@@ -67,11 +67,11 @@ export class ExternalEmbedHandler {
     } else return this;
   }
 
-  doVideoHost(): this | null {
+  doVideoHost(thumbnail: boolean): this | null {
     const url = this.srcUrl;
     if (!url) return this;
 
-    const newEl = getPlayer(url);
+    const newEl = getPlayer(url, thumbnail);
     if (newEl) {
       this.replaceWith(newEl);
       return null;

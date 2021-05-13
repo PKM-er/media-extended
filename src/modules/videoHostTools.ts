@@ -101,26 +101,24 @@ export function getVideoInfo(src: URL): videoInfo | null {
   }
 }
 
-export function getPlayer(url: URL): HTMLDivElement | null {
+export function getPlayer(url: URL, thumbnail = false): HTMLDivElement | null {
   let info = getVideoInfo(url);
   if (!info) return null;
   const container = createDiv({ cls: "external-video" });
   switch (info.host) {
-    case Host.YouTube: {
-      setupThumbnail(container, info);
-      return container;
-    }
-    case Host.Vimeo: {
-      setupThumbnail(container, info);
-      return container;
-    }
-    case Host.Bilibili: {
-      setupThumbnail(container, info);
-      return container;
-    }
+    case Host.YouTube:
+    case Host.Vimeo:
+      if (thumbnail) setupThumbnail(container, info);
+      else setupPlyr(container, info);
+      break;
+    case Host.Bilibili:
+      if (thumbnail) setupThumbnail(container, info);
+      else setupIFrame(container, info);
+      break;
     default:
       assertNever(info.host);
   }
+  return container;
 }
 
 function getIFrame(info: videoInfo) {
