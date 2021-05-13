@@ -57,9 +57,11 @@ export class ExternalEmbedHandler {
     }
 
     if (fileType) {
+      const { setPlayer } = getSetupTool(this.src);
       let newEl = createEl(fileType);
       newEl.src = this.src;
       newEl.controls = true;
+      if (setPlayer) setPlayer(newEl);
       this.replaceWith(newEl);
       return null;
     } else return this;
