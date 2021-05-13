@@ -1,9 +1,8 @@
-import { TimeSpan, parseTF } from "./tfTools";
+import { parseTF } from "./tfTools";
 import { assertNever } from "assert-never";
-import { stringify, parse } from "query-string";
-import { parseLinktext } from "obsidian";
+import { parse } from "query-string";
 import Plyr from "plyr";
-import { HTMLMediaEl_TF, isHTMLMediaEl_TF } from "./playerSetup";
+import { injectTimestamp, Plyr_TF } from "./playerSetup";
 
 enum Host {
   YouTube,
@@ -90,7 +89,6 @@ export function getVideoInfo(src: URL): videoInfo | null {
         console.log("vimeo video url not supported or invalid");
         return null;
       }
-
     default:
       console.log("unsupported video host");
       return null;
@@ -152,87 +150,4 @@ export function getPlayer(url: URL): HTMLDivElement | null {
     default:
       assertNever(info.host);
   }
-}
-
-export interface Plyr_TF extends Plyr {
-  timeSpan: TimeSpan | null;
-}
-
-type Player_TF = HTMLMediaEl_TF | Plyr_TF;
-type Player = HTMLMediaElement | Plyr;
-
-/**
- * inject media fragment into player's src
- * @param player an <audio> or <video> element
- */
-function setStartTime(player: HTMLMediaEl_TF): void;
-function setStartTime(player: HTMLMediaElement, timeSpan: TimeSpan): void;
-function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void {
-  if (isHTMLMediaEl_TF(player)) {
-    timeSpan = player.timeSpan;
-  }
-  if (!timeSpan) throw new Error("timespan not found");
-
-  const { path, subpath: hash } = parseLinktext(player.src);
-  let hashObj = parse(hash);
-  hashObj.t = timeSpan.raw;
-  player.src = path + "#" + stringify(hashObj);
-}
-
-export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
-  const playerTF = player as Player_TF;
-  playerTF.timeSpan = timeSpan;
-
-  if (playerTF instanceof HTMLMediaElement) {
-    setStartTime(playerTF, timeSpan);
-  }
-
-  // inject event handler to restrict play range
-
-  /**
-   * if current is out of range when start playing,
-   * move currentTime back to timeSpan.start
-   **/
-  const onplaying = (e: Event) => {
-    if (!playerTF.timeSpan) throw new Error("timeSpan not found");
-
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = playerTF;
-    if (currentTime > end || currentTime < start) {
-      playerTF.currentTime = start;
-    }
-  };
-  /**
-   * if currentTime reaches end, pause video
-   * or play at start when loop is enabled
-   */
-  const ontimeupdate = (e: Event) => {
-    if (!playerTF.timeSpan) throw new Error("timeSpan not found");
-
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = playerTF;
-    if (currentTime > end) {
-      if (!playerTF.loop) {
-        playerTF.pause();
-      } else {
-        playerTF.currentTime = start;
-        // continue to play in loop
-        // if temporal fragment (#t=,2 at the end of src) paused the video
-        if (playerTF.paused) playerTF.play();
-      }
-    }
-  };
-  if (playerTF instanceof HTMLMediaElement) {
-    playerTF.onplaying = onplaying;
-    playerTF.ontimeupdate = ontimeupdate;
-  } else {
-    playerTF.on("playing", onplaying);
-    playerTF.on("timeupdate", ontimeupdate);
-  }
-
-  return playerTF;
 }
