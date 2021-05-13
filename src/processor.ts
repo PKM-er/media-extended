@@ -5,8 +5,9 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { parseTF, TimeSpan } from "./modules/MFParse";
-import { injectTimestamp, getEmbedFrom } from "./modules/embed-process";
+import { parseTF } from "./modules/tfTools";
+import { injectTimestamp } from "./modules/playerSetup";
+import { ExternalEmbedHandler } from "modules/handlers";
 
 type mutationParam = {
   callback: MutationCallback;
@@ -14,7 +15,6 @@ type mutationParam = {
 };
 
 /**
- *
  * @param src raw linktext (may contain #hash)
  * @returns setPlayer return null when timeSpan not parsed from srcLinktext
  */
@@ -39,10 +39,7 @@ function playerSetupTool(src: string): {
   return { linktext, setPlayer };
 }
 
-/**
- * HTMLMediaElement with temporal fragments
- */
-
+/** Process internal link to media files with hash */
 export function processInternalLinks(
   this: MediaExtended,
   el: HTMLElement,
@@ -133,13 +130,8 @@ export function processInternalLinks(
   }
 }
 
-// Process internal embeds with hash
-export function processInternalEmbeds(
-  /* this: MediaExtended,  */ el: HTMLElement,
-  ctx: MarkdownPostProcessorContext,
-) {
-  // const plugin = this;
-
+/** Process internal media embeds with hash */
+export function processInternalEmbeds(el: HTMLElement) {
   let allEmbeds;
   if ((allEmbeds = el.querySelectorAll("span.internal-embed"))) {
     const internalEmbed: mutationParam = {
@@ -160,98 +152,54 @@ export function processInternalEmbeds(
       ieObs.observe(span, internalEmbed.option);
     }
   }
-}
+  /**
+   * Update media embeds to respond to temporal fragments
+   */
+  function handleMedia(span: HTMLSpanElement) {
+    const srcLinktext = span.getAttr("src");
+    if (srcLinktext === null) {
+      console.error(span);
+      throw new TypeError("src not found on container <span>");
+    }
 
-/**
- * Update media embeds to respond to temporal fragments
- */
-function handleMedia(span: HTMLSpanElement) {
-  const srcLinktext = span.getAttr("src");
-  if (srcLinktext === null) {
-    console.error(span);
-    throw new TypeError("src not found on container <span>");
-  }
+    const { setPlayer } = playerSetupTool(srcLinktext);
 
-  const { setPlayer } = playerSetupTool(srcLinktext);
+    // skip if timeSpan is missing or invalid
+    if (!setPlayer) return;
 
-  // skip if timeSpan is missing or invalid
-  if (!setPlayer) return;
-
-  const webmEmbed: mutationParam = {
-    option: {
-      childList: true,
-    },
-    callback: (list, obs) =>
-      list.forEach((m) =>
-        m.addedNodes.forEach((node) => {
-          if (node instanceof HTMLMediaElement) {
-            setPlayer(node);
-            obs.disconnect();
-          }
-        }),
-      ),
-  };
-
-  if (!(span.firstElementChild instanceof HTMLMediaElement)) {
-    console.error("first element not player: %o", span.firstElementChild);
-    return;
-  }
-
-  setPlayer(span.firstElementChild);
-  if (span.getAttr("src")?.match(/\.webm$|\.webm#/)) {
-    const webmObs = new MutationObserver(webmEmbed.callback);
-    webmObs.observe(span, webmEmbed.option);
-  }
-}
-
-export function processExternalEmbeds(
-  el: HTMLElement,
-  ctx: MarkdownPostProcessorContext,
-) {
-  for (const e of el.querySelectorAll("img[referrerpolicy]")) {
-    const replaceWith = (newEl: HTMLElement) => {
-      if (srcEl.parentNode) {
-        srcEl.parentNode.replaceChild(newEl, srcEl);
-      } else {
-        console.error(srcEl);
-        throw new Error("parentNode of image not found");
-      }
+    const webmEmbed: mutationParam = {
+      option: {
+        childList: true,
+      },
+      callback: (list, obs) =>
+        list.forEach((m) =>
+          m.addedNodes.forEach((node) => {
+            if (node instanceof HTMLMediaElement) {
+              setPlayer(node);
+              obs.disconnect();
+            }
+          }),
+        ),
     };
 
-    const srcEl = e as HTMLImageElement;
-
-    let url: URL;
-    try {
-      url = new URL(srcEl.src);
-    } catch (error) {
-      // if url is invaild, do nothing and break current loop
-      console.error(error, srcEl);
-      break;
+    if (!(span.firstElementChild instanceof HTMLMediaElement)) {
+      console.error("first element not player: %o", span.firstElementChild);
+      return;
     }
 
-    type mediaType = "audio" | "video";
-    // if url contains no extension, type = null
-    let fileType: mediaType | null = null;
-    if (!url.pathname.includes(".")) {
-      const ext = url.pathname.split(".").pop() as string;
-      const acceptedExt: Map<mediaType, string[]> = new Map([
-        ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
-        ["video", ["mp4", "webm", "ogv"]],
-      ]);
-      for (const [type, extList] of acceptedExt) {
-        if (extList.includes(ext)) fileType = type;
-      }
+    setPlayer(span.firstElementChild);
+    if (span.getAttr("src")?.match(/\.webm$|\.webm#/)) {
+      const webmObs = new MutationObserver(webmEmbed.callback);
+      webmObs.observe(span, webmEmbed.option);
     }
+  }
+}
 
-    let newEl: HTMLMediaElement | HTMLDivElement | null = null;
-
-    if (fileType) {
-      newEl = createEl(fileType);
-      newEl.src = srcEl.src;
-      newEl.controls = true;
-      replaceWith(newEl);
-    } else if ((newEl = getEmbedFrom(url))) {
-      replaceWith(newEl);
-    }
+export function processExternalEmbeds(docEl: HTMLElement) {
+  const handler = new ExternalEmbedHandler();
+  for (const el of docEl.querySelectorAll("img[referrerpolicy]")) {
+    // <img src="" referrerpolicy="no-referrer">
+    const img = el as HTMLImageElement;
+    handler.setTarget(img).doDirectLink()?.doVideoHost();
   }
 }

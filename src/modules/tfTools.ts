@@ -1,6 +1,14 @@
 import { parse } from "query-string";
-import MFDefs from "./MFDefs";
 
+export const TFDef = {
+  tFrag: /^(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/,
+
+  npt_sec: /^\d+(?:\.\d+)?$/,
+  npt_mmss: /^(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/,
+  npt_hhmmss: /^(?<hh>\d+):(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/,
+};
+
+/** parse temporal fragment from hash */
 export function parseTF(hash: string | undefined): TimeSpan | null {
   if (hash) {
     const params = parse(hash);
@@ -9,7 +17,7 @@ export function parseTF(hash: string | undefined): TimeSpan | null {
     if (
       paramT &&
       typeof paramT === "string" &&
-      (match = MFDefs.tFrag.exec(paramT)) !== null
+      (match = TFDef.tFrag.exec(paramT)) !== null
     ) {
       if (!match.groups) throw new Error("tFragRegex match error");
       const { start, end } = match.groups;
@@ -19,14 +27,6 @@ export function parseTF(hash: string | undefined): TimeSpan | null {
   }
   return null;
 }
-export interface HTMLMediaEl_TF extends HTMLMediaElement {
-  timeSpan: TimeSpan;
-}
-
-export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
-  return (el as HTMLMediaEl_TF).timeSpan !== undefined;
-}
-
 export interface TimeSpan {
   end: number;
   start: number;
@@ -71,13 +71,13 @@ function convertTime(input: string): number | null {
 
     let match;
 
-    if ((match = MFDefs.npt_sec.exec(rawTime)) !== null) {
+    if ((match = TFDef.npt_sec.exec(rawTime)) !== null) {
       return +match[0];
-    } else if ((match = MFDefs.npt_mmss.exec(rawTime)) !== null) {
+    } else if ((match = TFDef.npt_mmss.exec(rawTime)) !== null) {
       if (!match.groups) throw new Error("npt_mmss match error");
       const { mm, ss } = match.groups;
       return +mm * 60 + +ss;
-    } else if ((match = MFDefs.npt_hhmmss.exec(rawTime)) !== null) {
+    } else if ((match = TFDef.npt_hhmmss.exec(rawTime)) !== null) {
       if (!match.groups) throw new Error("npt_hhmmss match error");
       const { hh, mm, ss } = match.groups;
       return +hh * 60 + +mm * 60 + +ss;

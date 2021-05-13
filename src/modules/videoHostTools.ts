@@ -1,8 +1,9 @@
-import { HTMLMediaEl_TF, TimeSpan, isHTMLMediaEl_TF, parseTF } from "./MFParse";
+import { TimeSpan, parseTF } from "./tfTools";
 import { assertNever } from "assert-never";
 import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
 import Plyr from "plyr";
+import { HTMLMediaEl_TF, isHTMLMediaEl_TF } from "./playerSetup";
 
 enum Host {
   YouTube,
@@ -16,7 +17,7 @@ interface videoInfo {
   iframe: URL;
 }
 
-export function getEmbedInfo(src: URL): videoInfo | null {
+export function getVideoInfo(src: URL): videoInfo | null {
   switch (src.hostname) {
     case "www.bilibili.com":
       if (src.pathname.startsWith("/video")) {
@@ -96,8 +97,8 @@ export function getEmbedInfo(src: URL): videoInfo | null {
   }
 }
 
-export function getEmbedFrom(url: URL): HTMLDivElement | null {
-  let info = getEmbedInfo(url);
+export function getPlayer(url: URL): HTMLDivElement | null {
+  let info = getVideoInfo(url);
   if (!info) return null;
 
   const iframe = createEl("iframe", {
