@@ -1,3 +1,19 @@
+# [2.3.0](https://github.com/alx-plugins/media-extended/compare/2.2.1...2.3.0) (2021-05-13)
+
+
+### Bug Fixes
+
+* **handlers.ts:** directlink external embed should respond to temporal fragment now ([fcea4e1](https://github.com/alx-plugins/media-extended/commit/fcea4e1454d91877d740d8a4794450a530800209))
+* **playersetup.ts:** looped media without temporal fragement should work again ([a7bf7a6](https://github.com/alx-plugins/media-extended/commit/a7bf7a6ee32cb6e22f2c2a1cae913e440f07ad9f))
+
+
+### Features
+
+* add setting for thumbnailPlaceholder ([411b1de](https://github.com/alx-plugins/media-extended/commit/411b1deda424199afc7720db5c7e4c4ee10648f3))
+* **videohosttools.ts:** add thumbnail support for vimeo and bilibili video ([3e3d5d4](https://github.com/alx-plugins/media-extended/commit/3e3d5d48acf0149219cb2e2844da162e7d8c05d7))
+* **videohosttools.ts:** add thumbnail support for youtube video ([c927ede](https://github.com/alx-plugins/media-extended/commit/c927eded0e3f2d0b090f15ca7ecaa00f3ea710ae))
+* add unregister method for MarkdownPostProcessor ([d6e39b9](https://github.com/alx-plugins/media-extended/commit/d6e39b90f9f65f9c7cf6575c377d33f8f7fb030f))
+
 ## [2.2.1](https://github.com/alx-plugins/media-extended/compare/2.2.0...2.2.1) (2021-05-12)
 
 
