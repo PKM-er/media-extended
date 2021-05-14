@@ -57,11 +57,11 @@ export class ExternalEmbedHandler {
     }
 
     if (fileType) {
-      const { setPlayer } = getSetupTool(this.src);
+      const { setPlayerTF } = getSetupTool(this.src);
       let newEl = createEl(fileType);
       newEl.src = this.src;
       newEl.controls = true;
-      if (setPlayer) setPlayer(newEl);
+      if (setPlayerTF) setPlayerTF(newEl);
       this.replaceWith(newEl);
       return null;
     } else return this;
@@ -93,10 +93,10 @@ export function handleLink(
     throw new Error("no href found in a.internal-link");
   }
 
-  const { linktext, setPlayer: basicSetup } = getSetupTool(srcLinktext);
+  const { linktext, setPlayerTF } = getSetupTool(srcLinktext);
 
   // skip if timeSpan is missing or invalid
-  if (!basicSetup) return;
+  if (!setPlayerTF) return;
 
   const newLink = createEl("a", {
     cls: "internal-link",
@@ -118,7 +118,7 @@ export function handleLink(
         openedMedia.push(leaf.view.contentEl);
     });
 
-    const setPlayer = (e: HTMLElement): void => {
+    const setPlayerTF = (e: HTMLElement): void => {
       // prettier-ignore
       const player = e.querySelector(
           "div.video-container > video, " +
@@ -126,16 +126,16 @@ export function handleLink(
           "div.video-container > audio" // for webm audio
         ) as HTMLMediaElement;
       if (!player) throw new Error("no player found in FileView");
-      basicSetup(player);
+      setPlayerTF(player);
       player.play();
     };
 
-    if (openedMedia.length) openedMedia.forEach((e) => setPlayer(e));
+    if (openedMedia.length) openedMedia.forEach((e) => setPlayerTF(e));
     else {
       const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
       fileLeaf.openFile(matchedFile).then(() => {
         if (fileLeaf.view instanceof FileView)
-          setPlayer(fileLeaf.view.contentEl);
+          setPlayerTF(fileLeaf.view.contentEl);
       });
     }
   };
@@ -157,10 +157,10 @@ export function handleMedia(span: HTMLSpanElement) {
     throw new TypeError("src not found on container <span>");
   }
 
-  const { setPlayer } = getSetupTool(srcLinktext);
+  const { setPlayerTF } = getSetupTool(srcLinktext);
 
   // skip if timeSpan is missing or invalid
-  if (!setPlayer) return;
+  if (!setPlayerTF) return;
 
   const webmEmbed: mutationParam = {
     option: {
@@ -170,7 +170,7 @@ export function handleMedia(span: HTMLSpanElement) {
       list.forEach((m) =>
         m.addedNodes.forEach((node) => {
           if (node instanceof HTMLMediaElement) {
-            setPlayer(node);
+            setPlayerTF(node);
             obs.disconnect();
           }
         }),
@@ -182,7 +182,7 @@ export function handleMedia(span: HTMLSpanElement) {
     return;
   }
 
-  setPlayer(span.firstElementChild);
+  setPlayerTF(span.firstElementChild);
   if (span.getAttr("src")?.match(/\.webm$|\.webm#/)) {
     const webmObs = new MutationObserver(webmEmbed.callback);
     webmObs.observe(span, webmEmbed.option);

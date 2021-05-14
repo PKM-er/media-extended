@@ -19,12 +19,12 @@ type setupTool = {
   linktext: string;
   timeSpan: TimeSpan | null;
   isLoop: boolean;
-  setPlayer: ((player: Player) => void) | null;
+  setPlayerTF: ((player: Player) => void) | null;
 };
 
 /**
  * @param src raw linktext (may contain #hash)
- * @returns setPlayer return null when timeSpan&loop not parsed from srcLinktext
+ * @returns setPlayerTF return null when timeSpan&loop not parsed from srcLinktext
  */
 export function getSetupTool(src: string | URL): setupTool {
   if (!src) throw new TypeError("srcLinktext empty");
@@ -42,17 +42,17 @@ export function getSetupTool(src: string | URL): setupTool {
   const timeSpan = parseTF(hash);
   const isLoop = parse(hash).loop === null;
 
-  let setPlayer: ((player: Player) => void) | null;
-  if (!timeSpan && !isLoop) setPlayer = null;
+  let setPlayerTF: ((player: Player) => void) | null;
+  if (!timeSpan && !isLoop) setPlayerTF = null;
   else
-    setPlayer = (player: Player): void => {
+    setPlayerTF = (player: Player): void => {
       // null: exist, with no value (#loop)
       if (isLoop) player.loop = true;
       // import timestamps to player
       if (timeSpan) injectTimestamp(player, timeSpan);
     };
 
-  return { linktext, timeSpan, isLoop, setPlayer };
+  return { linktext, timeSpan, isLoop, setPlayerTF };
 }
 
 /**

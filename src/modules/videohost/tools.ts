@@ -121,7 +121,7 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   const iframe = getIFrame(info);
 
   container.appendChild(iframe);
-  const { isLoop, timeSpan, setPlayer } = getSetupTool(info.src);
+  const { isLoop, timeSpan, setPlayerTF } = getSetupTool(info.src);
   container.addClass("plyr__video-embed");
   let youtube: any;
   if (info.host === Host.YouTube) {
@@ -139,7 +139,7 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
     invertTime: false,
     youtube,
   }) as Plyr_TF;
-  if (setPlayer) setPlayer(player);
+  if (setPlayerTF) setPlayerTF(player);
   return player;
 }
 
