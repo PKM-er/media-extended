@@ -1,3 +1,16 @@
+# [2.4.0](https://github.com/alx-plugins/media-extended/compare/2.3.0...2.4.0) (2021-05-14)
+
+
+### Bug Fixes
+
+* add filterDuplicates() for MutationRecord[] to avoid duplicate calls ([c256db6](https://github.com/alx-plugins/media-extended/commit/c256db6d988937eeefe08f4504fde04803821b58))
+
+
+### Features
+
+* add local subtitle support; set plyr as default local media player ([c005b9f](https://github.com/alx-plugins/media-extended/commit/c005b9fc7628a7b530b0d142660d9b65f9dd784e)), closes [#7](https://github.com/alx-plugins/media-extended/issues/7) [#25](https://github.com/alx-plugins/media-extended/issues/25)
+* add toolkit to load local subtitle ([fddf2d3](https://github.com/alx-plugins/media-extended/commit/fddf2d3839ab8e0942afd7f70cb6ddf4742cf14f))
+
 # [2.3.0](https://github.com/alx-plugins/media-extended/compare/2.2.1...2.3.0) (2021-05-13)
 
 
