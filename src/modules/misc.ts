@@ -9,3 +9,9 @@ export function filterDuplicates(list: MutationRecord[]): MutationRecord[] {
     .reverse()
     .filter((item, index) => targets.indexOf(item.target) == index);
 }
+
+export type Await<T> = T extends {
+  then(onfulfilled?: (value: infer U) => unknown): unknown;
+}
+  ? U
+  : T;

@@ -11,7 +11,7 @@ import "./main.css";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
-  processInternalEmbeds = processInternalEmbeds;
+  processInternalEmbeds = processInternalEmbeds.bind(this);
   processInternalLinks = processInternalLinks.bind(this);
   processExternalEmbeds = processExternalEmbeds.bind(this);
 

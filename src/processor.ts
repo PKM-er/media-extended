@@ -33,7 +33,11 @@ export function processInternalLinks(
 }
 
 /** Process internal media embeds with hash */
-export function processInternalEmbeds(el: HTMLElement) {
+export function processInternalEmbeds(
+  this: MediaExtended,
+  el: HTMLElement,
+  ctx: MarkdownPostProcessorContext,
+) {
   let allEmbeds;
   if ((allEmbeds = el.querySelectorAll("span.internal-embed"))) {
     const internalEmbed: mutationParam = {
@@ -41,7 +45,7 @@ export function processInternalEmbeds(el: HTMLElement) {
         for (const mutation of filterDuplicates(list)) {
           const span = mutation.target as HTMLSpanElement;
           if (span.hasClass("is-loaded") && !span.hasClass("mod-empty")) {
-            if (span.hasClass("media-embed")) handleMedia(span);
+            if (span.hasClass("media-embed")) handleMedia(span, this, ctx);
             obs.disconnect();
           }
         }

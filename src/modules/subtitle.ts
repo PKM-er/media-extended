@@ -1,28 +1,31 @@
 import MediaExtended from "main";
-import { TAbstractFile, TFile } from "obsidian";
+import { MarkdownRenderChild, TFile } from "obsidian";
 import iso from "iso-639-1";
-import { Track } from "plyr";
-import { parseSync, stringifySync } from "subtitle";
-import { join } from "node:path";
+import SrtCvt from "srt-webvtt";
 
-export function getSubtitles(video: TFile): TFile[] | null {
+function getSubtitles(video: TFile): TFile[] | null {
   const { basename: videoName, parent: folder } = video;
 
   // for video file "hello.mp4"
-  // vaild subtitle: "./hello.en.srt"
-  const subtitles = folder.children.filter((file) => {
+  // vaild subtitle:
+  // - "./hello.en.srt", "./hello.zh.srt" (muiltple files)
+  // - "./hello.srt" (single file)
+  let subtitles = folder.children.filter((file) => {
     // filter file only (exclude folder)
     if (!(file instanceof TFile)) return false;
     const isSubtitle = file.extension === "srt" || file.extension === "vtt";
     const isSameFile = file.basename.startsWith(videoName);
-    if (isSubtitle && isSameFile) {
+    return isSubtitle && isSameFile;
+  }) as TFile[];
+  if (subtitles.length > 1) {
+    subtitles = subtitles.filter((file) => {
       const languageSuffix = file.basename.slice(videoName.length);
       return (
         languageSuffix.startsWith(".") &&
         iso.validate(languageSuffix.substring(1))
       );
-    } else return false;
-  }) as TFile[];
+    });
+  }
 
   if (subtitles.length === 0) return null;
   else {
@@ -41,63 +44,88 @@ export function getSubtitles(video: TFile): TFile[] | null {
   }
 }
 
-export async function toVtt(
-  srtFile: TFile,
-  plugin: MediaExtended,
-): Promise<TFile> {
-  const srt = await plugin.app.vault.read(srtFile);
-  const vtt = stringifySync(parseSync(srt), { format: "WebVTT" });
-  return plugin.app.vault.create(
-    join(srtFile.parent.path, srtFile.basename + ".vtt"),
-    vtt,
-  );
+async function getSrtUrl(file: TFile, plugin: MediaExtended): Promise<string> {
+  const srt = await plugin.app.vault.read(file);
+  return new SrtCvt(new Blob([srt])).getURL();
+}
+
+async function getVttURL(file: TFile, plugin: MediaExtended) {
+  const blob = new Blob([await plugin.app.vault.read(file)], {
+    type: "text/vtt",
+  });
+  return URL.createObjectURL(blob);
 }
 
 /**
  *
  * @param video
- * @returns empty array if no subtitle exists
+ * @returns empty [objectUrl[], trackEl[]] if no subtitle exists
  */
 export async function getSubtitleTracks(
   video: TFile,
   plugin: MediaExtended,
-): Promise<Track[]> {
+): Promise<{ objUrls: string[]; tracks: HTMLTrackElement[] } | null> {
   const subFiles = getSubtitles(video);
-  if (!subFiles) {
-    console.log("no subtitle found");
-    return [];
-  }
+  if (!subFiles) return null;
 
-  // convert all srt to vtt
-  for (let i = subFiles.length - 1; i >= 0; i--) {
-    const sub = subFiles[i];
-    if (sub.extension !== "srt") continue;
-    try {
-      subFiles[i] = await toVtt(sub, plugin);
-    } catch (error) {
-      console.error(error, sub);
-      subFiles.splice(i, 1);
-    }
-  }
+  console.log(
+    "found subtitle(s): %o",
+    subFiles.map((v) => v.name),
+  );
+
   if (subFiles.length === 0) {
     console.error("no vtt subtitle availble");
-    return [];
+    return null;
   }
 
-  return subFiles.map((file) => {
-    const languageCode = file.basename.split(".").pop();
-    if (!languageCode || !iso.validate(languageCode))
-      throw new Error(
-        "languageCode unable to parse, problem with getSubtitles()? ",
-      );
+  const url: Map<TFile, string> = new Map();
+  for (const file of subFiles) {
+    if (file.extension === "srt") {
+      url.set(file, await getSrtUrl(file, plugin));
+    } else url.set(file, await getVttURL(file, plugin));
+  }
 
-    return {
+  const tracks = subFiles.map((file, i, array) => {
+    const languageCode = file.basename.split(".").pop();
+    let label: string | null = null;
+    let srclang: string | null = null;
+    if (array.length > 1) {
+      if (!languageCode || !iso.validate(languageCode))
+        throw new Error(
+          "languageCode unable to parse, problem with getSubtitles()? ",
+        );
+      label = iso.getNativeName(languageCode);
+      srclang = languageCode;
+    }
+
+    const attr = {
       kind: "captions",
-      label: iso.getNativeName(languageCode),
-      srclang: languageCode,
-      src: plugin.app.vault.getResourcePath(file),
-      default:
-        navigator.language.substring(0, 2) === languageCode ? true : undefined,
+      label,
+      srclang,
+      src: url.get(file) as string,
     };
+    return createEl("track", { attr }, (el) => {
+      if (navigator.language.substring(0, 2) === languageCode) {
+        el.setAttr("default", "");
+      }
+    });
   });
+
+  return { objUrls: [...url.values()], tracks };
+}
+
+export class SubtitleResource extends MarkdownRenderChild {
+  objectUrls: string[];
+
+  constructor(containerEl: HTMLDivElement, objectUrls: string[]) {
+    super();
+    this.containerEl = containerEl;
+    this.objectUrls = objectUrls;
+  }
+
+  unload() {
+    for (const url of this.objectUrls) {
+      URL.revokeObjectURL(url);
+    }
+  }
 }

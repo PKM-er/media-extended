@@ -1,7 +1,9 @@
 import MediaExtended from "main";
 import { FileView, MarkdownPostProcessorContext } from "obsidian";
-import { filterDuplicates, mutationParam } from "./misc";
+import Plyr from "plyr";
+import { Await, filterDuplicates, mutationParam } from "./misc";
 import { getSetupTool } from "./playerSetup";
+import { getSubtitleTracks, SubtitleResource } from "./subtitle";
 import { getPlayer } from "./videohost/getPlayer";
 
 type mediaType = "audio" | "video";
@@ -150,7 +152,11 @@ export function handleLink(
 /**
  * Update media embeds to respond to temporal fragments
  */
-export function handleMedia(span: HTMLSpanElement) {
+export async function handleMedia(
+  span: HTMLSpanElement,
+  plugin: MediaExtended,
+  ctx: MarkdownPostProcessorContext,
+) {
   const srcLinktext = span.getAttr("src");
   if (srcLinktext === null) {
     console.error(span);
@@ -159,32 +165,75 @@ export function handleMedia(span: HTMLSpanElement) {
 
   const { setPlayerTF } = getSetupTool(srcLinktext);
 
-  // skip if timeSpan is missing or invalid
-  if (!setPlayerTF) return;
-
-  const webmEmbed: mutationParam = {
-    option: {
-      childList: true,
-    },
-    callback: (list, obs) =>
-      filterDuplicates(list).forEach((m) =>
-        m.addedNodes.forEach((node) => {
-          if (node instanceof HTMLMediaElement) {
-            setPlayerTF(node);
-            obs.disconnect();
-          }
-        }),
-      ),
-  };
-
   if (!(span.firstElementChild instanceof HTMLMediaElement)) {
     console.error("first element not player: %o", span.firstElementChild);
     return;
   }
 
-  setPlayerTF(span.firstElementChild);
-  if (span.getAttr("src")?.match(/\.webm$|\.webm#/)) {
+  const isWebm = /\.webm$|\.webm#/.test(span.getAttr("src") ?? "");
+
+  function setupPlayer(
+    mediaEl: HTMLMediaElement,
+    info: Await<ReturnType<typeof getSubtitleTracks>>,
+    isWebm = false,
+  ): HTMLDivElement {
+    if (!mediaEl.parentElement) throw new Error("no parentElement");
+    const container = createDiv({ cls: "local-media" });
+    mediaEl.parentElement.appendChild(container);
+
+    let target: HTMLMediaElement;
+    if (!isWebm) target = mediaEl;
+    else {
+      target = mediaEl.cloneNode(true) as typeof mediaEl;
+      mediaEl.addClass("visuallyhidden");
+    }
+    container.appendChild(target);
+    ctx.addChild(new SubtitleResource(container, info?.objUrls ?? []));
+
+    if (info) info.tracks.forEach((t) => target.appendChild(t));
+    const player = new Plyr(target);
+    if (setPlayerTF) setPlayerTF(player);
+    return container;
+  }
+
+  const videoFile = plugin.app.metadataCache.getFirstLinkpathDest(
+    span.getAttr("src") as string,
+    ctx.sourcePath,
+  );
+  const tracks = await getSubtitleTracks(videoFile, plugin);
+
+  const srcMediaEl = span.firstElementChild;
+  /**
+   * div.local-media warped srcMediaEl by default
+   * div.local-media containing cloned srcMediaEl when file is webm
+   */
+  const newMediaContainer = setupPlayer(srcMediaEl, tracks, isWebm);
+
+  const webmEmbed: mutationParam = {
+    callback: (list, obs) => {
+      list.forEach((m) => {
+        if (m.addedNodes.length)
+          newMediaContainer.parentElement?.removeChild(newMediaContainer);
+        m.addedNodes.forEach((node) => {
+          if (node instanceof HTMLMediaElement) {
+            setupPlayer(node, tracks);
+            obs.disconnect();
+            return;
+          }
+        });
+      });
+    },
+    option: {
+      childList: true,
+    },
+  };
+
+  if (isWebm) {
     const webmObs = new MutationObserver(webmEmbed.callback);
     webmObs.observe(span, webmEmbed.option);
+    setTimeout(() => {
+      if (srcMediaEl.parentElement)
+        srcMediaEl.parentElement.removeChild(srcMediaEl);
+    }, 800);
   }
 }
