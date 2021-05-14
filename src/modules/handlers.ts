@@ -1,6 +1,6 @@
 import MediaExtended from "main";
 import { FileView, MarkdownPostProcessorContext } from "obsidian";
-import { mutationParam } from "./misc";
+import { filterDuplicates, mutationParam } from "./misc";
 import { getSetupTool } from "./playerSetup";
 import { getPlayer } from "./videohost/getPlayer";
 
@@ -167,7 +167,7 @@ export function handleMedia(span: HTMLSpanElement) {
       childList: true,
     },
     callback: (list, obs) =>
-      list.forEach((m) =>
+      filterDuplicates(list).forEach((m) =>
         m.addedNodes.forEach((node) => {
           if (node instanceof HTMLMediaElement) {
             setPlayerTF(node);

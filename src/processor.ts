@@ -5,7 +5,7 @@ import {
   handleLink,
   handleMedia,
 } from "modules/handlers";
-import { mutationParam } from "modules/misc";
+import { mutationParam, filterDuplicates } from "modules/misc";
 
 /** Process internal link to media files with hash */
 export function processInternalLinks(
@@ -16,7 +16,7 @@ export function processInternalLinks(
   const internalLink: mutationParam = {
     // check if link is resolved
     callback: (list, obs) => {
-      for (const m of list) {
+      for (const m of filterDuplicates(list)) {
         const a = m.target as HTMLAnchorElement;
         if (!a.hasClass("is-unresolved"))
           handleLink(m.target as HTMLAnchorElement, this, ctx);
@@ -38,7 +38,7 @@ export function processInternalEmbeds(el: HTMLElement) {
   if ((allEmbeds = el.querySelectorAll("span.internal-embed"))) {
     const internalEmbed: mutationParam = {
       callback: (list, obs) => {
-        for (const mutation of list) {
+        for (const mutation of filterDuplicates(list)) {
           const span = mutation.target as HTMLSpanElement;
           if (span.hasClass("is-loaded") && !span.hasClass("mod-empty")) {
             if (span.hasClass("media-embed")) handleMedia(span);
