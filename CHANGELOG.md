@@ -1,3 +1,19 @@
+# [2.5.0](https://github.com/alx-plugins/media-extended/compare/2.4.0...2.5.0) (2021-05-15)
+
+
+### Bug Fixes
+
+* subtitle can be selected and selection color is adjusted ([8641f84](https://github.com/alx-plugins/media-extended/commit/8641f840efd2c614940ad1dfdbd2db63b00c339a))
+* **handlemedia:** plyr should work with internal embeds with hash now ([078f807](https://github.com/alx-plugins/media-extended/commit/078f8071d8fb89c6429303e7a44d5cba70f0db34))
+* config plyr to respond to div.external-video size setting ([8ad5570](https://github.com/alx-plugins/media-extended/commit/8ad557095ff778b5ca2e79a67703741cabc3271a))
+
+
+### Features
+
+* add inline autoplay support ([12ebe8f](https://github.com/alx-plugins/media-extended/commit/12ebe8fc1c95ce59a37e13be0644f83daf13ee8c))
+* **getsetuptool():** add inline mute support ([86a5a2a](https://github.com/alx-plugins/media-extended/commit/86a5a2a7d43e708f4386254a878b0a4b4bc98b7e))
+* add global plyr size control ([d42f369](https://github.com/alx-plugins/media-extended/commit/d42f369e1fb6a0131903b79abdefeebf584b4aa0))
+
 # [2.4.0](https://github.com/alx-plugins/media-extended/compare/2.3.0...2.4.0) (2021-05-14)
 
 
