@@ -198,6 +198,8 @@ export async function handleMedia(
       ...defaultPlyrOption,
       autoplay: is("autoplay"),
     });
+    if (info)
+      container.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
     setRatio(container, player);
     setHashOpt(player);
     setPlayerTF(player);
