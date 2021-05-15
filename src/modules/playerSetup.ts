@@ -135,3 +135,21 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
 
   return playerTF;
 }
+
+export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
+  player.once("ready", function () {
+    let trys = 0;
+
+    const id = setInterval(() => {
+      if (player.ratio) {
+        console.log("got it: ", player.ratio);
+        // @ts-ignore
+        containerEl.style.aspectRatio = player.ratio.replace(/:/, "/");
+        clearInterval(id);
+      } else if (trys >= 10) {
+        console.error("failed to get player.ratio");
+        clearInterval(id);
+      } else trys++;
+    }, 100);
+  });
+}

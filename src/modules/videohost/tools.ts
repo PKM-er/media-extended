@@ -1,6 +1,6 @@
 import { assertNever } from "assert-never";
 import Plyr from "plyr";
-import { getSetupTool, Plyr_TF } from "../playerSetup";
+import { getSetupTool, Plyr_TF, setRatio } from "../playerSetup";
 import { setupThumbnail } from "./setupThumbnail";
 
 export enum Host {
@@ -142,6 +142,7 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
     invertTime: false,
     youtube,
   }) as Plyr_TF;
+  setRatio(container, player);
   if (setPlayerTF) setPlayerTF(player);
   return player;
 }
