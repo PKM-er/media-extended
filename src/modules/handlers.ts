@@ -59,11 +59,12 @@ export class ExternalEmbedHandler {
     }
 
     if (fileType) {
-      const { setPlayerTF } = getSetupTool(this.src);
+      const { setPlayerTF, setHashOpt } = getSetupTool(this.src);
       let newEl = createEl(fileType);
       newEl.src = this.src;
       newEl.controls = true;
-      if (setPlayerTF) setPlayerTF(newEl);
+      setHashOpt(newEl);
+      setPlayerTF(newEl);
       this.replaceWith(newEl);
       return null;
     } else return this;
@@ -95,10 +96,11 @@ export function handleLink(
     throw new Error("no href found in a.internal-link");
   }
 
-  const { linktext, setPlayerTF } = getSetupTool(srcLinktext);
+  const { linktext, timeSpan, setPlayerTF, setHashOpt } =
+    getSetupTool(srcLinktext);
 
   // skip if timeSpan is missing or invalid
-  if (!setPlayerTF) return;
+  if (!timeSpan) return;
 
   const newLink = createEl("a", {
     cls: "internal-link",
@@ -120,7 +122,7 @@ export function handleLink(
         openedMedia.push(leaf.view.contentEl);
     });
 
-    const setPlayerTF = (e: HTMLElement): void => {
+    const setupPlayer = (e: HTMLElement): void => {
       // prettier-ignore
       const player = e.querySelector(
           "div.video-container > video, " +
@@ -128,16 +130,17 @@ export function handleLink(
           "div.video-container > audio" // for webm audio
         ) as HTMLMediaElement;
       if (!player) throw new Error("no player found in FileView");
+      setHashOpt(player);
       setPlayerTF(player);
       player.play();
     };
 
-    if (openedMedia.length) openedMedia.forEach((e) => setPlayerTF(e));
+    if (openedMedia.length) openedMedia.forEach((e) => setupPlayer(e));
     else {
       const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
       fileLeaf.openFile(matchedFile).then(() => {
         if (fileLeaf.view instanceof FileView)
-          setPlayerTF(fileLeaf.view.contentEl);
+          setupPlayer(fileLeaf.view.contentEl);
       });
     }
   };
@@ -163,7 +166,7 @@ export async function handleMedia(
     throw new TypeError("src not found on container <span>");
   }
 
-  const { setPlayerTF } = getSetupTool(srcLinktext);
+  const { setPlayerTF, setHashOpt } = getSetupTool(srcLinktext);
 
   if (!(span.firstElementChild instanceof HTMLMediaElement)) {
     console.error("first element not player: %o", span.firstElementChild);
@@ -193,7 +196,8 @@ export async function handleMedia(
     if (info) info.tracks.forEach((t) => target.appendChild(t));
     const player = new Plyr(target, defaultPlyrOption);
     setRatio(container, player);
-    if (setPlayerTF) setPlayerTF(player);
+    setHashOpt(player);
+    setPlayerTF(player);
     return container;
   }
 

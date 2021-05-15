@@ -43,13 +43,14 @@ export const defaultPlyrOption = {
 type setupTool = {
   linktext: string;
   timeSpan: TimeSpan | null;
-  isLoop: boolean;
-  setPlayerTF: ((player: Player) => void) | null;
+  loop: boolean;
+  muted: boolean;
+  setHashOpt: (player: Player) => void;
+  setPlayerTF: (player: Player) => void;
 };
 
 /**
  * @param src raw linktext (may contain #hash)
- * @returns setPlayerTF return null when timeSpan&loop not parsed from srcLinktext
  */
 export function getSetupTool(src: string | URL): setupTool {
   if (!src) throw new TypeError("srcLinktext empty");
@@ -65,19 +66,23 @@ export function getSetupTool(src: string | URL): setupTool {
   }
 
   const timeSpan = parseTF(hash);
+  // null: exist, with no value (#loop)
   const isLoop = parse(hash).loop === null;
+  const isMute = parse(hash).mute === null;
 
-  let setPlayerTF: ((player: Player) => void) | null;
-  if (!timeSpan && !isLoop) setPlayerTF = null;
-  else
-    setPlayerTF = (player: Player): void => {
-      // null: exist, with no value (#loop)
-      if (isLoop) player.loop = true;
-      // import timestamps to player
+  return {
+    linktext,
+    timeSpan,
+    loop: isLoop,
+    muted: isMute,
+    setPlayerTF: (player) => {
       if (timeSpan) injectTimestamp(player, timeSpan);
-    };
-
-  return { linktext, timeSpan, isLoop, setPlayerTF };
+    },
+    setHashOpt: (player) => {
+      if (isLoop) player.loop = isLoop;
+      if (isMute) player.muted = isMute;
+    },
+  };
 }
 
 /**
@@ -167,7 +172,6 @@ export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
 
     const id = setInterval(() => {
       if (player.ratio) {
-        console.log("got it: ", player.ratio);
         // @ts-ignore
         containerEl.style.aspectRatio = player.ratio.replace(/:/, "/");
         clearInterval(id);
