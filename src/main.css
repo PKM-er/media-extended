@@ -7,14 +7,17 @@ div.local-media {
   margin: auto;
 }
 
-.plyr__caption::selection{
+.plyr__caption::selection {
   background-color: gray;
 }
 
 div.external-video > iframe.external-video,
 div.external-video > div.thumbnail,
-.plyr, .plyr__video-wrapper,
-.plyr audio, .plyr iframe, .plyr video {
+.plyr,
+.plyr__video-wrapper,
+.plyr audio,
+.plyr iframe,
+.plyr video {
   min-height: inherit;
   min-width: inherit;
   max-height: inherit;
