@@ -4,7 +4,7 @@ Improve media (video/audio) playing in Obsidian.
 
 ## Intro
 
-This plugin introduce some new features that improve media (video/audio) playing: 
+This plugin introduce some new features that improve media (video/audio) playing:
 
 - [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
   - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
@@ -13,7 +13,8 @@ This plugin introduce some new features that improve media (video/audio) playing
   - From external media files: `![](http://example.com/video.ogv#t=60)`
   - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
     - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
-- [ ] [External subtitle support for videos](https://github.com/alx-plugins/media-extended/issues/7)
+- [autoplay/mute/loop for media](#inline-options)
+- [External subtitle support for videos](#local-subtitle)
 - [ ] [Create links for timestamps from player](https://github.com/alx-plugins/media-extended/issues/9)
 - [ ] [Improved pictrue-in-pictrue support](https://github.com/alx-plugins/media-extended/issues/8)
 
@@ -21,18 +22,13 @@ This plugin introduce some new features that improve media (video/audio) playing
 
 ### Embed Media Fragments
 
-Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal link and see the results: 
+Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal link and see the results:
 
 ![EmbedMediaFragmentsDemo](https://img.aidenlx.top/picgo/EmbedMediaFragmentsDemo.gif)
 
-Also, loop is support by append `loop` to the hashtag like
-`#t=60&loop` or just `#loop`
-
-
-
 ### Timestamps for Media
 
-Just append [Media Fragment URI](#media-fragment-uri) to the regular internal link and see the results: 
+Just append [Media Fragment URI](#media-fragment-uri) to the regular internal link and see the results:
 
 ![TimestampsForMediaDemo](https://img.aidenlx.top/picgo/TimestampsForMediaDemo.gif)
 
@@ -45,6 +41,38 @@ Now also support videos from different hosts
 - Youtube: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
 - Bilibili: `![](https://www.bilibili.com/video/BV17x411w7KC)` (Timestamps not supported)
 - Vimeo: `![](https://vimeo.com/336812611)`
+
+### Inline Options
+
+| suffix  |  option  |
+| :-----: | :------: |
+| `#play` | autoplay |
+| `#loop` |   loop   |
+| `#mute` |  muted   |
+
+Example:
+
+- `![[example.mp4#t=1,2&loop&mute]]`
+- `![](https://www.youtube.com/watch?v=jNQXAC9IVRw#loop&t=1,2&mute)`
+
+### Local Subtitle
+
+Now support `.srt` and WebVTT format
+
+Requirements:
+
+- Placed in the same folder as media file
+- Using the same file name as media file
+
+> Media File: `example.mp4`
+> Subtitle File: `example.vtt` or `example.srt`
+
+- for single language: filename should be identical with media filename
+  - `example.vtt` is allowed, not `example.en.vtt`
+- for muiltple languages: vaild language code suffix are required
+  - For Chinese: `example.zh.vtt`, `example.cn.vtt` is invalid
+  - For English: `example.en.vtt`
+  - For other language, visit [this list](https://lingohub.com/academy/best-practices/iso-639-1-list)
 
 ## Compatibility
 
@@ -64,11 +92,11 @@ The required API feature is only available for Obsidian v0.10.2+.
 ### From GitHub
 
 1. Download the Latest Release from the Releases section of the GitHub Repository
-2. Put files to your vault's plugins folder: `<vault>/.obsidian/plugins/media-extended`  
+2. Put files to your vault's plugins folder: `<vault>/.obsidian/plugins/media-extended`
 3. Reload Obsidian
 4. If prompted about Safe Mode, you can disable safe mode and enable the plugin.
-Otherwise, head to Settings, third-party plugins, make sure safe mode is off and
-enable the plugin from there.
+   Otherwise, head to Settings, third-party plugins, make sure safe mode is off and
+   enable the plugin from there.
 
 > Note: The `.obsidian` folder may be hidden. On macOS, you should be able to press `Command+Shift+Dot` to show the folder in Finder.
 
