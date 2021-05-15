@@ -166,7 +166,7 @@ export async function handleMedia(
     throw new TypeError("src not found on container <span>");
   }
 
-  const { linktext, setPlayerTF, setHashOpt } = getSetupTool(srcLinktext);
+  const { is, linktext, setPlayerTF, setHashOpt } = getSetupTool(srcLinktext);
 
   if (!(span.firstElementChild instanceof HTMLMediaElement)) {
     console.error("first element not player: %o", span.firstElementChild);
@@ -194,7 +194,10 @@ export async function handleMedia(
     ctx.addChild(new SubtitleResource(container, info?.objUrls ?? []));
 
     if (info) info.tracks.forEach((t) => target.appendChild(t));
-    const player = new Plyr(target, defaultPlyrOption);
+    const player = new Plyr(target, {
+      ...defaultPlyrOption,
+      autoplay: is("autoplay"),
+    });
     setRatio(container, player);
     setHashOpt(player);
     setPlayerTF(player);

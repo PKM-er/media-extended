@@ -40,11 +40,13 @@ export const defaultPlyrOption = {
   controls: defaultPlyrControls,
 };
 
+/** Player Properties that can be controlled by hash */
+type PlayerProperties = "loop" | "muted" | "autoplay";
+
 type setupTool = {
   linktext: string;
   timeSpan: TimeSpan | null;
-  loop: boolean;
-  muted: boolean;
+  is: (prop: PlayerProperties) => boolean;
   setHashOpt: (player: Player) => void;
   setPlayerTF: (player: Player) => void;
 };
@@ -66,22 +68,31 @@ export function getSetupTool(src: string | URL): setupTool {
   }
 
   const timeSpan = parseTF(hash);
+  const hashQuery = parse(hash);
   // null: exist, with no value (#loop)
-  const isLoop = parse(hash).loop === null;
-  const isMute = parse(hash).mute === null;
+
+  const hashOpts = new Map<string, PlayerProperties>([
+    ["loop", "loop"],
+    ["mute", "muted"],
+    ["play", "autoplay"],
+  ]);
 
   return {
     linktext,
     timeSpan,
-    loop: isLoop,
-    muted: isMute,
+    is: (prop) => {
+      for (const [hash, key] of hashOpts) {
+        if (prop === key && hashQuery[hash] === null) return true;
+      }
+      return false;
+    },
     setPlayerTF: (player) => {
       if (timeSpan) injectTimestamp(player, timeSpan);
     },
-    setHashOpt: (player) => {
-      if (isLoop) player.loop = isLoop;
-      if (isMute) player.muted = isMute;
-    },
+    setHashOpt: (player) =>
+      hashOpts.forEach((key, hash) => {
+        if (hashQuery[hash] === null) player[key] = true;
+      }),
   };
 }
 

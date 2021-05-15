@@ -128,20 +128,19 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   );
   plyrDiv.appendChild(iframe);
 
-  const { loop, timeSpan, setHashOpt, setPlayerTF } = getSetupTool(info.src);
+  const { is, timeSpan, setHashOpt, setPlayerTF } = getSetupTool(info.src);
   let youtube: any;
   if (info.host === Host.YouTube) {
     youtube = {
       // set start time
       start: timeSpan && timeSpan.start !== 0 ? timeSpan.start : undefined,
-      loop: +loop,
     };
   }
   // @ts-ignore
   Plyr.timeSpan = null;
   const player = new Plyr(plyrDiv, {
     ...defaultPlyrOption,
-    loop: { active: loop },
+    autoplay: is("autoplay"),
     youtube,
   }) as Plyr_TF;
   setRatio(container, player);
