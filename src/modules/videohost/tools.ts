@@ -1,7 +1,10 @@
-import { assertNever } from "assert-never";
 import Plyr from "plyr";
-import { getSetupTool, Plyr_TF, setRatio } from "../playerSetup";
-import { setupThumbnail } from "./setupThumbnail";
+import {
+  defaultPlyrOption,
+  getSetupTool,
+  Plyr_TF,
+  setRatio,
+} from "../playerSetup";
 
 export enum Host {
   YouTube,
@@ -137,9 +140,8 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   // @ts-ignore
   Plyr.timeSpan = null;
   const player = new Plyr(plyrDiv, {
-    fullscreen: { enabled: false },
+    ...defaultPlyrOption,
     loop: { active: isLoop },
-    invertTime: false,
     youtube,
   }) as Plyr_TF;
   setRatio(container, player);

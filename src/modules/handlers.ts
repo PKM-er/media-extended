@@ -2,7 +2,7 @@ import MediaExtended from "main";
 import { FileView, MarkdownPostProcessorContext } from "obsidian";
 import Plyr from "plyr";
 import { Await, filterDuplicates, mutationParam } from "./misc";
-import { getSetupTool, setRatio } from "./playerSetup";
+import { defaultPlyrOption, getSetupTool, setRatio } from "./playerSetup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
 import { getPlayer } from "./videohost/getPlayer";
 
@@ -191,7 +191,7 @@ export async function handleMedia(
     ctx.addChild(new SubtitleResource(container, info?.objUrls ?? []));
 
     if (info) info.tracks.forEach((t) => target.appendChild(t));
-    const player = new Plyr(target);
+    const player = new Plyr(target, defaultPlyrOption);
     setRatio(container, player);
     if (setPlayerTF) setPlayerTF(player);
     return container;
