@@ -115,7 +115,7 @@ export function handleLink(
       linktext,
       ctx.sourcePath,
     );
-    if (!matchedFile) return;
+    if (!matchedFile) throw new Error("No file found for link: " + linktext);
 
     workspace.iterateAllLeaves((leaf) => {
       if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
@@ -166,7 +166,7 @@ export async function handleMedia(
     throw new TypeError("src not found on container <span>");
   }
 
-  const { setPlayerTF, setHashOpt } = getSetupTool(srcLinktext);
+  const { linktext, setPlayerTF, setHashOpt } = getSetupTool(srcLinktext);
 
   if (!(span.firstElementChild instanceof HTMLMediaElement)) {
     console.error("first element not player: %o", span.firstElementChild);
@@ -202,9 +202,11 @@ export async function handleMedia(
   }
 
   const videoFile = plugin.app.metadataCache.getFirstLinkpathDest(
-    span.getAttr("src") as string,
+    linktext,
     ctx.sourcePath,
   );
+  if (!videoFile) throw new Error("No file found for link: " + linktext);
+
   const tracks = await getSubtitleTracks(videoFile, plugin);
 
   const srcMediaEl = span.firstElementChild;
