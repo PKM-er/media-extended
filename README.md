@@ -13,6 +13,7 @@ This plugin introduce some new features that improve media (video/audio) playing
   - From external media files: `![](http://example.com/video.ogv#t=60)`
   - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
     - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
+- [playback speed control](#speed-control)
 - [autoplay/mute/loop for media](#inline-options)
 - [External subtitle support for videos](#local-subtitle)
 - [ ] [Create links for timestamps from player](https://github.com/alx-plugins/media-extended/issues/9)
@@ -41,6 +42,10 @@ Now also support videos from different hosts
 - Youtube: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
 - Bilibili: `![](https://www.bilibili.com/video/BV17x411w7KC)` (Timestamps not supported)
 - Vimeo: `![](https://vimeo.com/336812611)`
+
+## Speed Control
+
+Check Demo [here](https://img.aidenlx.top/picgo/SpeedControlDemo.mp4)
 
 ### Inline Options
 
