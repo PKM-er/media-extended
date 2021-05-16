@@ -26,7 +26,7 @@ export function getPlayer(url: URL, thumbnail = false): HTMLDivElement | null {
 }
 
 function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
-  const tool = getSetupTool(info.src);
+  const tool = getSetupTool(info.src.hash);
   const { timeSpan } = tool;
 
   let options: Parameters<typeof setPlyr>[3];
@@ -38,7 +38,12 @@ function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
     };
   else options = undefined;
 
-  return setPlyr(container, getIFrame(info), getSetupTool(info.src), options);
+  return setPlyr(
+    container,
+    getIFrame(info),
+    getSetupTool(info.src.hash),
+    options,
+  );
 }
 
 async function setupThumbnail(

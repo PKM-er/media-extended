@@ -1,5 +1,9 @@
 import MediaExtended from "main";
-import { FileView, MarkdownPostProcessorContext } from "obsidian";
+import {
+  FileView,
+  MarkdownPostProcessorContext,
+  parseLinktext,
+} from "obsidian";
 import { Await, mutationParam } from "./misc";
 import { getSetupTool, setPlyr } from "./player-setup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
@@ -10,32 +14,48 @@ const acceptedExt: Map<mediaType, string[]> = new Map([
   ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
   ["video", ["mp4", "webm", "ogv"]],
 ]);
-export class ExternalEmbedHandler {
-  target: HTMLImageElement;
-  constructor(target?: HTMLImageElement) {
-    if (target) this.target = target;
-    else this.target = createEl("img");
+
+function getUrl(src: string): URL | null {
+  try {
+    return new URL(src);
+  } catch (error) {
+    // if url is invaild, do nothing and break current loop
+    return null;
+  }
+}
+
+abstract class Handler<T extends HTMLElement> {
+  target: T;
+  plugin?: MediaExtended;
+  ctx?: MarkdownPostProcessorContext;
+
+  constructor(
+    target: T,
+    plugin?: MediaExtended,
+    ctx?: MarkdownPostProcessorContext,
+  ) {
+    this.target = target;
+    this.plugin = plugin;
+    this.ctx = ctx;
   }
 
-  setTarget(target: HTMLImageElement): this {
+  setTarget(target: T): this {
     this.target = target;
     return this;
   }
 
-  public get src(): string {
-    return this.target.src;
+  /** raw link */
+  public abstract get linktext(): string;
+
+  /** link without hash */
+  public get link(): string {
+    return parseLinktext(this.linktext).path;
+  }
+  public get hash(): string {
+    return parseLinktext(this.linktext).subpath;
   }
 
-  public get srcUrl(): URL | null {
-    try {
-      return new URL(this.src);
-    } catch (error) {
-      // if url is invaild, do nothing and break current loop
-      return null;
-    }
-  }
-
-  private replaceWith(newEl: HTMLElement) {
+  protected replaceWith(newEl: HTMLElement) {
     if (this.target.parentNode) {
       this.target.parentNode.replaceChild(newEl, this.target);
     } else {
@@ -43,9 +63,20 @@ export class ExternalEmbedHandler {
       throw new Error("parentNode of img not found");
     }
   }
+}
+
+export class ExternalEmbedHandler extends Handler<HTMLImageElement> {
+  constructor(target?: HTMLImageElement) {
+    if (target) super(target);
+    else super(createEl("img"));
+  }
+
+  public get linktext(): string {
+    return this.target.src;
+  }
 
   doDirectLink(): this | null {
-    const url = this.srcUrl;
+    const url = getUrl(this.linktext);
     if (!url) return this;
 
     // if url contains no extension, type = null
@@ -58,9 +89,9 @@ export class ExternalEmbedHandler {
     }
 
     if (fileType) {
-      const { setPlayerTF, setHashOpt } = getSetupTool(this.src);
+      const { setPlayerTF, setHashOpt } = getSetupTool(this.hash);
       let newEl = createEl(fileType);
-      newEl.src = this.src;
+      newEl.src = this.link;
       newEl.controls = true;
       setHashOpt(newEl);
       setPlayerTF(newEl);
@@ -70,7 +101,7 @@ export class ExternalEmbedHandler {
   }
 
   doVideoHost(thumbnail: boolean): this | null {
-    const url = this.srcUrl;
+    const url = getUrl(this.linktext);
     if (!url) return this;
 
     const newEl = getPlayer(url, thumbnail);
@@ -81,44 +112,74 @@ export class ExternalEmbedHandler {
   }
 }
 
-/**
- * Update internal links to media file to respond to temporal fragments
- */
-export function handleLink(
-  oldLink: HTMLAnchorElement,
-  plugin: MediaExtended,
-  ctx: MarkdownPostProcessorContext,
-) {
-  let srcLinktext = oldLink.dataset.href;
-  if (!srcLinktext) {
-    console.error(oldLink);
-    throw new Error("no href found in a.internal-link");
+// <a
+//   data-href="test.mp4#1"
+//   href="test.mp4#1"
+//   class="internal-link"
+//   target="_blank"
+//   rel="noopener"
+//   >test.mp4 > 1</a
+// >
+export class InternalLinkHandler extends Handler<HTMLAnchorElement> {
+  plugin: MediaExtended;
+  ctx: MarkdownPostProcessorContext;
+
+  constructor(
+    plugin: MediaExtended,
+    ctx: MarkdownPostProcessorContext,
+    target?: HTMLAnchorElement,
+  ) {
+    super(target ?? createEl("a"));
+    this.plugin = plugin;
+    this.ctx = ctx;
   }
 
-  const { linktext, timeSpan, setPlayerTF, setHashOpt } =
-    getSetupTool(srcLinktext);
+  public get linktext(): string {
+    let srcLinktext = this.target.dataset.href;
+    if (!srcLinktext) {
+      console.error(this.target);
+      throw new Error("no href found in a.internal-link");
+    } else return srcLinktext;
+  }
 
-  // skip if timeSpan is missing or invalid
-  if (!timeSpan) return;
-
-  const newLink = createEl("a", {
-    cls: "internal-link",
-    text: oldLink.innerText,
-  });
-  newLink.onclick = (e) => {
-    const workspace = plugin.app.workspace;
+  private onclick = (setupPlayer: any) => (e: MouseEvent) => {
+    const workspace = this.plugin.app.workspace;
 
     const openedMedia: HTMLElement[] = [];
 
-    const matchedFile = plugin.app.metadataCache.getFirstLinkpathDest(
-      linktext,
-      ctx.sourcePath,
+    const matchedFile = this.plugin.app.metadataCache.getFirstLinkpathDest(
+      this.link,
+      this.ctx.sourcePath,
     );
-    if (!matchedFile) throw new Error("No file found for link: " + linktext);
+    if (!matchedFile) throw new Error("No file found for link: " + this.link);
 
     workspace.iterateAllLeaves((leaf) => {
       if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
         openedMedia.push(leaf.view.contentEl);
+    });
+
+    if (openedMedia.length) openedMedia.forEach((e) => setupPlayer(e));
+    else {
+      const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+      fileLeaf.openFile(matchedFile).then(() => {
+        if (fileLeaf.view instanceof FileView)
+          setupPlayer(fileLeaf.view.contentEl);
+      });
+    }
+  };
+
+  /**
+   * Update internal links to media file to respond to temporal fragments
+   */
+  handle() {
+    const { timeSpan, setPlayerTF, setHashOpt } = getSetupTool(this.hash);
+
+    // skip if timeSpan is missing or invalid
+    if (!timeSpan) return;
+
+    const newLink = createEl("a", {
+      cls: "internal-link",
+      text: this.target.innerText,
     });
 
     const setupPlayer = (e: HTMLElement): void => {
@@ -134,107 +195,114 @@ export function handleLink(
       player.play();
     };
 
-    if (openedMedia.length) openedMedia.forEach((e) => setupPlayer(e));
-    else {
-      const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-      fileLeaf.openFile(matchedFile).then(() => {
-        if (fileLeaf.view instanceof FileView)
-          setupPlayer(fileLeaf.view.contentEl);
-      });
-    }
-  };
-  if (oldLink.parentNode) {
-    oldLink.parentNode.replaceChild(newLink, oldLink);
-  } else {
-    console.error(oldLink);
-    throw new Error("parentNode not found");
+    newLink.onclick = this.onclick(setupPlayer);
+    this.replaceWith(newLink);
   }
 }
 
-/**
- * Update media embeds to respond to temporal fragments
- */
-export async function handleMedia(
-  span: HTMLSpanElement,
-  plugin: MediaExtended,
-  ctx: MarkdownPostProcessorContext,
-) {
-  const srcLinktext = span.getAttr("src");
-  if (srcLinktext === null) {
-    console.error(span);
-    throw new TypeError("src not found on container <span>");
+// <span alt="a.mp4 > 1" src="a.mp4#1" class="internal-embed ..." >
+//   <video controls="" src="" ></video >
+// </span>
+export class InternalEmbedHandler extends Handler<HTMLSpanElement> {
+  plugin: MediaExtended;
+  ctx: MarkdownPostProcessorContext;
+
+  constructor(
+    plugin: MediaExtended,
+    ctx: MarkdownPostProcessorContext,
+    target?: HTMLSpanElement,
+  ) {
+    super(target ?? createEl("a"));
+    this.plugin = plugin;
+    this.ctx = ctx;
   }
 
-  const tool = getSetupTool(srcLinktext);
-  const { linktext } = tool;
-
-  if (!(span.firstElementChild instanceof HTMLMediaElement)) {
-    console.error("first element not player: %o", span.firstElementChild);
-    return;
+  public get linktext(): string {
+    const src = this.target.getAttr("src");
+    if (src) return src;
+    else throw new Error("no linktext found in span");
   }
 
-  const isWebm = /\.webm$|\.webm#/.test(span.getAttr("src") ?? "");
-
-  const videoFile = plugin.app.metadataCache.getFirstLinkpathDest(
-    linktext,
-    ctx.sourcePath,
-  );
-  if (!videoFile) throw new Error("No file found for link: " + linktext);
-
-  const trackInfo = await getSubtitleTracks(videoFile, plugin);
-
-  const srcMediaEl = span.firstElementChild;
-  /**
-   * div.local-media warped srcMediaEl by default,
-   * div.local-media containing cloned srcMediaEl when file is webm
-   */
-  function setupPlayer(
+  private setupPlayer(
     mediaEl: HTMLMediaElement,
     trackInfo: Await<ReturnType<typeof getSubtitleTracks>>,
     isWebm = false,
   ): HTMLDivElement {
-    if (!mediaEl.parentElement) throw new Error("no parentElement");
     const container = createDiv({ cls: "local-media" });
-    mediaEl.parentElement.appendChild(container);
+    this.target.appendChild(container);
 
     let target: HTMLMediaElement;
     if (!isWebm) target = mediaEl;
+    // setup plyr to a cloned mediaEl,
+    // keep original <video> intact to observe if <audio> is added
     else {
       target = mediaEl.cloneNode(true) as typeof mediaEl;
       mediaEl.addClass("visuallyhidden");
     }
-    setPlyr(container, target, tool);
-    ctx.addChild(new SubtitleResource(container, trackInfo?.objUrls ?? []));
+    setPlyr(container, target, getSetupTool(this.hash));
+    this.ctx.addChild(
+      new SubtitleResource(container, trackInfo?.objUrls ?? []),
+    );
     return container;
   }
 
-  const newMediaContainer = setupPlayer(srcMediaEl, trackInfo, isWebm);
+  /**
+   * Update media embeds to respond to temporal fragments
+   */
+  async handle() {
+    if (!(this.target.firstElementChild instanceof HTMLMediaElement)) {
+      console.error(
+        "first element not player: %o",
+        this.target.firstElementChild,
+      );
+      return;
+    }
+    const srcMediaEl = this.target.firstElementChild;
 
-  const webmEmbed: mutationParam = {
-    callback: (list, obs) => {
-      list.forEach((m) => {
-        if (m.addedNodes.length)
-          newMediaContainer.parentElement?.removeChild(newMediaContainer);
-        m.addedNodes.forEach((node) => {
-          if (node instanceof HTMLMediaElement) {
-            setupPlayer(node, trackInfo);
-            obs.disconnect();
-            return;
-          }
+    const isWebm = this.link.endsWith(".webm");
+
+    const videoFile = this.plugin.app.metadataCache.getFirstLinkpathDest(
+      this.link,
+      this.ctx.sourcePath,
+    );
+    if (!videoFile) throw new Error("No file found for link: " + this.link);
+
+    const trackInfo = await getSubtitleTracks(videoFile, this.plugin);
+
+    const newMediaContainer = this.setupPlayer(srcMediaEl, trackInfo, isWebm);
+
+    const webmEmbed: mutationParam = {
+      /** setup webm audio player */
+      callback: (list, obs) => {
+        list.forEach((m) => {
+          // when new <audio> is added,
+          // remove video container previously created
+          if (m.addedNodes.length)
+            newMediaContainer.parentElement?.removeChild(newMediaContainer);
+          m.addedNodes.forEach((node) => {
+            if (node instanceof HTMLMediaElement) {
+              this.setupPlayer(node, trackInfo);
+              obs.disconnect();
+              return;
+            }
+          });
         });
-      });
-    },
-    option: {
-      childList: true,
-    },
-  };
+      },
+      option: {
+        childList: true,
+      },
+    };
 
-  if (isWebm) {
-    const webmObs = new MutationObserver(webmEmbed.callback);
-    webmObs.observe(span, webmEmbed.option);
-    setTimeout(() => {
-      if (srcMediaEl.parentElement)
-        srcMediaEl.parentElement.removeChild(srcMediaEl);
-    }, 800);
+    if (isWebm) {
+      const webmObs = new MutationObserver(webmEmbed.callback);
+      // observe if <audio> is added to replace <video>
+      webmObs.observe(this.target, webmEmbed.option);
+      // if <video> is not added, remove preserved <video>
+      // keep only the configured plyr
+      setTimeout(() => {
+        if (srcMediaEl.parentElement)
+          srcMediaEl.parentElement.removeChild(srcMediaEl);
+      }, 800);
+    }
   }
 }

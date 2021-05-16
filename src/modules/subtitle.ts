@@ -56,6 +56,8 @@ async function getVttURL(file: TFile, plugin: MediaExtended) {
   return URL.createObjectURL(blob);
 }
 
+export type trackInfo = { objUrls: string[]; tracks: HTMLTrackElement[] };
+
 /**
  *
  * @param video
@@ -64,7 +66,7 @@ async function getVttURL(file: TFile, plugin: MediaExtended) {
 export async function getSubtitleTracks(
   video: TFile,
   plugin: MediaExtended,
-): Promise<{ objUrls: string[]; tracks: HTMLTrackElement[] } | null> {
+): Promise<trackInfo | null> {
   const subFiles = getSubtitles(video);
   if (!subFiles) return null;
 

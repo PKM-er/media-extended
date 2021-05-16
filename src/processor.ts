@@ -2,8 +2,8 @@ import MediaExtended from "main";
 import { MarkdownPostProcessorContext } from "obsidian";
 import {
   ExternalEmbedHandler,
-  handleLink,
-  handleMedia,
+  InternalLinkHandler,
+  InternalEmbedHandler,
 } from "modules/handlers";
 import { mutationParam, filterDuplicates } from "modules/misc";
 
@@ -13,13 +13,13 @@ export function processInternalLinks(
   el: HTMLElement,
   ctx: MarkdownPostProcessorContext,
 ) {
+  const handler = new InternalLinkHandler(this, ctx);
   const internalLink: mutationParam = {
     // check if link is resolved
     callback: (list, obs) => {
       for (const m of filterDuplicates(list)) {
         const a = m.target as HTMLAnchorElement;
-        if (!a.hasClass("is-unresolved"))
-          handleLink(m.target as HTMLAnchorElement, this, ctx);
+        if (!a.hasClass("is-unresolved")) handler.setTarget(a).handle();
         obs.disconnect();
       }
     },
@@ -38,14 +38,15 @@ export function processInternalEmbeds(
   el: HTMLElement,
   ctx: MarkdownPostProcessorContext,
 ) {
-  let allEmbeds;
-  if ((allEmbeds = el.querySelectorAll("span.internal-embed"))) {
+  const allEmbeds = el.querySelectorAll("span.internal-embed");
+  if (allEmbeds) {
+    const handler = new InternalEmbedHandler(this, ctx);
     const internalEmbed: mutationParam = {
       callback: (list, obs) => {
         for (const mutation of filterDuplicates(list)) {
           const span = mutation.target as HTMLSpanElement;
           if (span.hasClass("is-loaded") && !span.hasClass("mod-empty")) {
-            if (span.hasClass("media-embed")) handleMedia(span, this, ctx);
+            if (span.hasClass("media-embed")) handler.setTarget(span).handle();
             obs.disconnect();
           }
         }

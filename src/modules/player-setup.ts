@@ -48,29 +48,13 @@ const defaultPlyrOption = {
 type PlayerProperties = "loop" | "muted" | "autoplay";
 
 export type setupTool = {
-  linktext: string;
   timeSpan: TimeSpan | null;
   is: (prop: PlayerProperties) => boolean;
   setHashOpt: (player: Player) => void;
   setPlayerTF: (player: Player) => void;
 };
 
-/**
- * @param src raw linktext (may contain #hash)
- */
-export function getSetupTool(src: string | URL): setupTool {
-  if (!src) throw new TypeError("srcLinktext empty");
-
-  let linktext: string, hash: string;
-  if (typeof src === "string") {
-    const { path, subpath } = parseLinktext(src);
-    linktext = path;
-    hash = subpath;
-  } else {
-    hash = src.hash;
-    linktext = src.href.slice(0, -hash.length);
-  }
-
+export function getSetupTool(hash: string): setupTool {
   const timeSpan = parseTF(hash);
   const hashQuery = parse(hash);
   // null: exist, with no value (#loop)
@@ -82,7 +66,6 @@ export function getSetupTool(src: string | URL): setupTool {
   ]);
 
   return {
-    linktext,
     timeSpan,
     is: (prop) => {
       for (const [hash, key] of hashOpts) {
@@ -225,23 +208,20 @@ export function setPlyr(
   )
     throw new TypeError("inputEl and container not match");
 
-  let playerEl: HTMLDivElement | HTMLMediaElement;
+  let plyrTargetEl: HTMLDivElement | HTMLMediaElement;
   if (inputEl instanceof HTMLMediaElement) {
-    // if (!inputEl.parentElement) throw new Error("no parentElement");
-    // inputEl.parentElement.appendChild(container);
-
     if (tracks) tracks.forEach((t) => inputEl.appendChild(t));
-    playerEl = inputEl;
+    plyrTargetEl = inputEl;
   } else {
-    playerEl = createDiv({ cls: "plyr__video-embed" });
-    playerEl.appendChild(inputEl);
+    plyrTargetEl = createDiv({ cls: "plyr__video-embed" });
+    plyrTargetEl.appendChild(inputEl);
   }
 
   if (options) options = { ...defaultPlyrOption, ...options };
   else options = defaultPlyrOption;
 
   options.autoplay = is("autoplay");
-  const player = new Plyr(playerEl, options);
+  const player = new Plyr(plyrTargetEl, options);
 
   // hide poster to make subtitle selectable
   if (tracks)
@@ -251,7 +231,13 @@ export function setPlyr(
   setHashOpt(player);
   setPlayerTF(player);
 
-  container.appendChild(playerEl);
+  const playerEl = player.elements.container;
+
+  if (playerEl) container.appendChild(playerEl);
+  else {
+    console.error(player);
+    throw new Error("player's container is null");
+  }
 
   return player as Plyr_TF;
 }
