@@ -217,6 +217,8 @@ export function setPlyr(
     plyrTargetEl.appendChild(inputEl);
   }
 
+  container.appendChild(plyrTargetEl);
+
   if (options) options = { ...defaultPlyrOption, ...options };
   else options = defaultPlyrOption;
 
@@ -230,14 +232,6 @@ export function setPlyr(
   setRatio(container, player);
   setHashOpt(player);
   setPlayerTF(player);
-
-  const playerEl = player.elements.container;
-
-  if (playerEl) container.appendChild(playerEl);
-  else {
-    console.error(player);
-    throw new Error("player's container is null");
-  }
 
   return player as Plyr_TF;
 }
