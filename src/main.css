@@ -56,10 +56,7 @@ div.thumbnail {
   filter: blur(1.5rem);
 }
 
-/** patch slider-thumb in plyr.css (margin-top: -4px -> 4px) */
+/** patch slider-thumb */
 .plyr--full-ui input[type="range"]::-webkit-slider-thumb {
-  margin-top: calc(
-    var(--plyr-range-track-height, 5px) / 2 * -1 -
-      var(--plyr-range-thumb-height, 13px) / 2 * -1
-  ) !important;
+  top: 0px;
 }
