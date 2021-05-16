@@ -62,7 +62,3 @@ export default class MediaExtended extends Plugin {
     }
   }
 }
-
-// function processVideoPlayer(el:HTMLElement, ctx:MarkdownPostProcessorContext) {
-//    this.player = new Plyr("span.internal-embed > video")
-// }

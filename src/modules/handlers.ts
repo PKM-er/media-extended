@@ -5,6 +5,7 @@ import { Await, filterDuplicates, mutationParam } from "./misc";
 import { defaultPlyrOption, getSetupTool, setRatio } from "./playerSetup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
 import { getPlayer } from "./videohost/getPlayer";
+import { setPlyr } from "./playerSetup";
 
 type mediaType = "audio" | "video";
 const acceptedExt: Map<mediaType, string[]> = new Map([
@@ -166,7 +167,8 @@ export async function handleMedia(
     throw new TypeError("src not found on container <span>");
   }
 
-  const { is, linktext, setPlayerTF, setHashOpt } = getSetupTool(srcLinktext);
+  const tool = getSetupTool(srcLinktext);
+  const { linktext } = tool;
 
   if (!(span.firstElementChild instanceof HTMLMediaElement)) {
     console.error("first element not player: %o", span.firstElementChild);
@@ -175,9 +177,22 @@ export async function handleMedia(
 
   const isWebm = /\.webm$|\.webm#/.test(span.getAttr("src") ?? "");
 
+  const videoFile = plugin.app.metadataCache.getFirstLinkpathDest(
+    linktext,
+    ctx.sourcePath,
+  );
+  if (!videoFile) throw new Error("No file found for link: " + linktext);
+
+  const trackInfo = await getSubtitleTracks(videoFile, plugin);
+
+  const srcMediaEl = span.firstElementChild;
+  /**
+   * div.local-media warped srcMediaEl by default,
+   * div.local-media containing cloned srcMediaEl when file is webm
+   */
   function setupPlayer(
     mediaEl: HTMLMediaElement,
-    info: Await<ReturnType<typeof getSubtitleTracks>>,
+    trackInfo: Await<ReturnType<typeof getSubtitleTracks>>,
     isWebm = false,
   ): HTMLDivElement {
     if (!mediaEl.parentElement) throw new Error("no parentElement");
@@ -190,36 +205,12 @@ export async function handleMedia(
       target = mediaEl.cloneNode(true) as typeof mediaEl;
       mediaEl.addClass("visuallyhidden");
     }
-    container.appendChild(target);
-    ctx.addChild(new SubtitleResource(container, info?.objUrls ?? []));
-
-    if (info) info.tracks.forEach((t) => target.appendChild(t));
-    const player = new Plyr(target, {
-      ...defaultPlyrOption,
-      autoplay: is("autoplay"),
-    });
-    if (info)
-      container.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
-    setRatio(container, player);
-    setHashOpt(player);
-    setPlayerTF(player);
+    setPlyr(container, target, tool);
+    ctx.addChild(new SubtitleResource(container, trackInfo?.objUrls ?? []));
     return container;
   }
 
-  const videoFile = plugin.app.metadataCache.getFirstLinkpathDest(
-    linktext,
-    ctx.sourcePath,
-  );
-  if (!videoFile) throw new Error("No file found for link: " + linktext);
-
-  const tracks = await getSubtitleTracks(videoFile, plugin);
-
-  const srcMediaEl = span.firstElementChild;
-  /**
-   * div.local-media warped srcMediaEl by default
-   * div.local-media containing cloned srcMediaEl when file is webm
-   */
-  const newMediaContainer = setupPlayer(srcMediaEl, tracks, isWebm);
+  const newMediaContainer = setupPlayer(srcMediaEl, trackInfo, isWebm);
 
   const webmEmbed: mutationParam = {
     callback: (list, obs) => {
@@ -228,7 +219,7 @@ export async function handleMedia(
           newMediaContainer.parentElement?.removeChild(newMediaContainer);
         m.addedNodes.forEach((node) => {
           if (node instanceof HTMLMediaElement) {
-            setupPlayer(node, tracks);
+            setupPlayer(node, trackInfo);
             obs.disconnect();
             return;
           }

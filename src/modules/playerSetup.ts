@@ -1,6 +1,7 @@
 import { parseTF, TimeSpan } from "./tfTools";
 import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
+import Plyr from "plyr";
 
 export interface Plyr_TF extends Plyr {
   timeSpan: TimeSpan | null;
@@ -43,7 +44,7 @@ export const defaultPlyrOption = {
 /** Player Properties that can be controlled by hash */
 type PlayerProperties = "loop" | "muted" | "autoplay";
 
-type setupTool = {
+export type setupTool = {
   linktext: string;
   timeSpan: TimeSpan | null;
   is: (prop: PlayerProperties) => boolean;
@@ -192,4 +193,68 @@ export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
       } else trys++;
     }, 100);
   });
+}
+
+export function setPlyr(
+  container: HTMLDivElement,
+  inputEl: HTMLIFrameElement,
+  tool: setupTool,
+  options?: Plyr.Options,
+): Plyr_TF;
+export function setPlyr(
+  container: HTMLDivElement,
+  inputEl: HTMLMediaElement,
+  tool: setupTool,
+  options?: Plyr.Options,
+  tracks?: HTMLTrackElement[],
+): Plyr_TF;
+export function setPlyr(
+  container: HTMLDivElement,
+  inputEl: HTMLIFrameElement | HTMLMediaElement,
+  tool: setupTool,
+  options?: Plyr.Options,
+  tracks?: HTMLTrackElement[],
+): Plyr_TF {
+  const { is, setHashOpt, setPlayerTF } = tool;
+
+  if (
+    !(
+      inputEl instanceof HTMLMediaElement && container.hasClass("local-media")
+    ) &&
+    !(
+      inputEl instanceof HTMLIFrameElement &&
+      container.hasClass("external-video")
+    )
+  )
+    throw new TypeError("inputEl and container not match");
+
+  let playerEl: HTMLDivElement | HTMLMediaElement;
+  if (inputEl instanceof HTMLMediaElement) {
+    // if (!inputEl.parentElement) throw new Error("no parentElement");
+    // inputEl.parentElement.appendChild(container);
+
+    if (tracks) tracks.forEach((t) => inputEl.appendChild(t));
+    playerEl = inputEl;
+  } else {
+    playerEl = createDiv({ cls: "plyr__video-embed" });
+    playerEl.appendChild(inputEl);
+  }
+
+  if (options) options = { ...defaultPlyrOption, ...options };
+  else options = defaultPlyrOption;
+
+  options.autoplay = is("autoplay");
+  const player = new Plyr(playerEl, options);
+
+  // hide poster to make subtitle selectable
+  if (tracks)
+    container.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
+
+  setRatio(container, player);
+  setHashOpt(player);
+  setPlayerTF(player);
+
+  container.appendChild(playerEl);
+
+  return player as Plyr_TF;
 }

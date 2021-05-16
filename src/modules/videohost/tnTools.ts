@@ -1,81 +1,8 @@
-import { assertNever } from "assert-never";
-import {
-  videoInfo,
-  setupPlyr,
-  Host,
-  setupIFrame,
-  playButtonHtml,
-} from "./tools";
 import https from "https";
 
-export async function setupThumbnail(
-  container: HTMLDivElement,
-  info: videoInfo,
-): Promise<void> {
-  const { id: videoId } = info;
-
-  let thumbnailUrl: string | null;
-  let fakePlayHandler: typeof PlyrHandler;
-  function PlyrHandler() {
-    const player = setupPlyr(container, info);
-    player.once("ready", function (evt) {
-      this.play();
-    });
-    container.removeChild(thumbnail);
-  }
-
-  switch (info.host) {
-    case Host.YouTube:
-      thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-      fakePlayHandler = PlyrHandler;
-      break;
-    case Host.Bilibili:
-      if (info.id.startsWith("av"))
-        thumbnailUrl = await fetchBiliThumbnail(+info.id.substring(2));
-      else thumbnailUrl = await fetchBiliThumbnail(info.id);
-      fakePlayHandler = () => {
-        setupIFrame(container, info);
-        container.removeChild(thumbnail);
-      };
-      break;
-    case Host.Vimeo:
-      thumbnailUrl = await fetchVimeoThumbnail(info.src);
-      fakePlayHandler = PlyrHandler;
-      break;
-    default:
-      assertNever(info.host);
-  }
-
-  const thumbnail = createDiv(
-    {
-      cls: ["thumbnail", "plyr plyr--full-ui plyr--video"],
-    },
-    (el) => {
-      if (thumbnailUrl) el.style.backgroundImage = `url("${thumbnailUrl}")`;
-      el.appendChild(
-        createEl(
-          "button",
-          {
-            cls: "plyr__control plyr__control--overlaid",
-            attr: {
-              type: "button",
-              "data-plyr": "play",
-              "aria-label": "Play",
-            },
-          },
-          (button) => {
-            button.innerHTML = playButtonHtml;
-            button.onClickEvent(fakePlayHandler);
-          },
-        ),
-      );
-    },
-  );
-
-  container.appendChild(thumbnail);
-}
-
-async function fetchVimeoThumbnail(url: string | URL): Promise<string | null> {
+export async function fetchVimeoThumbnail(
+  url: string | URL,
+): Promise<string | null> {
   const api = new URL("https://vimeo.com/api/oembed.json");
   if (typeof url === "string") api.searchParams.append("url", url);
   else api.searchParams.append("url", url.href);
@@ -94,9 +21,11 @@ async function fetchVimeoThumbnail(url: string | URL): Promise<string | null> {
     });
 }
 
-async function fetchBiliThumbnail(aid: number): Promise<string | null>;
-async function fetchBiliThumbnail(bvid: string): Promise<string | null>;
-async function fetchBiliThumbnail(id: string | number): Promise<string | null> {
+export async function fetchBiliThumbnail(aid: number): Promise<string | null>;
+export async function fetchBiliThumbnail(bvid: string): Promise<string | null>;
+export async function fetchBiliThumbnail(
+  id: string | number,
+): Promise<string | null> {
   const api = new URL("http://api.bilibili.com/x/web-interface/view");
   if (typeof id === "string") api.searchParams.append("bvid", id);
   else api.searchParams.append("aid", "av" + id);
