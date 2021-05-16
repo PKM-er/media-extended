@@ -239,7 +239,13 @@ export class InternalEmbedHandler extends Handler<HTMLSpanElement> {
       target = mediaEl.cloneNode(true) as typeof mediaEl;
       mediaEl.addClass("visuallyhidden");
     }
-    setPlyr(container, target, getSetupTool(this.hash));
+    setPlyr(
+      container,
+      target,
+      getSetupTool(this.hash),
+      undefined,
+      trackInfo?.tracks,
+    );
     this.ctx.addChild(
       new SubtitleResource(container, trackInfo?.objUrls ?? []),
     );
