@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/alx-plugins/media-extended/compare/2.5.1...2.5.2) (2021-05-16)
+
+
+### Bug Fixes
+
+* **main.css:** slider-thumb no longer get misaligned across different theme ([4b47f61](https://github.com/alx-plugins/media-extended/commit/4b47f61eaf74fa0001adfbb9846161e6e6be8b61))
+
 ## [2.5.1](https://github.com/alx-plugins/media-extended/compare/2.5.0...2.5.1) (2021-05-16)
 
 

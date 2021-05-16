@@ -1,6 +1,6 @@
 {
   "name": "media-extended",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Improve media (video/audio) playing in Obsidian",
   "main": "main.js",
   "scripts": {
