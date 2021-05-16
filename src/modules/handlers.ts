@@ -1,11 +1,9 @@
 import MediaExtended from "main";
 import { FileView, MarkdownPostProcessorContext } from "obsidian";
-import Plyr from "plyr";
-import { Await, filterDuplicates, mutationParam } from "./misc";
-import { defaultPlyrOption, getSetupTool, setRatio } from "./playerSetup";
+import { Await, mutationParam } from "./misc";
+import { getSetupTool, setPlyr } from "./player-setup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
-import { getPlayer } from "./videohost/getPlayer";
-import { setPlyr } from "./playerSetup";
+import { getPlayer } from "./video-host/get-player";
 
 type mediaType = "audio" | "video";
 const acceptedExt: Map<mediaType, string[]> = new Map([

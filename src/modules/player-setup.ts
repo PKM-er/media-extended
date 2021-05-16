@@ -1,4 +1,4 @@
-import { parseTF, TimeSpan } from "./tfTools";
+import { parseTF, TimeSpan } from "./temporal-frag";
 import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
 import Plyr from "plyr";
