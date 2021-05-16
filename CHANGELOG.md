@@ -1,3 +1,12 @@
+## [2.5.1](https://github.com/alx-plugins/media-extended/compare/2.5.0...2.5.1) (2021-05-16)
+
+
+### Bug Fixes
+
+* adjust css to fix frame size not responsive ([4d011bf](https://github.com/alx-plugins/media-extended/commit/4d011bf0fe90f3062e7f6e979f247159b5a64ea3))
+* **handlers.ts:** fix internal embed not reading subtitles ([a964c0b](https://github.com/alx-plugins/media-extended/commit/a964c0b6e98b7fef6f35ac5d67cb203de0212013))
+* **player-setup.ts:** fix internal webm embed not working ([7fab710](https://github.com/alx-plugins/media-extended/commit/7fab71048d5e480452982e7445fa887fa31228fb))
+
 # [2.5.0](https://github.com/alx-plugins/media-extended/compare/2.4.0...2.5.0) (2021-05-15)
 
 
