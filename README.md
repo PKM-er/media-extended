@@ -43,7 +43,7 @@ Now also support videos from different hosts
 - Bilibili: `![](https://www.bilibili.com/video/BV17x411w7KC)` (Timestamps not supported)
 - Vimeo: `![](https://vimeo.com/336812611)`
 
-## Speed Control
+### Speed Control
 
 Check Demo [here](https://img.aidenlx.top/picgo/SpeedControlDemo.mp4)
 
