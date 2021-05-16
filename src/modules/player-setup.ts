@@ -3,12 +3,15 @@ import { stringify, parse } from "query-string";
 import { parseLinktext } from "obsidian";
 import Plyr from "plyr";
 
+/** Player with temporal fragments */
+export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
+export type Player = HTMLMediaElement | Plyr;
+
+/** Plyr with temporal fragments */
 export interface Plyr_TF extends Plyr {
   timeSpan: TimeSpan | null;
 }
-
-export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
-export type Player = HTMLMediaElement | Plyr;
+/** HTMLMediaElement with temporal fragments */
 export interface HTMLMediaEl_TF extends HTMLMediaElement {
   timeSpan: TimeSpan;
 }
@@ -16,7 +19,7 @@ export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
   return (el as HTMLMediaEl_TF).timeSpan !== undefined;
 }
 
-export const defaultPlyrControls = [
+const defaultPlyrControls = [
   "play-large", // The large play button in the center
   // "restart", // Restart playback
   // "rewind", // Rewind by the seek time (default 10 seconds)
@@ -35,7 +38,7 @@ export const defaultPlyrControls = [
   // "fullscreen", // Toggle fullscreen
 ];
 
-export const defaultPlyrOption = {
+const defaultPlyrOption = {
   fullscreen: { enabled: false },
   invertTime: false,
   controls: defaultPlyrControls,
@@ -101,15 +104,9 @@ export function getSetupTool(src: string | URL): setupTool {
  * inject media fragment into player's src
  * @param player an <audio> or <video> element
  */
-export function setStartTime(player: HTMLMediaEl_TF): void;
-export function setStartTime(
-  player: HTMLMediaElement,
-  timeSpan: TimeSpan,
-): void;
-export function setStartTime(
-  player: HTMLMediaElement,
-  timeSpan?: TimeSpan,
-): void {
+function setStartTime(player: HTMLMediaEl_TF): void;
+function setStartTime(player: HTMLMediaElement, timeSpan: TimeSpan): void;
+function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void {
   if (isHTMLMediaEl_TF(player)) {
     timeSpan = player.timeSpan;
   }
@@ -178,7 +175,7 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
   return playerTF;
 }
 
-export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
+function setRatio(containerEl: HTMLDivElement, player: Plyr) {
   player.once("ready", function () {
     let trys = 0;
 

@@ -83,7 +83,7 @@ function convertTime(input: string): number | null {
       return +hh * 60 + +mm * 60 + +ss;
     } else return null;
   } else {
-    console.error("fail to parse npt: " + input);
+    // console.error("fail to parse npt: " + input);
     return null;
   }
 }

@@ -25,7 +25,7 @@ export function getPlayer(url: URL, thumbnail = false): HTMLDivElement | null {
   return container;
 }
 
-export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
+function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   const tool = getSetupTool(info.src);
   const { timeSpan } = tool;
 
@@ -41,7 +41,7 @@ export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   return setPlyr(container, getIFrame(info), getSetupTool(info.src), options);
 }
 
-export async function setupThumbnail(
+async function setupThumbnail(
   container: HTMLDivElement,
   info: videoInfo,
 ): Promise<void> {
@@ -124,7 +124,7 @@ function getIFrame(info: videoInfo) {
   });
 }
 
-export function setupIFrame(container: HTMLDivElement, info: videoInfo): void {
+function setupIFrame(container: HTMLDivElement, info: videoInfo): void {
   container.appendChild(getIFrame(info));
   container.addClass("bili-embed");
 }
