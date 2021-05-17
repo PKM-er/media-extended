@@ -43,8 +43,8 @@ const defaultPlyrControls = [
   "fullscreen", // Toggle fullscreen
 ];
 
-const defaultPlyrOption = {
-  fullscreen: { enabled: false },
+const defaultPlyrOption: Plyr.Options = {
+  // fullscreen: { enabled: false },
   invertTime: false,
   controls: defaultPlyrControls,
 };

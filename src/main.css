@@ -2,7 +2,7 @@
 div.external-video,
 div.local-media {
   min-height: 16em;
-  min-width: 350px;
+  min-width: 450px;
   max-width: 100%;
   height: 40vh;
   margin: auto;
