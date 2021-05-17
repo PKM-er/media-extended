@@ -89,13 +89,12 @@ export class ExternalEmbedHandler extends Handler<HTMLImageElement> {
     }
 
     if (fileType) {
-      const { setPlayerTF, setHashOpt } = getSetupTool(this.hash);
-      let newEl = createEl(fileType);
-      newEl.src = this.link;
-      newEl.controls = true;
-      setHashOpt(newEl);
-      setPlayerTF(newEl);
-      this.replaceWith(newEl);
+      const playerEl = createEl(fileType);
+      playerEl.src = this.link;
+      playerEl.controls = true;
+      const container = createDiv({ cls: "local-media" });
+      setPlyr(container, playerEl, getSetupTool(this.hash));
+      this.replaceWith(container);
       return null;
     } else return this;
   }
