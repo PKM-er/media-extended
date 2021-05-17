@@ -1,3 +1,12 @@
+## [2.5.3](https://github.com/alx-plugins/media-extended/compare/2.5.2...2.5.3) (2021-05-17)
+
+
+### Bug Fixes
+
+* **player-setup.ts:** enable pip and fullscreen by default ([1ff6dad](https://github.com/alx-plugins/media-extended/commit/1ff6dad91e52b3273538b37948aea33b9fb6072a))
+* caption is enable by default when subtitle file is present ([28539fa](https://github.com/alx-plugins/media-extended/commit/28539fa4c4706c38b8eae3ac9f88a60c024f1fb3))
+* enable plyr for direct links ([4ef6f53](https://github.com/alx-plugins/media-extended/commit/4ef6f53956d9d2dd10c86998254525dc03d958a9))
+
 ## [2.5.2](https://github.com/alx-plugins/media-extended/compare/2.5.1...2.5.2) (2021-05-16)
 
 
