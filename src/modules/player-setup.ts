@@ -232,6 +232,7 @@ export function setPlyr(
   setRatio(container, player);
   setHashOpt(player);
   setPlayerTF(player);
+  if (tracks) player.once("ready", () => player.toggleCaptions());
 
   return player as Plyr_TF;
 }
