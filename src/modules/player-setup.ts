@@ -7,16 +7,21 @@ import Plyr from "plyr";
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
 export type Player = HTMLMediaElement | Plyr;
 
+interface TemporalFrag {
+  readonly timeSpan: TimeSpan | null;
+  setTimeSpan(span: TimeSpan | null): void;
+}
+
 /** Plyr with temporal fragments */
-export interface Plyr_TF extends Plyr {
-  timeSpan: TimeSpan | null;
-}
+export type Plyr_TF = TemporalFrag & Plyr;
 /** HTMLMediaElement with temporal fragments */
-export interface HTMLMediaEl_TF extends HTMLMediaElement {
-  timeSpan: TimeSpan;
-}
+export type HTMLMediaEl_TF = TemporalFrag & HTMLMediaElement;
+
 export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
-  return (el as HTMLMediaEl_TF).timeSpan !== undefined;
+  return (
+    Boolean((el as HTMLMediaEl_TF).timeSpan) ||
+    (el as HTMLMediaEl_TF).timeSpan === null
+  );
 }
 
 const defaultPlyrControls = [
@@ -74,7 +79,7 @@ export function getSetupTool(hash: string): setupTool {
       return false;
     },
     setPlayerTF: (player) => {
-      if (timeSpan) injectTimestamp(player, timeSpan);
+      PlayerTFSetup(player, timeSpan);
     },
     setHashOpt: (player) =>
       hashOpts.forEach((key, hash) => {
@@ -83,39 +88,15 @@ export function getSetupTool(hash: string): setupTool {
   };
 }
 
-/**
- * inject media fragment into player's src
- * @param player an <audio> or <video> element
- */
-function setStartTime(player: HTMLMediaEl_TF): void;
-function setStartTime(player: HTMLMediaElement, timeSpan: TimeSpan): void;
-function setStartTime(player: HTMLMediaElement, timeSpan?: TimeSpan): void {
-  if (isHTMLMediaEl_TF(player)) {
-    timeSpan = player.timeSpan;
-  }
-  if (!timeSpan) throw new Error("timespan not found");
-
-  const { path, subpath: hash } = parseLinktext(player.src);
-  let hashObj = parse(hash);
-  hashObj.t = timeSpan.raw;
-  player.src = path + "#" + stringify(hashObj);
-}
-
-export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
+export function PlayerTFSetup(player: Player, timeSpan?: TimeSpan | null) {
   const playerTF = player as Player_TF;
-  playerTF.timeSpan = timeSpan;
 
-  if (playerTF instanceof HTMLMediaElement) {
-    setStartTime(playerTF, timeSpan);
-  }
-
-  // inject event handler to restrict play range
   /**
    * if current is out of range when start playing,
    * move currentTime back to timeSpan.start
    **/
   const onplaying = (e: Event) => {
-    if (!playerTF.timeSpan) throw new Error("timeSpan not found");
+    if (!playerTF.timeSpan) return;
 
     const {
       timeSpan: { start, end },
@@ -130,7 +111,7 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
    * or play at start when loop is enabled
    */
   const ontimeupdate = (e: Event) => {
-    if (!playerTF.timeSpan) throw new Error("timeSpan not found");
+    if (!playerTF.timeSpan) return;
 
     const {
       timeSpan: { start, end },
@@ -147,15 +128,35 @@ export function injectTimestamp(player: Player, timeSpan: TimeSpan): Player_TF {
       }
     }
   };
-  if (playerTF instanceof HTMLMediaElement) {
-    playerTF.onplaying = onplaying;
-    playerTF.ontimeupdate = ontimeupdate;
-  } else {
-    playerTF.on("playing", onplaying);
-    playerTF.on("timeupdate", ontimeupdate);
-  }
 
-  return playerTF;
+  /** when update, inject event handler to restrict play range */
+  playerTF.setTimeSpan = (span: TimeSpan | null) => {
+    // @ts-ignore
+    playerTF.timeSpan = span;
+
+    if (span) {
+      if (playerTF instanceof HTMLMediaElement && !playerTF.onplaying) {
+        (playerTF as HTMLMediaElement).onplaying = onplaying;
+        (playerTF as HTMLMediaElement).ontimeupdate = ontimeupdate;
+      } else {
+        (playerTF as Plyr).on("playing", onplaying);
+        (playerTF as Plyr).on("timeupdate", ontimeupdate);
+      }
+      // set currentTime
+      playerTF.currentTime = span.start ?? 0;
+    } else {
+      if (playerTF instanceof HTMLMediaElement) {
+        playerTF.onplaying = null;
+        playerTF.ontimeupdate = null;
+      } else {
+        playerTF.off("playing", onplaying);
+        playerTF.off("timeupdate", ontimeupdate);
+      }
+      // reset currentTime
+      playerTF.currentTime = 0;
+    }
+  };
+  playerTF.setTimeSpan(timeSpan ?? null);
 }
 
 function setRatio(containerEl: HTMLDivElement, player: Plyr) {
