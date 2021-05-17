@@ -4,7 +4,7 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { Await, mutationParam } from "./misc";
+import { Await, mutationParam, getUrl } from "./misc";
 import { getSetupTool, setPlyr } from "./player-setup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
 import { getPlayer } from "./video-host/get-player";
@@ -14,15 +14,6 @@ const acceptedExt: Map<mediaType, string[]> = new Map([
   ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
   ["video", ["mp4", "webm", "ogv"]],
 ]);
-
-function getUrl(src: string): URL | null {
-  try {
-    return new URL(src);
-  } catch (error) {
-    // if url is invaild, do nothing and break current loop
-    return null;
-  }
-}
 
 abstract class Handler<T extends HTMLElement> {
   target: T;

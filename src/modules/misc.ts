@@ -15,3 +15,12 @@ export type Await<T> = T extends {
 }
   ? U
   : T;
+
+export function getUrl(src: string): URL | null {
+  try {
+    return new URL(src);
+  } catch (error) {
+    // if url is invaild, do nothing and break current loop
+    return null;
+  }
+}
