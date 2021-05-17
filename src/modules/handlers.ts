@@ -4,16 +4,10 @@ import {
   MarkdownPostProcessorContext,
   parseLinktext,
 } from "obsidian";
-import { Await, mutationParam, getUrl } from "./misc";
+import { Await, mutationParam, getUrl, getMediaType } from "./misc";
 import { getSetupTool, setPlyr } from "./player-setup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
 import { getPlayer } from "./video-host/get-player";
-
-type mediaType = "audio" | "video";
-const acceptedExt: Map<mediaType, string[]> = new Map([
-  ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
-  ["video", ["mp4", "webm", "ogv"]],
-]);
 
 abstract class Handler<T extends HTMLElement> {
   target: T;
@@ -70,14 +64,7 @@ export class ExternalEmbedHandler extends Handler<HTMLImageElement> {
     const url = getUrl(this.linktext);
     if (!url) return this;
 
-    // if url contains no extension, type = null
-    let fileType: mediaType | null = null;
-    if (url.pathname.includes(".")) {
-      const ext = url.pathname.split(".").pop() as string;
-      for (const [type, extList] of acceptedExt) {
-        if (extList.includes(ext)) fileType = type;
-      }
-    }
+    const fileType = getMediaType(url);
 
     if (fileType) {
       const playerEl = createEl(fileType);
