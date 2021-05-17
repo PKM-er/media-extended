@@ -10,6 +10,7 @@ This plugin introduce some new features that improve media (video/audio) playing
   - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
 - [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
 - [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
+  - From local drive: `![](files:///Users/someone/video.ogv#t=60)`
   - From external media files: `![](http://example.com/video.ogv#t=60)`
   - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
     - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
