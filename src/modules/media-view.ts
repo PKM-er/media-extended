@@ -2,7 +2,7 @@ import { getPlayer } from "external-embed";
 import { ItemView, MarkdownView, Menu, WorkspaceLeaf } from "obsidian";
 import Plyr from "plyr";
 import { mainpart } from "./misc";
-import { getSetupTool, Plyr_TF, setPlyr, setRatio } from "./player-setup";
+import { getSetupTool, Plyr_TF, setRatio } from "./player-setup";
 import { TimeSpan } from "./temporal-frag";
 import { Host, isDirect, videoInfo } from "./video-host/video-info";
 import TimeFormat from "hh-mm-ss";
@@ -14,7 +14,8 @@ export class ExternalMediaView extends ItemView {
   container: HTMLDivElement;
   info: videoInfo | null;
   displayText: string = "No Media";
-  baseMenu: (menu: Menu) => void;
+  baseMenu: ItemView["onMoreOptionsMenu"];
+  leafOpen_bak: WorkspaceLeaf["open"];
 
   public set src(info: videoInfo) {
     if (!this.isEqual(info)) {
@@ -80,6 +81,12 @@ export class ExternalMediaView extends ItemView {
     this.onMoreOptionsMenu = (menu: Menu) => {
       this.extendedMenu(menu);
       this.baseMenu.bind(this)(menu);
+    };
+    this.leafOpen_bak = leaf.open;
+    // @ts-ignore
+    leaf.open = (view) => {
+      if (view instanceof ExternalMediaView)
+        return this.leafOpen_bak.bind(leaf)(view);
     };
   }
 
