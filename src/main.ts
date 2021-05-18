@@ -5,6 +5,8 @@ import "./main.css";
 import { processExternalEmbeds } from "external-embed";
 import { processInternalEmbeds } from "internal-embed";
 import { processInternalLinks } from "internal-link";
+import { processExternalLinks } from "external-link";
+import { ExternalMediaView, EX_VIEW_TYPE } from "modules/media-view";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
@@ -12,6 +14,7 @@ export default class MediaExtended extends Plugin {
   processInternalEmbeds = processInternalEmbeds.bind(this);
   processInternalLinks = processInternalLinks.bind(this);
   processExternalEmbeds = processExternalEmbeds.bind(this);
+  processExternalLinks = processExternalLinks.bind(this);
 
   async loadSettings() {
     Object.assign(this.settings, await this.loadData());
@@ -37,6 +40,9 @@ export default class MediaExtended extends Plugin {
     if (this.settings.extendedImageEmbedSyntax) {
       this.registerMarkdownPostProcessor(this.processExternalEmbeds);
     }
+
+    this.registerView(EX_VIEW_TYPE, (leaf) => new ExternalMediaView(leaf));
+    this.registerMarkdownPostProcessor(this.processExternalLinks);
 
     // this.registerMarkdownPostProcessor(processVideoPlayer.bind(this));
   }
