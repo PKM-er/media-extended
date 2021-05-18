@@ -159,7 +159,7 @@ export function PlayerTFSetup(player: Player, timeSpan?: TimeSpan | null) {
   playerTF.setTimeSpan(timeSpan ?? null);
 }
 
-function setRatio(containerEl: HTMLDivElement, player: Plyr) {
+export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
   player.once("ready", function () {
     let trys = 0;
 

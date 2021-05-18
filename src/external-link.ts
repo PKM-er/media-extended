@@ -1,9 +1,8 @@
 import MediaExtended from "main";
 import { Handler } from "modules/handlers";
 import { ExternalMediaView, EX_VIEW_TYPE } from "modules/media-view";
-import { getSetupTool } from "modules/player-setup";
 import { getVideoInfo, videoInfo } from "modules/video-host/video-info";
-import { MarkdownPostProcessorContext } from "obsidian";
+import { MarkdownPostProcessorContext, WorkspaceLeaf } from "obsidian";
 
 export function processExternalLinks(
   this: MediaExtended,
@@ -47,20 +46,43 @@ export class ExternalLinkHandler extends Handler<HTMLAnchorElement> {
       e.preventDefault();
       const workspace = this.plugin.app.workspace;
 
-      const opened = workspace.getLeavesOfType(EX_VIEW_TYPE);
+      // @ts-ignore
+      const groupId: string | null = workspace.activeLeaf.group;
+      let playerLeaf: WorkspaceLeaf | null = null;
+      if (groupId) {
+        const allPlayerLeavesInGroup = workspace
+          .getLeavesOfType(EX_VIEW_TYPE)
+          .filter((leaf) => {
+            // @ts-ignore
+            return leaf.group === groupId;
+          });
+        if (allPlayerLeavesInGroup.length > 0)
+          playerLeaf = allPlayerLeavesInGroup[0];
+        for (let i = 1; i < allPlayerLeavesInGroup.length; i++) {
+          allPlayerLeavesInGroup[i].detach();
+        }
+      }
 
-      const found = opened.find((leaf) =>
-        (leaf.view as ExternalMediaView).isEqual(info),
-      );
-
-      if (found) {
-        const view = found.view as ExternalMediaView;
-        view.timeSpan = getSetupTool(this.hash).timeSpan;
-        view.player.play();
+      if (playerLeaf) {
+        const view = playerLeaf.view as ExternalMediaView;
+        const info = getVideoInfo(this.linktext);
+        if (info) {
+          if (view.isEqual(info)) {
+            view.src = info;
+            view.player.play();
+          } else {
+            view.player.once("ready", function () {
+              this.play();
+            });
+            view.src = info;
+          }
+        }
       } else {
         const newLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
+        workspace.activeLeaf.setGroupMember(newLeaf);
         const view = new ExternalMediaView(newLeaf, info);
         newLeaf.open(view);
+
         view.player.once("ready", function () {
           this.play();
         });
