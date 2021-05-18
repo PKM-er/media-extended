@@ -21,12 +21,7 @@ export function setupPlyr(
     };
   else options = undefined;
 
-  return setPlyr(
-    container,
-    getIFrame(info),
-    getSetupTool(info.src.hash),
-    options,
-  );
+  return setPlyr(container, getIFrame(info), tool, options);
 }
 
 export async function setupThumbnail(

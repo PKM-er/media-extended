@@ -24,8 +24,11 @@ function getMediaType(url: URL): mediaType | null {
 
 export type videoInfo = videoInfo_Direct | videoInfo_Host;
 export interface videoInfo_Direct {
-  src: URL;
   type: mediaType;
+  /** converted src that is safe to use inside Obsidian */
+  link: URL;
+  filename: string;
+  src: URL;
 }
 export function isDirect(info: videoInfo): info is videoInfo_Direct {
   return (info as videoInfo_Host).host === undefined;
@@ -37,9 +40,24 @@ export interface videoInfo_Host {
   src: URL;
 }
 
-export function getVideoInfo(src: URL): videoInfo | null {
+export function getVideoInfo(src: URL | string): videoInfo | null {
+  if (typeof src === "string") {
+    try {
+      src = new URL(src);
+    } catch (error) {
+      console.error("invalid url: ", src);
+      return null;
+    }
+  }
   const mediaType = getMediaType(src);
-  if (mediaType) return { src, type: mediaType };
+  if (mediaType) {
+    let link: URL;
+    if (src.protocol === "file:")
+      link = new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
+    else link = src;
+    const rawFilename = link.pathname.split("/").pop() ?? "";
+    return { type: mediaType, link, filename: decodeURI(rawFilename), src };
+  }
 
   switch (src.hostname) {
     case "www.bilibili.com":

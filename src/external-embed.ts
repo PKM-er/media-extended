@@ -53,13 +53,12 @@ export function getPlayer(
   info: videoInfo,
 ): HTMLDivElement | null {
   const container = createDiv({ cls: "external-video" });
-  if (!info) return null;
   if (isDirect(info)) {
     const playerEl = createEl(info.type);
-    playerEl.src = info.src.href;
+    playerEl.src = info.link.href;
     playerEl.controls = true;
     const container = createDiv({ cls: "local-media" });
-    setPlyr(container, playerEl, getSetupTool(info.src.hash));
+    setPlyr(container, playerEl, getSetupTool(info.link.hash));
     return container;
   }
 
