@@ -24,21 +24,3 @@ export function getUrl(src: string): URL | null {
     return null;
   }
 }
-
-type mediaType = "audio" | "video";
-const acceptedExt: Map<mediaType, string[]> = new Map([
-  ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
-  ["video", ["mp4", "webm", "ogv"]],
-]);
-
-export function getMediaType(url: URL): mediaType | null {
-  // if url contains no extension, type = null
-  let fileType: mediaType | null = null;
-  if (url.pathname.includes(".")) {
-    const ext = url.pathname.split(".").pop() as string;
-    for (const [type, extList] of acceptedExt) {
-      if (extList.includes(ext)) fileType = type;
-    }
-  }
-  return fileType;
-}

@@ -4,7 +4,33 @@ export enum Host {
   Vimeo,
 }
 
-export interface videoInfo {
+type mediaType = "audio" | "video";
+const acceptedExt: Map<mediaType, string[]> = new Map([
+  ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
+  ["video", ["mp4", "webm", "ogv"]],
+]);
+
+function getMediaType(url: URL): mediaType | null {
+  // if url contains no extension, type = null
+  let fileType: mediaType | null = null;
+  if (url.pathname.includes(".")) {
+    const ext = url.pathname.split(".").pop() as string;
+    for (const [type, extList] of acceptedExt) {
+      if (extList.includes(ext)) fileType = type;
+    }
+  }
+  return fileType;
+}
+
+export type videoInfo = videoInfo_Direct | videoInfo_Host;
+export interface videoInfo_Direct {
+  src: URL;
+  type: mediaType;
+}
+export function isDirect(info: videoInfo): info is videoInfo_Direct {
+  return (info as videoInfo_Host).host === undefined;
+}
+export interface videoInfo_Host {
   host: Host;
   id: string;
   iframe: URL;
@@ -12,6 +38,9 @@ export interface videoInfo {
 }
 
 export function getVideoInfo(src: URL): videoInfo | null {
+  const mediaType = getMediaType(src);
+  if (mediaType) return { src, type: mediaType };
+
   switch (src.hostname) {
     case "www.bilibili.com":
       if (src.pathname.startsWith("/video")) {
