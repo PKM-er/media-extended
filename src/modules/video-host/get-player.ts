@@ -1,31 +1,11 @@
 import { assertNever } from "assert-never";
 import { Plyr_TF, getSetupTool, setPlyr } from "modules/player-setup";
 import { fetchBiliThumbnail, fetchVimeoThumbnail } from "./thumbnail";
-import { getVideoInfo, Host, videoInfo } from "./video-info";
+import { Host, videoInfo } from "./video-info";
 
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
-export function getPlayer(url: URL, thumbnail = false): HTMLDivElement | null {
-  let info = getVideoInfo(url);
-  if (!info) return null;
-  const container = createDiv({ cls: "external-video" });
-  switch (info.host) {
-    case Host.YouTube:
-    case Host.Vimeo:
-      if (thumbnail) setupThumbnail(container, info);
-      else setupPlyr(container, info);
-      break;
-    case Host.Bilibili:
-      if (thumbnail) setupThumbnail(container, info);
-      else setupIFrame(container, info);
-      break;
-    default:
-      assertNever(info.host);
-  }
-  return container;
-}
-
-function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
+export function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   const tool = getSetupTool(info.src.hash);
   const { timeSpan } = tool;
 
@@ -46,7 +26,7 @@ function setupPlyr(container: HTMLDivElement, info: videoInfo): Plyr_TF {
   );
 }
 
-async function setupThumbnail(
+export async function setupThumbnail(
   container: HTMLDivElement,
   info: videoInfo,
 ): Promise<void> {
@@ -129,7 +109,7 @@ function getIFrame(info: videoInfo) {
   });
 }
 
-function setupIFrame(container: HTMLDivElement, info: videoInfo): void {
+export function setupIFrame(container: HTMLDivElement, info: videoInfo): void {
   container.appendChild(getIFrame(info));
   container.addClass("bili-embed");
 }

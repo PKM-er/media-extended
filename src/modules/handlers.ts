@@ -1,3 +1,4 @@
+import assertNever from "assert-never";
 import MediaExtended from "main";
 import {
   FileView,
@@ -7,7 +8,12 @@ import {
 import { Await, mutationParam, getUrl, getMediaType } from "./misc";
 import { getSetupTool, setPlyr } from "./player-setup";
 import { getSubtitleTracks, SubtitleResource } from "./subtitle";
-import { getPlayer } from "./video-host/get-player";
+import {
+  setupIFrame,
+  setupPlyr,
+  setupThumbnail,
+} from "./video-host/get-player";
+import { getVideoInfo, Host } from "./video-host/video-info";
 
 abstract class Handler<T extends HTMLElement> {
   target: T;
@@ -77,15 +83,35 @@ export class ExternalEmbedHandler extends Handler<HTMLImageElement> {
     } else return this;
   }
 
-  doVideoHost(thumbnail: boolean): this | null {
-    const url = getUrl(this.linktext);
-    if (!url) return this;
-
-    const newEl = getPlayer(url, thumbnail);
+  doVideoHost(thumbnail = false): this | null {
+    const newEl = this.getPlayer(thumbnail);
     if (newEl) {
       this.replaceWith(newEl);
       return null;
     } else return this;
+  }
+
+  getPlayer(thumbnail: boolean): HTMLDivElement | null {
+    const url = getUrl(this.linktext);
+    if (!url) return null;
+
+    let info = getVideoInfo(url);
+    if (!info) return null;
+    const container = createDiv({ cls: "external-video" });
+    switch (info.host) {
+      case Host.YouTube:
+      case Host.Vimeo:
+        if (thumbnail) setupThumbnail(container, info);
+        else setupPlyr(container, info);
+        break;
+      case Host.Bilibili:
+        if (thumbnail) setupThumbnail(container, info);
+        else setupIFrame(container, info);
+        break;
+      default:
+        assertNever(info.host);
+    }
+    return container;
   }
 }
 
