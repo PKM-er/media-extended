@@ -1,12 +1,10 @@
 import { Plugin, MarkdownPreviewRenderer } from "obsidian";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
-import {
-  processInternalEmbeds,
-  processExternalEmbeds,
-  processInternalLinks,
-} from "./processor";
 import "plyr/dist/plyr.css";
 import "./main.css";
+import { processExternalEmbeds } from "external-embed";
+import { processInternalEmbeds } from "internal-embed";
+import { processInternalLinks } from "internal-link";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
