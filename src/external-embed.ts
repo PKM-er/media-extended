@@ -2,7 +2,7 @@ import assertNever from "assert-never";
 import MediaExtended from "main";
 import { Handler } from "modules/handlers";
 import { getUrl } from "modules/misc";
-import { setPlyr, getSetupTool } from "modules/player-setup";
+import { setPlyr, getSetupTool, Plyr_TF } from "modules/player-setup";
 import {
   setupThumbnail,
   setupPlyr,
@@ -43,7 +43,7 @@ class ExternalEmbedHandler extends Handler<HTMLImageElement> {
   handle(thumbnail = false): boolean {
     if (!this.info) return false;
     const newEl = getPlayer(thumbnail, this.info);
-    if (newEl) this.replaceWith(newEl);
+    if (newEl) this.replaceWith(newEl.container);
     return Boolean(newEl);
   }
 }
@@ -51,22 +51,23 @@ class ExternalEmbedHandler extends Handler<HTMLImageElement> {
 export function getPlayer(
   thumbnail: boolean,
   info: videoInfo,
-): HTMLDivElement | null {
+): { player: Plyr_TF | null; container: HTMLDivElement } {
   const container = createDiv({ cls: "external-video" });
   if (isDirect(info)) {
     const playerEl = createEl(info.type);
     playerEl.src = info.link.href;
     playerEl.controls = true;
     const container = createDiv({ cls: "local-media" });
-    setPlyr(container, playerEl, getSetupTool(info.link.hash));
-    return container;
+    let player = setPlyr(container, playerEl, getSetupTool(info.link.hash));
+    return { player, container };
   }
 
+  let player: Plyr_TF | null = null;
   switch (info.host) {
     case Host.YouTube:
     case Host.Vimeo:
       if (thumbnail) setupThumbnail(container, info);
-      else setupPlyr(container, info);
+      else player = setupPlyr(container, info);
       break;
     case Host.Bilibili:
       if (thumbnail) setupThumbnail(container, info);
@@ -75,5 +76,5 @@ export function getPlayer(
     default:
       assertNever(info.host);
   }
-  return container;
+  return { player, container };
 }
