@@ -1,9 +1,11 @@
 import { getPlayer } from "external-embed";
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, MarkdownView, Menu, WorkspaceLeaf } from "obsidian";
 import Plyr from "plyr";
+import { mainpart } from "./misc";
 import { getSetupTool, Plyr_TF, setPlyr, setRatio } from "./player-setup";
 import { TimeSpan } from "./temporal-frag";
 import { Host, isDirect, videoInfo } from "./video-host/video-info";
+import TimeFormat from "hh-mm-ss";
 
 export const EX_VIEW_TYPE = "external-media";
 
@@ -12,6 +14,7 @@ export class ExternalMediaView extends ItemView {
   container: HTMLDivElement;
   info: videoInfo | null;
   displayText: string = "No Media";
+  baseMenu: (menu: Menu) => void;
 
   public set src(info: videoInfo) {
     if (!this.isEqual(info)) {
@@ -73,6 +76,43 @@ export class ExternalMediaView extends ItemView {
     this.container = container;
     this.contentEl.appendChild(container);
     this.setDisplayText(info);
+    this.baseMenu = this.onMoreOptionsMenu;
+    this.onMoreOptionsMenu = (menu: Menu) => {
+      this.extendedMenu(menu);
+      this.baseMenu.bind(this)(menu);
+    };
+  }
+
+  extendedMenu(menu: Menu) {
+    menu.addItem((item) =>
+      item
+        .setIcon("star")
+        .setTitle("Get current Timestamp")
+        .onClick(() => {
+          const timestamp = this.getTimeStamp();
+          if (!timestamp) return;
+          // @ts-ignore
+          const group = this.app.workspace.getGroupLeaves(this.leaf.group);
+          for (const leaf of group) {
+            if (leaf.view instanceof MarkdownView) {
+              const editor = leaf.view.editor;
+              const lastPos = { ch: 0, line: editor.lastLine() + 1 };
+              editor.replaceRange("\n" + timestamp, lastPos, lastPos);
+              return;
+            }
+          }
+        }),
+    );
+  }
+
+  getTimeStamp() {
+    if (!this.info) return null;
+    const current = this.player.currentTime;
+    const display = TimeFormat.fromS(current, "hh:mm:ss").replace(
+      /^00:|\.\d+$/g,
+      "",
+    );
+    return `[${display}](${mainpart(this.info.src)}#t=${current})`;
   }
 
   async onOpen() {
@@ -84,7 +124,6 @@ export class ExternalMediaView extends ItemView {
   isEqual(info: videoInfo) {
     if (this.info === null) return false;
     if (isDirect(info) && isDirect(this.info)) {
-      const mainpart = (url: URL) => url.href.slice(0, -url.hash.length);
       return mainpart(info.link) === mainpart(this.info.link);
     } else if (!isDirect(info) && !isDirect(this.info)) {
       return info.host === this.info.host && info.id === this.info.id;
@@ -106,11 +145,5 @@ export class ExternalMediaView extends ItemView {
         ? info.filename
         : Host[info.host] + ": " + info.id;
     }
-  }
-
-  private updateTitle() {
-    const titleEl = this.containerEl.querySelector("div.view-header-title");
-    if (titleEl) (titleEl as HTMLDivElement).innerText = this.getDisplayText();
-    else console.error("title missing: %o", this.contentEl);
   }
 }
