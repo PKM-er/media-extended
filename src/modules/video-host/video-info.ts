@@ -1,7 +1,7 @@
 export enum Host {
-  YouTube,
-  Bilibili,
-  Vimeo,
+  youtube,
+  bili,
+  vimeo,
 }
 
 type mediaType = "audio" | "video";
@@ -75,7 +75,7 @@ export function getVideoInfo(src: URL | string): videoInfo | null {
         let page = src.searchParams.get("p");
         if (page) queryStr += `&page=${page}`;
         return {
-          host: Host.Bilibili,
+          host: Host.bili,
           id: videoId,
           iframe: new URL(
             `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`,
@@ -93,7 +93,7 @@ export function getVideoInfo(src: URL | string): videoInfo | null {
         let videoId = src.searchParams.get("v");
         if (videoId) {
           return {
-            host: Host.YouTube,
+            host: Host.youtube,
             id: videoId,
             iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
             src,
@@ -106,7 +106,7 @@ export function getVideoInfo(src: URL | string): videoInfo | null {
         if (/^\/[^\/]+$/.test(src.pathname)) {
           let videoId = src.pathname.substring(1);
           return {
-            host: Host.YouTube,
+            host: Host.youtube,
             id: videoId,
             iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
             src,
@@ -126,7 +126,7 @@ export function getVideoInfo(src: URL | string): videoInfo | null {
       if ((match = path.match(/^\/(\d+)$/))) {
         let videoId = match[1];
         return {
-          host: Host.Vimeo,
+          host: Host.vimeo,
           id: videoId,
           iframe: new URL(`https://player.vimeo.com/video/${videoId}`),
           src,

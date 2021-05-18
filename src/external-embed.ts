@@ -64,12 +64,12 @@ export function getPlayer(
 
   let player: Plyr_TF | null = null;
   switch (info.host) {
-    case Host.YouTube:
-    case Host.Vimeo:
+    case Host.youtube:
+    case Host.vimeo:
       if (thumbnail) setupThumbnail(container, info);
       else player = setupPlyr(container, info);
       break;
-    case Host.Bilibili:
+    case Host.bili:
       if (thumbnail) setupThumbnail(container, info);
       else setupIFrame(container, info);
       break;

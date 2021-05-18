@@ -13,7 +13,7 @@ export function setupPlyr(
   const { timeSpan } = tool;
 
   let options: Parameters<typeof setPlyr>[3];
-  if (info.host === Host.YouTube && timeSpan && timeSpan.start !== 0)
+  if (info.host === Host.youtube && timeSpan && timeSpan.start !== 0)
     options = {
       youtube: {
         start: timeSpan.start,
@@ -41,11 +41,11 @@ export async function setupThumbnail(
   }
 
   switch (info.host) {
-    case Host.YouTube:
+    case Host.youtube:
       thumbnailUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
       fakePlayHandler = PlyrHandler;
       break;
-    case Host.Bilibili:
+    case Host.bili:
       if (info.id.startsWith("av"))
         thumbnailUrl = await fetchBiliThumbnail(+info.id.substring(2));
       else thumbnailUrl = await fetchBiliThumbnail(info.id);
@@ -54,7 +54,7 @@ export async function setupThumbnail(
         container.removeChild(thumbnail);
       };
       break;
-    case Host.Vimeo:
+    case Host.vimeo:
       thumbnailUrl = await fetchVimeoThumbnail(info.src);
       fakePlayHandler = PlyrHandler;
       break;
