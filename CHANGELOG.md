@@ -1,3 +1,26 @@
+# [2.6.0](https://github.com/alx-plugins/media-extended/compare/2.5.3...2.6.0) (2021-05-19)
+
+
+### Bug Fixes
+
+* **main.ts:** click on link boundary of external media in sourceMode no longer open link in browser ([e4beb54](https://github.com/alx-plugins/media-extended/commit/e4beb54afc38dd6eb6c2c3ebb7bd484448600556))
+* **media-view.ts:** fix pip issues ([6568848](https://github.com/alx-plugins/media-extended/commit/65688482776f484248f3380a1c0e1ed628eb9990))
+* **media-view.ts:** leaf with ExternalMediaView no longer sync with markdown ([bd847c7](https://github.com/alx-plugins/media-extended/commit/bd847c7325d4851404662296f83ef470dbd354e3))
+* **misc.ts:** fix mainpart() return empty string when no hash in URL ([dbd205c](https://github.com/alx-plugins/media-extended/commit/dbd205cd5507bc462eb4e87d5edf795de53cdf33))
+* **player-setup.ts:** fix full-screen control not showing up ([4815ea8](https://github.com/alx-plugins/media-extended/commit/4815ea840e10148e3db4d1e34cfceab9f80f8b89))
+
+
+### Features
+
+* **main.ts:** add cmd/ctrl + t as default shortcut to get timestamp ([a259f24](https://github.com/alx-plugins/media-extended/commit/a259f24634a04b548fe99220b673fb8495b89830))
+* add initial support for timestamp link to external media ([837fd50](https://github.com/alx-plugins/media-extended/commit/837fd5029daa4bcffa8333e49aacf9287223402b)), closes [#14](https://github.com/alx-plugins/media-extended/issues/14)
+* add internal link support for MediaView ([6b0d959](https://github.com/alx-plugins/media-extended/commit/6b0d95930eea75bc8ca11079b6aeaf7b7b3a2efe))
+* **media-view.ts:** add pip toggle in MediaView ([fe82393](https://github.com/alx-plugins/media-extended/commit/fe823936fb7fe87fb6497a7d1521e38fc6cc8406))
+* external media links in sourceMode is now clickable ([f70579b](https://github.com/alx-plugins/media-extended/commit/f70579bbae810e7ddc39061b7c3f9eb435668fe8))
+* **main.ts:** add command to insert timestamp when in sourceMode ([a5cc2cb](https://github.com/alx-plugins/media-extended/commit/a5cc2cb6963aeacd6faa606613618678f42e1b92))
+* **media-view.ts:** add group binding to ExternalMediaView ([951d17b](https://github.com/alx-plugins/media-extended/commit/951d17b8ee87d9b9fb6abd7e155dae3f2c266291))
+* **media-view.ts:** initial support to insert timestamp from player to doc ([c83a982](https://github.com/alx-plugins/media-extended/commit/c83a982086cb20c3c39e3704f2c839852f1f02c3)), closes [#9](https://github.com/alx-plugins/media-extended/issues/9)
+
 ## [2.5.3](https://github.com/alx-plugins/media-extended/compare/2.5.2...2.5.3) (2021-05-17)
 
 
