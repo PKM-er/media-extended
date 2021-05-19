@@ -83,6 +83,12 @@ export default class MediaExtended extends Plugin {
           )?.addTimeStampToMDView(activeLeaf.view as MarkdownView);
         }
       },
+      hotkeys: [
+        {
+          modifiers: ["Mod"],
+          key: "t",
+        },
+      ],
     });
 
     this.registerCodeMirror((cm) => {
