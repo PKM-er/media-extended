@@ -55,7 +55,7 @@ export default class MediaExtended extends Plugin {
             .find(
               (leaf) =>
                 (leaf.view as ExternalMediaView).getTimeStamp !== undefined,
-            )?.view;
+            )?.view as ExternalMediaView | undefined;
         if (checking) {
           if (
             activeLeaf.view instanceof MarkdownView &&
@@ -70,15 +70,10 @@ export default class MediaExtended extends Plugin {
           }
           return false;
         } else {
-          // @ts-ignore
-          const mediaView = getMediaView(activeLeaf.group);
-          if (!mediaView)
-            throw new Error("Check failed, no leaf of ExternalMediaView found");
-          const text = (
-            mediaView as ExternalMediaView
-          ).getTimeStamp() as string;
-          const editor = (activeLeaf.view as MarkdownView).editor;
-          editor.replaceRange(text, editor.getCursor(), editor.getCursor());
+          getMediaView(
+            // @ts-ignore
+            activeLeaf.group,
+          )?.addTimeStampToMDView(activeLeaf.view as MarkdownView);
         }
       },
     });

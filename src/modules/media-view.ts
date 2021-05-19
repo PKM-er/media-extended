@@ -1,5 +1,10 @@
 import { getPlayer } from "external-embed";
-import { ItemView, MarkdownView, Menu, WorkspaceLeaf } from "obsidian";
+import {
+  EditorPosition,
+  ItemView,
+  MarkdownView,
+  WorkspaceLeaf,
+} from "obsidian";
 import Plyr from "plyr";
 import { mainpart } from "./misc";
 import { getSetupTool, Plyr_TF, setRatio } from "./player-setup";
@@ -89,7 +94,7 @@ export class ExternalMediaView extends ItemView {
         return this.leafOpen_bak.bind(leaf)(view);
     };
 
-    this.addAction("star", buttonTitle, this.addTimeStampToDoc);
+    this.addAction("star", buttonTitle, this.addToDoc);
     const button = this.containerEl.querySelector(
       `a.view-action[aria-label="${buttonTitle}"]`,
     );
@@ -99,20 +104,26 @@ export class ExternalMediaView extends ItemView {
     }
   }
 
-  addTimeStampToDoc = () => {
-    const timestamp = this.getTimeStamp();
-    if (!timestamp) return;
+  private addToDoc = () => {
     // @ts-ignore
     const group = this.app.workspace.getGroupLeaves(this.leaf.group);
     for (const leaf of group) {
       if (leaf.view instanceof MarkdownView) {
-        const editor = leaf.view.editor;
-        const lastPos = { ch: 0, line: editor.lastLine() + 1 };
-        editor.replaceRange("\n" + timestamp, lastPos, lastPos);
+        this.addTimeStampToMDView(leaf.view);
         return;
       }
     }
-  }
+  };
+
+  addTimeStampToMDView = (view: MarkdownView) => {
+    const timestamp = this.getTimeStamp();
+    if (!timestamp) return;
+    const { editor } = view;
+    const cursor = editor.getCursor();
+    let insertPos: EditorPosition;
+    insertPos = cursor;
+    editor.replaceRange("\n" + timestamp, insertPos, insertPos);
+  };
 
   getTimeStamp() {
     if (!this.info) return null;
