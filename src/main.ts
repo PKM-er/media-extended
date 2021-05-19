@@ -5,8 +5,9 @@ import "./main.css";
 import { processExternalEmbeds } from "external-embed";
 import { processInternalEmbeds } from "internal-embed";
 import { processInternalLinks } from "internal-link";
-import { processExternalLinks } from "external-link";
+import { onclick, processExternalLinks } from "external-link";
 import { ExternalMediaView, EX_VIEW_TYPE } from "modules/media-view";
+import { getVideoInfo } from "modules/video-host/video-info";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
@@ -78,8 +79,26 @@ export default class MediaExtended extends Plugin {
       },
     });
 
-    // this.registerMarkdownPostProcessor(processVideoPlayer.bind(this));
+    this.registerCodeMirror((cm) => {
+      const warpEl = cm.getWrapperElement();
+      warpEl.on(
+        "mousedown",
+        "span.cm-url:not(.cm-formatting)",
+        this.cmLinkHandler,
+      );
+    });
   }
+
+  cmLinkHandler = (e: MouseEvent, del: HTMLElement) => {
+    const link = del.innerText;
+    const info = getVideoInfo(link);
+    const isMacOS = /Macintosh|iPhone/.test(navigator.userAgent);
+    const modKey = isMacOS ? e.metaKey : e.ctrlKey;
+    if (info && modKey) {
+      e.stopPropagation();
+      onclick(info, this.app.workspace)(e);
+    }
+  };
 
   onunload() {
     console.log("unloading media-extended");
@@ -98,5 +117,13 @@ export default class MediaExtended extends Plugin {
         this.processExternalEmbeds,
       );
     }
+    this.registerCodeMirror((cm) => {
+      const warpEl = cm.getWrapperElement();
+      warpEl.off(
+        "mousedown",
+        "span.cm-url:not(.cm-formatting)",
+        this.cmLinkHandler,
+      );
+    });
   }
 }
