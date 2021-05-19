@@ -13,23 +13,26 @@ import { Host, isDirect, videoInfo } from "./video-host/video-info";
 import TimeFormat from "hh-mm-ss";
 
 export const EX_VIEW_TYPE = "external-media";
-const buttonTitle = "Get current Timestamp";
 export class ExternalMediaView extends ItemView {
   player: Plyr_TF;
   container: HTMLDivElement;
   info: videoInfo | null;
   displayText: string = "No Media";
-  leafOpen_bak: WorkspaceLeaf["open"];
+  private leafOpen_bak: WorkspaceLeaf["open"];
+  private controls: Map<string, HTMLElement>;
 
   public set src(info: videoInfo) {
     if (!this.isEqual(info)) {
+      this.showControls();
       let source: Plyr.SourceInfo;
       if (isDirect(info)) {
+        this.showControl("pip");
         source = {
           type: info.type,
           sources: [{ src: info.link.href }],
         };
       } else {
+        this.hideControl("pip");
         if (info.host === Host.bili) {
           console.error("Bilibili not supported in Plyr");
           return;
@@ -48,13 +51,20 @@ export class ExternalMediaView extends ItemView {
     }
     this.hash = info.src.hash;
     setRatio(this.container, this.player);
+  }
+
+  showControls() {
     if (this.contentEl.hidden) this.contentEl.hidden = false;
-    const button = this.containerEl.querySelector(
-      `a.view-action[aria-label="${buttonTitle}"]`,
-    );
-    if (button && (button as HTMLAnchorElement).style.display)
-      (button as HTMLAnchorElement).style.display = "";
-    else console.error("button not found: ", this.containerEl);
+    this.controls.forEach((el) => {
+      if (el.style.display === "none") el.style.display = "";
+    });
+  }
+  showControl(name: string) {
+    const el = this.controls.get(name);
+    if (el) {
+      if (el.style.display === "none") el.style.display = "";
+    } else
+      console.error(`control named ${name} not found in %o`, this.controls);
   }
 
   public get timeSpan(): TimeSpan | null {
@@ -94,15 +104,28 @@ export class ExternalMediaView extends ItemView {
         return this.leafOpen_bak.bind(leaf)(view);
     };
 
-    this.addAction("star", buttonTitle, this.addToDoc);
-    const button = this.containerEl.querySelector(
-      `a.view-action[aria-label="${buttonTitle}"]`,
-    );
-    if (this.info === null) {
-      if (button) (button as HTMLAnchorElement).style.display = "none";
-      else console.error("button not found: ", this.containerEl);
-    }
+    this.controls = new Map([
+      [
+        "get-timestamp",
+        this.addAction("star", "Get current Timestamp", this.addToDoc),
+      ],
+      [
+        "pip",
+        this.addAction(
+          "popup-open",
+          "Toggle Picture-in-Picture",
+          this.togglePip,
+        ),
+      ],
+    ]);
   }
+
+  togglePip = () => {
+    if (this.player.pip) {
+    } else {
+    }
+    this.player.pip = !this.player.pip;
+  };
 
   private addToDoc = () => {
     // @ts-ignore
@@ -136,9 +159,18 @@ export class ExternalMediaView extends ItemView {
   }
 
   async onOpen() {
-    if (this.displayText === "No Media") {
-      this.contentEl.hidden = true;
-    }
+    if (this.info === null) this.hideControls();
+    else if (!isDirect(this.info)) this.hideControl("pip");
+  }
+
+  hideControls() {
+    if (!this.contentEl.hidden) this.contentEl.hidden = true;
+    this.controls.forEach((el) => (el.style.display = "none"));
+  }
+  hideControl(name: string) {
+    const el = this.controls.get(name);
+    if (el) el.style.display = "none";
+    else console.error(`control named ${name} not found in %o`, this.controls);
   }
 
   isEqual(info: videoInfo) {
