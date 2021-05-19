@@ -8,13 +8,12 @@ import { Host, isDirect, videoInfo } from "./video-host/video-info";
 import TimeFormat from "hh-mm-ss";
 
 export const EX_VIEW_TYPE = "external-media";
-
+const buttonTitle = "Get current Timestamp";
 export class ExternalMediaView extends ItemView {
   player: Plyr_TF;
   container: HTMLDivElement;
   info: videoInfo | null;
   displayText: string = "No Media";
-  baseMenu: ItemView["onMoreOptionsMenu"];
   leafOpen_bak: WorkspaceLeaf["open"];
 
   public set src(info: videoInfo) {
@@ -45,6 +44,12 @@ export class ExternalMediaView extends ItemView {
     this.hash = info.src.hash;
     setRatio(this.container, this.player);
     if (this.contentEl.hidden) this.contentEl.hidden = false;
+    const button = this.containerEl.querySelector(
+      `a.view-action[aria-label="${buttonTitle}"]`,
+    );
+    if (button && (button as HTMLAnchorElement).style.display)
+      (button as HTMLAnchorElement).style.display = "";
+    else console.error("button not found: ", this.containerEl);
   }
 
   public get timeSpan(): TimeSpan | null {
@@ -77,39 +82,36 @@ export class ExternalMediaView extends ItemView {
     this.container = container;
     this.contentEl.appendChild(container);
     this.setDisplayText(info);
-    this.baseMenu = this.onMoreOptionsMenu;
-    this.onMoreOptionsMenu = (menu: Menu) => {
-      this.extendedMenu(menu);
-      this.baseMenu.bind(this)(menu);
-    };
     this.leafOpen_bak = leaf.open;
     // @ts-ignore
     leaf.open = (view) => {
       if (view instanceof ExternalMediaView)
         return this.leafOpen_bak.bind(leaf)(view);
     };
+
+    this.addAction("star", buttonTitle, this.addTimeStampToDoc);
+    const button = this.containerEl.querySelector(
+      `a.view-action[aria-label="${buttonTitle}"]`,
+    );
+    if (this.info === null) {
+      if (button) (button as HTMLAnchorElement).style.display = "none";
+      else console.error("button not found: ", this.containerEl);
+    }
   }
 
-  extendedMenu(menu: Menu) {
-    menu.addItem((item) =>
-      item
-        .setIcon("star")
-        .setTitle("Get current Timestamp")
-        .onClick(() => {
-          const timestamp = this.getTimeStamp();
-          if (!timestamp) return;
-          // @ts-ignore
-          const group = this.app.workspace.getGroupLeaves(this.leaf.group);
-          for (const leaf of group) {
-            if (leaf.view instanceof MarkdownView) {
-              const editor = leaf.view.editor;
-              const lastPos = { ch: 0, line: editor.lastLine() + 1 };
-              editor.replaceRange("\n" + timestamp, lastPos, lastPos);
-              return;
-            }
-          }
-        }),
-    );
+  addTimeStampToDoc = () => {
+    const timestamp = this.getTimeStamp();
+    if (!timestamp) return;
+    // @ts-ignore
+    const group = this.app.workspace.getGroupLeaves(this.leaf.group);
+    for (const leaf of group) {
+      if (leaf.view instanceof MarkdownView) {
+        const editor = leaf.view.editor;
+        const lastPos = { ch: 0, line: editor.lastLine() + 1 };
+        editor.replaceRange("\n" + timestamp, lastPos, lastPos);
+        return;
+      }
+    }
   }
 
   getTimeStamp() {
