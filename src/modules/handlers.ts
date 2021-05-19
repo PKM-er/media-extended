@@ -3,22 +3,9 @@ import { MarkdownPostProcessorContext, parseLinktext } from "obsidian";
 
 export abstract class Handler<T extends HTMLElement> {
   target: T;
-  plugin?: MediaExtended;
-  ctx?: MarkdownPostProcessorContext;
 
-  constructor(
-    target: T,
-    plugin?: MediaExtended,
-    ctx?: MarkdownPostProcessorContext,
-  ) {
+  constructor(target: T) {
     this.target = target;
-    this.plugin = plugin;
-    this.ctx = ctx;
-  }
-
-  setTarget(target: T): this {
-    this.target = target;
-    return this;
   }
 
   /** raw link */

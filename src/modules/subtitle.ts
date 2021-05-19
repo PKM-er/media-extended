@@ -1,7 +1,7 @@
-import MediaExtended from "main";
-import { MarkdownRenderChild, TFile } from "obsidian";
+import { MarkdownRenderChild, TFile, Vault } from "obsidian";
 import iso from "iso-639-1";
 import SrtCvt from "srt-webvtt";
+import Plyr from "plyr";
 
 function getSubtitles(video: TFile): TFile[] | null {
   const { basename: videoName, parent: folder } = video;
@@ -44,19 +44,23 @@ function getSubtitles(video: TFile): TFile[] | null {
   }
 }
 
-async function getSrtUrl(file: TFile, plugin: MediaExtended): Promise<string> {
-  const srt = await plugin.app.vault.read(file);
+async function getSrtUrl(file: TFile, vault: Vault): Promise<string> {
+  const srt = await vault.read(file);
   return new SrtCvt(new Blob([srt])).getURL();
 }
 
-async function getVttURL(file: TFile, plugin: MediaExtended) {
-  const blob = new Blob([await plugin.app.vault.read(file)], {
+async function getVttURL(file: TFile, vault: Vault) {
+  const blob = new Blob([await vault.read(file)], {
     type: "text/vtt",
   });
   return URL.createObjectURL(blob);
 }
 
-export type trackInfo = { objUrls: string[]; tracks: HTMLTrackElement[] };
+export type trackInfo = {
+  objUrls: string[];
+  trackEls: HTMLTrackElement[];
+  tracks: Plyr.Track[];
+};
 
 /**
  *
@@ -65,7 +69,7 @@ export type trackInfo = { objUrls: string[]; tracks: HTMLTrackElement[] };
  */
 export async function getSubtitleTracks(
   video: TFile,
-  plugin: MediaExtended,
+  vault: Vault,
 ): Promise<trackInfo | null> {
   const subFiles = getSubtitles(video);
   if (!subFiles) return null;
@@ -83,15 +87,17 @@ export async function getSubtitleTracks(
   const url: Map<TFile, string> = new Map();
   for (const file of subFiles) {
     if (file.extension === "srt") {
-      url.set(file, await getSrtUrl(file, plugin));
-    } else url.set(file, await getVttURL(file, plugin));
+      url.set(file, await getSrtUrl(file, vault));
+    } else url.set(file, await getVttURL(file, vault));
   }
 
-  const tracks = subFiles.map((file, i, array) => {
+  const tracks: Plyr.Track[] = [];
+  const trackEls: HTMLTrackElement[] = [];
+  for (const file of subFiles) {
     const languageCode = file.basename.split(".").pop();
     let label: string | null = null;
     let srclang: string | null = null;
-    if (array.length > 1) {
+    if (subFiles.length > 1) {
       if (!languageCode || !iso.validate(languageCode))
         throw new Error(
           "languageCode unable to parse, problem with getSubtitles()? ",
@@ -100,20 +106,34 @@ export async function getSubtitleTracks(
       srclang = languageCode;
     }
 
-    const attr = {
+    const track: Plyr.Track = {
       kind: "captions",
-      label,
-      srclang,
+      label: label ?? "default",
+      srcLang: srclang ?? undefined,
       src: url.get(file) as string,
     };
-    return createEl("track", { attr }, (el) => {
-      if (navigator.language.substring(0, 2) === languageCode) {
-        el.setAttr("default", "");
-      }
-    });
-  });
+    const trackEl = createEl(
+      "track",
+      {
+        attr: {
+          kind: "captions",
+          label,
+          srclang,
+          src: url.get(file) as string,
+        },
+      },
+      (el) => {
+        if (navigator.language.substring(0, 2) === languageCode) {
+          el.setAttr("default", "");
+        }
+      },
+    );
 
-  return { objUrls: [...url.values()], tracks };
+    trackEls.push(trackEl);
+    tracks.push(track);
+  }
+
+  return { objUrls: [...url.values()], trackEls, tracks };
 }
 
 export class SubtitleResource extends MarkdownRenderChild {

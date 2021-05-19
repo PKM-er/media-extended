@@ -1,4 +1,10 @@
-import { Plugin, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
+import {
+  Plugin,
+  MarkdownPreviewRenderer,
+  MarkdownView,
+  parseLinktext,
+  TFile,
+} from "obsidian";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
 import "plyr/dist/plyr.css";
 import "./main.css";
@@ -6,9 +12,12 @@ import { processExternalEmbeds } from "external-embed";
 import { processInternalEmbeds } from "internal-embed";
 import { processInternalLinks } from "internal-link";
 import { onclick, processExternalLinks } from "external-link";
-import { ExternalMediaView, EX_VIEW_TYPE } from "modules/media-view";
-import { getVideoInfo } from "modules/video-host/video-info";
+import { MediaView, MEDIA_VIEW_TYPE } from "modules/media-view";
+import { getMediaType, getVideoInfo } from "modules/video-host/video-info";
+import { Await } from "modules/misc";
 
+const linkSelector =
+  "span.cm-url:not(.cm-formatting), span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
@@ -42,7 +51,7 @@ export default class MediaExtended extends Plugin {
       this.registerMarkdownPostProcessor(this.processExternalEmbeds);
     }
 
-    this.registerView(EX_VIEW_TYPE, (leaf) => new ExternalMediaView(leaf));
+    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf));
     this.registerMarkdownPostProcessor(this.processExternalLinks);
     this.addCommand({
       id: "get-timestamp",
@@ -53,10 +62,8 @@ export default class MediaExtended extends Plugin {
           this.app.workspace
             // @ts-ignore
             .getGroupLeaves(group)
-            .find(
-              (leaf) =>
-                (leaf.view as ExternalMediaView).getTimeStamp !== undefined,
-            )?.view as ExternalMediaView | undefined;
+            .find((leaf) => (leaf.view as MediaView).getTimeStamp !== undefined)
+            ?.view as MediaView | undefined;
         if (checking) {
           if (
             activeLeaf.view instanceof MarkdownView &&
@@ -66,7 +73,7 @@ export default class MediaExtended extends Plugin {
           ) {
             // @ts-ignore
             const mediaView = getMediaView(activeLeaf.group);
-            if (mediaView && (mediaView as ExternalMediaView).getTimeStamp())
+            if (mediaView && (mediaView as MediaView).getTimeStamp())
               return true;
           }
           return false;
@@ -81,22 +88,41 @@ export default class MediaExtended extends Plugin {
 
     this.registerCodeMirror((cm) => {
       const warpEl = cm.getWrapperElement();
-      warpEl.on(
-        "mousedown",
-        "span.cm-url:not(.cm-formatting)",
-        this.cmLinkHandler,
-      );
+      warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
     });
   }
 
-  cmLinkHandler = (e: MouseEvent, del: HTMLElement) => {
+  cmLinkHandler = async (e: MouseEvent, del: HTMLElement) => {
     const link = del.innerText;
-    const info = getVideoInfo(link);
     const isMacOS = /Macintosh|iPhone/.test(navigator.userAgent);
     const modKey = isMacOS ? e.metaKey : e.ctrlKey;
-    if (info && modKey) {
-      e.stopPropagation();
-      onclick(info, this.app.workspace)(e);
+    if (modKey) {
+      let info: Await<ReturnType<typeof getVideoInfo>>;
+      if (del.hasClass("cm-hmd-internal-link")) {
+        const { path, subpath: hash } = parseLinktext(link);
+
+        if (!getMediaType(path)) return;
+        else e.stopPropagation();
+
+        const activeLeaf = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (!activeLeaf) {
+          console.error("no MarkdownView activeLeaf found");
+          return;
+        }
+        const file = this.app.metadataCache.getFirstLinkpathDest(
+          path,
+          activeLeaf.file.path,
+        ) as TFile | null;
+        if (!file) return;
+        info = await getVideoInfo(file, hash, this.app.vault);
+      } else info = await getVideoInfo(link);
+
+      try {
+        console.log(info);
+        if (info) onclick(info, this.app.workspace)(e);
+      } catch (e) {
+        console.error(e);
+      }
     }
   };
 
@@ -119,11 +145,7 @@ export default class MediaExtended extends Plugin {
     }
     this.registerCodeMirror((cm) => {
       const warpEl = cm.getWrapperElement();
-      warpEl.off(
-        "mousedown",
-        "span.cm-url:not(.cm-formatting)",
-        this.cmLinkHandler,
-      );
+      warpEl.off("mousedown", linkSelector, this.cmLinkHandler);
     });
   }
 }

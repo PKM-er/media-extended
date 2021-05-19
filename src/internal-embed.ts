@@ -13,13 +13,13 @@ export function processInternalEmbeds(
 ) {
   const allEmbeds = el.querySelectorAll("span.internal-embed");
   if (allEmbeds) {
-    const handler = new InternalEmbedHandler(this, ctx);
     const internalEmbed: mutationParam = {
       callback: (list, obs) => {
         for (const mutation of filterDuplicates(list)) {
           const span = mutation.target as HTMLSpanElement;
           if (span.hasClass("is-loaded") && !span.hasClass("mod-empty")) {
-            if (span.hasClass("media-embed")) handler.setTarget(span).handle();
+            if (span.hasClass("media-embed"))
+              new InternalEmbedHandler(span, this, ctx).handle();
             obs.disconnect();
           }
         }
@@ -42,11 +42,11 @@ class InternalEmbedHandler extends Handler<HTMLSpanElement> {
   ctx: MarkdownPostProcessorContext;
 
   constructor(
+    target: HTMLSpanElement,
     plugin: MediaExtended,
     ctx: MarkdownPostProcessorContext,
-    target?: HTMLSpanElement,
   ) {
-    super(target ?? createEl("a"));
+    super(target);
     this.plugin = plugin;
     this.ctx = ctx;
   }
@@ -78,7 +78,7 @@ class InternalEmbedHandler extends Handler<HTMLSpanElement> {
       target,
       getSetupTool(this.hash),
       undefined,
-      trackInfo?.tracks,
+      trackInfo?.trackEls,
     );
     this.ctx.addChild(
       new SubtitleResource(container, trackInfo?.objUrls ?? []),
@@ -107,7 +107,7 @@ class InternalEmbedHandler extends Handler<HTMLSpanElement> {
     );
     if (!videoFile) throw new Error("No file found for link: " + this.link);
 
-    const trackInfo = await getSubtitleTracks(videoFile, this.plugin);
+    const trackInfo = await getSubtitleTracks(videoFile, this.plugin.app.vault);
 
     const newMediaContainer = this.setupPlayer(srcMediaEl, trackInfo, isWebm);
 

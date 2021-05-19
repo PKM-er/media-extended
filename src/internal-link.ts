@@ -1,7 +1,9 @@
+import { onclick } from "external-link";
 import MediaExtended from "main";
 import { Handler } from "modules/handlers";
 import { mutationParam, filterDuplicates } from "modules/misc";
 import { getSetupTool } from "modules/player-setup";
+import { getVideoInfo } from "modules/video-host/video-info";
 import { MarkdownPostProcessorContext, FileView } from "obsidian";
 
 /** Process internal link to media files with hash */
@@ -10,13 +12,13 @@ export function processInternalLinks(
   el: HTMLElement,
   ctx: MarkdownPostProcessorContext,
 ) {
-  const handler = new InternalLinkHandler(this, ctx);
   const internalLink: mutationParam = {
     // check if link is resolved
     callback: (list, obs) => {
       for (const m of filterDuplicates(list)) {
         const a = m.target as HTMLAnchorElement;
-        if (!a.hasClass("is-unresolved")) handler.setTarget(a).handle();
+        if (!a.hasClass("is-unresolved"))
+          new InternalLinkHandler(a, this, ctx).handle();
         obs.disconnect();
       }
     },
@@ -42,11 +44,11 @@ export class InternalLinkHandler extends Handler<HTMLAnchorElement> {
   ctx: MarkdownPostProcessorContext;
 
   constructor(
+    target: HTMLAnchorElement,
     plugin: MediaExtended,
     ctx: MarkdownPostProcessorContext,
-    target?: HTMLAnchorElement,
   ) {
-    super(target ?? createEl("a"));
+    super(target);
     this.plugin = plugin;
     this.ctx = ctx;
   }
@@ -59,60 +61,22 @@ export class InternalLinkHandler extends Handler<HTMLAnchorElement> {
     } else return srcLinktext;
   }
 
-  private onclick = (setupPlayer: any) => (e: MouseEvent) => {
-    const workspace = this.plugin.app.workspace;
-
-    const openedMedia: HTMLElement[] = [];
-
+  /**
+   * Update internal links to media file to respond to temporal fragments
+   */
+  async handle() {
     const matchedFile = this.plugin.app.metadataCache.getFirstLinkpathDest(
       this.link,
       this.ctx.sourcePath,
     );
     if (!matchedFile) throw new Error("No file found for link: " + this.link);
-
-    workspace.iterateAllLeaves((leaf) => {
-      if (leaf.view instanceof FileView && leaf.view.file === matchedFile)
-        openedMedia.push(leaf.view.contentEl);
-    });
-
-    if (openedMedia.length) openedMedia.forEach((e) => setupPlayer(e));
-    else {
-      const fileLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-      fileLeaf.openFile(matchedFile).then(() => {
-        if (fileLeaf.view instanceof FileView)
-          setupPlayer(fileLeaf.view.contentEl);
-      });
+    const info = await getVideoInfo(
+      matchedFile,
+      this.hash,
+      this.plugin.app.vault,
+    );
+    if (info) {
+      this.target.onclick = onclick(info, this.plugin.app.workspace);
     }
-  };
-
-  /**
-   * Update internal links to media file to respond to temporal fragments
-   */
-  handle() {
-    const { timeSpan, setPlayerTF, setHashOpt } = getSetupTool(this.hash);
-
-    // skip if timeSpan is missing or invalid
-    if (!timeSpan) return;
-
-    const newLink = createEl("a", {
-      cls: "internal-link",
-      text: this.target.innerText,
-    });
-
-    const setupPlayer = (e: HTMLElement): void => {
-      // prettier-ignore
-      const player = e.querySelector(
-          "div.video-container > video, " +
-          "div.audio-container > audio, " +
-          "div.video-container > audio" // for webm audio
-        ) as HTMLMediaElement;
-      if (!player) throw new Error("no player found in FileView");
-      setHashOpt(player);
-      setPlayerTF(player);
-      player.play();
-    };
-
-    newLink.onclick = this.onclick(setupPlayer);
-    this.replaceWith(newLink);
   }
 }

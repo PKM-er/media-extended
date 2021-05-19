@@ -9,20 +9,28 @@ import Plyr from "plyr";
 import { mainpart } from "./misc";
 import { getSetupTool, Plyr_TF, setRatio } from "./player-setup";
 import { TimeSpan } from "./temporal-frag";
-import { Host, isDirect, videoInfo } from "./video-host/video-info";
+import {
+  Host,
+  isDirect,
+  isHost,
+  isInternal,
+  videoInfo,
+} from "./video-host/video-info";
 import TimeFormat from "hh-mm-ss";
 
-export const EX_VIEW_TYPE = "external-media";
-export class ExternalMediaView extends ItemView {
+export const MEDIA_VIEW_TYPE = "external-media";
+export class MediaView extends ItemView {
   player: Plyr_TF;
   container: HTMLDivElement;
   info: videoInfo | null;
+  trackObjUrls: string[];
   displayText: string = "No Media";
   private leafOpen_bak: WorkspaceLeaf["open"];
   private controls: Map<string, HTMLElement>;
 
   public set src(info: videoInfo) {
     if (!this.isEqual(info)) {
+      this.revokeObjUrls();
       this.showControls();
       let source: Plyr.SourceInfo;
       if (isDirect(info)) {
@@ -31,6 +39,15 @@ export class ExternalMediaView extends ItemView {
           type: info.type,
           sources: [{ src: info.link.href }],
         };
+        this.hash = info.src.hash;
+      } else if (isInternal(info)) {
+        this.showControl("pip");
+        source = {
+          type: info.type,
+          sources: [{ src: info.link.href }],
+          tracks: info.trackInfo ? info.trackInfo.tracks : undefined,
+        };
+        this.hash = info.link.hash;
       } else {
         this.hideControl("pip");
         if (info.host === Host.bili) {
@@ -43,13 +60,13 @@ export class ExternalMediaView extends ItemView {
             { src: info.id, provider: Host[info.host] as "vimeo" | "youtube" },
           ],
         };
+        this.hash = info.src.hash;
       }
       this.info = info;
       this.player.source = source;
       this.setDisplayText(info);
       this.load();
     }
-    this.hash = info.src.hash;
     setRatio(this.container, this.player);
   }
 
@@ -92,6 +109,11 @@ export class ExternalMediaView extends ItemView {
       filename: "No Media",
       src: new URL("http://example.com/video.mp4"),
     };
+    if (isInternal(info) && info.trackInfo) {
+      this.trackObjUrls = info.trackInfo.objUrls;
+    } else {
+      this.trackObjUrls = [];
+    }
     const { container, player } = getPlayer(false, info);
     this.player = player as Plyr_TF;
     this.container = container;
@@ -100,8 +122,7 @@ export class ExternalMediaView extends ItemView {
     this.leafOpen_bak = leaf.open;
     // @ts-ignore
     leaf.open = (view) => {
-      if (view instanceof ExternalMediaView)
-        return this.leafOpen_bak.bind(leaf)(view);
+      if (view instanceof MediaView) return this.leafOpen_bak.bind(leaf)(view);
     };
 
     this.controls = new Map([
@@ -148,19 +169,36 @@ export class ExternalMediaView extends ItemView {
     editor.replaceRange("\n" + timestamp, insertPos, insertPos);
   };
 
-  getTimeStamp() {
+  getTimeStamp(sourcePath?: string) {
     if (!this.info) return null;
     const current = this.player.currentTime;
-    const display = TimeFormat.fromS(current, "hh:mm:ss").replace(
-      /^00:|\.\d+$/g,
-      "",
-    );
-    return `[${display}](${mainpart(this.info.src)}#t=${current})`;
+    const display = TimeFormat.fromS(current, "hh:mm:ss").replace(/^00:/g, "");
+    if (isInternal(this.info)) {
+      const linktext = this.app.metadataCache.fileToLinktext(
+        this.info.src,
+        sourcePath ?? "",
+        true,
+      );
+      return `[[${linktext}#t=${display}]]`;
+    } else
+      return (
+        `[${display.replace(/\.\d+$/, "")}]` +
+        `(${mainpart(this.info.src)}#t=${current})`
+      );
   }
 
   async onOpen() {
     if (this.info === null) this.hideControls();
     else if (!isDirect(this.info)) this.hideControl("pip");
+  }
+
+  revokeObjUrls() {
+    this.trackObjUrls.forEach((url) => URL.revokeObjectURL(url));
+    this.trackObjUrls.length = 0;
+  }
+
+  unload() {
+    this.revokeObjUrls();
   }
 
   hideControls() {
@@ -173,17 +211,19 @@ export class ExternalMediaView extends ItemView {
     else console.error(`control named ${name} not found in %o`, this.controls);
   }
 
-  isEqual(info: videoInfo) {
+  isEqual(info: videoInfo): Boolean {
     if (this.info === null) return false;
-    if (isDirect(info) && isDirect(this.info)) {
+    if (isInternal(info) && isInternal(this.info)) {
+      return info.src.path === this.info.src.path;
+    } else if (isDirect(info) && isDirect(this.info)) {
       return mainpart(info.link) === mainpart(this.info.link);
-    } else if (!isDirect(info) && !isDirect(this.info)) {
+    } else if (isHost(info) && isHost(this.info)) {
       return info.host === this.info.host && info.id === this.info.id;
-    }
+    } else return false;
   }
 
   getViewType(): string {
-    return EX_VIEW_TYPE;
+    return MEDIA_VIEW_TYPE;
   }
   getDisplayText() {
     return this.displayText;
@@ -193,9 +233,10 @@ export class ExternalMediaView extends ItemView {
     if (!info) {
       this.displayText = "No Media";
     } else {
-      this.displayText = isDirect(info)
-        ? info.filename
-        : Host[info.host] + ": " + info.id;
+      this.displayText =
+        isDirect(info) || isInternal(info)
+          ? info.filename
+          : Host[info.host] + ": " + info.id;
     }
   }
 }
