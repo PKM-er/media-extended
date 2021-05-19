@@ -25,4 +25,5 @@ export function getUrl(src: string): URL | null {
   }
 }
 
-export const mainpart = (url: URL) => url.href.slice(0, -url.hash.length);
+export const mainpart = (url: URL) =>
+  url.hash ? url.href.slice(0, -url.hash.length) : url.href;
