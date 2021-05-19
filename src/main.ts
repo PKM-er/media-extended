@@ -1,4 +1,4 @@
-import { Plugin, MarkdownPreviewRenderer } from "obsidian";
+import { Plugin, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
 import "plyr/dist/plyr.css";
 import "./main.css";
@@ -43,6 +43,45 @@ export default class MediaExtended extends Plugin {
 
     this.registerView(EX_VIEW_TYPE, (leaf) => new ExternalMediaView(leaf));
     this.registerMarkdownPostProcessor(this.processExternalLinks);
+    this.addCommand({
+      id: "get-timestamp",
+      name: "Get timestamp from player",
+      checkCallback: (checking) => {
+        const activeLeaf = this.app.workspace.activeLeaf;
+        const getMediaView = (group: string) =>
+          this.app.workspace
+            // @ts-ignore
+            .getGroupLeaves(group)
+            .find(
+              (leaf) =>
+                (leaf.view as ExternalMediaView).getTimeStamp !== undefined,
+            )?.view;
+        if (checking) {
+          if (
+            activeLeaf.view instanceof MarkdownView &&
+            activeLeaf.view.getMode() === "source" &&
+            // @ts-ignore
+            activeLeaf.group
+          ) {
+            // @ts-ignore
+            const mediaView = getMediaView(activeLeaf.group);
+            if (mediaView && (mediaView as ExternalMediaView).getTimeStamp())
+              return true;
+          }
+          return false;
+        } else {
+          // @ts-ignore
+          const mediaView = getMediaView(activeLeaf.group);
+          if (!mediaView)
+            throw new Error("Check failed, no leaf of ExternalMediaView found");
+          const text = (
+            mediaView as ExternalMediaView
+          ).getTimeStamp() as string;
+          const editor = (activeLeaf.view as MarkdownView).editor;
+          editor.replaceRange(text, editor.getCursor(), editor.getCursor());
+        }
+      },
+    });
 
     // this.registerMarkdownPostProcessor(processVideoPlayer.bind(this));
   }
