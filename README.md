@@ -9,6 +9,8 @@ This plugin introduce some new features that improve media (video/audio) playing
 - [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
   - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
 - [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
+- [Allow timestamps for video/audio](#timestamps-for-media) in external links
+- [Extract timestamp from video](#get-timestamp) from MediaView
 - [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
   - From local drive: `![](files:///Users/someone/video.ogv#t=60)`
   - From external media files: `![](http://example.com/video.ogv#t=60)`
@@ -17,7 +19,6 @@ This plugin introduce some new features that improve media (video/audio) playing
 - [playback speed control](#speed-control)
 - [autoplay/mute/loop for media](#inline-options)
 - [External subtitle support for videos](#local-subtitle)
-- [ ] [Create links for timestamps from player](https://github.com/alx-plugins/media-extended/issues/9)
 - [ ] [Improved pictrue-in-pictrue support](https://github.com/alx-plugins/media-extended/issues/8)
 
 ## How to use
@@ -30,9 +31,20 @@ Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal li
 
 ### Timestamps for Media
 
-Just append [Media Fragment URI](#media-fragment-uri) to the regular internal link and see the results:
+Just append [Media Fragment URI](#media-fragment-uri) to the regular links and see the results:
 
-![TimestampsForMediaDemo](https://img.aidenlx.top/picgo/TimestampsForMediaDemo.gif)
+![TimestampsForMediaDemo2](https://img.aidenlx.top/picgo/TimestampsForMediaDemo2.gif)
+[demo video](https://img.aidenlx.top/uPic/TimestampsForMediaDemo2.mp4) if the gif failed to load
+### Get Timestamp
+
+Open a media view from internal/external link, then you can use the following method to get timestamp from current time in player: 
+
+- via Command Palette: type in `Get timestamp from player`
+- via keyboard shortcut: `⌘`/`Ctrl`+`T` by default
+- click on the `⭐` button on the header of media view
+
+![GetTimestampDemo](https://img.aidenlx.top/picgo/GetTimestampDemo.gif)
+[demo video](https://img.aidenlx.top/uPic/GetTimestampDemo.mp4) if the gif failed to load
 
 ### Extended Image Embed Syntax
 
