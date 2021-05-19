@@ -30,18 +30,21 @@ export class MediaView extends ItemView {
 
   public set src(info: videoInfo) {
     if (!this.isEqual(info)) {
+      const isPipEnabledBefore = this.player.pip;
+      let canPip: boolean;
+      this.player.pip = false;
       this.revokeObjUrls();
       this.showControls();
       let source: Plyr.SourceInfo;
       if (isDirect(info)) {
-        this.showControl("pip");
+        canPip = true;
         source = {
           type: info.type,
           sources: [{ src: info.link.href }],
         };
         this.hash = info.src.hash;
       } else if (isInternal(info)) {
-        this.showControl("pip");
+        canPip = true;
         source = {
           type: info.type,
           sources: [{ src: info.link.href }],
@@ -49,7 +52,7 @@ export class MediaView extends ItemView {
         };
         this.hash = info.link.hash;
       } else {
-        this.hideControl("pip");
+        canPip = false;
         if (info.host === Host.bili) {
           console.error("Bilibili not supported in Plyr");
           return;
@@ -64,10 +67,19 @@ export class MediaView extends ItemView {
       }
       this.info = info;
       this.player.source = source;
+      if (canPip) {
+        this.showControl("pip");
+        if (isPipEnabledBefore)
+          this.player.once("playing", function () {
+            this.pip = true;
+          });
+      } else {
+        this.hideControl("pip");
+      }
       this.setDisplayText(info);
       this.load();
-    }
-    setRatio(this.container, this.player);
+      setRatio(this.container, this.player);
+    } else console.error("to update timestamp, use MediaView.hash");
   }
 
   showControls() {
@@ -142,9 +154,6 @@ export class MediaView extends ItemView {
   }
 
   togglePip = () => {
-    if (this.player.pip) {
-    } else {
-    }
     this.player.pip = !this.player.pip;
   };
 
@@ -189,7 +198,7 @@ export class MediaView extends ItemView {
 
   async onOpen() {
     if (this.info === null) this.hideControls();
-    else if (!isDirect(this.info)) this.hideControl("pip");
+    else if (isHost(this.info)) this.hideControl("pip");
   }
 
   revokeObjUrls() {
