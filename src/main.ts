@@ -16,8 +16,7 @@ import { MediaView, MEDIA_VIEW_TYPE } from "modules/media-view";
 import { getMediaType, getVideoInfo } from "modules/video-host/video-info";
 import { Await } from "modules/misc";
 
-const linkSelector =
-  "span.cm-url:not(.cm-formatting), span.cm-hmd-internal-link";
+const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
@@ -93,13 +92,13 @@ export default class MediaExtended extends Plugin {
   }
 
   cmLinkHandler = async (e: MouseEvent, del: HTMLElement) => {
-    const link = del.innerText;
+    const text = del.innerText;
     const isMacOS = /Macintosh|iPhone/.test(navigator.userAgent);
     const modKey = isMacOS ? e.metaKey : e.ctrlKey;
     if (modKey) {
       let info: Await<ReturnType<typeof getVideoInfo>>;
       if (del.hasClass("cm-hmd-internal-link")) {
-        const { path, subpath: hash } = parseLinktext(link);
+        const { path, subpath: hash } = parseLinktext(text);
 
         if (!getMediaType(path)) return;
         else e.stopPropagation();
@@ -115,10 +114,26 @@ export default class MediaExtended extends Plugin {
         ) as TFile | null;
         if (!file) return;
         info = await getVideoInfo(file, hash, this.app.vault);
-      } else info = await getVideoInfo(link);
+      } else {
+        if (
+          del.hasClass("cm-formatting") &&
+          del.hasClass("cm-formatting-link-string")
+        ) {
+          let urlEl: Element | null;
+          if (text === "(") urlEl = del.nextElementSibling;
+          else if (text === ")") urlEl = del.previousElementSibling;
+          else urlEl = null;
+          if (urlEl === null || !(urlEl instanceof HTMLElement)) {
+            console.error("unable to get url from: %o", del);
+            return;
+          }
+          info = await getVideoInfo(urlEl.innerText);
+        } else {
+          info = await getVideoInfo(text);
+        }
+      }
 
       try {
-        console.log(info);
         if (info) onclick(info, this.app.workspace)(e);
       } catch (e) {
         console.error(e);
