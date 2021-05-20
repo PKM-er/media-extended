@@ -1,3 +1,4 @@
+
 # Media Extended
 
 Improve media (video/audio) playing in Obsidian.
@@ -9,11 +10,11 @@ This plugin introduce some new features that improve media (video/audio) playing
 - [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
   - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
 - [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
-- [Allow timestamps for video/audio](#timestamps-for-media) in external links
+- [Allow timestamps for video/audio](#timestamps-for-media) in external links (`Extended image embed syntax` required)
 - [Extract timestamp from video](#get-timestamp) from MediaView
 - [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
-  - From local drive: `![](files:///Users/someone/video.ogv#t=60)`
-  - From external media files: `![](http://example.com/video.ogv#t=60)`
+  - From local drive: `![](files:///Users/someone/video.mp4#t=60)`
+  - From external media files: `![](http://some/video.mp4#t=60)`
   - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
     - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
 - [playback speed control](#speed-control)
@@ -33,8 +34,7 @@ Just append [Media Fragment URI](#media-fragment-uri) to the embedded internal l
 
 Just append [Media Fragment URI](#media-fragment-uri) to the regular links and see the results:
 
-![TimestampsForMediaDemo2](https://img.aidenlx.top/picgo/TimestampsForMediaDemo2.gif)
-[demo video](https://img.aidenlx.top/uPic/TimestampsForMediaDemo2.mp4) if the gif failed to load
+https://user-images.githubusercontent.com/31102694/118903647-c9d79780-b94a-11eb-8beb-ab507117790f.mp4
 
 ### Get Timestamp
 
@@ -44,8 +44,7 @@ Open a media view from internal/external link, then you can use the following me
 - via keyboard shortcut: `⌘`/`Ctrl`+`T` by default
 - click on the `⭐` button on the header of media view
 
-![GetTimestampDemo](https://img.aidenlx.top/picgo/GetTimestampDemo.gif)
-[demo video](https://img.aidenlx.top/uPic/GetTimestampDemo.mp4) if the gif failed to load
+https://user-images.githubusercontent.com/31102694/118903678-dd82fe00-b94a-11eb-8ef3-7b5044a2bab8.mp4
 
 ### Extended Image Embed Syntax
 
@@ -59,7 +58,7 @@ Now also support videos from different hosts
 
 ### Speed Control
 
-Check Demo [here](https://img.aidenlx.top/picgo/SpeedControlDemo.mp4)
+https://user-images.githubusercontent.com/31102694/118903711-ed024700-b94a-11eb-8a1f-e05cafea2299.mp4
 
 ### Inline Options
 
