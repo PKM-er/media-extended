@@ -1,6 +1,4 @@
 
-https://user-images.githubusercontent.com/31102694/118903617-bd533f00-b94a-11eb-829a-75053f13ad9c.mp4
-
 # Media Extended
 
 Improve media (video/audio) playing in Obsidian.
@@ -12,11 +10,11 @@ This plugin introduce some new features that improve media (video/audio) playing
 - [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
   - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
 - [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
-- [Allow timestamps for video/audio](#timestamps-for-media) in external links
+- [Allow timestamps for video/audio](#timestamps-for-media) in external links (`Extended image embed syntax` required)
 - [Extract timestamp from video](#get-timestamp) from MediaView
 - [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
-  - From local drive: `![](files:///Users/someone/video.ogv#t=60)`
-  - From external media files: `![](http://example.com/video.ogv#t=60)`
+  - From local drive: `![](files:///Users/someone/video.mp4#t=60)`
+  - From external media files: `![](http://some/video.mp4#t=60)`
   - From video hosts: `![](https://www.youtube.com/watch?v=jNQXAC9IVRw)`
     - Timestamps is supported for YouTube and Vimeo videos: `![](https://vimeo.com/336812611#t=10,20)`
 - [playback speed control](#speed-control)
