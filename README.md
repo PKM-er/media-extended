@@ -1,3 +1,6 @@
+
+https://user-images.githubusercontent.com/31102694/118903617-bd533f00-b94a-11eb-829a-75053f13ad9c.mp4
+
 # Media Extended
 
 Improve media (video/audio) playing in Obsidian.
@@ -33,8 +36,8 @@ Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal li
 
 Just append [Media Fragment URI](#media-fragment-uri) to the regular links and see the results:
 
-![TimestampsForMediaDemo2](https://img.aidenlx.top/picgo/TimestampsForMediaDemo2.gif)
-[demo video](https://img.aidenlx.top/uPic/TimestampsForMediaDemo2.mp4) if the gif failed to load
+https://user-images.githubusercontent.com/31102694/118903647-c9d79780-b94a-11eb-8beb-ab507117790f.mp4
+
 ### Get Timestamp
 
 Open a media view from internal/external link, then you can use the following method to get timestamp from current time in player: 
@@ -43,8 +46,7 @@ Open a media view from internal/external link, then you can use the following me
 - via keyboard shortcut: `⌘`/`Ctrl`+`T` by default
 - click on the `⭐` button on the header of media view
 
-![GetTimestampDemo](https://img.aidenlx.top/picgo/GetTimestampDemo.gif)
-[demo video](https://img.aidenlx.top/uPic/GetTimestampDemo.mp4) if the gif failed to load
+https://user-images.githubusercontent.com/31102694/118903678-dd82fe00-b94a-11eb-8ef3-7b5044a2bab8.mp4
 
 ### Extended Image Embed Syntax
 
@@ -58,7 +60,7 @@ Now also support videos from different hosts
 
 ### Speed Control
 
-Check Demo [here](https://img.aidenlx.top/picgo/SpeedControlDemo.mp4)
+https://user-images.githubusercontent.com/31102694/118903711-ed024700-b94a-11eb-8a1f-e05cafea2299.mp4
 
 ### Inline Options
 
