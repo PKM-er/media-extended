@@ -19,13 +19,13 @@ This plugin introduce some new features that improve media (video/audio) playing
 - [playback speed control](#speed-control)
 - [autoplay/mute/loop for media](#inline-options)
 - [External subtitle support for videos](#local-subtitle)
-- [ ] [Improved pictrue-in-pictrue support](https://github.com/alx-plugins/media-extended/issues/8)
+- [ ] [Improved picture-in-picture support](https://github.com/alx-plugins/media-extended/issues/8)
 
 ## How to use
 
 ### Embed Media Fragments
 
-Just append [Media Fragment URI](#media-fragment-uri) to the embeded internal link and see the results:
+Just append [Media Fragment URI](#media-fragment-uri) to the embedded internal link and see the results:
 
 ![EmbedMediaFragmentsDemo](https://img.aidenlx.top/picgo/EmbedMediaFragmentsDemo.gif)
 
@@ -35,9 +35,10 @@ Just append [Media Fragment URI](#media-fragment-uri) to the regular links and s
 
 ![TimestampsForMediaDemo2](https://img.aidenlx.top/picgo/TimestampsForMediaDemo2.gif)
 [demo video](https://img.aidenlx.top/uPic/TimestampsForMediaDemo2.mp4) if the gif failed to load
+
 ### Get Timestamp
 
-Open a media view from internal/external link, then you can use the following method to get timestamp from current time in player: 
+Open a media view from internal/external link, then you can use the following method to get timestamp from current time in player:
 
 - via Command Palette: type in `Get timestamp from player`
 - via keyboard shortcut: `⌘`/`Ctrl`+`T` by default
@@ -87,7 +88,7 @@ Requirements:
 
 - for single language: filename should be identical with media filename
   - `example.vtt` is allowed, not `example.en.vtt`
-- for muiltple languages: vaild language code suffix are required
+- for multiple languages: valid language code suffix are required
   - For Chinese: `example.zh.vtt`, `example.cn.vtt` is invalid
   - For English: `example.en.vtt`
   - For other language, visit [this list](https://lingohub.com/academy/best-practices/iso-639-1-list)
@@ -130,7 +131,7 @@ The time can be specified as:
 
 - a number of seconds (as a floating-point value), such as `121.12`
 - as an hours/minutes/seconds or minutes/seconds time separated with colons, such as `02:01.12`
-  - Minutes and seconds should be within 0-59 and written in two digits, for example, `1:20` or `10:3` is invaild.
+  - Minutes and seconds should be within 0-59 and written in two digits, for example, `1:20` or `10:3` is invalid.
 
 when the `starttime` is absent, it is set to the beginning of the video/audio, while `endtime` is set to the end by default if absent.
 
