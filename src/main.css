@@ -56,6 +56,15 @@ div.thumbnail {
   filter: blur(1.5rem);
 }
 
+.plyr--youtube.plyr--paused::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
 /** patch slider-thumb */
 .plyr--full-ui input[type="range"]::-webkit-slider-thumb {
   top: 0px;
