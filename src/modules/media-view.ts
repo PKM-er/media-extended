@@ -17,10 +17,12 @@ import {
   videoInfo,
 } from "./video-host/video-info";
 import TimeFormat from "hh-mm-ss";
+import MediaExtended from "main";
 
 export const MEDIA_VIEW_TYPE = "external-media";
 export class MediaView extends ItemView {
   player: Plyr_TF;
+  plugin: MediaExtended;
   container: HTMLDivElement;
   info: videoInfo | null;
   trackObjUrls: string[];
@@ -112,8 +114,9 @@ export class MediaView extends ItemView {
     this.player.muted = is("muted");
   }
 
-  constructor(leaf: WorkspaceLeaf, info?: videoInfo) {
+  constructor(leaf: WorkspaceLeaf, plugin: MediaExtended, info?: videoInfo) {
     super(leaf);
+    this.plugin = plugin;
     this.info = info ?? null;
     info = info ?? {
       type: "video",
@@ -126,7 +129,11 @@ export class MediaView extends ItemView {
     } else {
       this.trackObjUrls = [];
     }
-    const { container, player } = getPlayer(false, info);
+    const { container, player } = getPlayer(
+      false,
+      info,
+      this.plugin.settings.useYoutubeControls,
+    );
     this.player = player as Plyr_TF;
     this.container = container;
     this.contentEl.appendChild(container);

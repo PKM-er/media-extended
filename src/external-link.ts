@@ -53,14 +53,15 @@ export class ExternalLinkHandler extends Handler<HTMLAnchorElement> {
    */
   async handle() {
     const info = await getVideoInfo(this.linktext);
-    if (info) this.target.onclick = onclick(info, this.plugin.app.workspace);
+    if (info) this.target.onclick = onclick(info, this.plugin);
   }
 }
 
-export function onclick(info: videoInfo, workspace: Workspace) {
+export function onclick(info: videoInfo, plugin: MediaExtended) {
   return (e: Event) => {
     e.stopPropagation();
     e.preventDefault();
+    const workspace = plugin.app.workspace;
     // @ts-ignore
     const groupId: string | null = workspace.activeLeaf.group;
     let playerLeaf: WorkspaceLeaf | null = null;
@@ -94,7 +95,7 @@ export function onclick(info: videoInfo, workspace: Workspace) {
     } else {
       const newLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
       workspace.activeLeaf.setGroupMember(newLeaf);
-      const view = new MediaView(newLeaf, info);
+      const view = new MediaView(newLeaf, plugin, info);
       newLeaf.open(view);
 
       view.player.once("ready", function () {

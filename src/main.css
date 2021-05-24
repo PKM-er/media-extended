@@ -48,21 +48,25 @@ div.thumbnail {
 }
 
 /* hide recommended video in youtube */
-.plyr--youtube iframe {
+.external-video:not(.yt-controls) .plyr--youtube iframe {
   transition: 0.2s filter linear;
 }
 
-.plyr--youtube.plyr--paused iframe {
+.external-video:not(.yt-controls) .plyr--youtube.plyr--paused iframe {
   filter: blur(1.5rem);
 }
 
-.plyr--youtube.plyr--paused::after {
+.external-video:not(.yt-controls) .plyr--youtube.plyr--paused::after {
   content: "";
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
+}
+
+.external-video.yt-controls .plyr__poster {
+  display: none;
 }
 
 /** patch slider-thumb */

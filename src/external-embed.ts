@@ -22,11 +22,18 @@ export function processExternalEmbeds(this: MediaExtended, docEl: HTMLElement) {
   for (const el of docEl.querySelectorAll("img[referrerpolicy]")) {
     // <img src="" referrerpolicy="no-referrer">
     const img = el as HTMLImageElement;
-    new ExternalEmbedHandler(img).handle(this.settings.thumbnailPlaceholder);
+    new ExternalEmbedHandler(img, this).handle();
   }
 }
 
 class ExternalEmbedHandler extends Handler<HTMLImageElement> {
+  plugin: MediaExtended;
+
+  constructor(target: HTMLImageElement, plugin: MediaExtended) {
+    super(target);
+    this.plugin = plugin;
+  }
+
   private async getInfo(): Promise<videoInfo_Host | null> {
     const url = getUrl(this.linktext);
     if (!url) return null;
@@ -39,10 +46,14 @@ class ExternalEmbedHandler extends Handler<HTMLImageElement> {
     return this.target.src;
   }
 
-  async handle(thumbnail = false): Promise<boolean> {
+  async handle(): Promise<boolean> {
     const info = await this.getInfo();
     if (!info) return false;
-    const newEl = getPlayer(thumbnail, info);
+    const newEl = getPlayer(
+      this.plugin.settings.thumbnailPlaceholder,
+      info,
+      this.plugin.settings.useYoutubeControls,
+    );
     if (newEl) this.replaceWith(newEl.container);
     return Boolean(newEl);
   }
@@ -51,6 +62,7 @@ class ExternalEmbedHandler extends Handler<HTMLImageElement> {
 export function getPlayer(
   thumbnail: boolean,
   info: videoInfo,
+  useYtControls: boolean,
 ): { player: Plyr_TF | null; container: HTMLDivElement } {
   if (isDirect(info) || isInternal(info)) {
     const playerEl = createEl(info.type);
@@ -73,8 +85,8 @@ export function getPlayer(
     switch (info.host) {
       case Host.youtube:
       case Host.vimeo:
-        if (thumbnail) setupThumbnail(container, info);
-        else player = setupPlyr(container, info);
+        if (thumbnail) setupThumbnail(container, info, useYtControls);
+        else player = setupPlyr(container, info, useYtControls);
         break;
       case Host.bili:
         if (thumbnail) setupThumbnail(container, info);

@@ -1,5 +1,6 @@
 import { assertNever } from "assert-never";
 import { Plyr_TF, getSetupTool, setPlyr } from "modules/player-setup";
+import Plyr from "plyr";
 import { fetchBiliThumbnail, fetchVimeoThumbnail } from "./thumbnail";
 import { Host, videoInfo_Host } from "./video-info";
 
@@ -8,32 +9,48 @@ const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr
 export function setupPlyr(
   container: HTMLDivElement,
   info: videoInfo_Host,
+  useYtControls = false,
 ): Plyr_TF {
   const tool = getSetupTool(info.src.hash);
   const { timeSpan } = tool;
 
   let options: Parameters<typeof setPlyr>[3];
-  if (info.host === Host.youtube && timeSpan && timeSpan.start !== 0)
-    options = {
-      youtube: {
-        start: timeSpan.start,
-      },
-    };
-  else options = undefined;
-
-  return setPlyr(container, getIFrame(info), tool, options);
+  if (info.host === Host.youtube) {
+    options = {};
+    if (timeSpan && timeSpan.start !== 0) {
+      if (!options.youtube) options.youtube = {};
+      // @ts-ignore
+      options.youtube.start = timeSpan.start;
+    }
+    if (useYtControls) {
+      if (!options.youtube) options.youtube = {};
+      options.controls = ["play-large"];
+      // @ts-ignore
+      options.youtube.controls = true;
+      container.classList.add("yt-controls");
+    }
+  } else options = undefined;
+  const player = setPlyr(container, getIFrame(info), tool, options);
+  if (info.host === Host.youtube && useYtControls) {
+    player.on("ready", (event) => {
+      player.play();
+      player.pause();
+    });
+  }
+  return player;
 }
 
 export async function setupThumbnail(
   container: HTMLDivElement,
   info: videoInfo_Host,
+  useYtControls = false,
 ): Promise<void> {
   const { id: videoId } = info;
 
   let thumbnailUrl: string | null;
   let fakePlayHandler: typeof PlyrHandler;
   function PlyrHandler() {
-    const player = setupPlyr(container, info);
+    const player = setupPlyr(container, info, useYtControls);
     player.once("ready", function (evt) {
       this.play();
     });

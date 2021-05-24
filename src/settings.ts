@@ -6,6 +6,7 @@ export interface MxSettings {
   timestampLink: boolean;
   extendedImageEmbedSyntax: boolean;
   thumbnailPlaceholder: boolean;
+  useYoutubeControls: boolean;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -13,6 +14,7 @@ export const DEFAULT_SETTINGS: MxSettings = {
   timestampLink: false,
   extendedImageEmbedSyntax: false,
   thumbnailPlaceholder: false,
+  useYoutubeControls: false,
 };
 
 export class MESettingTab extends PluginSettingTab {
@@ -86,6 +88,21 @@ export class MESettingTab extends PluginSettingTab {
           descEl.createEl("br");
           descEl.appendText(
             "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
+          );
+          descEl.createEl("br");
+          descEl.appendText("Restart the app to take effects");
+        }),
+      },
+      {
+        k: "useYoutubeControls",
+        name: "Use Youtube Built-in Controls",
+        desc: createFragment((descEl) => {
+          descEl.appendText(
+            "If enabled, Youtube's built-in Controls will be used in favor of Plyr controls",
+          );
+          descEl.createEl("br");
+          descEl.appendText(
+            "Useful when need access to CC (Closed Captioning) and chapters progress bar",
           );
           descEl.createEl("br");
           descEl.appendText("Restart the app to take effects");

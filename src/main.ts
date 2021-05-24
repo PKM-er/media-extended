@@ -50,7 +50,7 @@ export default class MediaExtended extends Plugin {
       this.registerMarkdownPostProcessor(this.processExternalEmbeds);
     }
 
-    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf));
+    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
     this.registerMarkdownPostProcessor(this.processExternalLinks);
     this.addCommand({
       id: "get-timestamp",
@@ -140,7 +140,7 @@ export default class MediaExtended extends Plugin {
       }
 
       try {
-        if (info) onclick(info, this.app.workspace)(e);
+        if (info) onclick(info, this)(e);
       } catch (e) {
         console.error(e);
       }

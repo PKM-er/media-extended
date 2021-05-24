@@ -76,7 +76,7 @@ export class InternalLinkHandler extends Handler<HTMLAnchorElement> {
       this.plugin.app.vault,
     );
     if (info) {
-      this.target.onclick = onclick(info, this.plugin.app.workspace);
+      this.target.onclick = onclick(info, this.plugin);
     }
   }
 }
