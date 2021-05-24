@@ -1,3 +1,15 @@
+# [2.7.0](https://github.com/alx-plugins/media-extended/compare/2.6.0...2.7.0) (2021-05-24)
+
+
+### Bug Fixes
+
+* **main.css:** youtube iframe no longer response to mouse when paused ([739600c](https://github.com/alx-plugins/media-extended/commit/739600cb5f081ae898e1c9dec473653a1ab16417))
+
+
+### Features
+
+* add the option to use youtube built-in controls ([990ce0b](https://github.com/alx-plugins/media-extended/commit/990ce0b582f42f882db9cb4e957a299e068eedf6))
+
 # [2.6.0](https://github.com/alx-plugins/media-extended/compare/2.5.3...2.6.0) (2021-05-19)
 
 
