@@ -26,9 +26,11 @@ This plugin introduce some new features that improve media (video/audio) playing
 
 ### Embed Media Fragments
 
-Just append [Media Fragment URI](#media-fragment-uri) to the embedded internal link and see the results:
+Just append [Media Fragment URI](#media-fragment-uri) to the embedded internal link/external link and see the results:
 
-![EmbedMediaFragmentsDemo](https://img.aidenlx.top/picgo/EmbedMediaFragmentsDemo.gif)
+![EmbedMediaFragmentsDemo2](https://img.aidenlx.top/picgo/EmbedMediaFragmentsDemo2.gif)
+
+Note: `Extended image embed syntax` required for Youtube/Vimeo/Bilibili video, local media file and media directlinks
 
 ### Timestamps for Media
 
