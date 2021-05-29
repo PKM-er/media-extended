@@ -80,7 +80,7 @@ function convertTime(input: string): number | null {
     } else if ((match = TFDef.npt_hhmmss.exec(rawTime)) !== null) {
       if (!match.groups) throw new Error("npt_hhmmss match error");
       const { hh, mm, ss } = match.groups;
-      return +hh * 60 + +mm * 60 + +ss;
+      return +hh * 60 * 60 + +mm * 60 + +ss;
     } else return null;
   } else {
     // console.error("fail to parse npt: " + input);
