@@ -1,3 +1,10 @@
+## [2.7.2](https://github.com/alx-plugins/media-extended/compare/2.7.1...2.7.2) (2021-05-29)
+
+
+### Bug Fixes
+
+* **temporal-frag.ts:** convertTime() error in handling hours ([66cc014](https://github.com/alx-plugins/media-extended/commit/66cc014b6c4b0f5628a97bd4a9a0655df20b8046)), closes [#38](https://github.com/alx-plugins/media-extended/issues/38)
+
 ## [2.7.1](https://github.com/alx-plugins/media-extended/compare/2.7.0...2.7.1) (2021-05-29)
 
 
