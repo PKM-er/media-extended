@@ -34,12 +34,10 @@ class ExternalEmbedHandler extends Handler<HTMLImageElement> {
     this.plugin = plugin;
   }
 
-  private async getInfo(): Promise<videoInfo_Host | null> {
+  private async getInfo(): Promise<videoInfo | null> {
     const url = getUrl(this.linktext);
     if (!url) return null;
-    const info = await getVideoInfo(url);
-    if (info && isHost(info)) return info;
-    else return null;
+    else return await getVideoInfo(url);
   }
 
   public get linktext(): string {
