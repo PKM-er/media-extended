@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/alx-plugins/media-extended/compare/2.7.0...2.7.1) (2021-05-29)
+
+
+### Bug Fixes
+
+* **external-embed.ts:** external embed syntax not working with direct links ([d2affb7](https://github.com/alx-plugins/media-extended/commit/d2affb7e2584e84874a36d6d2a26f21ab4a0aa3a)), closes [#39](https://github.com/alx-plugins/media-extended/issues/39)
+
 # [2.7.0](https://github.com/alx-plugins/media-extended/compare/2.6.0...2.7.0) (2021-05-24)
 
 
