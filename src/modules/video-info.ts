@@ -1,5 +1,11 @@
 import { trackInfo } from "modules/subtitle";
-import { parseLinktext, TFile, Vault } from "obsidian";
+import {
+  App,
+  MarkdownPostProcessorContext,
+  parseLinktext,
+  TFile,
+  Vault,
+} from "obsidian";
 import { getSubtitleTracks } from "modules/subtitle";
 
 export enum Host {
@@ -8,10 +14,11 @@ export enum Host {
   vimeo,
 }
 
-type mediaType = "audio" | "video";
+type mediaType = "audio" | "video" | "media";
 const acceptedExt: Map<mediaType, string[]> = new Map([
   ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
-  ["video", ["mp4", "webm", "ogv"]],
+  ["video", ["mp4", "ogv"]],
+  ["media", ["webm"]],
 ]);
 
 export function getMediaType(src: string | URL | TFile): mediaType | null {
@@ -39,6 +46,7 @@ export function getMediaType(src: string | URL | TFile): mediaType | null {
 export type videoInfo = videoInfo_Direct | videoInfo_Host | videoInfo_Internal;
 
 export interface videoInfo_Internal {
+  hash: string;
   type: mediaType;
   /** resource path */
   link: URL;
@@ -47,6 +55,7 @@ export interface videoInfo_Internal {
   trackInfo?: trackInfo;
 }
 export interface videoInfo_Direct {
+  hash: string;
   type: mediaType;
   /** converted src that is safe to use inside Obsidian */
   link: URL;
@@ -60,6 +69,7 @@ export function isInternal(info: videoInfo): info is videoInfo_Internal {
   return info.src instanceof TFile;
 }
 export interface videoInfo_Host {
+  hash: string;
   host: Host;
   id: string;
   iframe: URL;
@@ -99,6 +109,7 @@ export async function getVideoInfo(
 
   if (mediaType) {
     let link: URL;
+    // Internal
     if (src instanceof TFile) {
       if (!vault)
         throw new TypeError("no vault provided to parse resource path");
@@ -112,8 +123,18 @@ export async function getVideoInfo(
         return null;
       }
       trackInfo = (await getSubtitleTracks(src, vault)) ?? undefined;
-      return { type: mediaType, link, filename: src.name, src, trackInfo };
-    } else if (src.protocol === "file:")
+      return {
+        type: mediaType,
+        link,
+        filename: src.name,
+        src,
+        trackInfo,
+        hash,
+      };
+    }
+
+    // direct links
+    if (src.protocol === "file:")
       link = new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
     else link = src;
     const rawFilename = decodeURI(link.pathname).split("/").pop() ?? "";
@@ -123,6 +144,7 @@ export async function getVideoInfo(
       filename: decodeURI(rawFilename),
       src,
       trackInfo,
+      hash: src.hash,
     };
   } else if (src instanceof TFile) return null;
 
@@ -144,10 +166,11 @@ export async function getVideoInfo(
         return {
           host: Host.bili,
           id: videoId,
+          src,
           iframe: new URL(
             `https://player.bilibili.com/player.html${queryStr}&high_quality=1&danmaku=0`,
           ),
-          src,
+          hash: src.hash,
         };
       } else {
         console.log("bilibili video url not supported or invalid");
@@ -164,6 +187,7 @@ export async function getVideoInfo(
             id: videoId,
             iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
             src,
+            hash: src.hash,
           };
         } else {
           console.log(`invalid video id: ${src.toString()}`);
@@ -177,6 +201,7 @@ export async function getVideoInfo(
             id: videoId,
             iframe: new URL(`https://www.youtube.com/embed/${videoId}`),
             src,
+            hash: src.hash,
           };
         } else {
           console.log(`invalid video id: ${src.toString()}`);
@@ -197,6 +222,7 @@ export async function getVideoInfo(
           id: videoId,
           iframe: new URL(`https://player.vimeo.com/video/${videoId}`),
           src,
+          hash: src.hash,
         };
       } else {
         console.log("vimeo video url not supported or invalid");
@@ -206,3 +232,32 @@ export async function getVideoInfo(
       return null;
   }
 }
+
+export const resolveInfo = async (
+  el: Element,
+  type: string,
+  app: App,
+  ctx: MarkdownPostProcessorContext,
+) => {
+  if (type === "internal") {
+    const linktext =
+      el instanceof HTMLAnchorElement ? el.dataset.href : el.getAttr("src");
+    if (!linktext) {
+      console.error("no linktext in internal embed: %o, escaping", el);
+      return null;
+    }
+    // resolve linktext, check if exist
+    const { subpath: hash, path } = parseLinktext(linktext);
+    const file: TFile | null = app.metadataCache.getFirstLinkpathDest(
+      path,
+      ctx.sourcePath,
+    );
+    return getVideoInfo(file, hash, app.vault);
+  } else {
+    const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
+    if (!src) {
+      console.info("fail to get embed src: %o, escaping", el);
+      return null;
+    } else return getVideoInfo(src);
+  }
+};

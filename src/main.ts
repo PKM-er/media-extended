@@ -1,29 +1,20 @@
-import {
-  Plugin,
-  MarkdownPreviewRenderer,
-  MarkdownView,
-  parseLinktext,
-  TFile,
-} from "obsidian";
+import { Plugin, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
 import "plyr/dist/plyr.css";
 import "./main.css";
-import { processExternalEmbeds } from "external-embed";
-import { processInternalEmbeds } from "internal-embed";
-import { processInternalLinks } from "internal-link";
-import { onclick, processExternalLinks } from "external-link";
-import { MediaView, MEDIA_VIEW_TYPE } from "modules/media-view";
-import { getMediaType, getVideoInfo } from "modules/video-host/video-info";
-import { Await } from "modules/misc";
+import { getEmbedProcessor } from "embeds";
+import { MediaView, MEDIA_VIEW_TYPE } from "./media-view";
+import { cmLinkHandler, getLinkProcessor } from "links";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
-  processInternalEmbeds = processInternalEmbeds.bind(this);
-  processInternalLinks = processInternalLinks.bind(this);
-  processExternalEmbeds = processExternalEmbeds.bind(this);
-  processExternalLinks = processExternalLinks.bind(this);
+  private processInternalEmbeds = getEmbedProcessor(this, "internal");
+  private processInternalLinks = getLinkProcessor(this, "internal");
+  private processExternalEmbeds = getEmbedProcessor(this, "external");
+  private processExternalLinks = getLinkProcessor(this, "external");
+  private cmLinkHandler = cmLinkHandler(this);
 
   async loadSettings() {
     Object.assign(this.settings, await this.loadData());
@@ -94,58 +85,11 @@ export default class MediaExtended extends Plugin {
     this.registerCodeMirror((cm) => {
       const warpEl = cm.getWrapperElement();
       warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
+      this.register(() =>
+        warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
+      );
     });
   }
-
-  cmLinkHandler = async (e: MouseEvent, del: HTMLElement) => {
-    const text = del.innerText;
-    const isMacOS = /Macintosh|iPhone/.test(navigator.userAgent);
-    const modKey = isMacOS ? e.metaKey : e.ctrlKey;
-    if (modKey) {
-      let info: Await<ReturnType<typeof getVideoInfo>>;
-      if (del.hasClass("cm-hmd-internal-link")) {
-        const { path, subpath: hash } = parseLinktext(text);
-
-        if (!getMediaType(path)) return;
-        else e.stopPropagation();
-
-        const activeLeaf = this.app.workspace.getActiveViewOfType(MarkdownView);
-        if (!activeLeaf) {
-          console.error("no MarkdownView activeLeaf found");
-          return;
-        }
-        const file = this.app.metadataCache.getFirstLinkpathDest(
-          path,
-          activeLeaf.file.path,
-        ) as TFile | null;
-        if (!file) return;
-        info = await getVideoInfo(file, hash, this.app.vault);
-      } else {
-        if (
-          del.hasClass("cm-formatting") &&
-          del.hasClass("cm-formatting-link-string")
-        ) {
-          let urlEl: Element | null;
-          if (text === "(") urlEl = del.nextElementSibling;
-          else if (text === ")") urlEl = del.previousElementSibling;
-          else urlEl = null;
-          if (urlEl === null || !(urlEl instanceof HTMLElement)) {
-            console.error("unable to get url from: %o", del);
-            return;
-          }
-          info = await getVideoInfo(urlEl.innerText);
-        } else {
-          info = await getVideoInfo(text);
-        }
-      }
-
-      try {
-        if (info) onclick(info, this)(e);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
 
   onunload() {
     console.log("unloading media-extended");

@@ -1,21 +1,26 @@
-import { getPlayer } from "external-embed";
 import {
   EditorPosition,
   ItemView,
   MarkdownView,
   WorkspaceLeaf,
 } from "obsidian";
-import Plyr from "plyr";
 import { mainpart } from "./misc";
-import { getSetupTool, Plyr_TF, setRatio } from "./player-setup";
-import { TimeSpan } from "./temporal-frag";
+import {
+  getPlyr,
+  getPlyrForHost,
+  getSetupTool,
+  infoToSource,
+  Plyr_TF,
+  setRatio,
+} from "modules/player-setup";
+import { TimeSpan } from "modules/temporal-frag";
 import {
   Host,
   isDirect,
   isHost,
   isInternal,
   videoInfo,
-} from "./video-host/video-info";
+} from "modules/video-info";
 import TimeFormat from "hh-mm-ss";
 import MediaExtended from "main";
 
@@ -37,35 +42,14 @@ export class MediaView extends ItemView {
       this.player.pip = false;
       this.revokeObjUrls();
       this.showControls();
-      let source: Plyr.SourceInfo;
-      if (isDirect(info)) {
-        canPip = true;
-        source = {
-          type: info.type,
-          sources: [{ src: info.link.href }],
-        };
-        this.hash = info.src.hash;
-      } else if (isInternal(info)) {
-        canPip = true;
-        source = {
-          type: info.type,
-          sources: [{ src: info.link.href }],
-          tracks: info.trackInfo ? info.trackInfo.tracks : undefined,
-        };
-        this.hash = info.link.hash;
-      } else {
+      const source = infoToSource(info);
+      this.player.source = source;
+      this.player.sourceBak = source;
+      this.hash = info.hash;
+      if (isHost(info)) {
         canPip = false;
-        if (info.host === Host.bili) {
-          console.error("Bilibili not supported in Plyr");
-          return;
-        }
-        source = {
-          type: "video",
-          sources: [
-            { src: info.id, provider: Host[info.host] as "vimeo" | "youtube" },
-          ],
-        };
-        this.hash = info.src.hash;
+      } else {
+        canPip = true;
       }
       this.info = info;
       this.player.source = source;
@@ -123,17 +107,21 @@ export class MediaView extends ItemView {
       link: new URL("http://example.com/video.mp4"),
       filename: "No Media",
       src: new URL("http://example.com/video.mp4"),
+      hash: "",
     };
     if (isInternal(info) && info.trackInfo) {
       this.trackObjUrls = info.trackInfo.objUrls;
     } else {
       this.trackObjUrls = [];
     }
-    const { container, player } = getPlayer(
-      false,
-      info,
-      this.plugin.settings.useYoutubeControls,
-    );
+
+    let result: ReturnType<typeof getPlyr>;
+    if (isHost(info)) {
+      result = getPlyrForHost(info, this.plugin.settings.useYoutubeControls);
+    } else {
+      result = getPlyr(info);
+    }
+    const { container, player } = result;
     this.player = player as Plyr_TF;
     this.container = container;
     this.contentEl.appendChild(container);

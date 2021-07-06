@@ -1,7 +1,15 @@
 import { parseTF, TimeSpan } from "./temporal-frag";
-import { stringify, parse } from "query-string";
-import { parseLinktext } from "obsidian";
+import { parse } from "query-string";
 import Plyr from "plyr";
+import {
+  Host,
+  isDirect,
+  isHost,
+  isInternal,
+  videoInfo,
+  videoInfo_Host,
+} from "./video-info";
+import assertNever from "assert-never";
 
 /** Player with temporal fragments */
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
@@ -10,6 +18,7 @@ export type Player = HTMLMediaElement | Plyr;
 interface TemporalFrag {
   readonly timeSpan: TimeSpan | null;
   setTimeSpan(span: TimeSpan | null): void;
+  sourceBak: Plyr.SourceInfo;
 }
 
 /** Plyr with temporal fragments */
@@ -52,16 +61,18 @@ const defaultPlyrOption: Plyr.Options = {
 /** Player Properties that can be controlled by hash */
 type PlayerProperties = "loop" | "muted" | "autoplay";
 
-export type setupTool = {
+type setupTool = {
   timeSpan: TimeSpan | null;
   is: (prop: PlayerProperties) => boolean;
   setHashOpt: (player: Player) => void;
   setPlayerTF: (player: Player) => void;
 };
 
-export function getSetupTool(hash: string): setupTool {
-  const timeSpan = parseTF(hash);
-  const hashQuery = parse(hash);
+export function getSetupTool(hash: string | null): setupTool {
+  const timeSpan = hash ? parseTF(hash) : null;
+  const hashQuery = hash ? parse(hash) : null;
+  const getQuery = (query: string) =>
+    hashQuery ? hashQuery[query] === null : false;
   // null: exist, with no value (#loop)
 
   const hashOpts = new Map<string, PlayerProperties>([
@@ -73,8 +84,9 @@ export function getSetupTool(hash: string): setupTool {
   return {
     timeSpan,
     is: (prop) => {
-      for (const [hash, key] of hashOpts) {
-        if (prop === key && hashQuery[hash] === null) return true;
+      if (!hash) return false;
+      for (const [query, key] of hashOpts) {
+        if (prop === key && getQuery(query)) return true;
       }
       return false;
     },
@@ -82,8 +94,8 @@ export function getSetupTool(hash: string): setupTool {
       PlayerTFSetup(player, timeSpan);
     },
     setHashOpt: (player) =>
-      hashOpts.forEach((key, hash) => {
-        if (hashQuery[hash] === null) player[key] = true;
+      hashOpts.forEach((key, query) => {
+        if (getQuery(query)) player[key] = true;
       }),
   };
 }
@@ -176,64 +188,97 @@ export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
   });
 }
 
-export function setPlyr(
-  container: HTMLDivElement,
-  inputEl: HTMLIFrameElement,
-  tool: setupTool,
-  options?: Plyr.Options,
-): Plyr_TF;
-export function setPlyr(
-  container: HTMLDivElement,
-  inputEl: HTMLMediaElement,
-  tool: setupTool,
-  options?: Plyr.Options,
-  tracks?: HTMLTrackElement[],
-): Plyr_TF;
-export function setPlyr(
-  container: HTMLDivElement,
-  inputEl: HTMLIFrameElement | HTMLMediaElement,
-  tool: setupTool,
-  options?: Plyr.Options,
-  tracks?: HTMLTrackElement[],
-): Plyr_TF {
-  const { is, setHashOpt, setPlayerTF } = tool;
+export function getPlyrForHost(
+  info: videoInfo_Host,
+  useYtControls = false,
+): ReturnType<typeof getPlyr> {
+  const { timeSpan } = getSetupTool(info.hash);
 
-  if (
-    !(
-      inputEl instanceof HTMLMediaElement && container.hasClass("local-media")
-    ) &&
-    !(
-      inputEl instanceof HTMLIFrameElement &&
-      container.hasClass("external-video")
-    )
-  )
-    throw new TypeError("inputEl and container not match");
+  let options: Plyr.Options;
+  if (info.host === Host.youtube) {
+    options = {};
+    if (timeSpan && timeSpan.start !== 0) {
+      if (!options.youtube) options.youtube = {};
+      // @ts-ignore
+      options.youtube.start = timeSpan.start;
+    }
+    if (useYtControls) {
+      if (!options.youtube) options.youtube = {};
+      options.controls = ["play-large"];
+      // @ts-ignore
+      options.youtube.controls = true;
+    }
+  } else options = {};
 
-  let plyrTargetEl: HTMLDivElement | HTMLMediaElement;
-  if (inputEl instanceof HTMLMediaElement) {
-    if (tracks) tracks.forEach((t) => inputEl.appendChild(t));
-    plyrTargetEl = inputEl;
-  } else {
-    plyrTargetEl = createDiv({ cls: "plyr__video-embed" });
-    plyrTargetEl.appendChild(inputEl);
+  const result = getPlyr(info, options);
+  const { container, player } = result;
+  if (useYtControls) container.classList.add("yt-controls");
+  if (info.host === Host.youtube && useYtControls) {
+    player.on("ready", (event) => {
+      player.play();
+      player.pause();
+    });
   }
+  return result;
+}
 
-  container.appendChild(plyrTargetEl);
+export function getPlyr(
+  info: videoInfo,
+  options?: Plyr.Options,
+): { container: HTMLDivElement; player: Plyr_TF } {
+  const { is, setHashOpt, setPlayerTF } = getSetupTool(info.hash);
+
+  const container = createDiv();
+  const playerEl = container.appendChild(createEl("video"));
 
   if (options) options = { ...defaultPlyrOption, ...options };
   else options = defaultPlyrOption;
 
   options.autoplay = is("autoplay");
-  const player = new Plyr(plyrTargetEl, options);
+  const player = new Plyr(playerEl, options);
+  let source = infoToSource(info);
 
-  // hide poster to make subtitle selectable
-  if (tracks)
-    container.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
+  player.source = source;
+  (player as Plyr_TF).sourceBak = source;
 
-  setRatio(container, player);
   setHashOpt(player);
   setPlayerTF(player);
-  if (tracks) player.once("ready", () => player.toggleCaptions());
+  if (isInternal(info) && info.trackInfo) {
+    // hide poster to make subtitle selectable
+    playerEl.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
+    player.once("ready", () => player.toggleCaptions());
+  }
 
-  return player as Plyr_TF;
+  return { container, player: player as Plyr_TF };
 }
+
+export const infoToSource = (info: videoInfo): Plyr.SourceInfo => {
+  if (isHost(info)) {
+    if (info.host === Host.bili)
+      throw new Error("Bilibili not supported in Plyr");
+    else
+      return {
+        type: "video",
+        sources: [
+          { src: info.id, provider: Host[info.host] as "vimeo" | "youtube" },
+        ],
+      };
+  } else {
+    const type = info.type === "media" ? "video" : info.type;
+    const sources = [{ src: info.link.href }];
+    if (isDirect(info)) {
+      return {
+        type,
+        sources,
+      };
+    } else if (isInternal(info)) {
+      return {
+        type,
+        sources,
+        tracks: info.trackInfo ? info.trackInfo.tracks : undefined,
+      };
+    } else {
+      assertNever(info);
+    }
+  }
+};
