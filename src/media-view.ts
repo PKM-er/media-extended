@@ -6,6 +6,7 @@ import {
 } from "obsidian";
 import { mainpart } from "./misc";
 import {
+  checkMediaType,
   getPlyr,
   getPlyrForHost,
   getSetupTool,
@@ -37,34 +38,32 @@ export class MediaView extends ItemView {
 
   public set src(info: videoInfo) {
     if (!this.isEqual(info)) {
-      const isPipEnabledBefore = this.player.pip;
-      let canPip: boolean;
-      this.player.pip = false;
       this.revokeObjUrls();
       this.showControls();
+
       const source = infoToSource(info);
-      this.player.source = source;
       this.player.sourceBak = source;
-      this.hash = info.hash;
-      if (isHost(info)) {
-        canPip = false;
-      } else {
-        canPip = true;
-      }
-      this.info = info;
       this.player.source = source;
-      if (canPip) {
+      setRatio(this.container, this.player);
+      checkMediaType(info, this.player);
+
+      this.hash = info.hash;
+
+      const isPipEnabledBefore = this.player.pip;
+      this.player.pip = false;
+      if (isHost(info)) {
+        this.hideControl("pip");
+      } else {
         this.showControl("pip");
         if (isPipEnabledBefore)
-          this.player.once("playing", function () {
-            this.pip = true;
+          this.player.once("playing", () => {
+            this.player.pip = true;
           });
-      } else {
-        this.hideControl("pip");
       }
+      this.info = info;
+
       this.setDisplayText(info);
       this.load();
-      setRatio(this.container, this.player);
     } else console.error("to update timestamp, use MediaView.hash");
   }
 

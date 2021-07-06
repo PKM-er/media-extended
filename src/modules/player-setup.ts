@@ -249,8 +249,42 @@ export function getPlyr(
     player.once("ready", () => player.toggleCaptions());
   }
 
+  checkMediaType(info, player);
+
   return { container, player: player as Plyr_TF };
 }
+
+/** check media type that can not be determined by extension and switch source accordingly */
+export const checkMediaType = (info: videoInfo, player: Plyr) => {
+  if (!isHost(info) && info.type === "media" && player.isHTML5) {
+    // using plyr.source setter to update will trigger event twice
+    let count = 0;
+    const handler = () => {
+      // @ts-ignore
+      const media: HTMLElement = player.media;
+      if (media && media instanceof HTMLVideoElement) {
+        if (count === 0) {
+          if (media.videoHeight !== 0 || media.videoWidth !== 0) {
+            player.off("loadedmetadata", handler);
+            (player as Plyr_TF).sourceBak.type = "video";
+          } else {
+            count++;
+          }
+        } else {
+          player.off("loadedmetadata", handler);
+          if (media.videoHeight === 0 && media.videoWidth === 0) {
+            (player as Plyr_TF).sourceBak.type = "audio";
+            console.log("media is audio, switching...");
+            player.source = (player as Plyr_TF).sourceBak;
+          } else {
+            (player as Plyr_TF).sourceBak.type = "video";
+          }
+        }
+      }
+    };
+    player.on("loadedmetadata", handler);
+  }
+};
 
 export const infoToSource = (info: videoInfo): Plyr.SourceInfo => {
   if (isHost(info)) {
