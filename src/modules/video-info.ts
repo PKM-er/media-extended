@@ -248,11 +248,12 @@ export const resolveInfo = async (
     }
     // resolve linktext, check if exist
     const { subpath: hash, path } = parseLinktext(linktext);
-    const file: TFile | null = app.metadataCache.getFirstLinkpathDest(
+    const file = app.metadataCache.getFirstLinkpathDest(
       path,
       ctx.sourcePath,
-    );
-    return getVideoInfo(file, hash, app.vault);
+    ) as TFile | null;
+
+    return file ? getVideoInfo(file, hash, app.vault) : null;
   } else {
     const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
     if (!src) {
