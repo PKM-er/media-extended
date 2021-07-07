@@ -56,7 +56,7 @@ export const getOpenLink = (
           view.src = info;
         }
       }
-    } else {
+    } else if (workspace.activeLeaf) {
       const newLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
       workspace.activeLeaf.setGroupMember(newLeaf);
       const view = new MediaView(newLeaf, plugin, info);
@@ -107,7 +107,7 @@ export function cmLinkHandler(this: MediaExtended) {
         const file = metadataCache.getFirstLinkpathDest(
           path,
           activeLeaf.file.path,
-        ) as TFile | null;
+        );
         if (!file) return;
         info = await getVideoInfo(file, hash, vault);
       } else {

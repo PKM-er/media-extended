@@ -27,47 +27,49 @@ export default class MediaExtended extends Plugin {
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
+    // register embed handlers
     if (this.settings.mediaFragmentsEmbed) {
       this.registerMarkdownPostProcessor(getEmbedProcessor(this, "internal"));
     }
     if (this.settings.timestampLink) {
       this.registerMarkdownPostProcessor(getLinkProcessor(this, "internal"));
     }
+
+    // register link handlers
     if (this.settings.extendedImageEmbedSyntax) {
       this.registerMarkdownPostProcessor(getEmbedProcessor(this, "external"));
     }
+    this.registerMarkdownPostProcessor(getLinkProcessor(this, "external"));
+    this.registerCodeMirror((cm) => {
+      const warpEl = cm.getWrapperElement();
+      warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
+      this.register(() =>
+        warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
+      );
+    });
 
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
-    this.registerMarkdownPostProcessor(getLinkProcessor(this, "external"));
     this.addCommand({
       id: "get-timestamp",
       name: "Get timestamp from player",
-      checkCallback: (checking) => {
-        const activeLeaf = this.app.workspace.activeLeaf;
+      editorCheckCallback: (checking, editor, view) => {
         const getMediaView = (group: string) =>
           this.app.workspace
             // @ts-ignore
             .getGroupLeaves(group)
             .find((leaf) => (leaf.view as MediaView).getTimeStamp !== undefined)
             ?.view as MediaView | undefined;
+        // @ts-ignore
+        const group: null | string = view.leaf.group;
         if (checking) {
-          if (
-            activeLeaf.view instanceof MarkdownView &&
-            activeLeaf.view.getMode() === "source" &&
-            // @ts-ignore
-            activeLeaf.group
-          ) {
-            // @ts-ignore
-            const mediaView = getMediaView(activeLeaf.group);
+          if (group) {
+            const mediaView = getMediaView(group);
             if (mediaView && (mediaView as MediaView).getTimeStamp())
               return true;
           }
           return false;
-        } else {
-          getMediaView(
-            // @ts-ignore
-            activeLeaf.group,
-          )?.addTimeStampToMDView(activeLeaf.view as MarkdownView);
+        } else if (group) {
+          getMediaView(group)?.addTimeStampToMDView(view);
         }
       },
       hotkeys: [
@@ -76,14 +78,6 @@ export default class MediaExtended extends Plugin {
           key: "t",
         },
       ],
-    });
-
-    this.registerCodeMirror((cm) => {
-      const warpEl = cm.getWrapperElement();
-      warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
-      this.register(() =>
-        warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
-      );
     });
   }
 }

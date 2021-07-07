@@ -140,8 +140,7 @@ export class SubtitleResource extends MarkdownRenderChild {
   objectUrls: string[];
 
   constructor(containerEl: HTMLDivElement, objectUrls: string[]) {
-    super();
-    this.containerEl = containerEl;
+    super(containerEl);
     this.objectUrls = objectUrls;
   }
 
