@@ -28,12 +28,12 @@ export const getEmbedProcessor = (
         } else if (isDirect(info)) {
           newEl = getContainer(getPlyr(info));
         } else {
-          newEl = createDiv({ cls: "external-video" });
+          newEl = createDiv();
           const {
             useYoutubeControls: ytControls,
             thumbnailPlaceholder: thumbnail,
           } = plugin.settings;
-          if (thumbnail) setupThumbnail(newEl, info, ytControls);
+          if (thumbnail) newEl = await setupThumbnail(info, ytControls);
           else
             switch (info.host) {
               case Host.youtube:

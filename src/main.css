@@ -1,6 +1,5 @@
 /* global div.external-video should be controlled in settings */
-div.external-video,
-div.local-media {
+.plyr--video, div.thumbnail {
   min-height: 16em;
   min-width: 450px;
   max-width: 100%;
@@ -10,21 +9,6 @@ div.local-media {
 
 .plyr__caption::selection {
   background-color: gray;
-}
-
-div.external-video > iframe.external-video,
-div.external-video > div.thumbnail,
-.plyr,
-.plyr__video-wrapper,
-.plyr audio,
-.plyr iframe,
-.plyr video {
-  min-height: inherit;
-  min-width: inherit;
-  max-height: inherit;
-  max-width: inherit;
-  width: 100%;
-  height: 100%;
 }
 
 .visuallyhidden:not(:focus):not(:active) {

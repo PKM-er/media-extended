@@ -7,12 +7,14 @@ import { videoInfo_Host, Host } from "modules/video-info";
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
 export async function setupThumbnail(
-  container: HTMLDivElement,
   info: videoInfo_Host,
   useYtControls = false,
-): Promise<void> {
+): Promise<HTMLDivElement> {
   const { id: videoId } = info;
 
+  const thumbnail = createDiv({
+    cls: ["thumbnail", "plyr plyr--full-ui plyr--video"],
+  });
   let thumbnailUrl: string | null;
   let fakePlayHandler: typeof PlyrHandler;
   function PlyrHandler() {
@@ -20,7 +22,7 @@ export async function setupThumbnail(
     player.once("ready", function (evt) {
       this.play();
     });
-    container.replaceWith(getContainer(player));
+    thumbnail.replaceWith(getContainer(player));
   }
 
   switch (info.host) {
@@ -33,8 +35,9 @@ export async function setupThumbnail(
         thumbnailUrl = await fetchBiliThumbnail(+info.id.substring(2));
       else thumbnailUrl = await fetchBiliThumbnail(info.id);
       fakePlayHandler = () => {
-        setupIFrame(container, info);
-        container.removeChild(thumbnail);
+        const div = createDiv();
+        setupIFrame(div, info);
+        thumbnail.replaceWith(div);
       };
       break;
     case Host.vimeo:
@@ -45,33 +48,26 @@ export async function setupThumbnail(
       assertNever(info.host);
   }
 
-  const thumbnail = createDiv(
-    {
-      cls: ["thumbnail", "plyr plyr--full-ui plyr--video"],
-    },
-    (el) => {
-      if (thumbnailUrl) el.style.backgroundImage = `url("${thumbnailUrl}")`;
-      el.appendChild(
-        createEl(
-          "button",
-          {
-            cls: "plyr__control plyr__control--overlaid",
-            attr: {
-              type: "button",
-              "data-plyr": "play",
-              "aria-label": "Play",
-            },
-          },
-          (button) => {
-            button.innerHTML = playButtonHtml;
-            button.onClickEvent(fakePlayHandler);
-          },
-        ),
-      );
-    },
+  if (thumbnailUrl) thumbnail.style.backgroundImage = `url("${thumbnailUrl}")`;
+  thumbnail.appendChild(
+    createEl(
+      "button",
+      {
+        cls: "plyr__control plyr__control--overlaid",
+        attr: {
+          type: "button",
+          "data-plyr": "play",
+          "aria-label": "Play",
+        },
+      },
+      (button) => {
+        button.innerHTML = playButtonHtml;
+        button.onClickEvent(fakePlayHandler);
+      },
+    ),
   );
 
-  container.appendChild(thumbnail);
+  return thumbnail;
 }
 
 export async function fetchVimeoThumbnail(
