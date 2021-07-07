@@ -10,11 +10,7 @@ const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
-  private processInternalEmbeds = getEmbedProcessor(this, "internal");
-  private processInternalLinks = getLinkProcessor(this, "internal");
-  private processExternalEmbeds = getEmbedProcessor(this, "external");
-  private processExternalLinks = getLinkProcessor(this, "external");
-  private cmLinkHandler = cmLinkHandler(this);
+  private cmLinkHandler = cmLinkHandler.bind(this);
 
   async loadSettings() {
     Object.assign(this.settings, await this.loadData());
@@ -32,17 +28,17 @@ export default class MediaExtended extends Plugin {
     this.addSettingTab(new MESettingTab(this.app, this));
 
     if (this.settings.mediaFragmentsEmbed) {
-      this.registerMarkdownPostProcessor(this.processInternalEmbeds);
+      this.registerMarkdownPostProcessor(getEmbedProcessor(this, "internal"));
     }
     if (this.settings.timestampLink) {
-      this.registerMarkdownPostProcessor(this.processInternalLinks);
+      this.registerMarkdownPostProcessor(getLinkProcessor(this, "internal"));
     }
     if (this.settings.extendedImageEmbedSyntax) {
-      this.registerMarkdownPostProcessor(this.processExternalEmbeds);
+      this.registerMarkdownPostProcessor(getEmbedProcessor(this, "external"));
     }
 
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
-    this.registerMarkdownPostProcessor(this.processExternalLinks);
+    this.registerMarkdownPostProcessor(getLinkProcessor(this, "external"));
     this.addCommand({
       id: "get-timestamp",
       name: "Get timestamp from player",
@@ -88,29 +84,6 @@ export default class MediaExtended extends Plugin {
       this.register(() =>
         warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
       );
-    });
-  }
-
-  onunload() {
-    console.log("unloading media-extended");
-    if (this.settings.mediaFragmentsEmbed) {
-      MarkdownPreviewRenderer.unregisterPostProcessor(
-        this.processInternalEmbeds,
-      );
-    }
-    if (this.settings.timestampLink) {
-      MarkdownPreviewRenderer.unregisterPostProcessor(
-        this.processInternalLinks,
-      );
-    }
-    if (this.settings.extendedImageEmbedSyntax) {
-      MarkdownPreviewRenderer.unregisterPostProcessor(
-        this.processExternalEmbeds,
-      );
-    }
-    this.registerCodeMirror((cm) => {
-      const warpEl = cm.getWrapperElement();
-      warpEl.off("mousedown", linkSelector, this.cmLinkHandler);
     });
   }
 }
