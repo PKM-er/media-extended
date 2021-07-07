@@ -4,13 +4,13 @@ import "plyr/dist/plyr.css";
 import "./main.css";
 import { getEmbedProcessor } from "embeds";
 import { MediaView, MEDIA_VIEW_TYPE } from "./media-view";
-import { cmLinkHandler, getLinkProcessor } from "links";
+import { getCMLinkHandler, getLinkProcessor } from "links";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
-  private cmLinkHandler = cmLinkHandler.bind(this);
+  private cmLinkHandler = getCMLinkHandler(this);
 
   async loadSettings() {
     Object.assign(this.settings, await this.loadData());
@@ -52,7 +52,7 @@ export default class MediaExtended extends Plugin {
     this.addCommand({
       id: "get-timestamp",
       name: "Get timestamp from player",
-      editorCheckCallback: (checking, editor, view) => {
+      editorCheckCallback: (checking, _editor, view) => {
         const getMediaView = (group: string) =>
           this.app.workspace
             // @ts-ignore

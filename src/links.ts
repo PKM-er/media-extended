@@ -85,8 +85,8 @@ export const getLinkProcessor = (
   };
 };
 
-export function cmLinkHandler(this: MediaExtended) {
-  const { workspace, metadataCache, vault } = this.app;
+export const getCMLinkHandler = (plugin: MediaExtended) => {
+  const { workspace, metadataCache, vault } = plugin.app;
   return async (e: MouseEvent, del: HTMLElement) => {
     const text = del.innerText;
     const isMacOS = /Macintosh|iPhone/.test(navigator.userAgent);
@@ -130,10 +130,10 @@ export function cmLinkHandler(this: MediaExtended) {
       }
 
       try {
-        if (info) getOpenLink(info, this)(e);
+        if (info) getOpenLink(info, plugin)(e);
       } catch (e) {
         console.error(e);
       }
     }
   };
-}
+};
