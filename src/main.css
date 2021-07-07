@@ -48,15 +48,15 @@ div.thumbnail {
 }
 
 /* hide recommended video in youtube */
-.external-video:not(.yt-controls) .plyr--youtube iframe {
+.plyr--youtube:not(.yt-controls) iframe {
   transition: 0.2s filter linear;
 }
 
-.external-video:not(.yt-controls) .plyr--youtube.plyr--paused iframe {
+.plyr--youtube.plyr--paused:not(.yt-controls) iframe {
   filter: blur(1.5rem);
 }
 
-.external-video:not(.yt-controls) .plyr--youtube.plyr--paused::after {
+.plyr--youtube.plyr--paused:not(.yt-controls)::after {
   content: "";
   position: absolute;
   width: 100%;
@@ -65,7 +65,7 @@ div.thumbnail {
   left: 0;
 }
 
-.external-video.yt-controls .plyr__poster {
+.yt-controls .plyr__poster {
   display: none;
 }
 
