@@ -1,6 +1,6 @@
 import assertNever from "assert-never";
 import MediaExtended from "main";
-import { getPlyr, getPlyrForHost } from "modules/player-setup";
+import { getContainer, getPlyr, getPlyrForHost } from "modules/player-setup";
 import { SubtitleResource } from "modules/subtitle";
 import { setupIFrame } from "modules/iframe";
 import { setupThumbnail } from "modules/thumbnail";
@@ -21,12 +21,12 @@ export const getEmbedProcessor = (
       let newEl: HTMLDivElement | null = null;
       try {
         if (isInternal(info)) {
-          newEl = getPlyr(info).container;
+          newEl = getContainer(getPlyr(info));
           ctx.addChild(
             new SubtitleResource(newEl, info.trackInfo?.objUrls ?? []),
           );
         } else if (isDirect(info)) {
-          newEl = getPlyr(info).container;
+          newEl = getContainer(getPlyr(info));
         } else {
           newEl = createDiv({ cls: "external-video" });
           const {
@@ -38,7 +38,7 @@ export const getEmbedProcessor = (
             switch (info.host) {
               case Host.youtube:
               case Host.vimeo:
-                newEl = getPlyrForHost(info, ytControls).container;
+                newEl = getContainer(getPlyrForHost(info, ytControls));
                 break;
               case Host.bili:
                 setupIFrame(newEl, info);

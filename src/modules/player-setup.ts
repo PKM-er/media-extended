@@ -171,27 +171,10 @@ export function PlayerTFSetup(player: Player, timeSpan?: TimeSpan | null) {
   playerTF.setTimeSpan(timeSpan ?? null);
 }
 
-export function setRatio(containerEl: HTMLDivElement, player: Plyr) {
-  player.once("ready", function () {
-    let trys = 0;
-
-    const id = setInterval(() => {
-      if (player.ratio) {
-        // @ts-ignore
-        containerEl.style.aspectRatio = player.ratio.replace(/:/, "/");
-        clearInterval(id);
-      } else if (trys >= 10) {
-        console.error("failed to get player.ratio");
-        clearInterval(id);
-      } else trys++;
-    }, 100);
-  });
-}
-
-export function getPlyrForHost(
+export const getPlyrForHost = (
   info: videoInfo_Host,
   useYtControls = false,
-): ReturnType<typeof getPlyr> {
+): Plyr_TF => {
   const { timeSpan } = getSetupTool(info.hash);
 
   let options: Plyr.Options;
@@ -210,26 +193,22 @@ export function getPlyrForHost(
     }
   } else options = {};
 
-  const result = getPlyr(info, options);
-  const { container, player } = result;
-  if (useYtControls) container.classList.add("yt-controls");
+  const player = getPlyr(info, options);
+  const container = player.elements.container;
+  if (useYtControls) container?.classList.add("yt-controls");
   if (info.host === Host.youtube && useYtControls) {
-    player.on("ready", (event) => {
-      player.play();
+    player.on("ready", async (event) => {
+      await player.play();
       player.pause();
     });
   }
-  return result;
-}
+  return player;
+};
 
-export function getPlyr(
-  info: videoInfo,
-  options?: Plyr.Options,
-): { container: HTMLDivElement; player: Plyr_TF } {
+export const getPlyr = (info: videoInfo, options?: Plyr.Options): Plyr_TF => {
   const { is, setHashOpt, setPlayerTF } = getSetupTool(info.hash);
 
-  const container = createDiv();
-  const playerEl = container.appendChild(createEl("video"));
+  const playerEl = createDiv().appendChild(createEl("video"));
 
   if (options) options = { ...defaultPlyrOption, ...options };
   else options = defaultPlyrOption;
@@ -251,8 +230,8 @@ export function getPlyr(
 
   checkMediaType(info, player);
 
-  return { container, player: player as Plyr_TF };
-}
+  return player as Plyr_TF;
+};
 
 /** check media type that can not be determined by extension and switch source accordingly */
 export const checkMediaType = (info: videoInfo, player: Plyr) => {
@@ -315,4 +294,10 @@ export const infoToSource = (info: videoInfo): Plyr.SourceInfo => {
       assertNever(info);
     }
   }
+};
+
+export const getContainer = (player: Plyr): HTMLDivElement => {
+  const container = player.elements.container as HTMLDivElement | null;
+  if (container) return container;
+  else throw new Error("Plyr container null");
 };

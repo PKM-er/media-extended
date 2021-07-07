@@ -1,6 +1,6 @@
 import assertNever from "assert-never";
 import https from "https";
-import { getPlyrForHost } from "modules/player-setup";
+import { getContainer, getPlyrForHost } from "modules/player-setup";
 import { setupIFrame } from "./iframe";
 import { videoInfo_Host, Host } from "modules/video-info";
 
@@ -16,11 +16,11 @@ export async function setupThumbnail(
   let thumbnailUrl: string | null;
   let fakePlayHandler: typeof PlyrHandler;
   function PlyrHandler() {
-    const { player, container: newEl } = getPlyrForHost(info, useYtControls);
+    const player = getPlyrForHost(info, useYtControls);
     player.once("ready", function (evt) {
       this.play();
     });
-    container.replaceWith(newEl);
+    container.replaceWith(getContainer(player));
   }
 
   switch (info.host) {

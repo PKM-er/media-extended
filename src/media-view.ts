@@ -7,12 +7,12 @@ import {
 import { mainpart } from "./misc";
 import {
   checkMediaType,
+  getContainer,
   getPlyr,
   getPlyrForHost,
   getSetupTool,
   infoToSource,
   Plyr_TF,
-  setRatio,
 } from "modules/player-setup";
 import { TimeSpan } from "modules/temporal-frag";
 import {
@@ -29,7 +29,6 @@ export const MEDIA_VIEW_TYPE = "external-media";
 export class MediaView extends ItemView {
   player: Plyr_TF;
   plugin: MediaExtended;
-  container: HTMLDivElement;
   info: videoInfo | null;
   trackObjUrls: string[];
   displayText: string = "No Media";
@@ -44,7 +43,6 @@ export class MediaView extends ItemView {
       const source = infoToSource(info);
       this.player.sourceBak = source;
       this.player.source = source;
-      setRatio(this.container, this.player);
       checkMediaType(info, this.player);
 
       this.hash = info.hash;
@@ -114,16 +112,14 @@ export class MediaView extends ItemView {
       this.trackObjUrls = [];
     }
 
-    let result: ReturnType<typeof getPlyr>;
+    let player: Plyr_TF;
     if (isHost(info)) {
-      result = getPlyrForHost(info, this.plugin.settings.useYoutubeControls);
+      player = getPlyrForHost(info, this.plugin.settings.useYoutubeControls);
     } else {
-      result = getPlyr(info);
+      player = getPlyr(info);
     }
-    const { container, player } = result;
-    this.player = player as Plyr_TF;
-    this.container = container;
-    this.contentEl.appendChild(container);
+    this.player = player;
+    this.contentEl.appendChild(getContainer(player));
     this.setDisplayText(info);
     this.leafOpen_bak = leaf.open;
     // @ts-ignore
