@@ -29,7 +29,6 @@ export default class MediaExtended extends Plugin {
     await this.loadSettings();
 
     this.server = getServer(2233);
-    this.server.listen(2233);
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
@@ -86,7 +85,7 @@ export default class MediaExtended extends Plugin {
       ],
     });
   }
-  
+
   onunload() {
     console.log("unloading media-extended");
     this.server?.close();

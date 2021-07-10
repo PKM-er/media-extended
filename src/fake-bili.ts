@@ -1,7 +1,7 @@
 import { default as express } from "express";
 import { NextFunction, Request, Response } from "express";
-import * as Fake from './routers/fake'
-import * as PlayUrl from './routers/playUrl'
+import * as Fake from "./routers/fake";
+import * as PlayUrl from "./routers/playUrl";
 
 export function getServer(port: number) {
   const app = express();
@@ -12,7 +12,7 @@ export function getServer(port: number) {
     err: Error,
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     console.error(err.stack);
     res.status(500).send(err.message);
