@@ -11,6 +11,7 @@ import {
 } from "./video-info";
 import assertNever from "assert-never";
 import * as dashjs from "dashjs";
+import { fetchBiliPoster } from "./placeholder";
 
 /** Player with temporal fragments */
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
@@ -220,11 +221,18 @@ export const getPlyr = (info: videoInfo, options?: Plyr.Options): Plyr_TF => {
 
   if (isHost(info) && info.host === Host.bili) {
     const dash = dashjs.MediaPlayer().create();
-
     const src =
       "http://localhost:2233/geturl/" +
       (info.iframe.searchParams.has("aid") ? "av" + info.id : info.id);
     dash.initialize(playerEl, src, false);
+    const getPoster = async () => {
+      const posterUrl = info.iframe.searchParams.has("aid")
+        ? await fetchBiliPoster(+info.id)
+        : await fetchBiliPoster(info.id);
+      if (posterUrl) player.poster = posterUrl;
+      else console.error("unable to fetch poster");
+    };
+    getPoster();
   } else {
     const source = infoToSource(info);
     player.source = source;

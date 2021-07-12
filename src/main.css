@@ -1,5 +1,5 @@
 /* global div.external-video should be controlled in settings */
-.plyr--video, div.thumbnail {
+.plyr--video, div.placeholder {
   min-height: 16em;
   min-width: 450px;
   max-width: 100%;
@@ -26,7 +26,7 @@
   overflow: hidden;
 }
 
-div.thumbnail {
+div.placeholder {
   background-repeat: no-repeat;
   background-size: cover;
 }

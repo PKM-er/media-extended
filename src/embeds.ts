@@ -2,7 +2,7 @@ import MediaExtended from "main";
 import { getContainer, getPlyr, getPlyrForHost } from "modules/player-setup";
 import { SubtitleResource } from "modules/subtitle";
 import { setupIFrame } from "modules/iframe";
-import { setupThumbnail } from "modules/thumbnail";
+import { setupPlaceholder } from "modules/placeholder";
 import { Host, isDirect, isInternal, resolveInfo } from "modules/video-info";
 import { MarkdownPostProcessor } from "obsidian";
 
@@ -20,20 +20,20 @@ export const getEmbedProcessor = (
       let newEl: HTMLDivElement | null = null;
       try {
         if (isInternal(info)) {
-          newEl = getContainer(getPlyr(info));
+          newEl = getContainer(await getPlyr(info));
           ctx.addChild(
             new SubtitleResource(newEl, info.trackInfo?.objUrls ?? []),
           );
         } else if (isDirect(info)) {
-          newEl = getContainer(getPlyr(info));
+          newEl = getContainer(await getPlyr(info));
         } else {
           newEl = createDiv();
           const {
             useYoutubeControls: ytControls,
-            thumbnailPlaceholder: thumbnail,
+            thumbnailPlaceholder: placeholder,
             interalBiliPlayback: biliEnabled,
           } = plugin.settings;
-          if (thumbnail) newEl = await setupThumbnail(info, ytControls);
+          if (placeholder) newEl = await setupPlaceholder(info, ytControls);
           else if (!biliEnabled && info.host === Host.bili)
             setupIFrame(newEl, info);
           else newEl = getContainer(getPlyrForHost(info, ytControls));
