@@ -4,22 +4,24 @@ import { DashData } from "bili-api/player/playurl";
 export function toMPD(data: DashData) {
   const d = data.dash;
 
-  let videos = d.video.filter(v=>v.codecs.startsWith("avc1")).map((v) => ({
-    BaseURL: v.baseUrl,
-    "@id": v.id,
-    "@mimeType": v.mimeType,
-    "@bandwidth": v.bandwidth,
-    "@codecs": v.codecs,
-    "@width": v.width,
-    "@height": v.height,
-    "@frameRate": v.frameRate,
-    "@sar": v.sar,
-    "@startWithSap": v.startWithSap,
-    SegmentBase: {
-      "@indexRange": v.SegmentBase.indexRange,
-      "@Initialization": v.SegmentBase.Initialization
-    },
-  }));
+  let videos = d.video
+    .filter((v) => v.codecs.startsWith("avc1"))
+    .map((v) => ({
+      BaseURL: v.baseUrl,
+      "@id": v.id,
+      "@mimeType": v.mimeType,
+      "@bandwidth": v.bandwidth,
+      "@codecs": v.codecs,
+      "@width": v.width,
+      "@height": v.height,
+      "@frameRate": v.frameRate,
+      "@sar": v.sar,
+      "@startWithSap": v.startWithSap,
+      SegmentBase: {
+        "@indexRange": v.SegmentBase.indexRange,
+        "@Initialization": v.SegmentBase.Initialization,
+      },
+    }));
 
   let audios = d.audio.map((v) => ({
     BaseURL: v.baseUrl,
@@ -30,7 +32,7 @@ export function toMPD(data: DashData) {
     "@startWithSap": v.startWithSap,
     SegmentBase: {
       "@indexRange": v.SegmentBase.indexRange,
-      "@Initialization": v.SegmentBase.Initialization
+      "@Initialization": v.SegmentBase.Initialization,
     },
   }));
 

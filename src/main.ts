@@ -5,7 +5,7 @@ import "./main.css";
 import { getEmbedProcessor } from "embeds";
 import { MediaView, MEDIA_VIEW_TYPE } from "./media-view";
 import { getCMLinkHandler, getLinkProcessor } from "links";
-import { getServer } from "fake-bili";
+import { getServer } from "fake-bili/proxy/server";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {

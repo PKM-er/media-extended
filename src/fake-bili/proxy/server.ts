@@ -1,7 +1,7 @@
 import { default as express } from "express";
 import { NextFunction, Request, Response } from "express";
-import * as Fake from "./routers/fake";
-import * as PlayUrl from "./routers/playUrl";
+import * as Fake from "./fake";
+import * as PlayUrl from "./play-url";
 
 export function getServer(port: number) {
   const app = express();

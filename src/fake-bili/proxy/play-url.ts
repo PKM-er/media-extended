@@ -5,12 +5,12 @@ import {
   getPlayUrl,
   isDash,
   isTrad,
-} from "../modules/bili-tools";
+} from "../bili-tools";
 import * as Pagelist from "bili-api/player/pagelist";
 import * as PlayUrl from "bili-api/player/playurl";
 import { fetch_method } from "bili-api/player/playurl";
 import assertNever from "assert-never";
-import { toMPD } from "../modules/dash-tool";
+import { toMPD } from "../dash-tool";
 import { RequestHandler } from "express";
 
 type vid =

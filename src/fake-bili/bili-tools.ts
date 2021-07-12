@@ -1,11 +1,11 @@
 import axios from "axios";
 import { returnBody } from "bili-api/player/general";
-import * as Pagelist from "bili-api/player/pagelist"
-import * as PlayUrl from "bili-api/player/playurl"
+import * as Pagelist from "bili-api/player/pagelist";
+import * as PlayUrl from "bili-api/player/playurl";
 
 export const enum vidType {
   avid,
-  bvid
+  bvid,
 }
 
 export function isBiliVId(id: string | number): vidType | null {
@@ -27,9 +27,7 @@ export function isTrad(obj: PlayUrl.Data): obj is PlayUrl.TradData {
  * 获取视频流URL（web端）
  * @param F = typeof args.fnval
  */
- export function getPlayUrl<F>(
-  args: PlayUrl.Params, cookie?:string
-) {
+export function getPlayUrl<F>(args: PlayUrl.Params, cookie?: string) {
   const url = "http://api.bilibili.com/x/player/playurl";
 
   // @ts-ignore
@@ -38,24 +36,21 @@ export function isTrad(obj: PlayUrl.Data): obj is PlayUrl.TradData {
   if (
     (avid && isBiliVId(avid) === vidType.avid) ||
     (bvid && isBiliVId(bvid) === vidType.bvid)
-  ){
-    let headers : any = {};
+  ) {
+    let headers: any = {};
     if (cookie) headers.Cookie = cookie;
     return axios.get<
       F extends PlayUrl.fetch_method.dash
         ? returnBody<PlayUrl.DashData>
         : returnBody<PlayUrl.TradData>
     >(url, { params: args, headers });
-  }
-
-  else throw new TypeError(`Invalid avid ${avid}/bvid ${bvid}`);
+  } else throw new TypeError(`Invalid avid ${avid}/bvid ${bvid}`);
 }
 
 /**
  * 查询视频分P列表 (avID转CID)
-*/
+ */
 export async function getPageList(arg: Pagelist.Params) {
-
   const url = "http://api.bilibili.com/x/player/pagelist";
 
   // @ts-ignore
