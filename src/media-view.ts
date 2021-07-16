@@ -13,7 +13,7 @@ import {
   getSetupTool,
   infoToSource,
   Plyr_TF,
-} from "modules/player-setup";
+} from "modules/plyr-setup";
 import { TimeSpan } from "modules/temporal-frag";
 import {
   Host,
