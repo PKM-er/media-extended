@@ -1,3 +1,5 @@
+## [2.8.1](https://github.com/aidenlx/media-extended/compare/2.8.0...2.8.1) (2021-07-17)
+
 # [2.8.0](https://github.com/aidenlx/media-extended/compare/2.7.2...2.8.0) (2021-07-17)
 
 
