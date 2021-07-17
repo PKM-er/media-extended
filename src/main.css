@@ -1,5 +1,5 @@
 /* global div.external-video should be controlled in settings */
-.plyr--video, div.placeholder {
+.plyr--video, div.placeholder, div.video-iframe {
   min-height: 16em;
   min-width: 450px;
   max-width: 100%;

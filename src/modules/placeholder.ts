@@ -1,14 +1,12 @@
 import assertNever from "assert-never";
 import https from "https";
-import { getContainer, getPlyrForHost } from "modules/player-setup";
-import { setupIFrame } from "./iframe";
 import { videoInfo_Host, Host } from "modules/video-info";
 
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
 export async function setupPlaceholder(
   info: videoInfo_Host,
-  useYtControls = false,
+  getRealPlayer: () => HTMLDivElement,
 ): Promise<HTMLDivElement> {
   const { id: videoId } = info;
 
@@ -16,33 +14,18 @@ export async function setupPlaceholder(
     cls: ["placeholder", "plyr plyr--full-ui plyr--video"],
   });
   let placeholderUrl: string | null;
-  let fakePlayHandler: typeof PlyrHandler;
-  function PlyrHandler() {
-    const player = getPlyrForHost(info, useYtControls);
-    player.once("ready", function (evt) {
-      this.play();
-    });
-    placeholder.replaceWith(getContainer(player));
-  }
 
   switch (info.host) {
     case Host.youtube:
       placeholderUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-      fakePlayHandler = PlyrHandler;
       break;
     case Host.bili:
       if (info.id.startsWith("av"))
         placeholderUrl = await fetchBiliPoster(+info.id.substring(2));
       else placeholderUrl = await fetchBiliPoster(info.id);
-      fakePlayHandler = () => {
-        const div = createDiv();
-        setupIFrame(div, info);
-        placeholder.replaceWith(div);
-      };
       break;
     case Host.vimeo:
       placeholderUrl = await fetchVimeoPoster(info.src);
-      fakePlayHandler = PlyrHandler;
       break;
     default:
       assertNever(info.host);
@@ -63,7 +46,7 @@ export async function setupPlaceholder(
       },
       (button) => {
         button.innerHTML = playButtonHtml;
-        button.onClickEvent(fakePlayHandler);
+        button.onClickEvent(() => placeholder.replaceWith(getRealPlayer()));
       },
     ),
   );

@@ -28,7 +28,9 @@ export default class MediaExtended extends Plugin {
 
     await this.loadSettings();
 
-    this.server = getServer(2233);
+    // @ts-ignore
+    const isMobile: boolean = this.app.isMobile;
+    if (!isMobile) this.server = getServer(2233);
 
     this.addSettingTab(new MESettingTab(this.app, this));
 

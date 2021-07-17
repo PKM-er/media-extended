@@ -1,5 +1,5 @@
 import MediaExtended from "main";
-import { getContainer, getPlyr, getPlyrForHost } from "modules/player-setup";
+import { getContainer, getPlyr, getPlyrForHost } from "modules/plyr-setup";
 import { SubtitleResource } from "modules/subtitle";
 import { setupIFrame } from "modules/iframe";
 import { setupPlaceholder } from "modules/placeholder";
@@ -20,23 +20,34 @@ export const getEmbedProcessor = (
       let newEl: HTMLDivElement | null = null;
       try {
         if (isInternal(info)) {
-          newEl = getContainer(await getPlyr(info));
+          newEl = getContainer(getPlyr(info));
           ctx.addChild(
             new SubtitleResource(newEl, info.trackInfo?.objUrls ?? []),
           );
         } else if (isDirect(info)) {
-          newEl = getContainer(await getPlyr(info));
+          newEl = getContainer(getPlyr(info));
         } else {
-          newEl = createDiv();
           const {
             useYoutubeControls: ytControls,
             thumbnailPlaceholder: placeholder,
             interalBiliPlayback: biliEnabled,
           } = plugin.settings;
-          if (placeholder) newEl = await setupPlaceholder(info, ytControls);
-          else if (!biliEnabled && info.host === Host.bili)
-            setupIFrame(newEl, info);
-          else newEl = getContainer(getPlyrForHost(info, ytControls));
+          // @ts-ignore
+          const isMobile: boolean = plugin.app.isMobile;
+          const getRealPlayer = () => {
+            if (info.host === Host.bili && (isMobile || !biliEnabled))
+              return setupIFrame(info);
+            else {
+              const player = getPlyrForHost(info, ytControls);
+              if (placeholder)
+                player.once("ready", function (evt) {
+                  this.play();
+                });
+              return getContainer(player);
+            }
+          };
+          if (placeholder) newEl = await setupPlaceholder(info, getRealPlayer);
+          else newEl = getRealPlayer();
         }
         if (newEl) el.replaceWith(newEl);
       } catch (error) {
