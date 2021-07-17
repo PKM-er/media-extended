@@ -78,12 +78,6 @@ export default class MediaExtended extends Plugin {
           getMediaView(group)?.addTimeStampToMDView(view);
         }
       },
-      hotkeys: [
-        {
-          modifiers: ["Mod"],
-          key: "t",
-        },
-      ],
     });
   }
 

@@ -43,7 +43,7 @@ https://user-images.githubusercontent.com/31102694/118903647-c9d79780-b94a-11eb-
 Open a media view from internal/external link, then you can use the following method to get timestamp from current time in player:
 
 - via Command Palette: type in `Get timestamp from player`
-- via keyboard shortcut: `⌘`/`Ctrl`+`T` by default
+- via keyboard shortcut (need to be set manually in hotkey manager)
 - click on the `⭐` button on the header of media view
 
 https://user-images.githubusercontent.com/31102694/118903678-dd82fe00-b94a-11eb-8ef3-7b5044a2bab8.mp4
