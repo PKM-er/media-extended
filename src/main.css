@@ -1,5 +1,14 @@
 /* global div.external-video should be controlled in settings */
-.plyr--video,
+.plyr.plyr--video {
+  margin: auto;
+  min-width: 400px;
+  width: min(100%, var(--max-ratio-width));
+}
+
+.plyr.plyr--video video {
+  width: var(--max-ratio-width);
+}
+
 div.placeholder {
   min-height: 16em;
   min-width: 450px;
