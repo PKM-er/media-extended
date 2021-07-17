@@ -10,7 +10,7 @@ import {
   videoInfo_Host,
 } from "./video-info";
 import assertNever from "assert-never";
-import * as dashjs from "dashjs";
+import dashjs from "dashjs";
 import { fetchBiliPoster } from "./placeholder";
 
 /** Player with temporal fragments */

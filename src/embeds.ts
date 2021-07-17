@@ -34,9 +34,10 @@ export const getEmbedProcessor = (
             interalBiliPlayback: biliEnabled,
           } = plugin.settings;
           const isMobile: boolean = getIsMobile(plugin.app);
+          const shouldIframe =
+            info.host === Host.bili && (isMobile || !biliEnabled);
           const getRealPlayer = () => {
-            if (info.host === Host.bili && (isMobile || !biliEnabled))
-              return setupIFrame(info);
+            if (shouldIframe) return setupIFrame(info);
             else {
               const player = getPlyrForHost(info, ytControls);
               if (placeholder)
@@ -46,7 +47,8 @@ export const getEmbedProcessor = (
               return getContainer(player);
             }
           };
-          if (placeholder) newEl = await setupPlaceholder(info, getRealPlayer);
+          if (placeholder && !shouldIframe)
+            newEl = await setupPlaceholder(info, getRealPlayer);
           else newEl = getRealPlayer();
         }
         if (newEl) el.replaceWith(newEl);

@@ -1,10 +1,18 @@
 /* global div.external-video should be controlled in settings */
-.plyr--video, div.placeholder, div.video-iframe {
+.plyr--video,
+div.placeholder {
   min-height: 16em;
   min-width: 450px;
   max-width: 100%;
   height: 40vh;
   margin: auto;
+}
+
+iframe.bili-iframe {
+  min-height: 360px;
+  min-width: 480px;
+  margin: auto;
+  display: block;
 }
 
 .plyr__caption::selection {
