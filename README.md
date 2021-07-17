@@ -96,7 +96,7 @@ Requirements:
 
 ## Compatibility
 
-The required API feature is only available for Obsidian v0.10.2+.
+The required API feature is only available for Obsidian v0.12.2+.
 
 ## Installation
 

@@ -1,3 +1,30 @@
+# [2.8.0](https://github.com/aidenlx/media-extended/compare/2.7.2...2.8.0) (2021-07-17)
+
+
+### Bug Fixes
+
+* bili on mobile no longer use placeholder when option is enabled; update iframe sizing ([911e7ae](https://github.com/aidenlx/media-extended/commit/911e7ae32ff696fe028bfb4b5c110fbe70b162cd))
+* fix adaptive aspect ratio; fix audio el height ([8e18ce2](https://github.com/aidenlx/media-extended/commit/8e18ce2af55abb4a584183a8faaad78e9fbbe336)), closes [#35](https://github.com/aidenlx/media-extended/issues/35) [#47](https://github.com/aidenlx/media-extended/issues/47)
+* fix cmLink not working ([dd6b42d](https://github.com/aidenlx/media-extended/commit/dd6b42d4cab55c83ff07be58499b201e0958bc11))
+* fix thumbnail creation ([6b640b4](https://github.com/aidenlx/media-extended/commit/6b640b42e90aa539435291619808e68a5f4128c9))
+* fix unspecified radix of parseInt() ([ca058d4](https://github.com/aidenlx/media-extended/commit/ca058d471a167cd0d894a45a20e301f5a1c2ef85))
+* fix webm audio treated as video in media view ([7b96132](https://github.com/aidenlx/media-extended/commit/7b96132f77e1aae8fdbb8da43e8db7f251c80c4b))
+* **main.css:** fix .yt-controls not working ([ba718a1](https://github.com/aidenlx/media-extended/commit/ba718a142ae9b015c6394459adb8346c25bdf478))
+* minor bug fix and code formatting ([932e6db](https://github.com/aidenlx/media-extended/commit/932e6db723a4b2bc27b92b3578ee5b1ce11cfaf9))
+* **src/routers/fake.ts:** fix pathRewrite result missing "/" ([6d9bbaf](https://github.com/aidenlx/media-extended/commit/6d9bbaf271d140af6bb9d555cbed916a3a0ac634))
+* **video-info:** fix error when resolving non-existing file ([ce96be9](https://github.com/aidenlx/media-extended/commit/ce96be94be9a26e34be37dd8ee322fe8fb961f43))
+
+
+### Features
+
+* add bilibili timestamp support ([ee8c158](https://github.com/aidenlx/media-extended/commit/ee8c1586244902a5848b036c960166243dcf97d9))
+* add bilibili video initial support ([99b70df](https://github.com/aidenlx/media-extended/commit/99b70df87de8a0c46bc1931ec425efd9a95751d1))
+* add fallback for bili video on mobile; placeholder support on bili internal player ([31fbdcd](https://github.com/aidenlx/media-extended/commit/31fbdcdd0d5c2f5099540e026b38c03f502ed8cb))
+* add settings and unload function for bili-fake ([5d80fe7](https://github.com/aidenlx/media-extended/commit/5d80fe7320cbd80f49744aa057d6c3fdd6c4dd2c))
+* allow bilibili internal playback ([d551db2](https://github.com/aidenlx/media-extended/commit/d551db2f179ae62fc1c81351aa28ea69db22f91f))
+* **player-setup:** add poster for internal bilibili player ([076030f](https://github.com/aidenlx/media-extended/commit/076030f9e8db437df97baeb2dc0ef474e434b487))
+* update bilibili api ([8481f58](https://github.com/aidenlx/media-extended/commit/8481f58ebf86854f979c6e469ddb7d583bd98b7d))
+
 ## [2.7.2](https://github.com/alx-plugins/media-extended/compare/2.7.1...2.7.2) (2021-05-29)
 
 
