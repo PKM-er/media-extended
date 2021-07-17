@@ -6,6 +6,7 @@ import { getEmbedProcessor } from "embeds";
 import { MediaView, MEDIA_VIEW_TYPE } from "./media-view";
 import { getCMLinkHandler, getLinkProcessor } from "links";
 import { getServer } from "fake-bili/proxy/server";
+import { getIsMobile } from "misc";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
@@ -28,9 +29,7 @@ export default class MediaExtended extends Plugin {
 
     await this.loadSettings();
 
-    // @ts-ignore
-    const isMobile: boolean = this.app.isMobile;
-    if (!isMobile) this.server = getServer(2233);
+    if (!getIsMobile(this.app)) this.server = getServer(2233);
 
     this.addSettingTab(new MESettingTab(this.app, this));
 

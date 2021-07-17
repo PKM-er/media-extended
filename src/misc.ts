@@ -1,3 +1,5 @@
+import { App } from "obsidian";
+
 export type mutationParam = {
   callback: MutationCallback;
   option: MutationObserverInit;
@@ -27,3 +29,6 @@ export function getUrl(src: string): URL | null {
 
 export const mainpart = (url: URL) =>
   url.hash ? url.href.slice(0, -url.hash.length) : url.href;
+
+// @ts-ignore
+export const getIsMobile = (app: App) => app.isMobile as boolean;

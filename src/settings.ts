@@ -1,3 +1,4 @@
+import { getIsMobile } from "misc";
 import { App, PluginSettingTab, Setting } from "obsidian";
 import MediaExtended from "./main";
 
@@ -144,9 +145,7 @@ export class MESettingTab extends PluginSettingTab {
       },
     });
 
-    // @ts-ignore
-    const isMobile: boolean = this.app.isMobile;
-    if (!isMobile)
+    if (!getIsMobile(this.app))
       setToggle({
         k: "interalBiliPlayback",
         name: "Play bilibili video with local player",

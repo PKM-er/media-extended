@@ -5,6 +5,7 @@ import { setupIFrame } from "modules/iframe";
 import { setupPlaceholder } from "modules/placeholder";
 import { Host, isDirect, isInternal, resolveInfo } from "modules/video-info";
 import { MarkdownPostProcessor } from "obsidian";
+import { getIsMobile } from "misc";
 
 export const getEmbedProcessor = (
   plugin: MediaExtended,
@@ -32,8 +33,7 @@ export const getEmbedProcessor = (
             thumbnailPlaceholder: placeholder,
             interalBiliPlayback: biliEnabled,
           } = plugin.settings;
-          // @ts-ignore
-          const isMobile: boolean = plugin.app.isMobile;
+          const isMobile: boolean = getIsMobile(plugin.app);
           const getRealPlayer = () => {
             if (info.host === Host.bili && (isMobile || !biliEnabled))
               return setupIFrame(info);
