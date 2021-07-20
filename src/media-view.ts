@@ -1,5 +1,4 @@
 import TimeFormat from "hh-mm-ss";
-import MediaExtended from "main";
 import {
   checkMediaType,
   getContainer,
@@ -17,6 +16,7 @@ import {
   isInternal,
   videoInfo,
 } from "modules/video-info";
+import MediaExtended from "mx-main";
 import {
   EditorPosition,
   ItemView,

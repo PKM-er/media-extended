@@ -1,4 +1,3 @@
-import MediaExtended from "main";
 import {
   getMediaType,
   getVideoInfo,
@@ -6,11 +5,11 @@ import {
   resolveInfo,
   videoInfo,
 } from "modules/video-info";
+import MediaExtended from "mx-main";
 import {
   MarkdownPostProcessor,
   MarkdownView,
   parseLinktext,
-  TFile,
   WorkspaceLeaf,
 } from "obsidian";
 
