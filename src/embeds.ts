@@ -7,6 +7,7 @@ import { Host, isDirect, isInternal, resolveInfo } from "modules/video-info";
 import { MarkdownPostProcessor } from "obsidian";
 import { getIsMobile } from "misc";
 import type Plyr from "plyr";
+import parseUnit, { isCssValue } from "@tinyfe/parse-unit";
 
 export const getEmbedProcessor = (
   plugin: MediaExtended,
@@ -21,7 +22,8 @@ export const getEmbedProcessor = (
 
       let newEl: HTMLDivElement | null = null;
       try {
-        const ratioSetup = (player: Plyr) => setRatio(player, 30, "vh");
+        const ratioSetup = (player: Plyr) =>
+          setRatio(player, plugin.settings.embedHeight);
         const setRegularPlyr = () => {
           const player = getPlyr(info);
           ratioSetup(player);
@@ -68,12 +70,16 @@ export const getEmbedProcessor = (
   };
 };
 
-const setRatio = (player: Plyr, maxHeight: number, unit: string) => {
-  const setRatioWidth = (ratio: number) =>
+const setRatio = (player: Plyr, maxHeight: string) => {
+  if (!isCssValue(maxHeight)) throw new TypeError("maxHeight not css value");
+
+  const setRatioWidth = (ratio: number) => {
+    let [val, unit] = parseUnit(maxHeight);
     getContainer(player).style.setProperty(
       "--max-ratio-width",
-      maxHeight * ratio + unit,
+      val * ratio + unit,
     );
+  };
   if (player.isHTML5)
     player.once("loadedmetadata", () => {
       if (!player.ratio) {

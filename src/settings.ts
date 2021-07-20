@@ -1,6 +1,7 @@
 import { getIsMobile } from "misc";
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 import MediaExtended from "./main";
+import parseUnit, { isCssValue } from "@tinyfe/parse-unit";
 
 export interface MxSettings {
   mediaFragmentsEmbed: boolean;
@@ -9,17 +10,24 @@ export interface MxSettings {
   thumbnailPlaceholder: boolean;
   useYoutubeControls: boolean;
   interalBiliPlayback: boolean;
+  embedHeight: string;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
   mediaFragmentsEmbed: true,
-  timestampLink: false,
-  extendedImageEmbedSyntax: false,
+  timestampLink: true,
+  extendedImageEmbedSyntax: true,
   thumbnailPlaceholder: false,
   useYoutubeControls: false,
-  interalBiliPlayback: false,
+  interalBiliPlayback: true,
+  embedHeight: "30vh",
 };
 
+type option = {
+  k: keyof MxSettings;
+  name: string;
+  desc: string | ((el: DocumentFragment) => void);
+};
 export class MESettingTab extends PluginSettingTab {
   plugin: MediaExtended;
 
@@ -33,20 +41,35 @@ export class MESettingTab extends PluginSettingTab {
     new Setting(this.containerEl)
       .setName(name)
       .setDesc(typeof desc === "string" ? desc : createFragment(desc))
-      .addToggle((toggle) =>
-        toggle.setValue(settings[k]).onChange(async (value) => {
-          settings[k] = value;
-          this.plugin.saveData(settings);
-          this.display();
-        }),
-      );
+      .addToggle((toggle) => {
+        const oldValue = settings[k];
+        if (typeof oldValue === "boolean") {
+          toggle.setValue(oldValue).onChange(async (value) => {
+            // @ts-ignore
+            settings[k] = value;
+            this.plugin.saveData(settings);
+            this.display();
+          });
+        } else throw new TypeError("toggle not boolean");
+      });
   };
 
   display(): void {
-    let { containerEl, setToggle } = this;
+    let { containerEl } = this;
 
     containerEl.empty();
 
+    this.general();
+    this.player();
+    this.ytb();
+    this.bili();
+  }
+
+  general(): void {
+    let { containerEl } = this;
+    const { setToggle } = this;
+
+    containerEl.createEl("h2", { text: "General" });
     setToggle({
       k: "mediaFragmentsEmbed",
       name: "Embed Media Fragments",
@@ -56,29 +79,12 @@ export class MESettingTab extends PluginSettingTab {
         );
         descEl.createEl("br");
         descEl.appendText(
-          "Loop is also available by append #loop or #t=...&loop to the end of filename",
+          "Loop is also available by appending #loop or #t=...&loop to filename",
         );
         descEl.createEl("br");
         descEl.appendText("Restart the app to take effects");
       },
     });
-
-    setToggle({
-      k: "mediaFragmentsEmbed",
-      name: "Embed Media Fragments",
-      desc: (descEl) => {
-        descEl.appendText(
-          "If enabled, you can write ![[demo.mp4#t=10]] to embed the specific fragment of video/audio. ",
-        );
-        descEl.createEl("br");
-        descEl.appendText(
-          "Loop is also available by append #loop or #t=...&loop to the end of filename",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Restart the app to take effects");
-      },
-    });
-
     setToggle({
       k: "timestampLink",
       name: "Timestamps for Media",
@@ -103,13 +109,21 @@ export class MESettingTab extends PluginSettingTab {
           "If enabled, you can write ![](link/to/demo.mp4) to embed video and audio.",
         );
         descEl.createEl("br");
+        descEl.appendText("Timestamps and fragments are also available");
+        descEl.createEl("br");
         descEl.appendText(
-          "Support direct file links (with file extension) and videos from video hosts (Youtube, Bilibili)",
+          "Support direct file links (local/remote) and videos from video hosts (Youtube, Bilibili...)",
         );
         descEl.createEl("br");
         descEl.appendText("Restart the app to take effects");
       },
     });
+  }
+  player(): void {
+    let { containerEl } = this;
+    const { setToggle } = this;
+
+    containerEl.createEl("h2", { text: "Player" });
 
     setToggle({
       k: "thumbnailPlaceholder",
@@ -128,6 +142,31 @@ export class MESettingTab extends PluginSettingTab {
         descEl.appendText("Restart the app to take effects");
       },
     });
+    new Setting(containerEl)
+      .setName("Player Height for Embeds")
+      .setDesc("Reload preview to take effects")
+      .addText((text) => {
+        const save = debounce(
+          async (value: string) => {
+            this.plugin.settings.embedHeight = value;
+            await this.plugin.saveSettings();
+          },
+          500,
+          true,
+        );
+        text
+          .setValue(this.plugin.settings.embedHeight)
+          .onChange(async (value: string) => {
+            text.inputEl.toggleClass("incorrect", !isCssValue(value));
+            if (isCssValue(value)) save(value);
+          });
+      });
+  }
+  ytb(): void {
+    let { containerEl } = this;
+    const { setToggle } = this;
+
+    containerEl.createEl("h2", { text: "Youtube" });
 
     setToggle({
       k: "useYoutubeControls",
@@ -144,8 +183,14 @@ export class MESettingTab extends PluginSettingTab {
         descEl.appendText("Restart the app to take effects");
       },
     });
+  }
+  bili(): void {
+    let { containerEl } = this;
+    const { setToggle } = this;
 
-    if (!getIsMobile(this.app))
+    containerEl.createEl("h2", { text: "Bilibili" });
+
+    if (!getIsMobile(this.app)) {
       setToggle({
         k: "interalBiliPlayback",
         name: "Play bilibili video with local player",
@@ -159,10 +204,8 @@ export class MESettingTab extends PluginSettingTab {
           descEl.appendText("注意：移动版不支持，重启Obsidian生效");
         },
       });
+    } else {
+      containerEl.appendText("时间戳在移动端不可用");
+    }
   }
 }
-type option = {
-  k: keyof MxSettings;
-  name: string;
-  desc: string | ((el: DocumentFragment) => void);
-};

@@ -9,8 +9,8 @@ This plugin introduce some new features that improve media (video/audio) playing
 
 - [Embed video/audio fragments](#embed-media-fragments), instead of the whole file.
   - Support internal link for local files, as well as YouTube and Vimeo videos ([Extended image embed syntax](#extended-image-embed-syntax) required)
-- [Allow timestamps for video/audio](#timestamps-for-media) in internal links (disabled by default)
-- [Allow timestamps for video/audio](#timestamps-for-media) in external links (`Extended image embed syntax` required)
+- [Allow timestamps for video/audio](#timestamps-for-media) in internal links
+- [Allow timestamps for video/audio](#timestamps-for-media) in external links (`[Extended image embed syntax](#extended-image-embed-syntax)` required)
 - [Extract timestamp from video](#get-timestamp) from MediaView
 - [Extended image embed syntax](#extended-image-embed-syntax) that allows video/audio embeds (disabled by default)
   - From local drive: `![](files:///Users/someone/video.mp4#t=60)`

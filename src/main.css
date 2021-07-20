@@ -5,6 +5,11 @@
   width: min(100%, var(--max-ratio-width));
 }
 
+input.incorrect {
+  background: #fcf1f0;
+  color: #eb3223;
+}
+
 .plyr.plyr--video video {
   width: var(--max-ratio-width);
 }
