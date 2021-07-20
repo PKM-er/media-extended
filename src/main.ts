@@ -1,5 +1,10 @@
 import { Plugin, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
-import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
+import {
+  DEFAULT_SETTINGS,
+  hideYtbRecommClass,
+  MESettingTab,
+  MxSettings,
+} from "./settings";
 import "plyr/dist/plyr.css";
 import "./main.css";
 import { getEmbedProcessor } from "embeds";
@@ -28,6 +33,8 @@ export default class MediaExtended extends Plugin {
     console.log("loading media-extended");
 
     await this.loadSettings();
+
+    document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
 
     if (!getIsMobile(this.app)) this.server = getServer(2233);
 

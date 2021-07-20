@@ -1,7 +1,9 @@
 import { getIsMobile } from "misc";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 import MediaExtended from "./main";
-import parseUnit, { isCssValue } from "@tinyfe/parse-unit";
+import { isCssValue } from "@tinyfe/parse-unit";
+
+export const hideYtbRecommClass = "alx-hide-ytb-recomm";
 
 export interface MxSettings {
   mediaFragmentsEmbed: boolean;
@@ -11,6 +13,7 @@ export interface MxSettings {
   useYoutubeControls: boolean;
   interalBiliPlayback: boolean;
   embedHeight: string;
+  hideYtbRecomm: boolean;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -21,6 +24,7 @@ export const DEFAULT_SETTINGS: MxSettings = {
   useYoutubeControls: false,
   interalBiliPlayback: true,
   embedHeight: "30vh",
+  hideYtbRecomm: false,
 };
 
 type option = {
@@ -36,7 +40,10 @@ export class MESettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  setToggle = ({ k, name, desc }: option) => {
+  setToggle = (
+    { k, name, desc }: option,
+    onChange?: (value: boolean) => any,
+  ) => {
     let { settings } = this.plugin;
     new Setting(this.containerEl)
       .setName(name)
@@ -45,6 +52,7 @@ export class MESettingTab extends PluginSettingTab {
         const oldValue = settings[k];
         if (typeof oldValue === "boolean") {
           toggle.setValue(oldValue).onChange(async (value) => {
+            if (onChange) onChange(value);
             // @ts-ignore
             settings[k] = value;
             this.plugin.saveData(settings);
@@ -183,6 +191,16 @@ export class MESettingTab extends PluginSettingTab {
         descEl.appendText("Restart the app to take effects");
       },
     });
+    if (!this.plugin.settings.useYoutubeControls) {
+      setToggle(
+        {
+          k: "hideYtbRecomm",
+          name: "Hide Recommend Videos",
+          desc: "Blur on pause to hide annoying recommend videos, ignored when Youtube Built-in Controls enabled",
+        },
+        (value) => document.body.toggleClass(hideYtbRecommClass, value),
+      );
+    }
   }
   bili(): void {
     let { containerEl } = this;

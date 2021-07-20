@@ -60,15 +60,15 @@ div.placeholder {
 }
 
 /* hide recommended video in youtube */
-.plyr--youtube:not(.yt-controls) iframe {
+.alx-hide-ytb-recomm .plyr--youtube:not(.yt-controls) iframe {
   transition: 0.2s filter linear;
 }
 
-.plyr--youtube.plyr--paused:not(.yt-controls) iframe {
+.alx-hide-ytb-recomm .plyr--youtube.plyr--paused:not(.yt-controls) iframe {
   filter: blur(1.5rem);
 }
 
-.plyr--youtube.plyr--paused:not(.yt-controls)::after {
+.alx-hide-ytb-recomm .plyr--youtube.plyr--paused:not(.yt-controls)::after {
   content: "";
   position: absolute;
   width: 100%;
