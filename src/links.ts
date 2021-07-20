@@ -1,10 +1,3 @@
-import {
-  getMediaType,
-  getVideoInfo,
-  isInternal,
-  resolveInfo,
-  videoInfo,
-} from "modules/video-info";
 import MediaExtended from "mx-main";
 import {
   MarkdownPostProcessor,
@@ -15,6 +8,13 @@ import {
 
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
 import { Await } from "./misc";
+import {
+  getMediaType,
+  getVideoInfo,
+  isInternal,
+  resolveInfo,
+  videoInfo,
+} from "./modules/video-info";
 
 type evtHandler = (e: Event) => void;
 

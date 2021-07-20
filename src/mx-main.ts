@@ -1,13 +1,13 @@
 import "plyr/dist/plyr.css";
 import "./main.css";
 
-import { getEmbedProcessor } from "embeds";
-import { getServer } from "fake-bili/proxy/server";
-import { getCMLinkHandler, getLinkProcessor } from "links";
-import { getIsMobile } from "misc";
-import { MarkdownPreviewRenderer, MarkdownView, Plugin } from "obsidian";
+import { Plugin } from "obsidian";
 
+import { getEmbedProcessor } from "./embeds";
+import { getServer } from "./fake-bili/proxy/server";
+import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
+import { getIsMobile } from "./misc";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,

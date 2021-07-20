@@ -1,13 +1,14 @@
 import parseUnit, { isCssValue } from "@tinyfe/parse-unit";
-import { getIsMobile } from "misc";
-import { setupIFrame } from "modules/iframe";
-import { setupPlaceholder } from "modules/placeholder";
-import { getContainer, getPlyr, getPlyrForHost } from "modules/plyr-setup";
-import { SubtitleResource } from "modules/subtitle";
-import { Host, isDirect, isInternal, resolveInfo } from "modules/video-info";
 import MediaExtended from "mx-main";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
+
+import { getIsMobile } from "./misc";
+import { setupIFrame } from "./modules/iframe";
+import { setupPlaceholder } from "./modules/placeholder";
+import { getContainer, getPlyr, getPlyrForHost } from "./modules/plyr-setup";
+import { SubtitleResource } from "./modules/subtitle";
+import { Host, isDirect, isInternal, resolveInfo } from "./modules/video-info";
 
 export const getEmbedProcessor = (
   plugin: MediaExtended,

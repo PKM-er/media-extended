@@ -1,7 +1,7 @@
 import assertNever from "assert-never";
 import { statusCode } from "bili-api/player/general";
-import * as Pagelist from "bili-api/player/pagelist";
-import * as PlayUrl from "bili-api/player/playurl";
+import type * as Pagelist from "bili-api/player/pagelist";
+import type * as PlayUrl from "bili-api/player/playurl";
 import { fetch_method } from "bili-api/player/playurl";
 import { RequestHandler } from "express";
 

@@ -1,5 +1,3 @@
-import { trackInfo } from "modules/subtitle";
-import { getSubtitleTracks } from "modules/subtitle";
 import {
   App,
   MarkdownPostProcessorContext,
@@ -7,6 +5,9 @@ import {
   TFile,
   Vault,
 } from "obsidian";
+
+import { trackInfo } from "./subtitle";
+import { getSubtitleTracks } from "./subtitle";
 
 export enum Host {
   youtube,

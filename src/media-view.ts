@@ -1,21 +1,4 @@
 import TimeFormat from "hh-mm-ss";
-import {
-  checkMediaType,
-  getContainer,
-  getPlyr,
-  getPlyrForHost,
-  getSetupTool,
-  infoToSource,
-  Plyr_TF,
-} from "modules/plyr-setup";
-import { TimeSpan } from "modules/temporal-frag";
-import {
-  Host,
-  isDirect,
-  isHost,
-  isInternal,
-  videoInfo,
-} from "modules/video-info";
 import MediaExtended from "mx-main";
 import {
   EditorPosition,
@@ -25,6 +8,23 @@ import {
 } from "obsidian";
 
 import { mainpart } from "./misc";
+import {
+  checkMediaType,
+  getContainer,
+  getPlyr,
+  getPlyrForHost,
+  getSetupTool,
+  infoToSource,
+  Plyr_TF,
+} from "./modules/plyr-setup";
+import { TimeSpan } from "./modules/temporal-frag";
+import {
+  Host,
+  isDirect,
+  isHost,
+  isInternal,
+  videoInfo,
+} from "./modules/video-info";
 
 export const MEDIA_VIEW_TYPE = "external-media";
 export class MediaView extends ItemView {
