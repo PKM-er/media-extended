@@ -1,7 +1,8 @@
+import { isCssValue } from "@tinyfe/parse-unit";
 import { getIsMobile } from "misc";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
+
 import MediaExtended from "./main";
-import { isCssValue } from "@tinyfe/parse-unit";
 
 export const hideYtbRecommClass = "alx-hide-ytb-recomm";
 

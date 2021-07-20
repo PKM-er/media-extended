@@ -1,7 +1,7 @@
 import assertNever from "assert-never";
 import axios from "axios";
 import { setRatioWidth } from "embeds";
-import { videoInfo_Host, Host } from "modules/video-info";
+import { Host, videoInfo_Host } from "modules/video-info";
 
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
@@ -21,11 +21,11 @@ const getPosterUrl = async (info: videoInfo_Host) => {
   }
 };
 
-export async function setupPlaceholder(
+export const setupPlaceholder = async (
   info: videoInfo_Host,
   height: string,
   getRealPlayer: () => HTMLDivElement,
-): Promise<HTMLDivElement> {
+): Promise<HTMLDivElement> => {
   const placeholderUrl = await getPosterUrl(info);
 
   const placeholder = createDiv({
@@ -52,9 +52,9 @@ export async function setupPlaceholder(
   );
 
   return placeholder;
-}
+};
 
-async function fetchVimeoPoster(url: string | URL): Promise<string | null> {
+const fetchVimeoPoster = async (url: string | URL): Promise<string | null> => {
   const api = new URL("https://vimeo.com/api/oembed.json");
   if (typeof url === "string") api.searchParams.append("url", url);
   else api.searchParams.append("url", url.href);
@@ -71,7 +71,7 @@ async function fetchVimeoPoster(url: string | URL): Promise<string | null> {
       console.error(e);
       return null;
     });
-}
+};
 
 export const fetchBiliPoster = async (
   ...args: [aid: number] | [bvid: string]

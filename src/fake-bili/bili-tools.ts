@@ -8,26 +8,24 @@ export const enum vidType {
   bvid,
 }
 
-export function isBiliVId(id: string | number): vidType | null {
+export const isBiliVId = (id: string | number): vidType | null => {
   if (typeof id === "number" && Number.isInteger(id)) return vidType.avid;
   else if (typeof id === "string" && /^bv/i.test(id)) return vidType.bvid;
   else console.log("Invalid id: " + id);
   return null;
-}
+};
 
-export function isDash(obj: PlayUrl.Data): obj is PlayUrl.DashData {
-  return (obj as PlayUrl.DashData).dash !== undefined;
-}
+export const isDash = (obj: PlayUrl.Data): obj is PlayUrl.DashData =>
+  (obj as PlayUrl.DashData).dash !== undefined;
 
-export function isTrad(obj: PlayUrl.Data): obj is PlayUrl.TradData {
-  return (obj as PlayUrl.TradData).durl !== undefined;
-}
+export const isTrad = (obj: PlayUrl.Data): obj is PlayUrl.TradData =>
+  (obj as PlayUrl.TradData).durl !== undefined;
 
 /**
  * 获取视频流URL（web端）
  * @param F = typeof args.fnval
  */
-export function getPlayUrl<F>(args: PlayUrl.Params, cookie?: string) {
+export const getPlayUrl = <F>(args: PlayUrl.Params, cookie?: string) => {
   const url = "http://api.bilibili.com/x/player/playurl";
 
   // @ts-ignore
@@ -45,12 +43,12 @@ export function getPlayUrl<F>(args: PlayUrl.Params, cookie?: string) {
         : returnBody<PlayUrl.TradData>
     >(url, { params: args, headers });
   } else throw new TypeError(`Invalid avid ${avid}/bvid ${bvid}`);
-}
+};
 
 /**
  * 查询视频分P列表 (avID转CID)
  */
-export async function getPageList(arg: Pagelist.Params) {
+export const getPageList = async (arg: Pagelist.Params) => {
   const url = "http://api.bilibili.com/x/player/pagelist";
 
   // @ts-ignore
@@ -62,4 +60,4 @@ export async function getPageList(arg: Pagelist.Params) {
   )
     return axios.get<Pagelist.Return>(url, { params: arg });
   else throw new TypeError(`Invalid aid ${aid}/bvid ${bvid}`);
-}
+};

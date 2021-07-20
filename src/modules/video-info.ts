@@ -1,4 +1,5 @@
 import { trackInfo } from "modules/subtitle";
+import { getSubtitleTracks } from "modules/subtitle";
 import {
   App,
   MarkdownPostProcessorContext,
@@ -6,7 +7,6 @@ import {
   TFile,
   Vault,
 } from "obsidian";
-import { getSubtitleTracks } from "modules/subtitle";
 
 export enum Host {
   youtube,
@@ -21,7 +21,7 @@ const acceptedExt: Map<mediaType, string[]> = new Map([
   ["media", ["webm"]],
 ]);
 
-export function getMediaType(src: string | URL | TFile): mediaType | null {
+export const getMediaType = (src: string | URL | TFile): mediaType | null => {
   // if url contains no extension, type = null
   let ext: string | null = null;
   if (src instanceof TFile) {
@@ -41,7 +41,7 @@ export function getMediaType(src: string | URL | TFile): mediaType | null {
     if (extList.includes(ext)) fileType = type;
   }
   return fileType;
-}
+};
 
 export type videoInfo = videoInfo_Direct | videoInfo_Host | videoInfo_Internal;
 
@@ -62,12 +62,11 @@ export interface videoInfo_Direct {
   filename: string;
   src: URL;
 }
-export function isDirect(info: videoInfo): info is videoInfo_Direct {
-  return (info as videoInfo_Host).host === undefined && info.src instanceof URL;
-}
-export function isInternal(info: videoInfo): info is videoInfo_Internal {
-  return info.src instanceof TFile;
-}
+export const isDirect = (info: videoInfo): info is videoInfo_Direct =>
+  (info as videoInfo_Host).host === undefined && info.src instanceof URL;
+export const isInternal = (info: videoInfo): info is videoInfo_Internal =>
+  info.src instanceof TFile;
+
 export interface videoInfo_Host {
   hash: string;
   host: Host;
@@ -75,26 +74,14 @@ export interface videoInfo_Host {
   iframe: URL;
   src: URL;
 }
-export function isHost(info: videoInfo): info is videoInfo_Host {
-  return (
-    (info as videoInfo_Host).host !== undefined &&
-    (info as videoInfo_Host).id !== undefined
-  );
-}
+export const isHost = (info: videoInfo): info is videoInfo_Host =>
+  (info as videoInfo_Host).host !== undefined &&
+  (info as videoInfo_Host).id !== undefined;
 
-export async function getVideoInfo(
-  src: URL | string,
-): Promise<videoInfo | null>;
-export async function getVideoInfo(
-  src: TFile,
-  hash: string,
-  vault: Vault,
-): Promise<videoInfo | null>;
-export async function getVideoInfo(
-  src: TFile | URL | string,
-  hash?: string,
-  vault?: Vault,
-): Promise<videoInfo | null> {
+export const getVideoInfo = async (
+  ...args: [src: URL | string] | [src: TFile, hash: string, vault: Vault]
+): Promise<videoInfo | null> => {
+  let [src, hash, vault] = args;
   if (typeof src === "string") {
     try {
       src = new URL(src);
@@ -232,7 +219,7 @@ export async function getVideoInfo(
     default:
       return null;
   }
-}
+};
 
 export const resolveInfo = async (
   el: Element,

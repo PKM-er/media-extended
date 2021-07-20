@@ -9,7 +9,7 @@ export const TFDef = {
 };
 
 /** parse temporal fragment from hash */
-export function parseTF(hash: string | undefined): TimeSpan | null {
+export const parseTF = (hash: string | undefined): TimeSpan | null => {
   if (hash) {
     const params = parse(hash);
     const paramT = params.t;
@@ -26,7 +26,7 @@ export function parseTF(hash: string | undefined): TimeSpan | null {
     }
   }
   return null;
-}
+};
 export interface TimeSpan {
   end: number;
   start: number;
@@ -35,10 +35,11 @@ export interface TimeSpan {
    */
   raw: string;
 }
-function getTimeSpan(
+
+const getTimeSpan = (
   start: string | undefined,
   end: string | undefined,
-): Omit<TimeSpan, "raw"> | null {
+): Omit<TimeSpan, "raw"> | null => {
   // start may be an empty string
   const startRaw = start ? start : null;
   const endRaw = end ?? null;
@@ -63,8 +64,9 @@ function getTimeSpan(
   } else {
     return { start: startTime, end: endTime };
   }
-}
-function convertTime(input: string): number | null {
+};
+
+const convertTime = (input: string): number | null => {
   const npttimedef = /^(?:npt:)?([\d\.:]+)$/;
   if (npttimedef.test(input)) {
     const rawTime = (input.match(npttimedef) as RegExpMatchArray)[1];
@@ -86,4 +88,4 @@ function convertTime(input: string): number | null {
     // console.error("fail to parse npt: " + input);
     return null;
   }
-}
+};

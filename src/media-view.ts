@@ -1,10 +1,5 @@
-import {
-  EditorPosition,
-  ItemView,
-  MarkdownView,
-  WorkspaceLeaf,
-} from "obsidian";
-import { mainpart } from "./misc";
+import TimeFormat from "hh-mm-ss";
+import MediaExtended from "main";
 import {
   checkMediaType,
   getContainer,
@@ -22,8 +17,14 @@ import {
   isInternal,
   videoInfo,
 } from "modules/video-info";
-import TimeFormat from "hh-mm-ss";
-import MediaExtended from "main";
+import {
+  EditorPosition,
+  ItemView,
+  MarkdownView,
+  WorkspaceLeaf,
+} from "obsidian";
+
+import { mainpart } from "./misc";
 
 export const MEDIA_VIEW_TYPE = "external-media";
 export class MediaView extends ItemView {

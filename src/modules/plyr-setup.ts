@@ -1,6 +1,10 @@
-import { parseTF, TimeSpan } from "./temporal-frag";
-import { parse } from "query-string";
+import assertNever from "assert-never";
+import dashjs from "dashjs";
 import Plyr from "plyr";
+import { parse } from "query-string";
+
+import { fetchBiliPoster } from "./placeholder";
+import { parseTF, TimeSpan } from "./temporal-frag";
 import {
   Host,
   isDirect,
@@ -9,9 +13,6 @@ import {
   videoInfo,
   videoInfo_Host,
 } from "./video-info";
-import assertNever from "assert-never";
-import dashjs from "dashjs";
-import { fetchBiliPoster } from "./placeholder";
 
 /** Player with temporal fragments */
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
@@ -28,12 +29,14 @@ export type Plyr_TF = TemporalFrag & Plyr;
 /** HTMLMediaElement with temporal fragments */
 export type HTMLMediaEl_TF = TemporalFrag & HTMLMediaElement;
 
-export function isHTMLMediaEl_TF(el: HTMLMediaElement): el is HTMLMediaEl_TF {
+export const isHTMLMediaEl_TF = (
+  el: HTMLMediaElement,
+): el is HTMLMediaEl_TF => {
   return (
     Boolean((el as HTMLMediaEl_TF).timeSpan) ||
     (el as HTMLMediaEl_TF).timeSpan === null
   );
-}
+};
 
 const defaultPlyrControls = [
   "play-large", // The large play button in the center
@@ -70,7 +73,7 @@ type setupTool = {
   setPlayerTF: (player: Player) => void;
 };
 
-export function getSetupTool(hash: string | null): setupTool {
+export const getSetupTool = (hash: string | null): setupTool => {
   const timeSpan = hash ? parseTF(hash) : null;
   const hashQuery = hash ? parse(hash) : null;
   const getQuery = (query: string) =>
@@ -100,9 +103,9 @@ export function getSetupTool(hash: string | null): setupTool {
         if (getQuery(query)) player[key] = true;
       }),
   };
-}
+};
 
-export function PlayerTFSetup(player: Player, timeSpan?: TimeSpan | null) {
+export const PlayerTFSetup = (player: Player, timeSpan?: TimeSpan | null) => {
   const playerTF = player as Player_TF;
 
   /**
@@ -171,7 +174,7 @@ export function PlayerTFSetup(player: Player, timeSpan?: TimeSpan | null) {
     }
   };
   playerTF.setTimeSpan(timeSpan ?? null);
-}
+};
 
 export const getPlyrForHost = (
   info: videoInfo_Host,

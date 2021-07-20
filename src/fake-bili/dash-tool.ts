@@ -1,7 +1,7 @@
-import { create } from "xmlbuilder2";
 import { DashData } from "bili-api/player/playurl";
+import { create } from "xmlbuilder2";
 
-export function toMPD(data: DashData) {
+export const toMPD = (data: DashData) => {
   const d = data.dash;
 
   let videos = d.video
@@ -53,4 +53,4 @@ export function toMPD(data: DashData) {
 
   const xml = root.end({ prettyPrint: true });
   return xml;
-}
+};

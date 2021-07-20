@@ -1,17 +1,18 @@
+import assertNever from "assert-never";
 import { statusCode } from "bili-api/player/general";
+import * as Pagelist from "bili-api/player/pagelist";
+import * as PlayUrl from "bili-api/player/playurl";
+import { fetch_method } from "bili-api/player/playurl";
+import { RequestHandler } from "express";
+
 import {
-  vidType,
   getPageList,
   getPlayUrl,
   isDash,
   isTrad,
+  vidType,
 } from "../bili-tools";
-import * as Pagelist from "bili-api/player/pagelist";
-import * as PlayUrl from "bili-api/player/playurl";
-import { fetch_method } from "bili-api/player/playurl";
-import assertNever from "assert-never";
 import { toMPD } from "../dash-tool";
-import { RequestHandler } from "express";
 
 type vid =
   | { type: vidType.bvid; value: string }
@@ -22,10 +23,10 @@ export const Route = "/geturl/:vid(av\\d+|bv\\w+)";
 let Cookie: string | undefined;
 let PORT: number;
 
-export function getHandler(
+export const getHandler = (
   port: number = 2233,
   cookie?: string,
-): RequestHandler {
+): RequestHandler => {
   Cookie = cookie;
   PORT = port;
   const shell: RequestHandler = async (req, res, next) => {
@@ -37,7 +38,7 @@ export function getHandler(
     }
   };
   return shell;
-}
+};
 
 const getUrl: RequestHandler = async (req, res, next) => {
   const rawId = req.params.vid;
@@ -86,7 +87,7 @@ const getUrl: RequestHandler = async (req, res, next) => {
   res.send(mpd);
 };
 
-async function getCid(id: vid, page: number | null) {
+const getCid = async (id: vid, page: number | null) => {
   let argPl: Pagelist.Params;
 
   switch (id.type) {
@@ -111,9 +112,9 @@ async function getCid(id: vid, page: number | null) {
   else cid = pagelistData.data[0].cid;
 
   return cid;
-}
+};
 
-async function getPlayData(id: vid, cid: number) {
+const getPlayData = async (id: vid, cid: number) => {
   let argPu: PlayUrl.Params;
   switch (id.type) {
     case vidType.avid:
@@ -136,13 +137,13 @@ async function getPlayData(id: vid, cid: number) {
   }
 
   return playUrlData.data;
-}
+};
 
-function convertToFakeUrl(obj: PlayUrl.Data) {
-  function toFakeUrl(src: string) {
+const convertToFakeUrl = (obj: PlayUrl.Data) => {
+  const toFakeUrl = (src: string) => {
     let { host, pathname, search } = new URL(src);
     return `http://localhost:${PORT}/fake/${host + pathname + search}`;
-  }
+  };
 
   if (isDash(obj)) {
     const irMediaInfo = (info: PlayUrl.mediaInfo) => {
@@ -163,4 +164,4 @@ function convertToFakeUrl(obj: PlayUrl.Data) {
   }
 
   return obj;
-}
+};

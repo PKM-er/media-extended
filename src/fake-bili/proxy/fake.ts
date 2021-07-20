@@ -15,15 +15,15 @@ const proxyOpt: Options = {
   pathRewrite: {
     "^/fake/.+?/": "/", // rewrite path
   },
-  router(req) {
+  router: (req) => {
     return "https://" + req.params.host;
   },
-  onProxyReq(proxyReq) {
+  onProxyReq: (proxyReq) => {
     proxyReq.setHeader("user-agent", ua);
     proxyReq.setHeader("referer", "https://www.bilibili.com/");
     proxyReq.setHeader("origin", "https://www.bilibili.com");
   },
-  onProxyRes(proxyRes) {
+  onProxyRes: (proxyRes) => {
     proxyRes.headers["Access-Control-Allow-Origin"] = "*";
   },
 };

@@ -1,12 +1,10 @@
 import MediaExtended from "main";
-import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
-import { Await } from "./misc";
 import {
-  videoInfo,
-  isInternal,
   getMediaType,
   getVideoInfo,
+  isInternal,
   resolveInfo,
+  videoInfo,
 } from "modules/video-info";
 import {
   MarkdownPostProcessor,
@@ -15,6 +13,9 @@ import {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
+
+import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
+import { Await } from "./misc";
 
 type evtHandler = (e: Event) => void;
 

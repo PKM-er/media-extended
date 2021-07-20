@@ -1,9 +1,9 @@
-import { MarkdownRenderChild, TFile, Vault } from "obsidian";
 import iso from "iso-639-1";
-import SrtCvt from "srt-webvtt";
+import { MarkdownRenderChild, TFile, Vault } from "obsidian";
 import Plyr from "plyr";
+import SrtCvt from "srt-webvtt";
 
-function getSubtitles(video: TFile): TFile[] | null {
+const getSubtitles = (video: TFile): TFile[] | null => {
   const { basename: videoName, parent: folder } = video;
 
   // for video file "hello.mp4"
@@ -42,19 +42,19 @@ function getSubtitles(video: TFile): TFile[] | null {
 
     return subtitles;
   }
-}
+};
 
-async function getSrtUrl(file: TFile, vault: Vault): Promise<string> {
+const getSrtUrl = async (file: TFile, vault: Vault): Promise<string> => {
   const srt = await vault.read(file);
   return new SrtCvt(new Blob([srt])).getURL();
-}
+};
 
-async function getVttURL(file: TFile, vault: Vault) {
+const getVttURL = async (file: TFile, vault: Vault) => {
   const blob = new Blob([await vault.read(file)], {
     type: "text/vtt",
   });
   return URL.createObjectURL(blob);
-}
+};
 
 export type trackInfo = {
   objUrls: string[];
@@ -67,10 +67,10 @@ export type trackInfo = {
  * @param video
  * @returns empty [objectUrl[], trackEl[]] if no subtitle exists
  */
-export async function getSubtitleTracks(
+export const getSubtitleTracks = async (
   video: TFile,
   vault: Vault,
-): Promise<trackInfo | null> {
+): Promise<trackInfo | null> => {
   const subFiles = getSubtitles(video);
   if (!subFiles) return null;
 
@@ -134,7 +134,7 @@ export async function getSubtitleTracks(
   }
 
   return { objUrls: [...url.values()], trackEls, tracks };
-}
+};
 
 export class SubtitleResource extends MarkdownRenderChild {
   objectUrls: string[];

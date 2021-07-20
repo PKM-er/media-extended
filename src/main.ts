@@ -1,17 +1,19 @@
-import { Plugin, MarkdownPreviewRenderer, MarkdownView } from "obsidian";
+import "plyr/dist/plyr.css";
+import "./main.css";
+
+import { getEmbedProcessor } from "embeds";
+import { getServer } from "fake-bili/proxy/server";
+import { getCMLinkHandler, getLinkProcessor } from "links";
+import { getIsMobile } from "misc";
+import { MarkdownPreviewRenderer, MarkdownView, Plugin } from "obsidian";
+
+import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
   MESettingTab,
   MxSettings,
 } from "./settings";
-import "plyr/dist/plyr.css";
-import "./main.css";
-import { getEmbedProcessor } from "embeds";
-import { MediaView, MEDIA_VIEW_TYPE } from "./media-view";
-import { getCMLinkHandler, getLinkProcessor } from "links";
-import { getServer } from "fake-bili/proxy/server";
-import { getIsMobile } from "misc";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
