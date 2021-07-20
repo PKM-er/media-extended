@@ -76,7 +76,8 @@ const setRatio = (player: Plyr, maxHeight: string) => {
   if (!isCssValue(maxHeight)) throw new TypeError("maxHeight not css value");
 
   const container = getContainer(player);
-  if (player.isHTML5)
+  if (player.isHTML5) {
+    container.style.height = maxHeight;
     player.once("loadedmetadata", () => {
       if (!player.ratio) {
         console.warn("no ratio", player);
@@ -87,9 +88,11 @@ const setRatio = (player: Plyr, maxHeight: string) => {
         console.error("invaild ratio", player.ratio);
         return;
       }
+      // @ts-ignore
+      container.style.height = null;
       setRatioWidth(container, maxHeight, +w / +h);
     });
-  else {
+  } else {
     player.once("ready", () => {
       setRatioWidth(container, maxHeight, 16 / 9);
     });

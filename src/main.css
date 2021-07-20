@@ -14,6 +14,10 @@ input.incorrect {
   width: var(--max-ratio-width);
 }
 
+.plyr__poster {
+  background-size: cover;
+}
+
 .placeholder {
   aspect-ratio: 16/9;
   margin: auto;
@@ -48,6 +52,11 @@ iframe.bili-iframe {
 div.placeholder {
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+/* patch poster not filling container*/
+.plyr__video-wrapper {
+  height: 100%;
 }
 
 /* hide recommended video in youtube */
