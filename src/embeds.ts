@@ -42,24 +42,26 @@ export const getEmbedProcessor = (
             useYoutubeControls: ytControls,
             thumbnailPlaceholder: placeholder,
             interalBiliPlayback: biliEnabled,
+            embedHeight: height,
           } = plugin.settings;
           const isMobile: boolean = getIsMobile(plugin.app);
           const shouldIframe =
             info.host === Host.bili && (isMobile || !biliEnabled);
+          const shouldPlaceholder = placeholder && info.host !== Host.bili;
           const getRealPlayer = () => {
             if (shouldIframe) return setupIFrame(info);
             else {
               const player = getPlyrForHost(info, ytControls);
               ratioSetup(player);
-              if (placeholder)
+              if (shouldPlaceholder)
                 player.once("ready", function (evt) {
                   this.play();
                 });
               return getContainer(player);
             }
           };
-          if (placeholder && !shouldIframe)
-            newEl = await setupPlaceholder(info, getRealPlayer);
+          if (shouldPlaceholder && !shouldIframe)
+            newEl = await setupPlaceholder(info, height, getRealPlayer);
           else newEl = getRealPlayer();
         }
         if (newEl) el.replaceWith(newEl);
@@ -73,13 +75,7 @@ export const getEmbedProcessor = (
 const setRatio = (player: Plyr, maxHeight: string) => {
   if (!isCssValue(maxHeight)) throw new TypeError("maxHeight not css value");
 
-  const setRatioWidth = (ratio: number) => {
-    let [val, unit] = parseUnit(maxHeight);
-    getContainer(player).style.setProperty(
-      "--max-ratio-width",
-      val * ratio + unit,
-    );
-  };
+  const container = getContainer(player);
   if (player.isHTML5)
     player.once("loadedmetadata", () => {
       if (!player.ratio) {
@@ -91,11 +87,19 @@ const setRatio = (player: Plyr, maxHeight: string) => {
         console.error("invaild ratio", player.ratio);
         return;
       }
-      setRatioWidth(+w / +h);
+      setRatioWidth(container, maxHeight, +w / +h);
     });
   else {
     player.once("ready", () => {
-      setRatioWidth(16 / 9);
+      setRatioWidth(container, maxHeight, 16 / 9);
     });
   }
+};
+export const setRatioWidth = (
+  el: HTMLElement,
+  maxHeight: string,
+  ratio: number,
+) => {
+  let [val, unit] = parseUnit(maxHeight);
+  el.style.setProperty("--max-ratio-width", val * ratio + unit);
 };

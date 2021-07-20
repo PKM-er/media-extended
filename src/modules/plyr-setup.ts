@@ -179,9 +179,8 @@ export const getPlyrForHost = (
 ): Plyr_TF => {
   const { timeSpan } = getSetupTool(info.hash);
 
-  let options: Plyr.Options;
+  let options: Plyr.Options = {};
   if (info.host === Host.youtube) {
-    options = {};
     if (timeSpan && timeSpan.start !== 0) {
       if (!options.youtube) options.youtube = {};
       // @ts-ignore
@@ -193,7 +192,7 @@ export const getPlyrForHost = (
       // @ts-ignore
       options.youtube.controls = true;
     }
-  } else options = {};
+  }
 
   const player = getPlyr(info, options);
   const container = player.elements.container;

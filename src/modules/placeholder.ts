@@ -1,54 +1,54 @@
 import assertNever from "assert-never";
 import axios from "axios";
+import { setRatioWidth } from "embeds";
 import { videoInfo_Host, Host } from "modules/video-info";
 
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
+const getPosterUrl = async (info: videoInfo_Host) => {
+  const { id: videoId } = info;
+  switch (info.host) {
+    case Host.youtube:
+      return `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+    case Host.bili:
+      if (info.id.startsWith("av"))
+        return await fetchBiliPoster(+info.id.substring(2));
+      else return await fetchBiliPoster(info.id);
+    case Host.vimeo:
+      return await fetchVimeoPoster(info.src);
+    default:
+      assertNever(info.host);
+  }
+};
+
 export async function setupPlaceholder(
   info: videoInfo_Host,
+  height: string,
   getRealPlayer: () => HTMLDivElement,
 ): Promise<HTMLDivElement> {
-  const { id: videoId } = info;
+  const placeholderUrl = await getPosterUrl(info);
 
   const placeholder = createDiv({
     cls: ["placeholder", "plyr plyr--full-ui plyr--video"],
   });
-  let placeholderUrl: string | null;
-
-  switch (info.host) {
-    case Host.youtube:
-      placeholderUrl = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-      break;
-    case Host.bili:
-      if (info.id.startsWith("av"))
-        placeholderUrl = await fetchBiliPoster(+info.id.substring(2));
-      else placeholderUrl = await fetchBiliPoster(info.id);
-      break;
-    case Host.vimeo:
-      placeholderUrl = await fetchVimeoPoster(info.src);
-      break;
-    default:
-      assertNever(info.host);
-  }
 
   if (placeholderUrl)
     placeholder.style.backgroundImage = `url("${placeholderUrl}")`;
-  placeholder.appendChild(
-    createEl(
-      "button",
-      {
-        cls: "plyr__control plyr__control--overlaid",
-        attr: {
-          type: "button",
-          "data-plyr": "play",
-          "aria-label": "Play",
-        },
+  setRatioWidth(placeholder, height, 16 / 9);
+  placeholder.createEl(
+    "button",
+    {
+      cls: "plyr__control plyr__control--overlaid",
+      attr: {
+        type: "button",
+        "data-plyr": "play",
+        "aria-label": "Play",
       },
-      (button) => {
-        button.innerHTML = playButtonHtml;
-        button.onClickEvent(() => placeholder.replaceWith(getRealPlayer()));
-      },
-    ),
+    },
+    (button) => {
+      button.innerHTML = playButtonHtml;
+      button.onClickEvent(() => placeholder.replaceWith(getRealPlayer()));
+    },
   );
 
   return placeholder;
