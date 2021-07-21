@@ -1,3 +1,4 @@
+import parseUnit from "@tinyfe/parse-unit";
 import { App } from "obsidian";
 
 export type mutationParam = {
@@ -32,3 +33,12 @@ export const mainpart = (url: URL) =>
 
 // @ts-ignore
 export const getIsMobile = (app: App) => app.isMobile as boolean;
+
+export const setRatioWidth = (
+  el: HTMLElement,
+  maxHeight: string,
+  ratio: number,
+) => {
+  let [val, unit] = parseUnit(maxHeight);
+  el.style.setProperty("--max-ratio-width", val * ratio + unit);
+};

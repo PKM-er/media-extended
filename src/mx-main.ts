@@ -4,7 +4,7 @@ import "./main.css";
 import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";
-import { getServer } from "./fake-bili/proxy/server";
+import type getServer from "./fake-bili/proxy/server";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
 import { getIsMobile } from "./misc";
@@ -19,7 +19,7 @@ const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
-  server: ReturnType<typeof getServer> | undefined;
+  server?: ReturnType<typeof getServer>;
 
   private cmLinkHandler = getCMLinkHandler(this);
 
@@ -38,7 +38,10 @@ export default class MediaExtended extends Plugin {
 
     document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
 
-    if (!getIsMobile(this.app)) this.server = getServer(2233);
+    if (!getIsMobile(this.app)) {
+      const { default: getServer } = await import("./fake-bili/proxy/server");
+      this.server = getServer(2233);
+    }
 
     this.addSettingTab(new MESettingTab(this.app, this));
 

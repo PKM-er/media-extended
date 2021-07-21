@@ -17,6 +17,7 @@ export default {
   output: {
     file: "main.js",
     sourcemap: "inline",
+    inlineDynamicImports: true,
     sourcemapExcludeSources: isProd,
     format: "cjs",
     exports: "default",

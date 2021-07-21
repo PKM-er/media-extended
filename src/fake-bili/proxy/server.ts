@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from "express";
 import * as Fake from "./fake";
 import * as PlayUrl from "./play-url";
 
-export const getServer = (port: number) => {
+const getServer = (port: number) => {
   const app = express();
 
   app.use(Fake.Route, Fake.getProxy());
@@ -16,3 +16,5 @@ export const getServer = (port: number) => {
 
   return app.listen(port);
 };
+
+export default getServer;

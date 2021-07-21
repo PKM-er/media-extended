@@ -3,7 +3,6 @@ import dashjs from "dashjs";
 import Plyr from "plyr";
 import { parse } from "query-string";
 
-import { fetchBiliPoster } from "./placeholder";
 import { parseTF, TimeSpan } from "./temporal-frag";
 import {
   Host,
@@ -227,14 +226,17 @@ export const getPlyr = (info: videoInfo, options?: Plyr.Options): Plyr_TF => {
       "http://localhost:2233/geturl/" +
       (info.iframe.searchParams.has("aid") ? "av" + info.id : info.id);
     dash.initialize(playerEl, src, false);
-    const getPoster = async () => {
-      const posterUrl = info.iframe.searchParams.has("aid")
-        ? await fetchBiliPoster(+info.id)
-        : await fetchBiliPoster(info.id);
-      if (posterUrl) player.poster = posterUrl;
-      else console.error("unable to fetch poster");
-    };
-    getPoster();
+    import("../fake-bili/fetch-poster").then((module) => {
+      const { default: fetchBiliPoster } = module;
+      const getPoster = async () => {
+        const posterUrl = info.iframe.searchParams.has("aid")
+          ? await fetchBiliPoster(+info.id)
+          : await fetchBiliPoster(info.id);
+        if (posterUrl) player.poster = posterUrl;
+        else console.error("unable to fetch poster");
+      };
+      getPoster();
+    });
   } else {
     const source = infoToSource(info);
     player.source = source;

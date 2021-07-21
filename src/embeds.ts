@@ -1,9 +1,9 @@
-import parseUnit, { isCssValue } from "@tinyfe/parse-unit";
+import { isCssValue } from "@tinyfe/parse-unit";
 import MediaExtended from "mx-main";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
 
-import { getIsMobile } from "./misc";
+import { getIsMobile, setRatioWidth } from "./misc";
 import { setupIFrame } from "./modules/iframe";
 import { setupPlaceholder } from "./modules/placeholder";
 import { getContainer, getPlyr, getPlyrForHost } from "./modules/plyr-setup";
@@ -98,12 +98,4 @@ const setRatio = (player: Plyr, maxHeight: string) => {
       setRatioWidth(container, maxHeight, 16 / 9);
     });
   }
-};
-export const setRatioWidth = (
-  el: HTMLElement,
-  maxHeight: string,
-  ratio: number,
-) => {
-  let [val, unit] = parseUnit(maxHeight);
-  el.style.setProperty("--max-ratio-width", val * ratio + unit);
 };
