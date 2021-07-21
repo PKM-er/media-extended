@@ -1,7 +1,6 @@
 import { isCssValue } from "@tinyfe/parse-unit";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
-import { getIsMobile } from "./misc";
 import { getPortSetting, isAvailable } from "./modules/bili-bridge";
 import MediaExtended from "./mx-main";
 
@@ -217,7 +216,7 @@ export class MESettingTab extends PluginSettingTab {
             "替代嵌入式iframe播放器，支持时间戳、播放1080p视频等",
           );
           desc.createEl("br");
-          if (getIsMobile(this.app)) desc.appendText("移动版尚不支持");
+          if (this.app.isMobile) desc.appendText("移动版尚不支持");
           else if (!isAvailable(this.app)) {
             desc.appendText("BiliBili Plugin尚未启用，");
             desc.createEl("a", {
@@ -227,7 +226,7 @@ export class MESettingTab extends PluginSettingTab {
           }
         }),
       );
-    if (!getIsMobile(this.app) && isAvailable(this.app)) {
+    if (!this.app.isMobile && isAvailable(this.app)) {
       internalBili.addToggle((toggle) => {
         let { settings } = this.plugin;
         toggle

@@ -6,7 +6,6 @@ import { Plugin } from "obsidian";
 import { getEmbedProcessor } from "./embeds";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
-import { getIsMobile } from "./misc";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -51,7 +50,7 @@ export default class MediaExtended extends Plugin {
     }
     this.registerMarkdownPostProcessor(getLinkProcessor(this, "external"));
 
-    if (!getIsMobile(this.app)) {
+    if (!this.app.isMobile) {
       this.registerCodeMirror((cm) => {
         const warpEl = cm.getWrapperElement();
         warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
