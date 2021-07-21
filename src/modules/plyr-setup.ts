@@ -284,6 +284,8 @@ export const checkMediaType = (info: videoInfo, player: Plyr) => {
             (player as Plyr_TF).sourceBak.type = "audio";
             console.log("media is audio, switching...");
             player.source = (player as Plyr_TF).sourceBak;
+            // @ts-ignore reset height from ratio setup
+            getContainer(player).style.height = null;
           } else {
             (player as Plyr_TF).sourceBak.type = "video";
           }
