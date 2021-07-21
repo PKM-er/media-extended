@@ -6,6 +6,7 @@ import { Plugin } from "obsidian";
 import { getEmbedProcessor } from "./embeds";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
+import { getIsMobile } from "./misc";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -49,13 +50,16 @@ export default class MediaExtended extends Plugin {
       this.registerMarkdownPostProcessor(getEmbedProcessor(this, "external"));
     }
     this.registerMarkdownPostProcessor(getLinkProcessor(this, "external"));
-    this.registerCodeMirror((cm) => {
-      const warpEl = cm.getWrapperElement();
-      warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
-      this.register(() =>
-        warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
-      );
-    });
+
+    if (!getIsMobile(this.app)) {
+      this.registerCodeMirror((cm) => {
+        const warpEl = cm.getWrapperElement();
+        warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
+        this.register(() =>
+          warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
+        );
+      });
+    }
 
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
     this.addCommand({
