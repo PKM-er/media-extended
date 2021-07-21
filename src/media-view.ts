@@ -115,9 +115,13 @@ export class MediaView extends ItemView {
 
     let player: Plyr_TF;
     if (isHost(info)) {
-      player = getPlyrForHost(info, this.plugin.settings.useYoutubeControls);
+      player = getPlyrForHost(
+        info,
+        this.plugin.app,
+        this.plugin.settings.useYoutubeControls,
+      );
     } else {
-      player = getPlyr(info);
+      player = getPlyr(info, this.plugin.app);
     }
     this.player = player;
     this.contentEl.appendChild(getContainer(player));

@@ -2,6 +2,7 @@ import { isCssValue } from "@tinyfe/parse-unit";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
 import { getIsMobile } from "./misc";
+import { getPortSetting, isAvailable } from "./modules/bili-bridge";
 import MediaExtended from "./mx-main";
 
 export const hideYtbRecommClass = "alx-hide-ytb-recomm";
@@ -205,26 +206,39 @@ export class MESettingTab extends PluginSettingTab {
   }
   bili(): void {
     let { containerEl } = this;
-    const { setToggle } = this;
 
     containerEl.createEl("h2", { text: "Bilibili" });
 
-    if (!getIsMobile(this.app)) {
-      setToggle({
-        k: "interalBiliPlayback",
-        name: "Play bilibili video with local player",
-        desc: (descEl) => {
-          descEl.appendText(
-            "在本地播放Bilibili视频，替代嵌入式iframe播放器，支持播放1080p视频",
+    const internalBili = new Setting(containerEl)
+      .setName("高级BiliBili支持")
+      .setDesc(
+        createFragment((desc) => {
+          desc.appendText(
+            "替代嵌入式iframe播放器，支持时间戳、播放1080p视频等",
           );
-          descEl.createEl("br");
-          descEl.appendText("bilibili视频的时间戳功能需要开启该功能");
-          descEl.createEl("br");
-          descEl.appendText("注意：移动版不支持，重启Obsidian生效");
-        },
+          desc.createEl("br");
+          if (getIsMobile(this.app)) desc.appendText("移动版尚不支持");
+          else if (!isAvailable(this.app)) {
+            desc.appendText("BiliBili Plugin尚未启用，");
+            desc.createEl("a", {
+              href: "https://github.com/aidenlx/mx-bili-plugin",
+              text: "点此下载",
+            });
+          }
+        }),
+      );
+    if (!getIsMobile(this.app) && isAvailable(this.app)) {
+      internalBili.addToggle((toggle) => {
+        let { settings } = this.plugin;
+        toggle
+          .setValue(settings.interalBiliPlayback)
+          .onChange(async (value) => {
+            settings.interalBiliPlayback = value;
+            this.plugin.saveData(settings);
+            this.display();
+          });
       });
-    } else {
-      containerEl.appendText("时间戳在移动端不可用");
+      getPortSetting(this.app)(containerEl);
     }
   }
 }

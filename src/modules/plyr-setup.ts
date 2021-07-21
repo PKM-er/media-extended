@@ -1,8 +1,10 @@
 import assertNever from "assert-never";
 import dashjs from "dashjs";
+import { App } from "obsidian";
 import Plyr from "plyr";
 import { parse } from "query-string";
 
+import { fetchPosterFunc, getPort } from "./bili-bridge";
 import { parseTF, TimeSpan } from "./temporal-frag";
 import {
   Host,
@@ -177,6 +179,7 @@ export const PlayerTFSetup = (player: Player, timeSpan?: TimeSpan | null) => {
 
 export const getPlyrForHost = (
   info: videoInfo_Host,
+  app: App,
   useYtControls = false,
 ): Plyr_TF => {
   const { timeSpan } = getSetupTool(info.hash);
@@ -196,7 +199,7 @@ export const getPlyrForHost = (
     }
   }
 
-  const player = getPlyr(info, options);
+  const player = getPlyr(info, app, options);
   const container = player.elements.container;
   if (useYtControls) container?.classList.add("yt-controls");
   if (info.host === Host.youtube && useYtControls) {
@@ -208,7 +211,11 @@ export const getPlyrForHost = (
   return player;
 };
 
-export const getPlyr = (info: videoInfo, options?: Plyr.Options): Plyr_TF => {
+export const getPlyr = (
+  info: videoInfo,
+  app: App,
+  options?: Plyr.Options,
+): Plyr_TF => {
   const { is, setHashOpt, setPlayerTF } = getSetupTool(info.hash);
 
   const playerEl = createDiv().appendChild(createEl("video"));
@@ -221,22 +228,21 @@ export const getPlyr = (info: videoInfo, options?: Plyr.Options): Plyr_TF => {
   const player = new Plyr(playerEl, options);
 
   if (isHost(info) && info.host === Host.bili) {
+    console.log(dashjs);
     const dash = dashjs.MediaPlayer().create();
     const src =
-      "http://localhost:2233/geturl/" +
+      `http://localhost:${getPort(app)}/geturl/` +
       (info.iframe.searchParams.has("aid") ? "av" + info.id : info.id);
     dash.initialize(playerEl, src, false);
-    import("../fake-bili/fetch-poster").then((module) => {
-      const { default: fetchBiliPoster } = module;
-      const getPoster = async () => {
-        const posterUrl = info.iframe.searchParams.has("aid")
-          ? await fetchBiliPoster(+info.id)
-          : await fetchBiliPoster(info.id);
-        if (posterUrl) player.poster = posterUrl;
-        else console.error("unable to fetch poster");
-      };
-      getPoster();
-    });
+    const fetchBiliPoster = fetchPosterFunc(app);
+    const getPoster = async () => {
+      const posterUrl = info.iframe.searchParams.has("aid")
+        ? await fetchBiliPoster(+info.id)
+        : await fetchBiliPoster(info.id);
+      if (posterUrl) player.poster = posterUrl;
+      else console.error("unable to fetch poster");
+    };
+    getPoster();
   } else {
     const source = infoToSource(info);
     player.source = source;

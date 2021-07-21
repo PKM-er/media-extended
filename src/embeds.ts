@@ -3,7 +3,8 @@ import MediaExtended from "mx-main";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
 
-import { getIsMobile, setRatioWidth } from "./misc";
+import { setRatioWidth } from "./misc";
+import { isAvailable } from "./modules/bili-bridge";
 import { setupIFrame } from "./modules/iframe";
 import { setupPlaceholder } from "./modules/placeholder";
 import { getContainer, getPlyr, getPlyrForHost } from "./modules/plyr-setup";
@@ -22,53 +23,48 @@ export const getEmbedProcessor = (
       if (!info) return;
 
       let newEl: HTMLDivElement | null = null;
-      try {
-        const ratioSetup = (player: Plyr) =>
-          setRatio(player, plugin.settings.embedHeight);
-        const setRegularPlyr = () => {
-          const player = getPlyr(info);
-          ratioSetup(player);
-          return getContainer(player);
-        };
+      const ratioSetup = (player: Plyr) =>
+        setRatio(player, plugin.settings.embedHeight);
+      const setRegularPlyr = () => {
+        const player = getPlyr(info, plugin.app);
+        ratioSetup(player);
+        return getContainer(player);
+      };
 
-        if (isInternal(info)) {
-          newEl = setRegularPlyr();
-          ctx.addChild(
-            new SubtitleResource(newEl, info.trackInfo?.objUrls ?? []),
-          );
-        } else if (isDirect(info)) {
-          newEl = setRegularPlyr();
-        } else {
-          const {
-            useYoutubeControls: ytControls,
-            thumbnailPlaceholder: placeholder,
-            interalBiliPlayback: biliEnabled,
-            embedHeight: height,
-          } = plugin.settings;
-          const isMobile: boolean = getIsMobile(plugin.app);
-          const shouldIframe =
-            info.host === Host.bili && (isMobile || !biliEnabled);
-          const shouldPlaceholder = placeholder && info.host !== Host.bili;
-          const getRealPlayer = () => {
-            if (shouldIframe) return setupIFrame(info);
-            else {
-              const player = getPlyrForHost(info, ytControls);
-              ratioSetup(player);
-              if (shouldPlaceholder)
-                player.once("ready", function (evt) {
-                  this.play();
-                });
-              return getContainer(player);
-            }
-          };
-          if (shouldPlaceholder && !shouldIframe)
-            newEl = await setupPlaceholder(info, height, getRealPlayer);
-          else newEl = getRealPlayer();
-        }
-        if (newEl) el.replaceWith(newEl);
-      } catch (error) {
-        console.error(error);
+      if (isInternal(info)) {
+        newEl = setRegularPlyr();
+        ctx.addChild(
+          new SubtitleResource(newEl, info.trackInfo?.objUrls ?? []),
+        );
+      } else if (isDirect(info)) {
+        newEl = setRegularPlyr();
+      } else {
+        const {
+          useYoutubeControls: ytControls,
+          thumbnailPlaceholder: placeholder,
+          interalBiliPlayback: biliEnabled,
+          embedHeight: height,
+        } = plugin.settings;
+        const shouldIframe =
+          info.host === Host.bili && (!isAvailable(plugin.app) || !biliEnabled);
+        const shouldPlaceholder = placeholder && info.host !== Host.bili;
+        const getRealPlayer = () => {
+          if (shouldIframe) return setupIFrame(info);
+          else {
+            const player = getPlyrForHost(info, plugin.app, ytControls);
+            ratioSetup(player);
+            if (shouldPlaceholder)
+              player.once("ready", function (evt) {
+                this.play();
+              });
+            return getContainer(player);
+          }
+        };
+        if (shouldPlaceholder && !shouldIframe)
+          newEl = await setupPlaceholder(info, height, getRealPlayer);
+        else newEl = getRealPlayer();
       }
+      if (newEl) el.replaceWith(newEl);
     });
   };
 };

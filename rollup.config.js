@@ -1,8 +1,8 @@
 import commonjs from "@rollup/plugin-commonjs";
-import json from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import css from "rollup-plugin-import-css";
+import nodePolyfills from "rollup-plugin-polyfill-node";
 
 const isProd = process.env.BUILD === "production";
 
@@ -17,7 +17,6 @@ export default {
   output: {
     file: "main.js",
     sourcemap: "inline",
-    inlineDynamicImports: true,
     sourcemapExcludeSources: isProd,
     format: "cjs",
     exports: "default",
@@ -28,7 +27,7 @@ export default {
     typescript(),
     nodeResolve({ browser: true, preferBuiltins: false }),
     commonjs(),
-    json(),
+    nodePolyfills(),
     css({
       output: "styles.css",
     }),

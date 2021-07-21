@@ -4,10 +4,8 @@ import "./main.css";
 import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";
-import type getServer from "./fake-bili/proxy/server";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
-import { getIsMobile } from "./misc";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -18,8 +16,6 @@ import {
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
-
-  server?: ReturnType<typeof getServer>;
 
   private cmLinkHandler = getCMLinkHandler(this);
 
@@ -37,11 +33,6 @@ export default class MediaExtended extends Plugin {
     await this.loadSettings();
 
     document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
-
-    if (!getIsMobile(this.app)) {
-      const { default: getServer } = await import("./fake-bili/proxy/server");
-      this.server = getServer(2233);
-    }
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
@@ -93,8 +84,7 @@ export default class MediaExtended extends Plugin {
     });
   }
 
-  onunload() {
-    console.log("unloading media-extended");
-    this.server?.close();
-  }
+  // onunload() {
+  //   console.log("unloading media-extended");
+  // }
 }
