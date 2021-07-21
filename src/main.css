@@ -11,6 +11,7 @@ input.incorrect {
 
 .plyr.plyr--video video {
   width: var(--max-ratio-width);
+  margin: auto;
 }
 
 .plyr__poster {
