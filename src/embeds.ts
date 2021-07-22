@@ -77,7 +77,7 @@ const setRatio = (player: Plyr, maxHeight: string) => {
   if (player.type === "video") {
     if (player.isHTML5) {
       container.style.height = maxHeight;
-      player.once("loadedmetadata", () => {
+      player.once("canplay", () => {
         if (!player.ratio) {
           console.warn("no ratio", player);
           return;
