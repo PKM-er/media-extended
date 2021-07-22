@@ -67,11 +67,9 @@ export default class MediaExtended extends Plugin {
       editorCheckCallback: (checking, _editor, view) => {
         const getMediaView = (group: string) =>
           this.app.workspace
-            // @ts-ignore
             .getGroupLeaves(group)
             .find((leaf) => (leaf.view as MediaView).getTimeStamp !== undefined)
             ?.view as MediaView | undefined;
-        // @ts-ignore
         const group: null | string = view.leaf.group;
         if (checking) {
           if (group) {

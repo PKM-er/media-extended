@@ -1,4 +1,5 @@
 import TimeFormat from "hh-mm-ss";
+import { around } from "monkey-around";
 import MediaExtended from "mx-main";
 import {
   EditorPosition,
@@ -33,7 +34,6 @@ export class MediaView extends ItemView {
   info: videoInfo | null;
   trackObjUrls: string[];
   displayText: string = "No Media";
-  private leafOpen_bak: WorkspaceLeaf["open"];
   private controls: Map<string, HTMLElement>;
 
   public set src(info: videoInfo) {
@@ -126,11 +126,17 @@ export class MediaView extends ItemView {
     this.player = player;
     this.contentEl.appendChild(getContainer(player));
     this.setDisplayText(info);
-    this.leafOpen_bak = leaf.open;
-    // @ts-ignore
-    leaf.open = (view) => {
-      if (view instanceof MediaView) return this.leafOpen_bak.bind(leaf)(view);
-    };
+
+    // prevent view from switching to other type when MarkdownView in group changes
+    around(leaf, {
+      // @ts-ignore
+      // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+      open(next) {
+        return function (this: any, view) {
+          if (view instanceof MediaView) return next.call(this, view);
+        };
+      },
+    });
 
     this.controls = new Map([
       [
@@ -153,13 +159,16 @@ export class MediaView extends ItemView {
   };
 
   private addToDoc = () => {
-    // @ts-ignore
-    const group = this.app.workspace.getGroupLeaves(this.leaf.group);
-    for (const leaf of group) {
-      if (leaf.view instanceof MarkdownView) {
-        this.addTimeStampToMDView(leaf.view);
-        return;
+    if (this.leaf.group) {
+      const group = this.app.workspace.getGroupLeaves(this.leaf.group);
+      for (const leaf of group) {
+        if (leaf.view instanceof MarkdownView) {
+          this.addTimeStampToMDView(leaf.view);
+          return;
+        }
       }
+    } else {
+      console.error("no group for leaf: %o", this.leaf);
     }
   };
 

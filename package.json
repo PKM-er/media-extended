@@ -37,6 +37,7 @@
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "hh-mm-ss": "^1.2.0",
     "iso-639-1": "^2.1.9",
+    "monkey-around": "^2.2.0",
     "obsidian": "^0.12.11",
     "plyr": "^3.6.8",
     "prettier": "^2.3.2",

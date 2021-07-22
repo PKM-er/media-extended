@@ -26,14 +26,16 @@ export const getOpenLink = (
   return (e) => {
     e.stopPropagation();
     e.preventDefault();
-    // @ts-ignore
+    if (!workspace.activeLeaf) {
+      console.error("no active leaf");
+      return;
+    }
     const groupId: string | null = workspace.activeLeaf.group;
     let playerLeaf: WorkspaceLeaf | null = null;
     if (groupId) {
       const allPlayerLeavesInGroup = workspace
         .getLeavesOfType(MEDIA_VIEW_TYPE)
         .filter((leaf) => {
-          // @ts-ignore
           return leaf.group === groupId;
         });
       if (allPlayerLeavesInGroup.length > 0)

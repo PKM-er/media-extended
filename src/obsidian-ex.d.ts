@@ -9,4 +9,7 @@ declare module "obsidian" {
       };
     };
   }
+  interface WorkspaceLeaf {
+    group: string | null;
+  }
 }
