@@ -11,15 +11,15 @@ import { Await } from "./misc";
 import {
   getMediaType,
   getVideoInfo,
-  isInternal,
+  isHost,
+  mediaInfo,
   resolveInfo,
-  videoInfo,
-} from "./modules/video-info";
+} from "./modules/media-info";
 
 type evtHandler = (e: Event) => void;
 
 export const getOpenLink = (
-  info: videoInfo,
+  info: mediaInfo,
   plugin: MediaExtended,
 ): evtHandler => {
   const { workspace } = plugin.app;
@@ -47,26 +47,46 @@ export const getOpenLink = (
 
     if (playerLeaf) {
       const view = playerLeaf.view as MediaView;
-      if (info) {
-        if (view.isEqual(info)) {
-          view.hash = isInternal(info) ? info.link.hash : info.src.hash;
-          view.player.play();
+      const isInfoEqual = view.isEqual(info);
+      view.setInfo(info).then(() => {
+        if (!view.core) return;
+        const { player } = view.core;
+        if (isInfoEqual) {
+          player.play();
         } else {
-          view.player.once("ready", function () {
-            this.play();
-          });
-          view.src = info;
+          if (!isHost(info) && info.type === "media" && player.isHTML5) {
+            player.once("ready", function () {
+              const promise = this.play();
+              let count = 0;
+              if (promise) {
+                promise.catch((e) => {
+                  const message =
+                    "The play() request was interrupted by a new load request";
+                  if (count === 0 && (e.message as string)?.includes(message)) {
+                    console.warn(e);
+                    count++;
+                  } else console.error(e);
+                });
+              }
+            });
+          } else
+            player.once("ready", function () {
+              this.play();
+            });
         }
-      }
+      });
     } else if (workspace.activeLeaf) {
       const newLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
       workspace.activeLeaf.setGroupMember(newLeaf);
       const view = new MediaView(newLeaf, plugin, info);
       newLeaf.open(view);
 
-      view.player.once("ready", function () {
-        this.play();
-      });
+      if (view.core) {
+        const { player } = view.core;
+        player.once("ready", function () {
+          this.play();
+        });
+      }
     }
   };
 };
@@ -111,7 +131,7 @@ export const getCMLinkHandler = (plugin: MediaExtended) => {
           activeLeaf.file.path,
         );
         if (!file) return;
-        info = await getVideoInfo(file, hash, vault);
+        info = await getVideoInfo(file, hash);
       } else {
         if (
           del.hasClass("cm-formatting") &&

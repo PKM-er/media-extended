@@ -6,7 +6,7 @@ import {
   Vault,
 } from "obsidian";
 
-import { trackInfo } from "./subtitle";
+import { getSubtitles, trackInfo } from "./subtitle";
 import { getSubtitleTracks } from "./subtitle";
 
 export enum Host {
@@ -44,94 +44,83 @@ export const getMediaType = (src: string | URL | TFile): mediaType | null => {
   return fileType;
 };
 
-export type videoInfo = videoInfo_Direct | videoInfo_Host | videoInfo_Internal;
+export type mediaInfo = mediaInfo_Direct | mediaInfo_Host | mediaInfo_Internal;
 
-export interface videoInfo_Internal {
+export interface mediaInfo_Internal {
   hash: string;
   type: mediaType;
-  /** resource path */
-  link: URL;
   filename: string;
-  src: TFile;
+  /** path for media file */
+  src: string;
+  /** paths for subtitles, could be empty */
+  subtitles: string[];
   trackInfo?: trackInfo;
+  updateTrackInfo(
+    this: mediaInfo_Internal,
+    vault: Vault,
+  ): Promise<trackInfo | null>;
+  getSrcFile(this: mediaInfo_Internal, vault: Vault): TFile;
 }
-export interface videoInfo_Direct {
+export const isInternal = (info: mediaInfo): info is mediaInfo_Internal =>
+  typeof info.src === "string";
+
+export interface mediaInfo_Direct {
   hash: string;
   type: mediaType;
-  /** converted src that is safe to use inside Obsidian */
-  link: URL;
   filename: string;
   src: URL;
 }
-export const isDirect = (info: videoInfo): info is videoInfo_Direct =>
-  (info as videoInfo_Host).host === undefined && info.src instanceof URL;
-export const isInternal = (info: videoInfo): info is videoInfo_Internal =>
-  info.src instanceof TFile;
+export const isDirect = (info: mediaInfo): info is mediaInfo_Direct =>
+  (info as mediaInfo_Host).host === undefined && info.src instanceof URL;
 
-export interface videoInfo_Host {
+export interface mediaInfo_Host {
   hash: string;
   host: Host;
   id: string;
   iframe: URL;
   src: URL;
 }
-export const isHost = (info: videoInfo): info is videoInfo_Host =>
-  (info as videoInfo_Host).host !== undefined &&
-  (info as videoInfo_Host).id !== undefined;
+export const isHost = (info: mediaInfo): info is mediaInfo_Host =>
+  (info as mediaInfo_Host).host !== undefined &&
+  (info as mediaInfo_Host).id !== undefined;
 
 export const getVideoInfo = async (
-  ...args: [src: URL | string] | [src: TFile, hash: string, vault: Vault]
-): Promise<videoInfo | null> => {
-  let [src, hash, vault] = args;
+  ...args: [src: URL | string] | [src: TFile, hash: string]
+): Promise<mediaInfo | null> => {
+  let [src, hash] = args;
   if (typeof src === "string") {
     try {
       src = new URL(src);
     } catch (error) {
-      console.error("invalid url: ", src);
       return null;
     }
   }
 
   const mediaType = getMediaType(src);
-  let trackInfo: trackInfo | undefined = undefined;
 
   if (mediaType) {
-    let link: URL;
     // Internal
     if (src instanceof TFile) {
-      if (!vault)
-        throw new TypeError("no vault provided to parse resource path");
       if (!hash) hash = "";
       else if (!hash.startsWith("#")) hash = "#" + hash;
-      const resourcePath = vault.getResourcePath(src);
-      try {
-        link = new URL(resourcePath + hash);
-      } catch (error) {
-        console.error("invalid url: ", resourcePath);
-        return null;
-      }
-      trackInfo = (await getSubtitleTracks(src, vault)) ?? undefined;
+      const sub = getSubtitles(src);
       return {
         type: mediaType,
-        link,
         filename: src.name,
-        src,
-        trackInfo,
+        src: src.path,
+        subtitles: sub ? sub.map((f) => f.path) : [],
         hash,
+        updateTrackInfo,
+        getSrcFile,
       };
     }
 
     // direct links
-    if (src.protocol === "file:")
-      link = new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
-    else link = src;
-    const rawFilename = decodeURI(link.pathname).split("/").pop() ?? "";
+    const rawFilename = decodeURI(src.pathname).split("/").pop() ?? "";
     return {
       type: mediaType,
-      link,
       filename: decodeURI(rawFilename),
       src,
-      trackInfo,
       hash: src.hash,
     };
   } else if (src instanceof TFile) return null;
@@ -222,6 +211,29 @@ export const getVideoInfo = async (
   }
 };
 
+/**
+ * get links that is safe to use in obsidian
+ */
+export const getLink = (
+  ...args: [info: mediaInfo_Internal, vault: Vault] | [info: mediaInfo_Direct]
+): URL => {
+  const [info, vault] = args;
+  if (isInternal(info)) {
+    if (!vault) throw new Error("vault not provided");
+    const { src, hash } = info;
+    const file = vault.getAbstractFileByPath(src);
+    if (file && file instanceof TFile) {
+      const resourcePath = vault.getResourcePath(file);
+      return new URL(resourcePath + hash);
+    } else throw new Error("no file found for path: " + src);
+  } else {
+    const { src } = info;
+    if (src.protocol === "file:")
+      return new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
+    else return src;
+  }
+};
+
 export const resolveInfo = async (
   el: Element,
   type: string,
@@ -242,7 +254,7 @@ export const resolveInfo = async (
       ctx.sourcePath,
     ) as TFile | null;
 
-    return file ? getVideoInfo(file, hash, app.vault) : null;
+    return file ? getVideoInfo(file, hash) : null;
   } else {
     const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
     if (!src) {
@@ -251,3 +263,16 @@ export const resolveInfo = async (
     } else return getVideoInfo(src);
   }
 };
+
+export async function updateTrackInfo(this: mediaInfo_Internal, vault: Vault) {
+  if (this.subtitles.length > 0) {
+    const track = await getSubtitleTracks(this.subtitles, vault);
+    this.trackInfo = track;
+    return track;
+  } else return null;
+}
+export function getSrcFile(this: mediaInfo_Internal, vault: Vault) {
+  const aFile = vault.getAbstractFileByPath(this.src);
+  if (aFile && aFile instanceof TFile) return aFile;
+  else throw new Error("src file not found for path: " + this.src);
+}

@@ -1,19 +1,21 @@
 import assertNever from "assert-never";
 import dashjs from "dashjs";
-import { App } from "obsidian";
+import { Vault } from "obsidian";
 import Plyr from "plyr";
 import { parse } from "query-string";
 
+import MediaExtended from "../mx-main";
 import { fetchPosterFunc, getPort } from "./bili-bridge";
-import { parseTF, TimeSpan } from "./temporal-frag";
 import {
+  getLink,
   Host,
   isDirect,
   isHost,
   isInternal,
-  videoInfo,
-  videoInfo_Host,
-} from "./video-info";
+  mediaInfo,
+} from "./media-info";
+import { getSubtitleTracks } from "./subtitle";
+import { parseTF, TimeSpan } from "./temporal-frag";
 
 /** Player with temporal fragments */
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
@@ -177,54 +179,39 @@ export const PlayerTFSetup = (player: Player, timeSpan?: TimeSpan | null) => {
   playerTF.setTimeSpan(timeSpan ?? null);
 };
 
-export const getPlyrForHost = (
-  info: videoInfo_Host,
-  app: App,
-  useYtControls = false,
-): Plyr_TF => {
-  const { timeSpan } = getSetupTool(info.hash);
-
+const getYtbOptions = (timeSpan: TimeSpan | null, useYtControls: boolean) => {
   let options: Plyr.Options = {};
-  if (info.host === Host.youtube) {
-    if (timeSpan && timeSpan.start !== 0) {
-      if (!options.youtube) options.youtube = {};
-      // @ts-ignore
-      options.youtube.start = timeSpan.start;
-    }
-    if (useYtControls) {
-      if (!options.youtube) options.youtube = {};
-      options.controls = ["play-large"];
-      // @ts-ignore
-      options.youtube.controls = true;
-    }
+  if (timeSpan && timeSpan.start !== 0) {
+    if (!options.youtube) options.youtube = {};
+    // @ts-ignore
+    options.youtube.start = timeSpan.start;
   }
-
-  const player = getPlyr(info, app, options);
-  const container = player.elements.container;
-  if (useYtControls) container?.classList.add("yt-controls");
-  if (info.host === Host.youtube && useYtControls) {
-    player.on("ready", async (event) => {
-      await player.play();
-      player.pause();
-    });
+  if (useYtControls) {
+    if (!options.youtube) options.youtube = {};
+    options.controls = ["play-large"];
+    // @ts-ignore
+    options.youtube.controls = true;
   }
-  return player;
+  return options;
 };
 
 export const getPlyr = (
-  info: videoInfo,
-  app: App,
+  info: mediaInfo,
+  plugin: MediaExtended,
   options?: Plyr.Options,
 ): Plyr_TF => {
-  const { is, setHashOpt, setPlayerTF } = getSetupTool(info.hash);
+  const { is, setHashOpt, setPlayerTF, timeSpan } = getSetupTool(info.hash);
 
-  const playerEl = createDiv().appendChild(createEl("video"));
+  const { app } = plugin;
+  const { useYoutubeControls } = plugin.settings;
 
-  if (options) options = { ...defaultPlyrOption, ...options };
-  else options = defaultPlyrOption;
-
+  options = options ?? {};
+  const isYtb = isHost(info) && info.host === Host.youtube;
+  const ytbOptions = isYtb ? getYtbOptions(timeSpan, useYoutubeControls) : null;
+  options = { ...defaultPlyrOption, ...ytbOptions, ...options };
   options.autoplay = is("autoplay");
 
+  const playerEl = createDiv().appendChild(createEl("video"));
   const player = new Plyr(playerEl, options);
 
   if (isHost(info) && info.host === Host.bili) {
@@ -244,14 +231,14 @@ export const getPlyr = (
     };
     getPoster();
   } else {
-    const source = infoToSource(info);
+    const source = infoToSource(info, app.vault);
     player.source = source;
     (player as Plyr_TF).sourceBak = source;
   }
 
   setHashOpt(player);
   setPlayerTF(player);
-  if (isInternal(info) && info.trackInfo) {
+  if (isInternal(info) && info.subtitles.length > 0) {
     // hide poster to make subtitle selectable
     playerEl.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
     player.once("ready", () => player.toggleCaptions());
@@ -259,11 +246,21 @@ export const getPlyr = (
 
   checkMediaType(info, player);
 
+  // setup youtube
+  const container = getContainer(player);
+  if (useYoutubeControls) container.classList.add("yt-controls");
+  if (isYtb && useYoutubeControls) {
+    player.on("ready", async () => {
+      await player.play();
+      player.pause();
+    });
+  }
+
   return player as Plyr_TF;
 };
 
 /** check media type that can not be determined by extension and switch source accordingly */
-export const checkMediaType = (info: videoInfo, player: Plyr) => {
+export const checkMediaType = (info: mediaInfo, player: Plyr) => {
   if (!isHost(info) && info.type === "media" && player.isHTML5) {
     // using plyr.source setter to update will trigger event twice
     let count = 0;
@@ -283,7 +280,9 @@ export const checkMediaType = (info: videoInfo, player: Plyr) => {
           if (media.videoHeight === 0 && media.videoWidth === 0) {
             (player as Plyr_TF).sourceBak.type = "audio";
             console.log("media is audio, switching...");
+            const isPlaying = player.playing;
             player.source = (player as Plyr_TF).sourceBak;
+            if (isPlaying) player.once("canplay", () => player.play());
             // @ts-ignore reset height from ratio setup
             getContainer(player).style.height = null;
           } else {
@@ -296,7 +295,10 @@ export const checkMediaType = (info: videoInfo, player: Plyr) => {
   }
 };
 
-export const infoToSource = (info: videoInfo): Plyr.SourceInfo => {
+export const infoToSource = (
+  info: mediaInfo,
+  vault: Vault,
+): Plyr.SourceInfo => {
   if (isHost(info)) {
     if (info.host === Host.bili)
       throw new Error("Bilibili not supported in Plyr");
@@ -309,18 +311,20 @@ export const infoToSource = (info: videoInfo): Plyr.SourceInfo => {
       };
   } else {
     const type = info.type === "media" ? "video" : info.type;
-    const sources = [{ src: info.link.href }];
     if (isDirect(info)) {
       return {
         type,
-        sources,
+        sources: [{ src: getLink(info).href }],
       };
     } else if (isInternal(info)) {
-      return {
-        type,
-        sources,
-        tracks: info.trackInfo ? info.trackInfo.tracks : undefined,
-      };
+      if (info.subtitles.length > 0 && info.trackInfo === undefined)
+        throw new Error("trackInfo not updated");
+      else
+        return {
+          type,
+          sources: [{ src: getLink(info, vault).href }],
+          tracks: info.trackInfo ? info.trackInfo.tracks : undefined,
+        };
     } else {
       assertNever(info);
     }

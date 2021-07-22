@@ -1,5 +1,4 @@
-/* global div.external-video should be controlled in settings */
-.plyr.plyr--video {
+.markdown-preview-view .plyr.plyr--video {
   margin: auto;
   min-width: 400px;
   width: min(100%, var(--max-ratio-width));
@@ -9,7 +8,7 @@ input.incorrect {
   color: #eb3223;
 }
 
-.plyr.plyr--video video {
+.markdown-preview-view .plyr.plyr--video video {
   width: var(--max-ratio-width);
   margin: auto;
 }
@@ -21,6 +20,8 @@ input.incorrect {
 .placeholder {
   aspect-ratio: 16/9;
   margin: auto;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 iframe.bili-iframe {
@@ -47,11 +48,6 @@ iframe.bili-iframe {
 
   clip-path: inset(100%);
   overflow: hidden;
-}
-
-div.placeholder {
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 
 /* patch poster not filling container*/

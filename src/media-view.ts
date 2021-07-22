@@ -5,129 +5,107 @@ import {
   EditorPosition,
   ItemView,
   MarkdownView,
+  Modal,
+  Notice,
+  TFile,
+  ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
 
 import { mainpart } from "./misc";
 import {
-  checkMediaType,
-  getContainer,
-  getPlyr,
-  getPlyrForHost,
-  getSetupTool,
-  infoToSource,
-  Plyr_TF,
-} from "./modules/plyr-setup";
-import { TimeSpan } from "./modules/temporal-frag";
-import {
+  getLink,
+  getSrcFile,
+  getVideoInfo,
   Host,
   isDirect,
   isHost,
   isInternal,
-  videoInfo,
-} from "./modules/video-info";
+  mediaInfo,
+  updateTrackInfo,
+} from "./modules/media-info";
+import {
+  getContainer,
+  getPlyr,
+  getSetupTool,
+  Plyr_TF,
+} from "./modules/plyr-setup";
+import { getSubtitleTracks } from "./modules/subtitle";
+import { TimeSpan } from "./modules/temporal-frag";
 
-export const MEDIA_VIEW_TYPE = "external-media";
+export const MEDIA_VIEW_TYPE = "media-view";
+
 export class MediaView extends ItemView {
-  player: Plyr_TF;
   plugin: MediaExtended;
-  info: videoInfo | null;
-  trackObjUrls: string[];
-  displayText: string = "No Media";
+
+  core: {
+    info: mediaInfo;
+    player: Plyr_TF;
+  } | null = null;
+
+  get player(): Plyr_TF | null {
+    return this.core?.player ?? null;
+  }
+
+  emptyEl: HTMLDivElement;
+  playerEl: HTMLDivElement;
   private controls: Map<string, HTMLElement>;
 
-  public set src(info: videoInfo) {
-    if (!this.isEqual(info)) {
-      this.revokeObjUrls();
-      this.showControls();
+  get info(): mediaInfo | null {
+    return this.core?.info ?? null;
+  }
+  async setInfo(info: mediaInfo | null) {
+    if (info === null) {
+      this.showEmpty();
+      if (info) this.unloadCore();
+    } else if (!this.isEqual(info)) {
+      this.showEmpty(true);
+      if (info) this.unloadCore();
 
-      const source = infoToSource(info);
-      this.player.sourceBak = source;
-      this.player.source = source;
-      checkMediaType(info, this.player);
+      if (isInternal(info)) await info.updateTrackInfo(this.app.vault);
+      const player = getPlyr(info, this.plugin);
+      this.playerEl.appendChild(getContainer(player));
 
-      this.hash = info.hash;
+      if (player.isHTML5) this.showControl("pip");
+      else this.hideControl("pip");
 
-      const isPipEnabledBefore = this.player.pip;
-      this.player.pip = false;
-      if (isHost(info)) {
-        this.hideControl("pip");
-      } else {
-        this.showControl("pip");
-        if (isPipEnabledBefore)
-          this.player.once("playing", () => {
-            this.player.pip = true;
-          });
-      }
-      this.info = info;
-
-      this.setDisplayText(info);
+      this.core = { info, player };
+      // update display text
       this.load();
-    } else console.error("to update timestamp, use MediaView.hash");
+    } else {
+      this.hash = info.hash;
+    }
   }
-
-  showControls() {
-    if (this.contentEl.hidden) this.contentEl.hidden = false;
-    this.controls.forEach((el) => {
-      if (el.style.display === "none") el.style.display = "";
+  showEmpty(revert = false) {
+    // @ts-ignore
+    this.emptyEl.style.display = revert ? "none" : null;
+    // @ts-ignore
+    this.playerEl.style.display = revert ? null : "none";
+    revert ? this.showControls() : this.hideControls();
+  }
+  getState(): any {
+    let state = super.getState();
+    state.info = { ...this.info, trackInfo: undefined };
+    return state;
+  }
+  async setState(state: any, result: ViewStateResult): Promise<void> {
+    const { info } = state;
+    console.log(info);
+    this.setInfo({
+      ...info,
+      updateTrackInfo,
+      getSrcFile,
     });
-  }
-  showControl(name: string) {
-    const el = this.controls.get(name);
-    if (el) {
-      if (el.style.display === "none") el.style.display = "";
-    } else
-      console.error(`control named ${name} not found in %o`, this.controls);
+    await super.setState(state, result);
   }
 
-  public get timeSpan(): TimeSpan | null {
-    return this.player.timeSpan;
-  }
-
-  public set timeSpan(timeSpan: TimeSpan | null) {
-    this.player.setTimeSpan(timeSpan);
-  }
-
-  public set hash(hash: string) {
-    const { timeSpan, is } = getSetupTool(hash);
-    this.player.setTimeSpan(timeSpan);
-    this.player.autoplay = is("autoplay");
-    this.player.loop = is("loop");
-    this.player.muted = is("muted");
-  }
-
-  constructor(leaf: WorkspaceLeaf, plugin: MediaExtended, info?: videoInfo) {
+  constructor(leaf: WorkspaceLeaf, plugin: MediaExtended, info?: mediaInfo) {
     super(leaf);
     this.plugin = plugin;
-    this.info = info ?? null;
-    info = info ?? {
-      type: "video",
-      link: new URL("http://example.com/video.mp4"),
-      filename: "No Media",
-      src: new URL("http://example.com/video.mp4"),
-      hash: "",
-    };
-    if (isInternal(info) && info.trackInfo) {
-      this.trackObjUrls = info.trackInfo.objUrls;
-    } else {
-      this.trackObjUrls = [];
-    }
-
-    let player: Plyr_TF;
-    if (isHost(info)) {
-      player = getPlyrForHost(
-        info,
-        this.plugin.app,
-        this.plugin.settings.useYoutubeControls,
-      );
-    } else {
-      player = getPlyr(info, this.plugin.app);
-    }
-    this.player = player;
-    this.contentEl.appendChild(getContainer(player));
-    this.setDisplayText(info);
-
-    // prevent view from switching to other type when MarkdownView in group changes
+    this.emptyEl = this.setEmpty();
+    this.playerEl = this.contentEl.createDiv({ cls: "media-view-player" });
+    this.controls = this.getControls();
+    // prevent view from switching to other type when MarkdownView in group change mode
     around(leaf, {
       // @ts-ignore
       // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -137,8 +115,10 @@ export class MediaView extends ItemView {
         };
       },
     });
-
-    this.controls = new Map([
+    this.setInfo(info ?? null);
+  }
+  private getControls() {
+    return new Map([
       [
         "get-timestamp",
         this.addAction("star", "Get current Timestamp", this.addToDoc),
@@ -153,8 +133,111 @@ export class MediaView extends ItemView {
       ],
     ]);
   }
+  private setEmpty(): HTMLDivElement {
+    const { contentEl } = this;
+    const mainEl = contentEl.createDiv({ cls: "empty-state" });
+    mainEl.createDiv({ cls: "empty-state-container" }, (containerEl) => {
+      containerEl.createDiv({ cls: "empty-state-title", text: "No Media" });
+      containerEl.createDiv({ cls: "empty-state-action-list" }, (listEl) => {
+        const createAction = (
+          text: string,
+          action: (this: HTMLElement, ev: MouseEvent) => any,
+        ) => {
+          listEl.createDiv({ cls: "empty-state-action", text }, (el) =>
+            el.onClickEvent(action),
+          );
+        };
+        // createAction("Open Local Media in Vault", () => {});
+        createAction("Open Media from Link", () => {
+          const prompt = new PromptModal(this).open();
+        });
+      });
+    });
+    return mainEl;
+  }
+
+  get timeSpan(): TimeSpan | null {
+    return this.player?.timeSpan ?? null;
+  }
+  set timeSpan(timeSpan: TimeSpan | null) {
+    if (this.player) this.player.setTimeSpan(timeSpan);
+    else throw new Error("trying to set timeSpan on empty media view");
+  }
+
+  set hash(hash: string) {
+    if (!this.player)
+      throw new Error("trying to set timeSpan on empty media view");
+
+    const { timeSpan, is } = getSetupTool(hash);
+    this.player.setTimeSpan(timeSpan);
+    this.player.autoplay = is("autoplay");
+    this.player.loop = is("loop");
+    this.player.muted = is("muted");
+  }
+
+  unloadCore() {
+    if (this.core) {
+      const { info, player } = this.core;
+      if (isInternal(info) && info.trackInfo)
+        info.trackInfo.objUrls.forEach((url) => URL.revokeObjectURL(url));
+      if (player.pip) player.pip = false;
+      player.destroy();
+      this.updatePlayerEl();
+      this.core = null;
+    } else console.warn("core already destoryed");
+  }
+  private updatePlayerEl() {
+    let newEl = createDiv({ cls: "media-view-player" });
+    this.playerEl.replaceWith(newEl);
+    this.playerEl = newEl;
+  }
+  unload() {
+    this.unloadCore();
+  }
+
+  getViewType(): string {
+    return MEDIA_VIEW_TYPE;
+  }
+  getDisplayText() {
+    if (this.core) {
+      const { info, player } = this.core;
+      if (isInternal(info) || isDirect(info)) return info.filename;
+      else {
+        if (info.host === Host.youtube || info.host === Host.vimeo) {
+          // @ts-ignore
+          const getTitle = (): string | undefined => player?.config?.title;
+          let title;
+          if ((title = getTitle())) {
+            return title;
+          } else {
+            // try to fetch title and update displaytext when available
+            let count = 0;
+            const interval = window.setInterval(() => {
+              const title = getTitle();
+              if (title) this.load();
+              if (title || count > 10) window.clearInterval(interval);
+              count++;
+            }, 200);
+          }
+        }
+        return Host[info.host] + ": " + info.id;
+      }
+    } else return "";
+  }
+
+  isEqual(newMedia: mediaInfo): Boolean {
+    if (this.info === null) return false;
+    if (isInternal(newMedia) && isInternal(this.info)) {
+      return newMedia.src === this.info.src;
+    } else if (isDirect(newMedia) && isDirect(this.info)) {
+      return mainpart(getLink(newMedia)) === mainpart(getLink(this.info));
+    } else if (isHost(newMedia) && isHost(this.info)) {
+      return newMedia.host === this.info.host && newMedia.id === this.info.id;
+    } else return false;
+  }
 
   togglePip = () => {
+    if (!this.player) throw new Error("no media");
     this.player.pip = !this.player.pip;
   };
 
@@ -171,7 +254,6 @@ export class MediaView extends ItemView {
       console.error("no group for leaf: %o", this.leaf);
     }
   };
-
   addTimeStampToMDView = (view: MarkdownView) => {
     const timestamp = this.getTimeStamp();
     if (!timestamp) return;
@@ -181,14 +263,14 @@ export class MediaView extends ItemView {
     insertPos = cursor;
     editor.replaceRange("\n" + timestamp, insertPos, insertPos);
   };
-
-  getTimeStamp(sourcePath?: string) {
+  getTimeStamp(sourcePath?: string): string | null {
     if (!this.info) return null;
+    if (!this.player) throw new Error("no media");
     const current = this.player.currentTime;
     const display = TimeFormat.fromS(current, "hh:mm:ss").replace(/^00:/g, "");
     if (isInternal(this.info)) {
       const linktext = this.app.metadataCache.fileToLinktext(
-        this.info.src,
+        this.info.getSrcFile(this.app.vault),
         sourcePath ?? "",
         true,
       );
@@ -200,22 +282,21 @@ export class MediaView extends ItemView {
       );
   }
 
-  async onOpen() {
-    if (this.info === null) this.hideControls();
-    else if (isHost(this.info)) this.hideControl("pip");
+  showControls() {
+    this.controls.forEach((el) => {
+      if (el.style.display === "none")
+        // @ts-ignore
+        el.style.display = null;
+    });
   }
-
-  revokeObjUrls() {
-    this.trackObjUrls.forEach((url) => URL.revokeObjectURL(url));
-    this.trackObjUrls.length = 0;
+  showControl(name: string) {
+    const el = this.controls.get(name);
+    if (el) {
+      if (el.style.display === "none") el.style.display = "";
+    } else
+      console.error(`control named ${name} not found in %o`, this.controls);
   }
-
-  unload() {
-    this.revokeObjUrls();
-  }
-
   hideControls() {
-    if (!this.contentEl.hidden) this.contentEl.hidden = true;
     this.controls.forEach((el) => (el.style.display = "none"));
   }
   hideControl(name: string) {
@@ -223,33 +304,45 @@ export class MediaView extends ItemView {
     if (el) el.style.display = "none";
     else console.error(`control named ${name} not found in %o`, this.controls);
   }
+}
 
-  isEqual(info: videoInfo): Boolean {
-    if (this.info === null) return false;
-    if (isInternal(info) && isInternal(this.info)) {
-      return info.src.path === this.info.src.path;
-    } else if (isDirect(info) && isDirect(this.info)) {
-      return mainpart(info.link) === mainpart(this.info.link);
-    } else if (isHost(info) && isHost(this.info)) {
-      return info.host === this.info.host && info.id === this.info.id;
-    } else return false;
+class PromptModal extends Modal {
+  view: MediaView;
+  constructor(view: MediaView) {
+    super(view.app);
+    this.view = view;
   }
 
-  getViewType(): string {
-    return MEDIA_VIEW_TYPE;
-  }
-  getDisplayText() {
-    return this.displayText;
+  onOpen() {
+    let { contentEl, titleEl, modalEl } = this;
+
+    titleEl.setText("Enter Link to Media");
+    const input = contentEl.createEl(
+      "input",
+      { type: "text" },
+      (el) => (el.style.width = "100%"),
+    );
+    modalEl.createDiv({ cls: "modal-button-container" }, (div) => {
+      div.createEl("button", { cls: "mod-cta", text: "Open" }, (el) =>
+        el.onClickEvent(async () => {
+          const result = await getVideoInfo(input.value);
+          if (result) {
+            await this.view.setInfo(result);
+            this.view.player?.once("ready", function () {
+              this.play();
+            });
+            this.close();
+          } else new Notice("Link not supported");
+        }),
+      );
+      div.createEl("button", { text: "Cancel" }, (el) =>
+        el.onClickEvent(() => this.close()),
+      );
+    });
   }
 
-  setDisplayText(info: videoInfo | null) {
-    if (!info) {
-      this.displayText = "No Media";
-    } else {
-      this.displayText =
-        isDirect(info) || isInternal(info)
-          ? info.filename
-          : Host[info.host] + ": " + info.id;
-    }
+  onClose() {
+    let { contentEl } = this;
+    contentEl.empty();
   }
 }

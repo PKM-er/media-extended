@@ -12,4 +12,8 @@ declare module "obsidian" {
   interface WorkspaceLeaf {
     group: string | null;
   }
+
+  interface Vault {
+    exists: DataAdapter["exists"];
+  }
 }

@@ -1,6 +1,6 @@
-import { videoInfo_Host } from "modules/video-info";
+import { mediaInfo_Host } from "modules/media-info";
 
-export const setupIFrame = (info: videoInfo_Host): HTMLDivElement =>
+export const setupIFrame = (info: mediaInfo_Host): HTMLDivElement =>
   createEl("iframe", {
     cls: "bili-iframe",
     attr: {

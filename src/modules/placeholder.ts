@@ -1,14 +1,14 @@
 import assertNever from "assert-never";
 
 import { setRatioWidth } from "../misc";
-import { Host, videoInfo_Host } from "./video-info";
+import { Host, mediaInfo_Host } from "./media-info";
 
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
 export const setupPlaceholder = async (
-  info: videoInfo_Host,
+  info: mediaInfo_Host,
   height: string,
-  getRealPlayer: () => HTMLDivElement,
+  getRealPlayer: () => Promise<HTMLDivElement>,
 ): Promise<HTMLDivElement> => {
   const placeholderUrl = await getPosterUrl(info);
 
@@ -31,14 +31,16 @@ export const setupPlaceholder = async (
     },
     (button) => {
       button.innerHTML = playButtonHtml;
-      button.onClickEvent(() => placeholder.replaceWith(getRealPlayer()));
+      button.onClickEvent(async () =>
+        placeholder.replaceWith(await getRealPlayer()),
+      );
     },
   );
 
   return placeholder;
 };
 
-const getPosterUrl = async (info: videoInfo_Host) => {
+const getPosterUrl = async (info: mediaInfo_Host) => {
   const { id: videoId } = info;
   switch (info.host) {
     case Host.youtube:

@@ -6,10 +6,10 @@ import type Plyr from "plyr";
 import { setRatioWidth } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
 import { setupIFrame } from "./modules/iframe";
+import { Host, isHost, isInternal, resolveInfo } from "./modules/media-info";
 import { setupPlaceholder } from "./modules/placeholder";
-import { getContainer, getPlyr, getPlyrForHost } from "./modules/plyr-setup";
-import { SubtitleResource } from "./modules/subtitle";
-import { Host, isDirect, isInternal, resolveInfo } from "./modules/video-info";
+import { getContainer, getPlyr } from "./modules/plyr-setup";
+import { MediaResource } from "./modules/subtitle";
 
 export const getEmbedProcessor = (
   plugin: MediaExtended,
@@ -25,22 +25,29 @@ export const getEmbedProcessor = (
       let newEl: HTMLDivElement | null = null;
       const ratioSetup = (player: Plyr) =>
         setRatio(player, plugin.settings.embedHeight);
-      const setRegularPlyr = () => {
-        const player = getPlyr(info, plugin.app);
+      /**
+       * @param placeholder play immediately
+       */
+      const setPlyr = async (placeholder = false): Promise<HTMLDivElement> => {
+        let objectUrls: string[] | undefined = undefined;
+        if (isInternal(info)) {
+          const trackInfo = await info.updateTrackInfo(plugin.app.vault);
+          if (trackInfo) objectUrls = trackInfo.objUrls;
+        }
+        const player = getPlyr(info, plugin);
         ratioSetup(player);
-        return getContainer(player);
+        if (placeholder)
+          player.once("ready", function (evt) {
+            this.play();
+          });
+        const container = getContainer(player);
+
+        ctx.addChild(new MediaResource(container, player, objectUrls));
+        return container;
       };
 
-      if (isInternal(info)) {
-        newEl = setRegularPlyr();
-        ctx.addChild(
-          new SubtitleResource(newEl, info.trackInfo?.objUrls ?? []),
-        );
-      } else if (isDirect(info)) {
-        newEl = setRegularPlyr();
-      } else {
+      if (isHost(info)) {
         const {
-          useYoutubeControls: ytControls,
           thumbnailPlaceholder: placeholder,
           interalBiliPlayback: biliEnabled,
           embedHeight: height,
@@ -48,22 +55,17 @@ export const getEmbedProcessor = (
         const shouldIframe =
           info.host === Host.bili && (!isAvailable(plugin.app) || !biliEnabled);
         const shouldPlaceholder = placeholder && info.host !== Host.bili;
-        const getRealPlayer = () => {
+
+        const getRealPlayer = async () => {
           if (shouldIframe) return setupIFrame(info);
-          else {
-            const player = getPlyrForHost(info, plugin.app, ytControls);
-            ratioSetup(player);
-            if (shouldPlaceholder)
-              player.once("ready", function (evt) {
-                this.play();
-              });
-            return getContainer(player);
-          }
+          else return await setPlyr(shouldPlaceholder);
         };
+
         if (shouldPlaceholder && !shouldIframe)
           newEl = await setupPlaceholder(info, height, getRealPlayer);
-        else newEl = getRealPlayer();
-      }
+        else newEl = await getRealPlayer();
+      } else newEl = await setPlyr();
+
       if (newEl) el.replaceWith(newEl);
     });
   };
@@ -74,7 +76,7 @@ const setRatio = (player: Plyr, maxHeight: string) => {
 
   const container = getContainer(player);
   // @ts-ignore
-  if (player.type === "video") {
+  if (player.isVideo) {
     if (player.isHTML5) {
       container.style.height = maxHeight;
       player.once("canplay", () => {
