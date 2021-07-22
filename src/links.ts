@@ -8,9 +8,11 @@ import {
 
 import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
 import { Await } from "./misc";
+import { isAvailable } from "./modules/bili-bridge";
 import {
   getMediaType,
   getVideoInfo,
+  Host,
   isHost,
   mediaInfo,
   resolveInfo,
@@ -24,6 +26,12 @@ export const getOpenLink = (
 ): evtHandler => {
   const { workspace } = plugin.app;
   return (e) => {
+    if (
+      isHost(info) &&
+      info.host === Host.bili &&
+      (!isAvailable(plugin.app) || !plugin.settings.interalBiliPlayback)
+    )
+      return;
     e.stopPropagation();
     e.preventDefault();
     if (!workspace.activeLeaf) {

@@ -215,7 +215,6 @@ export const getPlyr = (
   const player = new Plyr(playerEl, options);
 
   if (isHost(info) && info.host === Host.bili) {
-    console.log(dashjs);
     const dash = dashjs.MediaPlayer().create();
     const src =
       `http://localhost:${getPort(app)}/geturl/` +
