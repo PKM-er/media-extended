@@ -5,7 +5,7 @@ import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
-import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
+import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -81,6 +81,13 @@ export default class MediaExtended extends Plugin {
         } else if (group) {
           getMediaView(group)?.addTimeStampToMDView(view);
         }
+      },
+    });
+    this.addCommand({
+      id: "open-media-link",
+      name: "Open Media from Link",
+      callback: () => {
+        new PromptModal(this).open();
       },
     });
   }

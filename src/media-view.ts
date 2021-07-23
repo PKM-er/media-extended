@@ -2,6 +2,7 @@ import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
 import MediaExtended from "mx-main";
 import {
+  App,
   EditorPosition,
   ItemView,
   MarkdownView,
@@ -72,6 +73,18 @@ export class MediaView extends ItemView {
       this.core = { info, player };
       // update display text
       this.load();
+      // @ts-ignore
+      if (player.isYouTube) {
+        const handler = (e: Plyr.PlyrStateChangeEvent) => {
+          // @ts-ignore
+          // console.log(e.detail.code, player?.config?.title);
+          if (e.detail.code === 1) {
+            this.load();
+            player.off("statechange", handler);
+          }
+        };
+        player.on("statechange", handler);
+      }
     } else {
       this.hash = info.hash;
     }
@@ -131,6 +144,12 @@ export class MediaView extends ItemView {
           this.togglePip,
         ),
       ],
+      [
+        "open-link",
+        this.addAction("go-to-file", "Open Media from link", () =>
+          new PromptModal(this.plugin, this).open(),
+        ),
+      ],
     ]);
   }
   private setEmpty(): HTMLDivElement {
@@ -149,7 +168,7 @@ export class MediaView extends ItemView {
         };
         // createAction("Open Local Media in Vault", () => {});
         createAction("Open Media from Link", () => {
-          const prompt = new PromptModal(this).open();
+          const prompt = new PromptModal(this.plugin, this).open();
         });
       });
     });
@@ -306,11 +325,13 @@ export class MediaView extends ItemView {
   }
 }
 
-class PromptModal extends Modal {
-  view: MediaView;
-  constructor(view: MediaView) {
-    super(view.app);
+export class PromptModal extends Modal {
+  view?: MediaView;
+  plugin: MediaExtended;
+  constructor(plugin: MediaExtended, view?: MediaView) {
+    super(plugin.app);
     this.view = view;
+    this.plugin = plugin;
   }
 
   onOpen() {
@@ -327,11 +348,16 @@ class PromptModal extends Modal {
         el.onClickEvent(async () => {
           const result = await getVideoInfo(input.value);
           if (result) {
-            await this.view.setInfo(result);
-            this.view.player?.once("ready", function () {
-              this.play();
-            });
-            this.close();
+            if (this.view) {
+              await this.view.setInfo(result);
+              this.view.player?.once("ready", function () {
+                this.play();
+              });
+              this.close();
+            } else if (this.app.workspace.activeLeaf) {
+              openNewView(result, this.app.workspace.activeLeaf, this.plugin);
+              this.close();
+            } else new Notice("No activeLeaf found");
           } else new Notice("Link not supported");
         }),
       );
@@ -346,3 +372,27 @@ class PromptModal extends Modal {
     contentEl.empty();
   }
 }
+
+export const openNewView = (
+  info: mediaInfo,
+  leaf: WorkspaceLeaf,
+  plugin: MediaExtended,
+) => {
+  if (!(leaf.view instanceof MarkdownView)) {
+    new Notice(
+      "No MarkdownView active, open new markdown file or click on opened md file",
+    );
+    return;
+  }
+  const newLeaf = plugin.app.workspace.createLeafBySplit(leaf);
+  leaf.setGroupMember(newLeaf);
+  const view = new MediaView(newLeaf, plugin, info);
+  newLeaf.open(view);
+
+  if (view.core) {
+    const { player } = view.core;
+    player.once("ready", function () {
+      this.play();
+    });
+  }
+};

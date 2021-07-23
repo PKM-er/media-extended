@@ -6,7 +6,7 @@ import {
   WorkspaceLeaf,
 } from "obsidian";
 
-import { MEDIA_VIEW_TYPE, MediaView } from "./media-view";
+import { MEDIA_VIEW_TYPE, MediaView, openNewView } from "./media-view";
 import { Await } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
 import {
@@ -84,17 +84,7 @@ export const getOpenLink = (
         }
       });
     } else if (workspace.activeLeaf) {
-      const newLeaf = workspace.createLeafBySplit(workspace.activeLeaf);
-      workspace.activeLeaf.setGroupMember(newLeaf);
-      const view = new MediaView(newLeaf, plugin, info);
-      newLeaf.open(view);
-
-      if (view.core) {
-        const { player } = view.core;
-        player.once("ready", function () {
-          this.play();
-        });
-      }
+      openNewView(info, workspace.activeLeaf, plugin);
     }
   };
 };
