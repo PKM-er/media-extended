@@ -62,7 +62,7 @@ export interface mediaInfo_Internal {
   getSrcFile(this: mediaInfo_Internal, vault: Vault): TFile;
 }
 export const isInternal = (info: mediaInfo): info is mediaInfo_Internal =>
-  typeof info.src === "string";
+  Array.isArray((info as mediaInfo_Internal).subtitles);
 
 export interface mediaInfo_Direct {
   hash: string;
@@ -71,7 +71,7 @@ export interface mediaInfo_Direct {
   src: URL;
 }
 export const isDirect = (info: mediaInfo): info is mediaInfo_Direct =>
-  (info as mediaInfo_Host).host === undefined && info.src instanceof URL;
+  !isInternal(info) && !isHost(info);
 
 export interface mediaInfo_Host {
   hash: string;

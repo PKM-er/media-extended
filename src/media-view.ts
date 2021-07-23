@@ -1,14 +1,13 @@
+import assertNever from "assert-never";
 import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
 import MediaExtended from "mx-main";
 import {
-  App,
   EditorPosition,
   ItemView,
   MarkdownView,
   Modal,
   Notice,
-  TFile,
   ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
@@ -102,13 +101,24 @@ export class MediaView extends ItemView {
     return state;
   }
   async setState(state: any, result: ViewStateResult): Promise<void> {
-    const { info } = state;
-    console.log(info);
-    this.setInfo({
-      ...info,
-      updateTrackInfo,
-      getSrcFile,
-    });
+    let info = state.info as mediaInfo | null;
+    if (!info) {
+      this.setInfo(info);
+    } else if (isHost(info)) {
+      info.src = new URL(info.src as any);
+      info.iframe = new URL(info.iframe as any);
+      this.setInfo(info);
+    } else if (isDirect(info)) {
+      info.src = new URL(info.src as any);
+      this.setInfo(info);
+    } else if (isInternal(info)) {
+      this.setInfo({
+        ...info,
+        updateTrackInfo,
+        getSrcFile,
+      });
+    } else assertNever(info);
+
     await super.setState(state, result);
   }
 
