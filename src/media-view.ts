@@ -102,22 +102,27 @@ export class MediaView extends ItemView {
   }
   async setState(state: any, result: ViewStateResult): Promise<void> {
     let info = state.info as mediaInfo | null;
-    if (!info) {
-      this.setInfo(info);
-    } else if (isHost(info)) {
-      info.src = new URL(info.src as any);
-      info.iframe = new URL(info.iframe as any);
-      this.setInfo(info);
-    } else if (isDirect(info)) {
-      info.src = new URL(info.src as any);
-      this.setInfo(info);
-    } else if (isInternal(info)) {
-      this.setInfo({
-        ...info,
-        updateTrackInfo,
-        getSrcFile,
-      });
-    } else assertNever(info);
+    try {
+      if (!info) {
+        await this.setInfo(info);
+      } else if (isHost(info)) {
+        info.src = new URL(info.src as any);
+        info.iframe = new URL(info.iframe as any);
+        await this.setInfo(info);
+      } else if (isDirect(info)) {
+        info.src = new URL(info.src as any);
+        await this.setInfo(info);
+      } else if (isInternal(info)) {
+        await this.setInfo({
+          ...info,
+          updateTrackInfo,
+          getSrcFile,
+        });
+      } else assertNever(info);
+    } catch (e) {
+      console.error(e);
+      await this.setInfo(null);
+    }
 
     await super.setState(state, result);
   }
