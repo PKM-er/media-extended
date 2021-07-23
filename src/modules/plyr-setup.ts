@@ -5,6 +5,7 @@ import Plyr from "plyr";
 import { parse } from "query-string";
 
 import MediaExtended from "../mx-main";
+import { recToPlyrControls } from "../settings";
 import { fetchPosterFunc, getPort } from "./bili-bridge";
 import {
   getLink,
@@ -14,7 +15,6 @@ import {
   isInternal,
   mediaInfo,
 } from "./media-info";
-import { getSubtitleTracks } from "./subtitle";
 import { parseTF, TimeSpan } from "./temporal-frag";
 
 /** Player with temporal fragments */
@@ -39,31 +39,6 @@ export const isHTMLMediaEl_TF = (
     Boolean((el as HTMLMediaEl_TF).timeSpan) ||
     (el as HTMLMediaEl_TF).timeSpan === null
   );
-};
-
-const defaultPlyrControls = [
-  "play-large", // The large play button in the center
-  // "restart", // Restart playback
-  // "rewind", // Rewind by the seek time (default 10 seconds)
-  "play", // Play/pause playback
-  // "fast-forward", // Fast forward by the seek time (default 10 seconds)
-  "progress", // The progress bar and scrubber for playback and buffering
-  "current-time", // The current time of playback
-  "duration", // The full duration of the media
-  // "mute", // Toggle mute
-  "volume", // Volume control
-  "captions", // Toggle captions
-  "settings", // Settings menu
-  // "pip", // Picture-in-picture (currently Safari only)
-  // "airplay", // Airplay (currently Safari only)
-  // "download", // Show a download button with a link to either the current source or a custom URL you specify in your options
-  "fullscreen", // Toggle fullscreen
-];
-
-const defaultPlyrOption: Plyr.Options = {
-  // fullscreen: { enabled: false },
-  invertTime: false,
-  controls: defaultPlyrControls,
 };
 
 /** Player Properties that can be controlled by hash */
@@ -203,11 +178,15 @@ export const getPlyr = (
   const { is, setHashOpt, setPlayerTF, timeSpan } = getSetupTool(info.hash);
 
   const { app } = plugin;
-  const { useYoutubeControls } = plugin.settings;
+  const { useYoutubeControls, plyrControls } = plugin.settings;
 
   options = options ?? {};
   const isYtb = isHost(info) && info.host === Host.youtube;
   const ytbOptions = isYtb ? getYtbOptions(timeSpan, useYoutubeControls) : null;
+  const defaultPlyrOption: Plyr.Options = {
+    invertTime: false,
+    controls: recToPlyrControls(plyrControls),
+  };
   options = { ...defaultPlyrOption, ...ytbOptions, ...options };
   options.autoplay = is("autoplay");
 
