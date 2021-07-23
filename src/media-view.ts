@@ -309,11 +309,17 @@ export class MediaView extends ItemView {
   addTimeStampToMDView = (view: MarkdownView) => {
     const timestamp = this.getTimeStamp();
     if (!timestamp) return;
+    const { timestampTemplate: template } = this.plugin.settings;
     const { editor } = view;
+
     const cursor = editor.getCursor();
     let insertPos: EditorPosition;
     insertPos = cursor;
-    editor.replaceRange("\n" + timestamp, insertPos, insertPos);
+    editor.replaceRange(
+      template.replace(/{{TIMESTAMP}}/g, timestamp),
+      insertPos,
+      insertPos,
+    );
   };
   getTimeStamp(sourcePath?: string): string | null {
     if (!this.info) return null;

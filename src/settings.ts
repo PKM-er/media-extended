@@ -18,6 +18,7 @@ export interface MxSettings {
   embedMinWidth: string;
   hideYtbRecomm: boolean;
   plyrControls: Record<PlyrControls, boolean>;
+  timestampTemplate: string;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -45,6 +46,7 @@ export const DEFAULT_SETTINGS: MxSettings = {
     pip: false, // Picture-in-picture (currently Safari only)
     fullscreen: true, // Toggle fullscreen
   },
+  timestampTemplate: "\n{{TIMESTAMP}}\n",
 };
 
 export const recToPlyrControls = (rec: Record<PlyrControls, boolean>) =>
@@ -93,6 +95,7 @@ export class MESettingTab extends PluginSettingTab {
     containerEl.empty();
 
     this.general();
+    this.noteTaking();
     this.player();
     this.ytb();
     this.bili();
@@ -158,6 +161,24 @@ export class MESettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Player" });
 
+    setToggle({
+      k: "thumbnailPlaceholder",
+      name: "Placeholder in favor of full player",
+      desc: (descEl) => {
+        descEl.appendText(
+          "If enabled, thumbnail placeholder will be used in favor of full player when page loads",
+        );
+        descEl.createEl("br");
+        descEl.appendText("Works with for Youtube/Vimeo/Bilibili embeds");
+        descEl.createEl("br");
+        descEl.appendText(
+          "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
+        );
+        descEl.createEl("br");
+        descEl.appendText("Restart the app to take effects");
+      },
+    });
+
     const plyrControls = new Setting(containerEl)
       .setName("Plyr Controls")
       .setDesc(
@@ -210,24 +231,32 @@ export class MESettingTab extends PluginSettingTab {
             if (isCssValue(value)) save(value);
           });
       });
+  }
+  noteTaking(): void {
+    let { containerEl } = this;
 
-    setToggle({
-      k: "thumbnailPlaceholder",
-      name: "Placeholder in favor of full player",
-      desc: (descEl) => {
-        descEl.appendText(
-          "If enabled, thumbnail placeholder will be used in favor of full player when page loads",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Works with for Youtube/Vimeo/Bilibili embeds");
-        descEl.createEl("br");
-        descEl.appendText(
-          "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Restart the app to take effects");
-      },
-    });
+    containerEl.createEl("h2", { text: "Note Taking" });
+
+    new Setting(containerEl)
+      .setName("Timestamp Template")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("The template used to insert timestamps.");
+          descEl.createEl("br");
+          descEl.appendText("Supported placeholders: {{TIMESTAMP}}");
+        }),
+      )
+      .addTextArea((text) => {
+        const onChange = async (value: string) => {
+          this.plugin.settings.timestampTemplate = value;
+          await this.plugin.saveSettings();
+        };
+        text
+          .setValue(this.plugin.settings.timestampTemplate)
+          .onChange(debounce(onChange, 500, true));
+        text.inputEl.rows = 5;
+        text.inputEl.cols = 20;
+      });
   }
   ytb(): void {
     let { containerEl } = this;
