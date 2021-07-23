@@ -68,7 +68,19 @@ export const getEmbedProcessor = (
         else newEl = await getRealPlayer();
       } else newEl = await setPlyr();
 
-      if (newEl) el.replaceWith(newEl);
+      if (newEl) {
+        const width = el.getAttr("width");
+        if (width) {
+          newEl.style.width = width + "px";
+          newEl.style.minWidth = "0px";
+        }
+        const height = el.getAttr("height");
+        if (height) {
+          newEl.style.height = height + "px";
+          newEl.style.minHeight = "0px";
+        }
+        el.replaceWith(newEl);
+      }
     });
   };
 };
