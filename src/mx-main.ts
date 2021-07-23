@@ -33,6 +33,10 @@ export default class MediaExtended extends Plugin {
     await this.loadSettings();
 
     document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
+    document.documentElement.style.setProperty(
+      "--plyr-min-width",
+      this.settings.embedMinWidth,
+    );
 
     this.addSettingTab(new MESettingTab(this.app, this));
 

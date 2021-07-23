@@ -26,7 +26,7 @@ export const getEmbedProcessor = (
 
       let newEl: HTMLDivElement | null = null;
       const ratioSetup = (player: Plyr) =>
-        setRatio(player, plugin.settings.embedHeight);
+        setRatio(player, plugin.settings.embedMaxHeight);
       /**
        * @param placeholder play immediately
        */
@@ -52,7 +52,7 @@ export const getEmbedProcessor = (
         const {
           thumbnailPlaceholder: placeholder,
           interalBiliPlayback: biliEnabled,
-          embedHeight: height,
+          embedMaxHeight: height,
         } = plugin.settings;
         const shouldIframe =
           info.host === Host.bili && (!isAvailable(plugin.app) || !biliEnabled);

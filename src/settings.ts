@@ -14,7 +14,8 @@ export interface MxSettings {
   thumbnailPlaceholder: boolean;
   useYoutubeControls: boolean;
   interalBiliPlayback: boolean;
-  embedHeight: string;
+  embedMaxHeight: string;
+  embedMinWidth: string;
   hideYtbRecomm: boolean;
   plyrControls: Record<PlyrControls, boolean>;
 }
@@ -26,7 +27,8 @@ export const DEFAULT_SETTINGS: MxSettings = {
   thumbnailPlaceholder: false,
   useYoutubeControls: false,
   interalBiliPlayback: true,
-  embedHeight: "30vh",
+  embedMaxHeight: "30vh",
+  embedMinWidth: "400px",
   hideYtbRecomm: false,
   plyrControls: {
     restart: false, // Restart playback
@@ -169,18 +171,40 @@ export class MESettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Maximum Player Height for Embeds")
-      .setDesc("Reload preview to take effects")
+      .setDesc("Reload app to take effects")
       .addText((text) => {
         const save = debounce(
           async (value: string) => {
-            this.plugin.settings.embedHeight = value;
+            this.plugin.settings.embedMaxHeight = value;
             await this.plugin.saveSettings();
           },
           500,
           true,
         );
         text
-          .setValue(this.plugin.settings.embedHeight)
+          .setValue(this.plugin.settings.embedMaxHeight)
+          .onChange(async (value: string) => {
+            text.inputEl.toggleClass("incorrect", !isCssValue(value));
+            if (isCssValue(value)) save(value);
+          });
+      });
+    new Setting(containerEl)
+      .setName("Minimum Player Width for Embeds")
+      .addText((text) => {
+        const save = debounce(
+          async (value: string) => {
+            this.plugin.settings.embedMinWidth = value;
+            document.documentElement.style.setProperty(
+              "--plyr-min-width",
+              value,
+            );
+            await this.plugin.saveSettings();
+          },
+          500,
+          true,
+        );
+        text
+          .setValue(this.plugin.settings.embedMinWidth)
           .onChange(async (value: string) => {
             text.inputEl.toggleClass("incorrect", !isCssValue(value));
             if (isCssValue(value)) save(value);
