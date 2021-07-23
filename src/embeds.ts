@@ -16,7 +16,9 @@ export const getEmbedProcessor = (
   type: "internal" | "external",
 ): MarkdownPostProcessor => {
   const selector =
-    type === "internal" ? "span.internal-embed" : "img[referrerpolicy]";
+    type === "internal"
+      ? "span.internal-embed, div.internal-embed"
+      : "img[referrerpolicy]";
   return (secEl, ctx) => {
     secEl.querySelectorAll(selector).forEach(async (el) => {
       const info = await resolveInfo(el, type, plugin.app, ctx);
