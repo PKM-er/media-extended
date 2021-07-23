@@ -98,10 +98,25 @@ export class MediaView extends ItemView {
   getState(): any {
     let state = super.getState();
     state.info = { ...this.info, trackInfo: undefined };
+    state.currentTime = this.core ? this.core.player.currentTime : 0;
     return state;
   }
   async setState(state: any, result: ViewStateResult): Promise<void> {
     let info = state.info as mediaInfo | null;
+    const currentTime = state.currentTime as number;
+    const resumeProgress = () => {
+      if (currentTime)
+        window.setTimeout(() => {
+          if (this.core) {
+            const { player } = this.core;
+            player.once("playing", () => {
+              player.currentTime = currentTime;
+              player.pause();
+            });
+            player.play();
+          } else console.error("fail to set currentTime: media view empty");
+        }, 1e3);
+    };
     try {
       if (!info) {
         await this.setInfo(info);
@@ -109,15 +124,18 @@ export class MediaView extends ItemView {
         info.src = new URL(info.src as any);
         info.iframe = new URL(info.iframe as any);
         await this.setInfo(info);
+        resumeProgress();
       } else if (isDirect(info)) {
         info.src = new URL(info.src as any);
         await this.setInfo(info);
+        resumeProgress();
       } else if (isInternal(info)) {
         await this.setInfo({
           ...info,
           updateTrackInfo,
           getSrcFile,
         });
+        resumeProgress();
       } else assertNever(info);
     } catch (e) {
       console.error(e);
