@@ -1,5 +1,7 @@
+import "dashjs/dist/dash.all.debug";
+
 import assertNever from "assert-never";
-import dashjs from "dashjs";
+import type dashjs from "dashjs";
 import { Vault } from "obsidian";
 import Plyr from "plyr";
 import { parse } from "query-string";
@@ -194,6 +196,7 @@ export const getPlyr = (
   const player = new Plyr(playerEl, options);
 
   if (isHost(info) && info.host === Host.bili) {
+    // @ts-ignore
     const dash = dashjs.MediaPlayer().create();
     const src =
       `http://localhost:${getPort(app)}/geturl/` +
