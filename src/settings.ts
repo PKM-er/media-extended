@@ -19,6 +19,7 @@ export interface MxSettings {
   hideYtbRecomm: boolean;
   plyrControls: Record<PlyrControls, boolean>;
   timestampTemplate: string;
+  hideEmbedControls: boolean;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -47,6 +48,7 @@ export const DEFAULT_SETTINGS: MxSettings = {
     fullscreen: true, // Toggle fullscreen
   },
   timestampTemplate: "\n{{TIMESTAMP}}\n",
+  hideEmbedControls: false,
 };
 
 export const recToPlyrControls = (rec: Record<PlyrControls, boolean>) =>
@@ -173,6 +175,21 @@ export class MESettingTab extends PluginSettingTab {
         descEl.createEl("br");
         descEl.appendText(
           "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
+        );
+        descEl.createEl("br");
+        descEl.appendText("Restart the app to take effects");
+      },
+    });
+    setToggle({
+      k: "hideEmbedControls",
+      name: "Hide Embed Controls By Default",
+      desc: (descEl) => {
+        descEl.appendText(
+          "If enabled, embeds are rendered similar to images with all controls hidden, click on embeds to play/pause",
+        );
+        descEl.createEl("br");
+        descEl.appendText(
+          "You can still enable controls manually by append #controls to link",
         );
         descEl.createEl("br");
         descEl.appendText("Restart the app to take effects");

@@ -8,7 +8,7 @@ import { isAvailable } from "./modules/bili-bridge";
 import { setupIFrame } from "./modules/iframe";
 import { Host, isHost, isInternal, resolveInfo } from "./modules/media-info";
 import { setupPlaceholder } from "./modules/placeholder";
-import { getContainer, getPlyr } from "./modules/plyr-setup";
+import { getContainer, getPlyr, getSetupTool } from "./modules/plyr-setup";
 import { MediaResource } from "./modules/subtitle";
 
 export const getEmbedProcessor = (
@@ -23,6 +23,7 @@ export const getEmbedProcessor = (
     secEl.querySelectorAll(selector).forEach(async (el) => {
       const info = await resolveInfo(el, type, plugin.app, ctx);
       if (!info) return;
+      const { is } = getSetupTool(info.hash);
 
       let newEl: HTMLDivElement | null = null;
       const ratioSetup = (player: Plyr) =>
@@ -36,7 +37,11 @@ export const getEmbedProcessor = (
           const trackInfo = await info.updateTrackInfo(plugin.app.vault);
           if (trackInfo) objectUrls = trackInfo.objUrls;
         }
-        const player = getPlyr(info, plugin);
+        const hideControls =
+          plugin.settings.hideEmbedControls && !is("controls")
+            ? { controls: ["play-large"] }
+            : undefined;
+        const player = getPlyr(info, plugin, hideControls);
         ratioSetup(player);
         if (placeholder)
           player.once("ready", function (evt) {

@@ -44,7 +44,7 @@ export const isHTMLMediaEl_TF = (
 };
 
 /** Player Properties that can be controlled by hash */
-type PlayerProperties = "loop" | "muted" | "autoplay";
+type PlayerProperties = "loop" | "muted" | "autoplay" | "controls";
 
 type setupTool = {
   timeSpan: TimeSpan | null;
@@ -64,6 +64,7 @@ export const getSetupTool = (hash: string | null): setupTool => {
     ["loop", "loop"],
     ["mute", "muted"],
     ["play", "autoplay"],
+    ["controls", "controls"],
   ]);
 
   return {
@@ -80,7 +81,10 @@ export const getSetupTool = (hash: string | null): setupTool => {
     },
     setHashOpt: (player) =>
       hashOpts.forEach((key, query) => {
-        if (getQuery(query)) player[key] = true;
+        if (key === "controls") {
+          if (player instanceof HTMLMediaElement && getQuery(query))
+            player[key] = true;
+        } else if (getQuery(query)) player[key] = true;
       }),
   };
 };
