@@ -20,6 +20,12 @@ This plugin introduce some new features that enhance media (video/audio) playbac
 
 Go to [Media Extended Wiki](https://github.com/aidenlx/media-extended/wiki) for more details
 
+***
+
+Note: for bilibili users, [bilibili plugin](https://github.com/aidenlx/mx-bili-plugin) is required for advanced features from v2.9.0
+
+注意：v2.9.0开始，bilibili用户需要安装[bilibili plugin](https://github.com/aidenlx/mx-bili-plugin)以启用`高级bilibili功能`
+
 ## Compatibility
 
 The required API feature is only available for Obsidian v0.12.2+.
