@@ -95,27 +95,37 @@ const setRatio = (player: Plyr, maxHeight: string) => {
 
   const container = getContainer(player);
   // @ts-ignore
-  if (player.isVideo) {
-    if (player.isHTML5) {
-      container.style.height = maxHeight;
-      player.once("canplay", () => {
-        if (!player.ratio) {
-          console.warn("no ratio", player);
-          return;
-        }
-        const [w, h] = player.ratio.split(":");
+  if (!player.isVideo) return;
+
+  if (player.isHTML5) {
+    container.style.height = maxHeight;
+    player.once("canplay", () => {
+      const setup = (ratio: string) => {
+        const [w, h] = ratio.split(":");
         if (!Number.isInteger(+w) || !Number.isInteger(+h)) {
-          console.error("invaild ratio", player.ratio);
+          console.error("invaild ratio", ratio);
           return;
         }
         // @ts-ignore
         container.style.height = null;
         setRatioWidth(container, maxHeight, +w / +h);
-      });
-    } else {
-      player.once("ready", () => {
-        setRatioWidth(container, maxHeight, 16 / 9);
-      });
-    }
+      };
+      let count = 0;
+      const interval = window.setInterval(() => {
+        if (!player.ratio) {
+          if (count > 5) {
+            console.warn("no ratio", player);
+            window.clearInterval(interval);
+          } else count++;
+        } else {
+          window.clearInterval(interval);
+          setup(player.ratio);
+        }
+      }, 200);
+    });
+  } else {
+    player.once("ready", () => {
+      setRatioWidth(container, maxHeight, 16 / 9);
+    });
   }
 };
