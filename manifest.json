@@ -3,7 +3,7 @@
   "name": "Media Extended",
   "version": "2.8.1",
   "minAppVersion": "0.12.2",
-  "description": "Improve media (video/audio) playing in Obsidian",
+  "description": "Media(Video/Audio) Playback Enhancement for Obsidian.md",
   "author": "AidenLx",
   "authorUrl": "https://github.com/AidenLx/",
   "isDesktopOnly": true
