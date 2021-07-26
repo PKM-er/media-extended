@@ -1,3 +1,32 @@
+# [2.9.0](https://github.com/aidenlx/media-extended/compare/2.8.1...2.9.0) (2021-07-26)
+
+
+### Bug Fixes
+
+* disable cm5 link click override on mobile ([4f68289](https://github.com/aidenlx/media-extended/commit/4f6828917dace971d859a66e555711687124e33c))
+* fix 9:16 video not in center ([982cb0f](https://github.com/aidenlx/media-extended/commit/982cb0f141224908496d1de0c20a946d6bd61fbe))
+* fix audio player height problem ([f87bba1](https://github.com/aidenlx/media-extended/commit/f87bba1afece1859854d134cb9a7f3849fa1316e))
+* fix bili poster size ([1cb27d4](https://github.com/aidenlx/media-extended/commit/1cb27d4f1dc1301129f286a7babc391ff0f12153))
+* fix link open blank media view when internal bili disabled ([00db550](https://github.com/aidenlx/media-extended/commit/00db55020bc219453edb4bf57209a17bda693a0d))
+* fix local video sometimes fail to get ratio ([aa7b34c](https://github.com/aidenlx/media-extended/commit/aa7b34cf3cfdac8ee8f28bcb83b293e3b7f9035b))
+* fix placeholder size; remove placeholder from bili videos ([b3db796](https://github.com/aidenlx/media-extended/commit/b3db796ba343c078d0592c30e373db5797a77bbf))
+* move bili video support to aidenlx/mx-bili-plugin ([1607de0](https://github.com/aidenlx/media-extended/commit/1607de0f41a6aabffea93be9392e315d5c67d503))
+
+
+### Features
+
+* add inline size control for media embeds ([0328980](https://github.com/aidenlx/media-extended/commit/03289806e6f420708fe97d87ea56fb3b6010c4b7)), closes [#11](https://github.com/aidenlx/media-extended/issues/11)
+* add min-width setting for embed ([53de1e7](https://github.com/aidenlx/media-extended/commit/53de1e7799b4a3397d38eeeb4c2dd1f2bf6ac44b)), closes [#50](https://github.com/aidenlx/media-extended/issues/50)
+* add open media link command and button in view ([f34b55b](https://github.com/aidenlx/media-extended/commit/f34b55b4d8c9c11ece39418dce4ec2e7ea13fafd))
+* add option to disable controls on embeds by default ([c0da866](https://github.com/aidenlx/media-extended/commit/c0da866b9e4f7786caa14992da087a7b77a61b7c))
+* add setting for embed height; adjust default settings ([0cb7462](https://github.com/aidenlx/media-extended/commit/0cb7462fa5d530ba9499c2c1e1b814428e30a7b8))
+* add setting to enable blur on pause for youtube videos ([d60d131](https://github.com/aidenlx/media-extended/commit/d60d131f2ade61d2861befe9c268060446fb8de9)), closes [#40](https://github.com/aidenlx/media-extended/issues/40)
+* add setting to show/hide plyr controls ([bd87725](https://github.com/aidenlx/media-extended/commit/bd87725182cca5e4436149a4394893f1eeb83b3c)), closes [#49](https://github.com/aidenlx/media-extended/issues/49)
+* add support for markdown-favor internal embeds ([b351cda](https://github.com/aidenlx/media-extended/commit/b351cda57d932b9925c74b8babf744a5888f70d3))
+* media view can now resume progress when vault reopens ([fc54c00](https://github.com/aidenlx/media-extended/commit/fc54c00189ce86d9ef64e22b8d5a673570359c7f))
+* **media-view:** add empty page; state of opened view is saved ([f7a0b15](https://github.com/aidenlx/media-extended/commit/f7a0b15230c44717c4e22aa47a37c8f5be5ef418)), closes [#42](https://github.com/aidenlx/media-extended/issues/42)
+* timestamp template support ([a31fc02](https://github.com/aidenlx/media-extended/commit/a31fc0285b3a7492023573874dea45e22785d27f)), closes [#32](https://github.com/aidenlx/media-extended/issues/32)
+
 ## [2.8.1](https://github.com/aidenlx/media-extended/compare/2.8.0...2.8.1) (2021-07-17)
 
 # [2.8.0](https://github.com/aidenlx/media-extended/compare/2.7.2...2.8.0) (2021-07-17)
