@@ -150,7 +150,7 @@ export class MESettingTab extends PluginSettingTab {
         descEl.appendText("Timestamps and fragments are also available");
         descEl.createEl("br");
         descEl.appendText(
-          "Support direct file links (local/remote) and videos from video hosts (Youtube, Bilibili...)",
+          "Support direct file links (local/remote) and videos from video hosts (Youtube, bilibili...)",
         );
         descEl.createEl("br");
         descEl.appendText("Restart the app to take effects");
@@ -171,7 +171,7 @@ export class MESettingTab extends PluginSettingTab {
           "If enabled, thumbnail placeholder will be used in favor of full player when page loads",
         );
         descEl.createEl("br");
-        descEl.appendText("Works with for Youtube/Vimeo/Bilibili embeds");
+        descEl.appendText("Works with for Youtube/Vimeo/bilibili embeds");
         descEl.createEl("br");
         descEl.appendText(
           "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
@@ -310,10 +310,10 @@ export class MESettingTab extends PluginSettingTab {
   bili(): void {
     let { containerEl } = this;
 
-    containerEl.createEl("h2", { text: "Bilibili" });
+    containerEl.createEl("h2", { text: "bilibili" });
 
     const internalBili = new Setting(containerEl)
-      .setName("高级BiliBili支持")
+      .setName("高级bilibili支持")
       .setDesc(
         createFragment((desc) => {
           desc.appendText(
