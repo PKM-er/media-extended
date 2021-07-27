@@ -156,8 +156,10 @@ export class MediaView extends ItemView {
       // @ts-ignore
       // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
       open(next) {
-        return function (this: any, view) {
-          if (view instanceof MediaView) return next.call(this, view);
+        return function (this: WorkspaceLeaf, view) {
+          if (this.group) {
+            if (view instanceof MediaView) return next.call(this, view);
+          } else return next.call(this, view);
         };
       },
     });
