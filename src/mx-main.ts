@@ -1,11 +1,13 @@
 import "plyr/dist/plyr.css";
 import "./main.css";
 
+import assertNever from "assert-never";
 import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
+import { acceptedExt } from "./modules/media-info";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -64,7 +66,8 @@ export default class MediaExtended extends Plugin {
       });
     }
 
-    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
+    this.registerExtensions();
+
     this.addCommand({
       id: "get-timestamp",
       name: "Get timestamp from player",
@@ -96,7 +99,38 @@ export default class MediaExtended extends Plugin {
     });
   }
 
-  // onunload() {
-  //   console.log("unloading media-extended");
-  // }
+  registerExtensions() {
+    const exts = getExts();
+    this.app.viewRegistry.unregisterExtensions(exts);
+    this.app.viewRegistry.registerViewWithExtensions(
+      exts,
+      MEDIA_VIEW_TYPE,
+      (leaf) => new MediaView(leaf, this),
+    );
+  }
+
+  unregisterExtensions() {
+    this.app.viewRegistry.unregisterExtensions(getExts());
+    for (const [type, exts] of acceptedExt) {
+      switch (type) {
+        case "audio":
+        case "video":
+          this.app.viewRegistry.registerExtensions(exts, type);
+          break;
+        case "media":
+          this.app.viewRegistry.registerExtensions(exts, "video");
+          break;
+        default:
+          assertNever(type);
+      }
+    }
+  }
+
+  onunload() {
+    console.log("unloading media-extended");
+    this.unregisterExtensions();
+  }
 }
+
+const getExts = () =>
+  [...acceptedExt.values()].reduce((acc, val) => acc.concat(val), []);

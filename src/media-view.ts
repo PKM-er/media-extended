@@ -4,10 +4,12 @@ import { around } from "monkey-around";
 import MediaExtended from "mx-main";
 import {
   EditorPosition,
+  FileView,
   ItemView,
   MarkdownView,
   Modal,
   Notice,
+  TFile,
   ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
@@ -16,7 +18,7 @@ import { mainpart } from "./misc";
 import {
   getLink,
   getSrcFile,
-  getVideoInfo,
+  getVideoInfo as getMediaInfo,
   Host,
   isDirect,
   isHost,
@@ -30,13 +32,13 @@ import {
   getSetupTool,
   Plyr_TF,
 } from "./modules/plyr-setup";
-import { getSubtitleTracks } from "./modules/subtitle";
 import { TimeSpan } from "./modules/temporal-frag";
 
 export const MEDIA_VIEW_TYPE = "media-view";
 
-export class MediaView extends ItemView {
+export class MediaView extends FileView {
   plugin: MediaExtended;
+  allowNoFile = true;
 
   core: {
     info: mediaInfo;
@@ -51,6 +53,34 @@ export class MediaView extends ItemView {
   playerEl: HTMLDivElement;
   private controls: Map<string, HTMLElement>;
 
+  async onLoadFile(file: TFile): Promise<void> {
+    const info = await getMediaInfo(file, "");
+    if (info) {
+      this.setInfo(info);
+    } else new Notice("Fail to open file");
+  }
+
+  async onRename(file: TFile) {
+    if (this.file && this.file === file && this.core) {
+      const { info } = this.core;
+      const { currentTime } = this.core.player;
+      await this.setInfo(await getMediaInfo(file, info.hash));
+      if (this.player) {
+        // await this.player.play();
+        this.player.once("canplay", function () {
+          window.setTimeout(() => (this.currentTime = currentTime), 200);
+          // this.pause();
+        });
+      }
+    }
+    super.onRename(file);
+  }
+
+  onDelete(file: TFile) {
+    super.onDelete(file);
+    if (this.file && this.file === file) this.leaf.detach();
+  }
+
   get info(): mediaInfo | null {
     return this.core?.info ?? null;
   }
@@ -58,11 +88,17 @@ export class MediaView extends ItemView {
     if (info === null) {
       this.showEmpty();
       if (info) this.unloadCore();
+      // @ts-ignore
+      this.file = null;
     } else if (!this.isEqual(info)) {
       this.showEmpty(true);
       if (info) this.unloadCore();
 
-      if (isInternal(info)) await info.updateTrackInfo(this.app.vault);
+      if (isInternal(info)) {
+        this.file = info.getSrcFile(this.app.vault);
+        await info.updateTrackInfo(this.app.vault);
+      }
+
       const player = getPlyr(info, this.plugin);
       this.playerEl.appendChild(getContainer(player));
 
@@ -102,7 +138,7 @@ export class MediaView extends ItemView {
     return state;
   }
   async setState(state: any, result: ViewStateResult): Promise<void> {
-    let info = state.info as mediaInfo | null;
+    let info = state.info as mediaInfo | null | undefined;
     const currentTime = state.currentTime as number;
     const resumeProgress = () => {
       if (currentTime)
@@ -119,7 +155,7 @@ export class MediaView extends ItemView {
     };
     try {
       if (!info) {
-        await this.setInfo(info);
+        if (info === null) await this.setInfo(info);
       } else if (isHost(info)) {
         info.src = new URL(info.src as any);
         info.iframe = new URL(info.iframe as any);
@@ -253,9 +289,14 @@ export class MediaView extends ItemView {
     return MEDIA_VIEW_TYPE;
   }
   getDisplayText() {
+    const getName = (filename: string) => {
+      const arr = filename.split(".");
+      arr.pop();
+      return arr.join(".");
+    };
     if (this.core) {
       const { info, player } = this.core;
-      if (isInternal(info) || isDirect(info)) return info.filename;
+      if (isInternal(info) || isDirect(info)) return getName(info.filename);
       else {
         if (info.host === Host.youtube || info.host === Host.vimeo) {
           // @ts-ignore
@@ -387,7 +428,7 @@ export class PromptModal extends Modal {
     modalEl.createDiv({ cls: "modal-button-container" }, (div) => {
       div.createEl("button", { cls: "mod-cta", text: "Open" }, (el) =>
         el.onClickEvent(async () => {
-          const result = await getVideoInfo(input.value);
+          const result = await getMediaInfo(input.value);
           if (result) {
             if (this.view) {
               await this.view.setInfo(result);

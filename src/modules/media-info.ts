@@ -16,7 +16,7 @@ export enum Host {
 }
 
 type mediaType = "audio" | "video" | "media";
-const acceptedExt: Map<mediaType, string[]> = new Map([
+export const acceptedExt: Map<mediaType, string[]> = new Map([
   ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
   ["video", ["mp4", "ogv"]],
   ["media", ["webm"]],
