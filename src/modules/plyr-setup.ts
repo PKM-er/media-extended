@@ -200,12 +200,14 @@ export const getPlyr = (
   const player = new Plyr(playerEl, options);
 
   if (isHost(info) && info.host === Host.bili) {
+    const vid = info.iframe.searchParams.has("aid") ? "av" + info.id : info.id;
+    const page = info.src.searchParams.get("p");
     // @ts-ignore
     const dash = dashjs.MediaPlayer().create();
-    const src =
-      `http://localhost:${getPort(app)}/geturl/` +
-      (info.iframe.searchParams.has("aid") ? "av" + info.id : info.id);
-    dash.initialize(playerEl, src, false);
+    const src = new URL("http://localhost/geturl/" + vid);
+    src.port = getPort(app).toString();
+    if (page) src.searchParams.append("page", page);
+    dash.initialize(playerEl, src.toString(), false);
     const fetchBiliPoster = fetchPosterFunc(app);
     const getPoster = async () => {
       const posterUrl = info.iframe.searchParams.has("aid")
