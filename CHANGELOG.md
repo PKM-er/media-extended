@@ -16,11 +16,12 @@
 
 ### Features
 
+* official mobile support
+  * add separate settings of player size controls for mobile ([f903e3a](https://github.com/aidenlx/media-extended/commit/f903e3a5715bfa5522c30f366893f6a5d2c6aed4))
+  * **media-view:** link now respect screen aspect ratio when open new view; add close button for mobile ([7ed695f](https://github.com/aidenlx/media-extended/commit/7ed695f038ae3738a62742a8be1ac208c6e71243))
 * add bilibili page support ([ce2376a](https://github.com/aidenlx/media-extended/commit/ce2376a90cd1be15fff4a20dbf709585e28c1bbc)), closes [#51](https://github.com/aidenlx/media-extended/issues/51)
-* add separate settings of player size controls for mobile ([f903e3a](https://github.com/aidenlx/media-extended/commit/f903e3a5715bfa5522c30f366893f6a5d2c6aed4))
 * allow to open media view from file explorer ([167e06b](https://github.com/aidenlx/media-extended/commit/167e06b8f43dc398cac9466050923e84c8af8a77)), closes [#53](https://github.com/aidenlx/media-extended/issues/53)
 * **media-view:** add speed control to more option menu ([72ad42c](https://github.com/aidenlx/media-extended/commit/72ad42c53778fcf3835f31ed539e32b457c392cc)), closes [#52](https://github.com/aidenlx/media-extended/issues/52)
-* **media-view:** link now respect aspect ratio when open new view; add close button for mobile ([7ed695f](https://github.com/aidenlx/media-extended/commit/7ed695f038ae3738a62742a8be1ac208c6e71243))
 * take timestamp from audio-recorder ([2db1bb6](https://github.com/aidenlx/media-extended/commit/2db1bb692a01b47805cc00968f960d5cdc31b259)), closes [#45](https://github.com/aidenlx/media-extended/issues/45)
 
 # [2.9.0](https://github.com/aidenlx/media-extended/compare/2.8.1...2.9.0) (2021-07-26)

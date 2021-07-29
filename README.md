@@ -11,10 +11,11 @@ This plugin introduce some new features that enhance media (video/audio) playbac
   - [Inline options](https://github.com/aidenlx/media-extended/wiki/Inline-Options) for loop/autoplay/mute/hide controls
   - [Embed/Link for online media](https://github.com/aidenlx/media-extended/wiki/Create-Online-Media-Embed-Link)
   - [Caption/Subtitle support](https://github.com/aidenlx/media-extended/wiki/Caption-Subtitle-Support)
-- Video Notetaking
+- Notetaking
   - [Create timestamp link/media fragment](https://github.com/aidenlx/media-extended/wiki/Restrict-Play-Range)
   - Dedicated media view binded to document to open media links
-  - [Create timestamp with one click](https://github.com/aidenlx/media-extended/wiki/Get-Timestamp)
+  - [Get timestamp from existing media file](https://github.com/aidenlx/media-extended/wiki/Get-Timestamp)
+  - [Take timestamp from audio recorder](https://github.com/aidenlx/media-extended/wiki/Audio-Recorder)
 
 ## How to use
 
