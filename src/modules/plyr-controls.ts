@@ -1,3 +1,5 @@
+import "../style/plyr-controls.css";
+
 import MediaExtended from "../mx-main";
 
 export type PlyrControls =

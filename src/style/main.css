@@ -58,50 +58,7 @@ iframe.bili-iframe {
   height: 100%;
 }
 
-/* hide recommended video in youtube */
-.alx-hide-ytb-recomm .plyr--youtube:not(.yt-controls) iframe {
-  transition: 0.2s filter linear;
-}
-
-.alx-hide-ytb-recomm .plyr--youtube.plyr--paused:not(.yt-controls) iframe {
-  filter: blur(1.5rem);
-}
-
-.alx-hide-ytb-recomm .plyr--youtube.plyr--paused:not(.yt-controls)::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.yt-controls .plyr__poster {
-  display: none;
-}
-
 /** patch slider-thumb */
 .plyr--full-ui input[type="range"]::-webkit-slider-thumb {
   top: 0px;
-}
-
-.plyr-controls-settings input[type="range"]::-webkit-slider-thumb {
-  cursor: inherit;
-}
-
-.plyr-controls-settings.plyr__controls {
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.plyr-controls-settings .plyr__control {
-  margin-bottom: 10px;
-}
-
-.plyr-progress-setting {
-  margin-bottom: 10px;
-}
-
-.plyr-controls-settings button.checked {
-  border: var(--interactive-accent) solid;
 }
