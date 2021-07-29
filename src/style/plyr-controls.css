@@ -19,3 +19,11 @@
   border: var(--interactive-accent) solid;
 }
 
+.plyr-controls-settings button {
+  width: inherit;
+  margin-right: 12px;
+}
+
+.plyr-controls-settings .plyr__time--duration {
+  display: inline-block !important;
+}
