@@ -37,6 +37,9 @@ iframe.bili-iframe {
 .plyr__caption {
   user-select: text;
 }
+.plyr__captions {
+  z-index: 5;
+}
 
 .visuallyhidden:not(:focus):not(:active) {
   position: absolute;
