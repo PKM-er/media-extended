@@ -229,7 +229,7 @@ export class MediaView extends FileView {
     this.controls = this.getControls();
 
     // prevent view from switching to other type when MarkdownView in group change mode
-    around(leaf, {
+    const unload = around(leaf, {
       // @ts-ignore
       // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
       open(next) {
@@ -240,6 +240,7 @@ export class MediaView extends FileView {
         };
       },
     });
+    this.register(unload);
     this.setInfo(info ?? null);
   }
   private getControls() {
