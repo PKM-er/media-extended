@@ -1,3 +1,28 @@
+# [2.10.0](https://github.com/aidenlx/media-extended/compare/2.9.0...2.10.0) (2021-07-29)
+
+
+### Bug Fixes
+
+* **embeds:** fix sometimes fail to get and set up ratio ([fa99d2a](https://github.com/aidenlx/media-extended/commit/fa99d2ad1c991435d7cac5b45e185b0e1cef3391)); increse retrys for ratio setup ([a80fb46](https://github.com/aidenlx/media-extended/commit/a80fb4695772fc7ba36ccb8606609baf21359ca9)), closes [#55](https://github.com/aidenlx/media-extended/issues/55)
+* fix dash not destroyed with plyr instance ([c809fd4](https://github.com/aidenlx/media-extended/commit/c809fd4f575381f1027547d51b5d579526de3722))
+* fix leaf with media view fail to switch view or close when not grouped ([58e25aa](https://github.com/aidenlx/media-extended/commit/58e25aa67f00a999c5cf95e0f91bb010ba981c22))
+* fix subtitle covered by control padding-top ([f342305](https://github.com/aidenlx/media-extended/commit/f342305118bbd8519dd3542d3aa8d3f016e6135b))
+* fix subtitle unable to be selected ([ec38c66](https://github.com/aidenlx/media-extended/commit/ec38c663792a86c4998e3d9f26a8d2eb8d85a0a5))
+* fix trying to set ratio on audio player ([aec5b52](https://github.com/aidenlx/media-extended/commit/aec5b52394ebc772cffd56678fc50158fb6edbf7))
+* **plyr-controls:** fix el style of plyr-controls settings on mobile ([4221e63](https://github.com/aidenlx/media-extended/commit/4221e638d097e95e3a54cbc27ef69583b903fad5))
+* **plyr-controls:** fix plyr-controls not align to center ([4e2b865](https://github.com/aidenlx/media-extended/commit/4e2b865f22f2292e41a9e244b4c4958f1ec1a60d))
+* unload monkey patch ([ec19401](https://github.com/aidenlx/media-extended/commit/ec19401fc17824f04b2f62377b470faeded95a24))
+
+
+### Features
+
+* add bilibili page support ([ce2376a](https://github.com/aidenlx/media-extended/commit/ce2376a90cd1be15fff4a20dbf709585e28c1bbc)), closes [#51](https://github.com/aidenlx/media-extended/issues/51)
+* add separate settings of player size controls for mobile ([f903e3a](https://github.com/aidenlx/media-extended/commit/f903e3a5715bfa5522c30f366893f6a5d2c6aed4))
+* allow to open media view from file explorer ([167e06b](https://github.com/aidenlx/media-extended/commit/167e06b8f43dc398cac9466050923e84c8af8a77)), closes [#53](https://github.com/aidenlx/media-extended/issues/53)
+* **media-view:** add speed control to more option menu ([72ad42c](https://github.com/aidenlx/media-extended/commit/72ad42c53778fcf3835f31ed539e32b457c392cc)), closes [#52](https://github.com/aidenlx/media-extended/issues/52)
+* **media-view:** link now respect aspect ratio when open new view; add close button for mobile ([7ed695f](https://github.com/aidenlx/media-extended/commit/7ed695f038ae3738a62742a8be1ac208c6e71243))
+* take timestamp from audio-recorder ([2db1bb6](https://github.com/aidenlx/media-extended/commit/2db1bb692a01b47805cc00968f960d5cdc31b259)), closes [#45](https://github.com/aidenlx/media-extended/issues/45)
+
 # [2.9.0](https://github.com/aidenlx/media-extended/compare/2.8.1...2.9.0) (2021-07-26)
 
 
