@@ -72,7 +72,7 @@ export class PlyrControlsSetting {
   regularContainer: HTMLDivElement;
   progressContainer: HTMLDivElement;
   get plyrControls() {
-    return this.plugin.settings.plyrControls;
+    return this.plugin.sizeSettings.plyrControls;
   }
 
   constructor(containerEl: HTMLElement, plugin: MediaExtended) {
@@ -96,7 +96,7 @@ export class PlyrControlsSetting {
       if ((id = this.buttonMap.get(button))) {
         const changeTo = !this.plyrControls[id];
         this.plyrControls[id] = changeTo;
-        this.plugin.saveData(this.plugin.settings);
+        this.plugin.saveSettings();
         button.toggleClass("checked", changeTo);
       } else {
         console.error("unknown click target: %o", ev.target);

@@ -191,7 +191,7 @@ export const getPlyr = (
   const ytbOptions = isYtb ? getYtbOptions(timeSpan, useYoutubeControls) : null;
   const defaultPlyrOption: Plyr.Options = {
     invertTime: false,
-    controls: recToPlyrControls(plyrControls),
+    controls: recToPlyrControls(plugin.sizeSettings.plyrControls),
   };
   options = { ...defaultPlyrOption, ...ytbOptions, ...options };
   options.autoplay = is("autoplay");

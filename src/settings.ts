@@ -14,10 +14,13 @@ export interface MxSettings {
   thumbnailPlaceholder: boolean;
   useYoutubeControls: boolean;
   interalBiliPlayback: boolean;
-  embedMaxHeight: string;
-  embedMinWidth: string;
   hideYtbRecomm: boolean;
+  embedMaxHeight: string;
+  embedMaxHeightMobile: string;
+  embedMinWidth: string;
+  embedMinWidthMobile: string;
   plyrControls: Record<PlyrControls, boolean>;
+  plyrControlsMobile: Record<PlyrControls, boolean>;
   timestampTemplate: string;
   hideEmbedControls: boolean;
 }
@@ -29,9 +32,9 @@ export const DEFAULT_SETTINGS: MxSettings = {
   thumbnailPlaceholder: false,
   useYoutubeControls: false,
   interalBiliPlayback: true,
+  hideYtbRecomm: false,
   embedMaxHeight: "30vh",
   embedMinWidth: "400px",
-  hideYtbRecomm: false,
   plyrControls: {
     restart: false, // Restart playback
     rewind: false, // Rewind by the seek time (default 10 seconds)
@@ -47,8 +50,31 @@ export const DEFAULT_SETTINGS: MxSettings = {
     pip: false, // Picture-in-picture (currently Safari only)
     fullscreen: true, // Toggle fullscreen
   },
+  embedMaxHeightMobile: "20vh",
+  embedMinWidthMobile: "200px",
+  plyrControlsMobile: {
+    restart: false, // Restart playback
+    rewind: false, // Rewind by the seek time (default 10 seconds)
+    play: true, // Play/pause playback
+    "fast-forward": false, // Fast forward by the seek time (default 10 seconds)
+    progress: true, // The progress bar and scrubber for playback and buffering
+    "current-time": false, // The current time of playback
+    duration: false, // The full duration of the media
+    mute: false, // Toggle mute
+    volume: true, // Volume control
+    captions: true, // Toggle captions
+    settings: true, // Settings menu
+    pip: false, // Picture-in-picture (currently Safari only)
+    fullscreen: true, // Toggle fullscreen
+  },
   timestampTemplate: "\n{{TIMESTAMP}}\n",
   hideEmbedControls: false,
+};
+
+export type SizeSettings = {
+  embedMaxHeight: string;
+  embedMinWidth: string;
+  plyrControls: Record<PlyrControls, boolean>;
 };
 
 export const recToPlyrControls = (rec: Record<PlyrControls, boolean>) =>
@@ -212,15 +238,13 @@ export class MESettingTab extends PluginSettingTab {
       .setDesc("Reload app to take effects")
       .addText((text) => {
         const save = debounce(
-          async (value: string) => {
-            this.plugin.settings.embedMaxHeight = value;
-            await this.plugin.saveSettings();
-          },
+          async (value: string) =>
+            await this.plugin.setSizeSettings({ embedMaxHeight: value }),
           500,
           true,
         );
         text
-          .setValue(this.plugin.settings.embedMaxHeight)
+          .setValue(this.plugin.sizeSettings.embedMaxHeight)
           .onChange(async (value: string) => {
             text.inputEl.toggleClass("incorrect", !isCssValue(value));
             if (isCssValue(value)) save(value);
@@ -231,18 +255,14 @@ export class MESettingTab extends PluginSettingTab {
       .addText((text) => {
         const save = debounce(
           async (value: string) => {
-            this.plugin.settings.embedMinWidth = value;
-            document.documentElement.style.setProperty(
-              "--plyr-min-width",
-              value,
-            );
-            await this.plugin.saveSettings();
+            this.plugin.setEmbedMinWidth(value);
+            await this.plugin.setSizeSettings({ embedMinWidth: value });
           },
           500,
           true,
         );
         text
-          .setValue(this.plugin.settings.embedMinWidth)
+          .setValue(this.plugin.sizeSettings.embedMinWidth)
           .onChange(async (value: string) => {
             text.inputEl.toggleClass("incorrect", !isCssValue(value));
             if (isCssValue(value)) save(value);

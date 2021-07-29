@@ -1,5 +1,4 @@
 import parseUnit from "@tinyfe/parse-unit";
-import { App } from "obsidian";
 
 export type mutationParam = {
   callback: MutationCallback;

@@ -14,6 +14,7 @@ import {
   hideYtbRecommClass,
   MESettingTab,
   MxSettings,
+  SizeSettings,
 } from "./settings";
 
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
@@ -23,12 +24,52 @@ export default class MediaExtended extends Plugin {
   private cmLinkHandler = getCMLinkHandler(this);
 
   async loadSettings() {
-    Object.assign(this.settings, await this.loadData());
+    this.settings = { ...this.settings, ...(await this.loadData()) };
   }
 
   async saveSettings() {
     await this.saveData(this.settings);
   }
+
+  setEmbedMinWidth = (value?: string) =>
+    document.documentElement.style.setProperty(
+      "--plyr-min-width",
+      value ?? this.sizeSettings.embedMinWidth,
+    );
+  get sizeSettings() {
+    return {
+      embedMaxHeight: this.app.isMobile
+        ? this.settings.embedMaxHeightMobile
+        : this.settings.embedMaxHeight,
+      embedMinWidth: this.app.isMobile
+        ? this.settings.embedMinWidthMobile
+        : this.settings.embedMinWidth,
+      plyrControls: this.app.isMobile
+        ? this.settings.plyrControlsMobile
+        : this.settings.plyrControls,
+    };
+  }
+  setSizeSettings = async (to: Partial<SizeSettings>): Promise<void> => {
+    let save: Partial<MxSettings>;
+    if (this.app.isMobile) {
+      save = {
+        embedMaxHeightMobile: to.embedMaxHeight,
+        embedMinWidthMobile: to.embedMinWidth,
+        plyrControlsMobile: to.plyrControls,
+      };
+    } else {
+      save = to;
+    }
+    const mergeObject = (A: any, B: any) => {
+      let res: any = {};
+      Object.keys({ ...A, ...B }).map((key) => {
+        res[key] = B[key] || A[key];
+      });
+      return res;
+    };
+    this.settings = mergeObject(this.settings, save);
+    await this.saveSettings();
+  };
 
   async onload(): Promise<void> {
     console.log("loading media-extended");
@@ -36,10 +77,7 @@ export default class MediaExtended extends Plugin {
     await this.loadSettings();
 
     document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
-    document.documentElement.style.setProperty(
-      "--plyr-min-width",
-      this.settings.embedMinWidth,
-    );
+    this.setEmbedMinWidth();
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
