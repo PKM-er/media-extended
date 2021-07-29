@@ -110,18 +110,27 @@ const setRatio = (player: Plyr, maxHeight: string) => {
         container.style.height = null;
         setRatioWidth(container, maxHeight, +w / +h);
       };
-      let count = 0;
-      const interval = window.setInterval(() => {
-        if (!player.ratio) {
-          if (count > 5) {
-            console.warn("no ratio", player);
+      const trySetRatio = (repeat: number, timeout: number, fail: Function) => {
+        let count = 0;
+        const interval = window.setInterval(() => {
+          if (!player.ratio) {
+            if (count > repeat) {
+              fail();
+              window.clearInterval(interval);
+            } else count++;
+          } else {
             window.clearInterval(interval);
-          } else count++;
-        } else {
-          window.clearInterval(interval);
-          setup(player.ratio);
-        }
-      }, 200);
+            setup(player.ratio);
+          }
+        }, timeout);
+      };
+      trySetRatio(10, 100, () => {
+        console.log("fail to get ratio within 1s, fallback to 16:9");
+        setup("16:9");
+        trySetRatio(4, 1e3, () =>
+          console.warn("no ratio for video: ", player.source),
+        );
+      });
     });
   } else {
     player.once("ready", () => {
