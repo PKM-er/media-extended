@@ -17,6 +17,16 @@ This plugin introduce some new features that enhance media (video/audio) playbac
   - [Get timestamp from existing media file](https://github.com/aidenlx/media-extended/wiki/Get-Timestamp)
   - [Take timestamp from audio recorder](https://github.com/aidenlx/media-extended/wiki/Audio-Recorder)
 
+## Demo
+
+https://user-images.githubusercontent.com/31102694/118903647-c9d79780-b94a-11eb-8beb-ab507117790f.mp4
+
+https://user-images.githubusercontent.com/31102694/119340113-a3a45580-bcc4-11eb-9098-a27a16e9d6e0.mp4
+
+https://user-images.githubusercontent.com/31102694/118903678-dd82fe00-b94a-11eb-8ef3-7b5044a2bab8.mp4
+
+https://user-images.githubusercontent.com/31102694/127543453-011d13b2-40e4-41e5-861e-3549d19be23f.mp4
+
 ## How to use
 
 Go to [Media Extended Wiki](https://github.com/aidenlx/media-extended/wiki) for more details
