@@ -21,6 +21,7 @@
     "@rollup/plugin-node-resolve": "^13.0.2",
     "@rollup/plugin-typescript": "^8.2.3",
     "@tinyfe/parse-unit": "^0.0.5",
+    "@types/dom-mediacapture-record": "^1.0.10",
     "@types/hh-mm-ss": "^1.2.1",
     "@types/node": "^16.4.0",
     "@typescript-eslint/eslint-plugin": "^4.28.4",

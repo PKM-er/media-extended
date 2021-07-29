@@ -6,6 +6,9 @@ declare module "obsidian" {
     plugins: {
       plugins: Record<string, any>;
     };
+    internalPlugins: {
+      plugins: Record<string, any>;
+    };
     viewRegistry: ViewRegistry;
   }
   interface WorkspaceLeaf {

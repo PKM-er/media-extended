@@ -8,6 +8,7 @@ import { Plugin } from "obsidian";
 import { getEmbedProcessor } from "./embeds";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
+import { setupRec } from "./modules/audio-rec";
 import { acceptedExt } from "./modules/media-info";
 import {
   DEFAULT_SETTINGS,
@@ -20,6 +21,8 @@ import {
 const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
+
+  recStartTime: number | null = null;
 
   private cmLinkHandler = getCMLinkHandler(this);
 
@@ -75,6 +78,8 @@ export default class MediaExtended extends Plugin {
     console.log("loading media-extended");
 
     await this.loadSettings();
+
+    setupRec.call(this);
 
     document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
     this.setEmbedMinWidth();
