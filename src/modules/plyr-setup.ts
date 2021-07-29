@@ -225,7 +225,10 @@ export const getPlyr = (
   setPlayerTF(player);
   if (isInternal(info) && info.subtitles.length > 0) {
     // hide poster to make subtitle selectable
-    playerEl.querySelector("div.plyr__poster")?.addClass("visuallyhidden");
+    const posterEl: HTMLElement | undefined = (player.elements as any).poster;
+    if (posterEl) posterEl.addClass("visuallyhidden");
+    else console.error("unable to find posterEl from", player.elements);
+
     player.once("ready", () => player.toggleCaptions());
   }
 

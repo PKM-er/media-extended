@@ -34,6 +34,9 @@ iframe.bili-iframe {
 .plyr__caption::selection {
   background-color: gray;
 }
+.plyr__caption {
+  user-select: text;
+}
 
 .visuallyhidden:not(:focus):not(:active) {
   position: absolute;
