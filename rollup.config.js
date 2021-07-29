@@ -1,6 +1,7 @@
 import commonjs from "@rollup/plugin-commonjs";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
+import copy from "rollup-plugin-copy";
 import css from "rollup-plugin-import-css";
 
 const isProd = process.env.BUILD === "production";
@@ -14,7 +15,7 @@ if you want to view the source visit the plugins github repository
 export default {
   input: "src/mx-main.ts",
   output: {
-    file: "main.js",
+    file: "build/main.js",
     sourcemap: "inline",
     sourcemapExcludeSources: isProd,
     format: "cjs",
@@ -27,7 +28,10 @@ export default {
     nodeResolve({ browser: true, preferBuiltins: false }),
     commonjs(),
     css({
-      output: "styles.css",
+      output: "build/styles.css",
+    }),
+    copy({
+      targets: [{ src: "manifest.json", dest: "build" }],
     }),
   ],
 };
