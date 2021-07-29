@@ -112,7 +112,10 @@ const setRatio = (player: Plyr, maxHeight: string) => {
       const trySetRatio = (repeat: number, timeout: number, fail: Function) => {
         let count = 0;
         const interval = window.setInterval(() => {
-          if (!player.ratio) {
+          // @ts-ignore
+          if (!player.isVideo) {
+            window.clearInterval(interval);
+          } else if (!player.ratio) {
             if (count > repeat) {
               fail();
               window.clearInterval(interval);
