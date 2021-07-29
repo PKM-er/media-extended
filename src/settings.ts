@@ -231,7 +231,10 @@ export class MESettingTab extends PluginSettingTab {
           descEl.appendText("Restart the app to take effects");
         }),
       );
-    new PlyrControlsSetting(plyrControls.settingEl.createDiv(), this.plugin);
+    new PlyrControlsSetting(
+      plyrControls.settingEl.createDiv({ cls: "plyr-ctrls-container" }),
+      this.plugin,
+    );
 
     new Setting(containerEl)
       .setName("Maximum Player Height for Embeds")

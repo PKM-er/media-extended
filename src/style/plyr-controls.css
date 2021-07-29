@@ -27,3 +27,7 @@
 .plyr-controls-settings .plyr__time--duration {
   display: inline-block !important;
 }
+
+.plyr-ctrls-container {
+  width: 100%;
+}
