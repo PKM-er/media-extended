@@ -33,4 +33,8 @@ declare module "obsidian" {
     onDelete(file: TFile): void;
     onRename(file: TFile): void;
   }
+
+  interface WorkspaceSplit {
+    containerEl: HTMLElement;
+  }
 }

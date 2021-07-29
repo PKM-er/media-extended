@@ -9,6 +9,7 @@ import {
   MarkdownView,
   Modal,
   Notice,
+  SplitDirection,
   TFile,
   ViewStateResult,
   WorkspaceLeaf,
@@ -186,6 +187,11 @@ export class MediaView extends FileView {
     this.plugin = plugin;
     this.emptyEl = this.setEmpty();
     this.playerEl = this.contentEl.createDiv({ cls: "media-view-player" });
+
+    // add close button for mobile
+    if (this.app.isMobile)
+      this.addAction("cross", "Close", () => this.leaf.detach());
+
     this.controls = this.getControls();
     // prevent view from switching to other type when MarkdownView in group change mode
     around(leaf, {
@@ -460,13 +466,29 @@ export const openNewView = (
   leaf: WorkspaceLeaf,
   plugin: MediaExtended,
 ) => {
+  const { workspace } = plugin.app;
   if (!(leaf.view instanceof MarkdownView)) {
     new Notice(
       "No MarkdownView active, open new markdown file or click on opened md file",
     );
     return;
   }
-  const newLeaf = plugin.app.workspace.createLeafBySplit(leaf);
+  const getDirection = (): SplitDirection => {
+    const vw = workspace.rootSplit.containerEl?.clientWidth;
+    const vh = workspace.rootSplit.containerEl?.clientHeight;
+    if (vh && vw) {
+      if (vh < vw) return "vertical";
+      else return "horizontal";
+    } else {
+      console.error(
+        "no containerEl for rootSplit, fallback to horizontal",
+        workspace.rootSplit,
+      );
+      return "horizontal";
+    }
+  };
+
+  const newLeaf = workspace.createLeafBySplit(leaf, getDirection());
   leaf.setGroupMember(newLeaf);
   const view = new MediaView(newLeaf, plugin, info);
   newLeaf.open(view);
