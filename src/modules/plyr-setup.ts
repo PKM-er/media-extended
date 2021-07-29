@@ -2,6 +2,7 @@ import "dashjs/dist/dash.all.debug";
 
 import assertNever from "assert-never";
 import type dashjs from "dashjs";
+import { around } from "monkey-around";
 import { Vault } from "obsidian";
 import Plyr from "plyr";
 import { parse } from "query-string";
@@ -208,6 +209,15 @@ export const getPlyr = (
     src.port = getPort(app).toString();
     if (page) src.searchParams.append("page", page);
     dash.initialize(playerEl, src.toString(), false);
+    around(player, {
+      // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+      destroy(next) {
+        return function (this: any) {
+          dash.destroy();
+          next.call(this);
+        };
+      },
+    });
     const fetchBiliPoster = fetchPosterFunc(app);
     const getPoster = async () => {
       const posterUrl = info.iframe.searchParams.has("aid")
