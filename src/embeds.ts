@@ -38,11 +38,10 @@ export const getEmbedProcessor = (
           const trackInfo = await info.updateTrackInfo(plugin.app.vault);
           if (trackInfo) objectUrls = trackInfo.objUrls;
         }
-        const hideControls =
-          plugin.settings.hideEmbedControls && !is("controls")
-            ? { controls: ["play-large"] }
-            : undefined;
-        const player = getPlyr(info, plugin, hideControls);
+        const player = getPlyr(info, plugin, (opts) => {
+          if (plugin.settings.hideEmbedControls && !is("controls"))
+            opts.controls = ["play-large"];
+        });
         ratioSetup(player);
         if (placeholder)
           player.once("ready", function (evt) {

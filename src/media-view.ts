@@ -3,9 +3,11 @@ import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
 import MediaExtended from "mx-main";
 import {
+  App,
   EditorPosition,
   FileView,
   MarkdownView,
+  Menu,
   Modal,
   Notice,
   SplitDirection,
@@ -106,6 +108,7 @@ export class MediaView extends FileView {
       else this.hideControl("pip");
 
       this.core = { info, player };
+
       // update display text
       this.load();
       // @ts-ignore
@@ -181,6 +184,39 @@ export class MediaView extends FileView {
     await super.setState(state, result);
   }
 
+  onMoreOptionsMenu(menu: Menu): void {
+    const getSpeedMenu = (app: App) => {
+      const map = new Map<string, string>([
+        ["0.5×", "0.5"],
+        ["0.75×", "0.75"],
+        ["Normal", "1"],
+        ["1.25×", "1.25"],
+        ["1.5×", "1.5"],
+        ["1.75×", "1.75"],
+        ["2×", "2"],
+      ]);
+      const menu = new Menu(app);
+      for (const [text, value] of map) {
+        menu.addItem((item) =>
+          item
+            .setTitle(text)
+            .setActive(Boolean(this.player && this.player.speed === +value))
+            .onClick(() => {
+              if (this.player) this.player.speed = +value;
+            }),
+        );
+      }
+      return menu;
+    };
+    menu.addItem((item) =>
+      item
+        .setTitle("Speed Control")
+        .onClick((evt) => getSpeedMenu(this.app).showAtMouseEvent(evt)),
+    );
+    menu.addSeparator();
+    super.onMoreOptionsMenu(menu);
+  }
+
   constructor(leaf: WorkspaceLeaf, plugin: MediaExtended, info?: mediaInfo) {
     super(leaf);
     this.plugin = plugin;
@@ -190,8 +226,8 @@ export class MediaView extends FileView {
     // add close button for mobile
     if (this.app.isMobile)
       this.addAction("cross", "Close", () => this.leaf.detach());
-
     this.controls = this.getControls();
+
     // prevent view from switching to other type when MarkdownView in group change mode
     around(leaf, {
       // @ts-ignore

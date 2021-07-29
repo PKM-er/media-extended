@@ -179,21 +179,21 @@ const getYtbOptions = (timeSpan: TimeSpan | null, useYtControls: boolean) => {
 export const getPlyr = (
   info: mediaInfo,
   plugin: MediaExtended,
-  options?: Plyr.Options,
+  changeOpts?: (options: Plyr.Options) => void,
 ): Plyr_TF => {
   const { is, setHashOpt, setPlayerTF, timeSpan } = getSetupTool(info.hash);
 
   const { app } = plugin;
-  const { useYoutubeControls, plyrControls } = plugin.settings;
+  const { useYoutubeControls } = plugin.settings;
 
-  options = options ?? {};
   const isYtb = isHost(info) && info.host === Host.youtube;
   const ytbOptions = isYtb ? getYtbOptions(timeSpan, useYoutubeControls) : null;
   const defaultPlyrOption: Plyr.Options = {
     invertTime: false,
     controls: recToPlyrControls(plugin.sizeSettings.plyrControls),
   };
-  options = { ...defaultPlyrOption, ...ytbOptions, ...options };
+  let options = { ...defaultPlyrOption, ...ytbOptions };
+  if (changeOpts) changeOpts(options);
   options.autoplay = is("autoplay");
 
   const playerEl = createDiv().appendChild(createEl("video"));
