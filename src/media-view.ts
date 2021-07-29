@@ -5,7 +5,6 @@ import MediaExtended from "mx-main";
 import {
   EditorPosition,
   FileView,
-  ItemView,
   MarkdownView,
   Modal,
   Notice,
@@ -18,8 +17,8 @@ import {
 import { mainpart } from "./misc";
 import {
   getLink,
+  getMediaInfo as getMediaInfo,
   getSrcFile,
-  getVideoInfo as getMediaInfo,
   Host,
   isDirect,
   isHost,

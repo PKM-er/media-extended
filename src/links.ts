@@ -10,8 +10,8 @@ import { MEDIA_VIEW_TYPE, MediaView, openNewView } from "./media-view";
 import { Await } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
 import {
+  getMediaInfo,
   getMediaType,
-  getVideoInfo,
   Host,
   isHost,
   mediaInfo,
@@ -112,7 +112,7 @@ export const getCMLinkHandler = (plugin: MediaExtended) => {
     const isMacOS = /Macintosh|iPhone/.test(navigator.userAgent);
     const modKey = isMacOS ? e.metaKey : e.ctrlKey;
     if (modKey) {
-      let info: Await<ReturnType<typeof getVideoInfo>>;
+      let info: Await<ReturnType<typeof getMediaInfo>>;
       if (del.hasClass("cm-hmd-internal-link")) {
         const { path, subpath: hash } = parseLinktext(text);
 
@@ -129,7 +129,7 @@ export const getCMLinkHandler = (plugin: MediaExtended) => {
           activeLeaf.file.path,
         );
         if (!file) return;
-        info = await getVideoInfo(file, hash);
+        info = await getMediaInfo(file, hash);
       } else {
         if (
           del.hasClass("cm-formatting") &&
@@ -143,9 +143,9 @@ export const getCMLinkHandler = (plugin: MediaExtended) => {
             console.error("unable to get url from: %o", del);
             return;
           }
-          info = await getVideoInfo(urlEl.innerText);
+          info = await getMediaInfo(urlEl.innerText);
         } else {
-          info = await getVideoInfo(text);
+          info = await getMediaInfo(text);
         }
       }
 

@@ -84,7 +84,7 @@ export const isHost = (info: mediaInfo): info is mediaInfo_Host =>
   (info as mediaInfo_Host).host !== undefined &&
   (info as mediaInfo_Host).id !== undefined;
 
-export const getVideoInfo = async (
+export const getMediaInfo = async (
   ...args: [src: URL | string] | [src: TFile, hash: string]
 ): Promise<mediaInfo | null> => {
   let [src, hash] = args;
@@ -254,13 +254,13 @@ export const resolveInfo = async (
       ctx.sourcePath,
     ) as TFile | null;
 
-    return file ? getVideoInfo(file, hash) : null;
+    return file ? getMediaInfo(file, hash) : null;
   } else {
     const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
     if (!src) {
       console.info("fail to get embed src: %o, escaping", el);
       return null;
-    } else return getVideoInfo(src);
+    } else return getMediaInfo(src);
   }
 };
 
