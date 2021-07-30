@@ -2,6 +2,7 @@ import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
 import { MarkdownView, TAbstractFile, TFile } from "obsidian";
 
+import { insertToCursor } from "../misc";
 import MediaExtended from "../mx-main";
 
 export function setupRec(this: MediaExtended) {
@@ -50,7 +51,7 @@ export function setupRec(this: MediaExtended) {
   this.addCommand({
     id: "take-rec-timestamp",
     name: "Get Current Timestamp of Recording",
-    editorCheckCallback: (checking, editor) => {
+    editorCheckCallback: (checking, _editor, view) => {
       if (checking) {
         return typeof this.recStartTime === "number";
       } else {
@@ -60,11 +61,7 @@ export function setupRec(this: MediaExtended) {
           const timestamp = `%%REC_${this.recStartTime}#t=${
             (Date.now() - start) / 1e3
           }%%`;
-          editor.replaceRange(
-            template.replace(/{{TIMESTAMP}}/g, timestamp),
-            editor.getCursor(),
-            editor.getCursor(),
-          );
+          insertToCursor(template.replace(/{{TIMESTAMP}}/g, timestamp), view);
         }
       }
     },

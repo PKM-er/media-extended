@@ -1,4 +1,5 @@
 import parseUnit from "@tinyfe/parse-unit";
+import { Editor, MarkdownView } from "obsidian";
 
 export type mutationParam = {
   callback: MutationCallback;
@@ -37,4 +38,14 @@ export const setRatioWidth = (
 ) => {
   let [val, unit] = parseUnit(maxHeight);
   el.style.setProperty("--max-ratio-width", val * ratio + unit);
+};
+
+export const insertToCursor = (str: string, view: MarkdownView) => {
+  const { editor, app } = view;
+  const cursor = editor.getCursor("to");
+  editor.replaceRange(str, cursor, cursor);
+  if (app.isMobile)
+    editor.setCursor(
+      editor.offsetToPos(editor.posToOffset(cursor) + str.length),
+    );
 };

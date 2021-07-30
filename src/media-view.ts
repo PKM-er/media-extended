@@ -16,7 +16,7 @@ import {
   WorkspaceLeaf,
 } from "obsidian";
 
-import { mainpart } from "./misc";
+import { insertToCursor, mainpart } from "./misc";
 import {
   getLink,
   getMediaInfo as getMediaInfo,
@@ -395,16 +395,7 @@ export class MediaView extends FileView {
     const timestamp = this.getTimeStamp();
     if (!timestamp) return;
     const { timestampTemplate: template } = this.plugin.settings;
-    const { editor } = view;
-
-    const cursor = editor.getCursor();
-    let insertPos: EditorPosition;
-    insertPos = cursor;
-    editor.replaceRange(
-      template.replace(/{{TIMESTAMP}}/g, timestamp),
-      insertPos,
-      insertPos,
-    );
+    insertToCursor(template.replace(/{{TIMESTAMP}}/g, timestamp), view);
   };
   getTimeStamp(sourcePath?: string): string | null {
     if (!this.info) return null;
