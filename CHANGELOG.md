@@ -1,3 +1,10 @@
+## [2.10.2](https://github.com/aidenlx/media-extended/compare/2.10.1...2.10.2) (2021-07-30)
+
+
+### Bug Fixes
+
+* fix video set in max-ratio-width even in fullscreen ([da60635](https://github.com/aidenlx/media-extended/commit/da60635fc93518fa98a5cac4323f72b22832a7ab))
+
 ## [2.10.1](https://github.com/aidenlx/media-extended/compare/2.10.0...2.10.1) (2021-07-30)
 
 
