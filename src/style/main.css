@@ -54,3 +54,10 @@ iframe.bili-iframe {
 .plyr--full-ui input[type="range"]::-webkit-slider-thumb {
   top: 0px;
 }
+
+.media-view-player {
+  height: 100%;
+}
+.media-view-player > .plyr.plyr--video {
+  height: inherit;
+}
