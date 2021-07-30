@@ -1,3 +1,10 @@
+## [2.10.1](https://github.com/aidenlx/media-extended/compare/2.10.0...2.10.1) (2021-07-30)
+
+
+### Bug Fixes
+
+* **plyr-controls:** fix icon empty when first open; fix custom theme break checked style ([45fadc9](https://github.com/aidenlx/media-extended/commit/45fadc990fc123d462444457d03338673f0aebcf))
+
 # [2.10.0](https://github.com/aidenlx/media-extended/compare/2.9.0...2.10.0) (2021-07-29)
 
 
