@@ -16,7 +16,7 @@
 }
 
 .plyr-controls-settings button.checked {
-  border: var(--interactive-accent) solid;
+  border: var(--interactive-accent) solid !important;
 }
 
 .plyr-controls-settings button {
