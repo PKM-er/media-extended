@@ -8,7 +8,7 @@ input.incorrect {
   color: #eb3223;
 }
 
-.markdown-preview-view .plyr.plyr--video video {
+.markdown-preview-view .plyr.plyr--video:not(:fullscreen) video {
   width: var(--max-ratio-width);
   margin: auto;
 }
