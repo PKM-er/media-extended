@@ -1,0 +1,19 @@
+.markdown-preview-view .plyr.plyr--video:not(:fullscreen) {
+  min-width: var(--plyr-min-width);
+  width: min(100%, var(--max-ratio-width));
+}
+.markdown-preview-view .plyr.plyr--video {
+  margin: auto;
+}
+
+.markdown-preview-view .plyr.plyr--video:not(:fullscreen) video {
+  width: var(--max-ratio-width);
+  margin: auto;
+}
+
+.markdown-preview-view .plyr.plyr--video.mx-default-height {
+  height: var(--mx-default-height);
+}
+.markdown-preview-view .plyr.plyr--video.mx-default-height:fullscreen {
+  height: 100% !important;
+}

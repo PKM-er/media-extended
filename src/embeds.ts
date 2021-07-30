@@ -1,3 +1,5 @@
+import "./style/ratio.css";
+
 import { isCssValue } from "@tinyfe/parse-unit";
 import MediaExtended from "mx-main";
 import { MarkdownPostProcessor } from "obsidian";
@@ -95,9 +97,11 @@ const setRatio = (player: Plyr, maxHeight: string) => {
   const container = getContainer(player);
   // @ts-ignore
   if (!player.isVideo) return;
+  const DEFAULT_CLASS = "mx-default-height";
+  container.style.setProperty("--" + DEFAULT_CLASS, maxHeight);
 
   if (player.isHTML5) {
-    container.style.height = maxHeight;
+    container.addClass(DEFAULT_CLASS);
     player.once("canplay", () => {
       const setup = (ratio: string) => {
         const [w, h] = ratio.split(":");
@@ -105,8 +109,7 @@ const setRatio = (player: Plyr, maxHeight: string) => {
           console.error("invaild ratio", ratio);
           return;
         }
-        // @ts-ignore
-        container.style.height = null;
+        container.removeClass(DEFAULT_CLASS);
         setRatioWidth(container, maxHeight, +w / +h);
       };
       const trySetRatio = (repeat: number, timeout: number, fail: Function) => {
