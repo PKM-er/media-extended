@@ -1,3 +1,13 @@
+## [2.10.3](https://github.com/aidenlx/media-extended/compare/2.10.2...2.10.3) (2021-07-30)
+
+
+### Bug Fixes
+
+* fix cursor not move when insert timestamp on mobile ([5c482a9](https://github.com/aidenlx/media-extended/commit/5c482a9344167f371015d23d529c9c5a307207a7))
+* fix media-view not unload properly ([fc35ce2](https://github.com/aidenlx/media-extended/commit/fc35ce2499e94cc1ef81168ec1594a2c47b822b5))
+* fix video embeds not be able to enter fullscreen on iOS ([e1380d6](https://github.com/aidenlx/media-extended/commit/e1380d69e91e660a74743845dc77d57c92f548e9))
+* **media-view:** video player now fill the page properly ([cf0ad0c](https://github.com/aidenlx/media-extended/commit/cf0ad0c4de15112d260c6e996a74913ab3c17270))
+
 ## [2.10.2](https://github.com/aidenlx/media-extended/compare/2.10.1...2.10.2) (2021-07-30)
 
 
