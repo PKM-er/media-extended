@@ -5,6 +5,8 @@ import {
   TFile,
   Vault,
 } from "obsidian";
+import { parse as parseQS, ParsedQuery } from "query-string";
+import url from "url-parse";
 
 import { getSubtitles, trackInfo } from "./subtitle";
 import { getSubtitleTracks } from "./subtitle";
@@ -22,18 +24,39 @@ export const acceptedExt: Map<mediaType, string[]> = new Map([
   ["media", ["webm"]],
 ]);
 
+const getPath = (src: URL | string) => {
+  const regex = /\.[^/]+?$/;
+  let pathname: string, query: ParsedQuery<string>;
+  if (src instanceof URL) {
+    pathname = src.pathname;
+    query = parseQS(src.search);
+  } else {
+    let parsed = url(src, false);
+    pathname = parsed.pathname;
+    query = parseQS(parsed.query as unknown as string);
+  }
+  if (regex.test(pathname)) return pathname;
+  else if (
+    // support onedrive-vercel-index
+    pathname === "/api" &&
+    query.raw === "true" &&
+    typeof query.path === "string" &&
+    regex.test(query.path)
+  )
+    return query.path;
+  else return null;
+};
+
 export const getMediaType = (src: string | URL | TFile): mediaType | null => {
   // if url contains no extension, type = null
   let ext: string | null = null;
   if (src instanceof TFile) {
     ext = src.extension;
-  } else if (typeof src === "string") {
-    const { path } = parseLinktext(src);
-    if (path.includes(".")) {
+  } else {
+    const path = getPath(src);
+    if (path) {
       ext = path.split(".").pop() as string;
     }
-  } else if (src.pathname.includes(".")) {
-    ext = src.pathname.split(".").pop() as string;
   }
   if (!ext) return null;
 
