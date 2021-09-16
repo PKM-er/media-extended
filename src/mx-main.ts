@@ -1,6 +1,7 @@
 import "plyr/dist/plyr.css";
-import "./style/main.css";
-import "./style/ytb.css";
+import "./style/main.less";
+import "./style/ytb.less";
+import "./style/caption-fix.less";
 
 import assertNever from "assert-never";
 import { Plugin } from "obsidian";

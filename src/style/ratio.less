@@ -1,0 +1,18 @@
+.markdown-preview-view .plyr.plyr--video {
+  margin: auto;
+
+  &:not(:fullscreen) {
+    min-width: var(--plyr-min-width);
+    width: min(100%, var(--max-ratio-width));
+    video {
+      width: var(--max-ratio-width);
+      margin: auto;
+    }
+  }
+  .mx-default-height {
+    height: var(--mx-default-height);
+    &:fullscreen {
+      height: 100% !important;
+    }
+  }
+}

@@ -20,16 +20,6 @@ iframe.bili-iframe {
   display: block;
 }
 
-.plyr__caption::selection {
-  background-color: gray;
-}
-.plyr__caption {
-  user-select: text;
-}
-.plyr__captions {
-  z-index: 5;
-}
-
 .visuallyhidden:not(:focus):not(:active) {
   position: absolute;
 
@@ -57,7 +47,7 @@ iframe.bili-iframe {
 
 .media-view-player {
   height: 100%;
-}
-.media-view-player > .plyr.plyr--video {
-  height: inherit;
+  & > .plyr.plyr--video {
+    height: inherit;
+  }
 }

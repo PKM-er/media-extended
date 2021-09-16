@@ -1,0 +1,34 @@
+.plyr-controls-settings {
+  input[type="range"]::-webkit-slider-thumb {
+    cursor: inherit;
+  }
+
+  &.plyr__controls {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .plyr__control {
+    margin-bottom: 10px;
+  }
+
+  button {
+    width: inherit;
+    margin-right: 12px;
+    &.checked {
+      border: var(--interactive-accent) solid !important;
+    }
+  }
+
+  .plyr__time--duration {
+    display: inline-block !important;
+  }
+}
+
+.plyr-progress-setting {
+  margin-bottom: 10px;
+}
+
+.plyr-ctrls-container {
+  width: 100%;
+}

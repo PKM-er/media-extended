@@ -1,4 +1,4 @@
-import "./style/ratio.css";
+import "./style/ratio.less";
 
 import { isCssValue } from "@tinyfe/parse-unit";
 import MediaExtended from "mx-main";

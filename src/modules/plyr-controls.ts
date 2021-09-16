@@ -1,4 +1,4 @@
-import "../style/plyr-controls.css";
+import "../style/plyr-controls.less";
 
 import MediaExtended from "../mx-main";
 
