@@ -369,7 +369,15 @@ export class MediaView extends FileView {
     } else if (isDirect(newMedia) && isDirect(this.info)) {
       return mainpart(getLink(newMedia)) === mainpart(getLink(this.info));
     } else if (isHost(newMedia) && isHost(this.info)) {
-      return newMedia.host === this.info.host && newMedia.id === this.info.id;
+      return (
+        newMedia.host === this.info.host &&
+        newMedia.id === this.info.id &&
+        !(
+          newMedia.host === Host.bili &&
+          newMedia.src.searchParams.get("p") !==
+            this.info.src.searchParams.get("p")
+        )
+      );
     } else return false;
   }
 
