@@ -40,7 +40,7 @@ const isProd = process.env.BUILD === "production";
       bundle: true,
       watch: !isProd,
       platform: "browser",
-      external: ["obsidian"],
+      external: ["obsidian", "https"],
       format: "cjs",
       mainFields: ["browser", "module", "main"],
       banner: { js: banner },

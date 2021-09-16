@@ -2,12 +2,14 @@ import {
   App,
   MarkdownPostProcessorContext,
   parseLinktext,
+  Platform,
   TFile,
   Vault,
 } from "obsidian";
 import { parse as parseQS, ParsedQuery } from "query-string";
 import url from "url-parse";
 
+import { getBiliRedirectUrl } from "../misc";
 import { getSubtitles, trackInfo } from "./subtitle";
 import { getSubtitleTracks } from "./subtitle";
 
@@ -149,6 +151,15 @@ export const getMediaInfo = async (
   } else if (src instanceof TFile) return null;
 
   switch (src.hostname) {
+    case "b23.tv":
+      try {
+        if (!Platform.isDesktopApp) return null;
+        const newUrl = await getBiliRedirectUrl(src.pathname.split("/")[1]);
+        src = new URL(newUrl);
+      } catch (err) {
+        console.error(err);
+        return null;
+      }
     case "www.bilibili.com":
       if (src.pathname.startsWith("/video")) {
         let videoId = src.pathname.replace("/video/", "");
