@@ -1,3 +1,15 @@
+## [2.10.4](https://github.com/aidenlx/media-extended/compare/2.10.3...2.10.4) (2021-09-16)
+
+
+### Bug Fixes
+
+* **media-view:** fix failed to switch between different pages of bilibili video ([3327a68](https://github.com/aidenlx/media-extended/commit/3327a68e06fcc5bdac9859856485305de3bd8cc2))
+
+
+### Features
+
+* **media-info:** support onedrive-vercel-index direct links ([36db97b](https://github.com/aidenlx/media-extended/commit/36db97b97793d36432880a24519f416df0b4ce07))
+
 ## [2.10.3](https://github.com/aidenlx/media-extended/compare/2.10.2...2.10.3) (2021-07-30)
 
 
