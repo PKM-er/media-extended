@@ -1,3 +1,10 @@
+## [2.10.5](https://github.com/aidenlx/media-extended/compare/2.10.4...2.10.5) (2021-09-16)
+
+
+### Features
+
+* **media-info:** add support for bilibili short url ([be39fbb](https://github.com/aidenlx/media-extended/commit/be39fbb009672acdb31709bb510a0f40b92ed3ed))
+
 ## [2.10.4](https://github.com/aidenlx/media-extended/compare/2.10.3...2.10.4) (2021-09-16)
 
 
