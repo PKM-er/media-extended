@@ -1,3 +1,5 @@
+## [2.10.6](https://github.com/aidenlx/media-extended/compare/2.10.5...2.10.6) (2021-10-16)
+
 ## [2.10.5](https://github.com/aidenlx/media-extended/compare/2.10.4...2.10.5) (2021-09-16)
 
 
