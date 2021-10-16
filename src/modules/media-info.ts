@@ -189,6 +189,7 @@ export const getMediaInfo = async (
         return null;
       }
       break;
+    case "youtube.com":
     case "www.youtube.com":
     case "youtu.be":
       if (src.pathname === "/watch") {
