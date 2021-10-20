@@ -410,9 +410,10 @@ export class MediaView extends FileView {
     if (!this.player) throw new Error("no media");
     const current = this.player.currentTime;
     const { timestampOffset: offset } = this.plugin.settings;
-    let offsetCurrentTime;
+    let offsetCurrentTime = current - offset;
     if (current - offset < 0) offsetCurrentTime = 0;
-    else offsetCurrentTime = current - offset;
+    else if (current - offset > this.player.duration)
+      offsetCurrentTime = this.player.duration;
     const display = TimeFormat.fromS(offsetCurrentTime, "hh:mm:ss").replace(
       /^00:/g,
       "",

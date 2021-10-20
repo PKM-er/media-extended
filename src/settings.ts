@@ -309,15 +309,20 @@ export class MESettingTab extends PluginSettingTab {
         }),
       )
       .addText((text) => {
-        const onChange = async (value: number) => {
-          if (isNaN(value)) value = 0;
-          else if (value < 0) value = value * -1;
-          this.plugin.settings.timestampOffset = value;
-          await this.plugin.saveSettings();
-        };
+        const save = debounce(
+          async (value: string) => {
+            this.plugin.settings.timestampOffset = Number(value);
+            await this.plugin.saveSettings();
+          },
+          500,
+          true,
+        );
         text
           .setValue(String(this.plugin.settings.timestampOffset))
-          .onChange(debounce(onChange, 500, true));
+          .onChange(async (value: string) => {
+            text.inputEl.toggleClass("incorrect", isNaN(Number(value)));
+            if (!isNaN(Number(value))) save(value);
+          });
       });
   }
   ytb(): void {
