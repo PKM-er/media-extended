@@ -409,7 +409,14 @@ export class MediaView extends FileView {
     if (!this.info) return null;
     if (!this.player) throw new Error("no media");
     const current = this.player.currentTime;
-    const display = TimeFormat.fromS(current, "hh:mm:ss").replace(/^00:/g, "");
+    const { timestampOffset: offset } = this.plugin.settings;
+    let offsetCurrentTime;
+    if (current - offset < 0) offsetCurrentTime = 0;
+    else offsetCurrentTime = current - offset;
+    const display = TimeFormat.fromS(offsetCurrentTime, "hh:mm:ss").replace(
+      /^00:/g,
+      "",
+    );
     if (isInternal(this.info)) {
       const linktext = this.app.metadataCache.fileToLinktext(
         this.info.getSrcFile(this.app.vault),
@@ -420,7 +427,7 @@ export class MediaView extends FileView {
     } else
       return (
         `[${display.replace(/\.\d+$/, "")}]` +
-        `(${mainpart(this.info.src)}#t=${current})`
+        `(${mainpart(this.info.src)}#t=${offsetCurrentTime})`
       );
   }
 

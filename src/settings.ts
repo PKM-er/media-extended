@@ -22,6 +22,7 @@ export interface MxSettings {
   plyrControls: Record<PlyrControls, boolean>;
   plyrControlsMobile: Record<PlyrControls, boolean>;
   timestampTemplate: string;
+  timestampOffset: number;
   hideEmbedControls: boolean;
 }
 
@@ -68,6 +69,7 @@ export const DEFAULT_SETTINGS: MxSettings = {
     fullscreen: true, // Toggle fullscreen
   },
   timestampTemplate: "\n{{TIMESTAMP}}\n",
+  timestampOffset: 0,
   hideEmbedControls: false,
 };
 
@@ -296,6 +298,26 @@ export class MESettingTab extends PluginSettingTab {
           .onChange(debounce(onChange, 500, true));
         text.inputEl.rows = 5;
         text.inputEl.cols = 20;
+      });
+
+    new Setting(containerEl)
+      .setName("Timestamp Offset")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("Amount of seconds to offset timestamps.");
+          descEl.createEl("br");
+        }),
+      )
+      .addText((text) => {
+        const onChange = async (value: number) => {
+          if (isNaN(value)) value = 0;
+          else if (value < 0) value = value * -1;
+          this.plugin.settings.timestampOffset = value;
+          await this.plugin.saveSettings();
+        };
+        text
+          .setValue(String(this.plugin.settings.timestampOffset))
+          .onChange(debounce(onChange, 500, true));
       });
   }
   ytb(): void {
