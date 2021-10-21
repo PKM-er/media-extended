@@ -1,3 +1,10 @@
+# [2.11.0](https://github.com/aidenlx/media-extended/compare/2.10.6...2.11.0) (2021-10-21)
+
+
+### Features
+
+* timestamp offsetting ([a2b51b5](https://github.com/aidenlx/media-extended/commit/a2b51b5ccf0dfca53f0f370f4bdda1e895712cc7)), closes [#59](https://github.com/aidenlx/media-extended/issues/59)
+
 ## [2.10.6](https://github.com/aidenlx/media-extended/compare/2.10.5...2.10.6) (2021-10-16)
 
 ## [2.10.5](https://github.com/aidenlx/media-extended/compare/2.10.4...2.10.5) (2021-09-16)

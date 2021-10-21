@@ -1,6 +1,6 @@
 {
   "name": "media-extended",
-  "version": "2.10.6",
+  "version": "2.11.0",
   "description": "Media(Video/Audio) Playback Enhancement for Obsidian.md",
   "main": "main.js",
   "scripts": {
