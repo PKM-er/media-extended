@@ -1,3 +1,10 @@
+## [2.11.1](https://github.com/aidenlx/media-extended/compare/2.11.0...2.11.1) (2021-10-21)
+
+
+### Bug Fixes
+
+* **setting:** fix desc of time offset ([10e6b49](https://github.com/aidenlx/media-extended/commit/10e6b49edc1a958a54d37428739e9fc0df318683))
+
 # [2.11.0](https://github.com/aidenlx/media-extended/compare/2.10.6...2.11.0) (2021-10-21)
 
 
