@@ -306,7 +306,9 @@ export class MESettingTab extends PluginSettingTab {
         createFragment((descEl) => {
           descEl.appendText("Amount of seconds to offset timestamps.");
           descEl.createEl("br");
-          descEl.appendText("Set postive value to offset forward, vice versa");
+          descEl.appendText(
+            "Set postive value to offset time backward, vice versa",
+          );
         }),
       )
       .addText((text) => {
