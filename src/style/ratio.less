@@ -3,7 +3,7 @@
 
   &:not(:fullscreen) {
     min-width: var(--plyr-min-width);
-    width: min(100%, var(--max-ratio-width));
+    width: ~"min(var(--max-ratio-width), 100%)";
     video {
       width: var(--max-ratio-width);
       margin: auto;
