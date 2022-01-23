@@ -4,7 +4,13 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "version": "lerna version --tag-version-prefix=''"
+  },
   "devDependencies": {
+    "@aidenlx/eslint-config": "^0.1.0",
+    "@aidenlx/prettier-config": "^0.1.0",
+    "@aidenlx/ts-config": "^0.1.0",
     "lerna": "^4.0.0"
   },
   "config": {
