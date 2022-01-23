@@ -1,102 +1,15 @@
 {
-  "name": "media-extended",
-  "version": "2.11.1",
-  "description": "Media(Video/Audio) Playback Enhancement for Obsidian.md",
-  "main": "main.js",
-  "scripts": {
-    "dev": "cross-env BUILD=dev node esbuild.js",
-    "check": "tsc --noEmit",
-    "build": "cross-env BUILD=production node esbuild.js",
-    "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)'",
-    "eslint": "eslint . --ext .ts,.tsx --fix",
-    "release": "release-it"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "name": "@aidenlx/media-extended",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
-    "@release-it/bumper": "^3.0.1",
-    "@release-it/conventional-changelog": "^3.0.1",
-    "@tinyfe/parse-unit": "^0.0.5",
-    "@types/dom-mediacapture-record": "^1.0.10",
-    "@types/hh-mm-ss": "^1.2.1",
-    "@types/node": "^16.4.0",
-    "@types/url-parse": "^1.4.4",
-    "@typescript-eslint/eslint-plugin": "^4.28.4",
-    "@typescript-eslint/parser": "^4.28.4",
-    "assert-never": "^1.2.1",
-    "cross-env": "^7.0.3",
-    "cz-conventional-changelog": "^3.3.0",
-    "dashjs": "^3.2.2",
-    "esbuild": "^0.12.28",
-    "esbuild-plugin-less": "^1.1.0",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.23.4",
-    "eslint-plugin-jsdoc": "^35.5.0",
-    "eslint-plugin-prefer-arrow": "^1.2.3",
-    "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-simple-import-sort": "^7.0.0",
-    "hh-mm-ss": "^1.2.0",
-    "iso-639-1": "^2.1.9",
-    "monkey-around": "^2.2.0",
-    "obsidian": "^0.12.11",
-    "plyr": "^3.6.8",
-    "prettier": "^2.3.2",
-    "query-string": "^7.0.1",
-    "release-it": "^14.10.0",
-    "srt-webvtt": "^1.3.2",
-    "tslib": "^2.3.0",
-    "typescript": "^4.3.5",
-    "url-parse": "^1.5.3"
-  },
-  "release-it": {
-    "hooks": {
-      "before:init": [
-        "npm run prettier",
-        "npm run eslint"
-      ],
-      "after:bump": [
-        "json -I -f manifest.json -e \"this.version='${version}'\"",
-        "json -I -f versions.json -e \"this['${version}']='$(cat manifest.json | json minAppVersion)'\"",
-        "sed -i '' \"s/available for Obsidian v.*$/available for Obsidian v$(cat manifest.json | json minAppVersion)+./\" README.md",
-        "git add .",
-        "npm run build"
-      ],
-      "after:git:release": "echo After git push, before github release",
-      "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
-    },
-    "git": {
-      "commitMessage": "chore: release v${version}",
-      "tagName": "${version}",
-      "tagAnnotation": "Release v${version}"
-    },
-    "npm": {
-      "publish": false
-    },
-    "github": {
-      "release": true,
-      "assets": [
-        "build/main.js",
-        "build/manifest.json",
-        "build/styles.css"
-      ],
-      "proxy": "http://127.0.0.1:7890",
-      "releaseName": "${version}"
-    },
-    "plugins": {
-      "@release-it/bumper": {
-        "out": "manifest.json"
-      },
-      "@release-it/conventional-changelog": {
-        "preset": "angular",
-        "infile": "CHANGELOG.md"
-      }
-    }
+    "lerna": "^4.0.0"
   },
   "config": {
     "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
+      "path": "cz-conventional-changelog"
     }
   }
 }
