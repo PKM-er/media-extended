@@ -1,4 +1,3 @@
-import MediaExtended from "mx-main";
 import {
   MarkdownPostProcessor,
   MarkdownView,
@@ -17,6 +16,7 @@ import {
   mediaInfo,
   resolveInfo,
 } from "./modules/media-info";
+import MediaExtended from "./mx-main";
 
 type evtHandler = (e: Event) => void;
 

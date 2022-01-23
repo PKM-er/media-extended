@@ -14,6 +14,9 @@ declare module "obsidian" {
   interface WorkspaceLeaf {
     group: string | null;
   }
+  interface MenuItem {
+    dom: HTMLElement;
+  }
 
   interface Vault {
     exists: DataAdapter["exists"];

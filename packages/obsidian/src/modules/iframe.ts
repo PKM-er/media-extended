@@ -1,4 +1,4 @@
-import { mediaInfo_Host } from "modules/media-info";
+import { mediaInfo_Host } from "./media-info";
 
 export const setupIFrame = (info: mediaInfo_Host): HTMLDivElement =>
   createEl("iframe", {

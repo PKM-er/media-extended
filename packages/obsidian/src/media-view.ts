@@ -1,10 +1,8 @@
 import assertNever from "assert-never";
 import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
-import MediaExtended from "mx-main";
 import {
   App,
-  EditorPosition,
   FileView,
   MarkdownView,
   Menu,
@@ -35,6 +33,7 @@ import {
   Plyr_TF,
 } from "./modules/plyr-setup";
 import { TimeSpan } from "./modules/temporal-frag";
+import MediaExtended from "./mx-main";
 
 export const MEDIA_VIEW_TYPE = "media-view";
 
@@ -209,9 +208,14 @@ export class MediaView extends FileView {
       return menu;
     };
     menu.addItem((item) =>
-      item
-        .setTitle("Speed Control")
-        .onClick((evt) => getSpeedMenu(this.app).showAtMouseEvent(evt)),
+      item.setTitle("Speed Control").onClick((evt) => {
+        const speed = getSpeedMenu(this.app);
+        if (evt instanceof MouseEvent) {
+          speed.showAtMouseEvent(evt);
+        } else {
+          speed.showAtPosition(item.dom.getBoundingClientRect());
+        }
+      }),
     );
     menu.addSeparator();
     super.onMoreOptionsMenu(menu);

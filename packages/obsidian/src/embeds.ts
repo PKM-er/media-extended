@@ -1,7 +1,6 @@
 import "./style/ratio.less";
 
 import { isCssValue } from "@tinyfe/parse-unit";
-import MediaExtended from "mx-main";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
 
@@ -12,6 +11,7 @@ import { Host, isHost, isInternal, resolveInfo } from "./modules/media-info";
 import { setupPlaceholder } from "./modules/placeholder";
 import { getContainer, getPlyr, getSetupTool } from "./modules/plyr-setup";
 import { MediaResource } from "./modules/subtitle";
+import MediaExtended from "./mx-main";
 
 export const getEmbedProcessor = (
   plugin: MediaExtended,
