@@ -1,0 +1,11 @@
+{
+  "extends": "@aidenlx/ts-config/tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "lib": ["dom", "es5", "scripthost", "es2015", "dom.iterable"],
+    "declaration": true,
+    "outDir": "dist"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist/**/*"]
+}

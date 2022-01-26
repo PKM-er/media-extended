@@ -1,12 +1,11 @@
-import assertNever from "assert-never";
+import { HostMediaInfo } from "mx-lib";
 
 import { setRatioWidth } from "../misc";
-import { Host, mediaInfo_Host } from "./media-info";
 
 const playButtonHtml = `<svg aria-hidden="true" focusable="false"> <svg id="plyr-play" viewBox="0 0 18 18"><path d="M15.562 8.1L3.87.225c-.818-.562-1.87 0-1.87.9v15.75c0 .9 1.052 1.462 1.87.9L15.563 9.9c.584-.45.584-1.35 0-1.8z"></path></svg></svg ><span class="plyr__sr-only">Play</span>`;
 
 export const setupPlaceholder = async (
-  info: mediaInfo_Host,
+  info: HostMediaInfo,
   height: string,
   getRealPlayer: () => Promise<HTMLDivElement>,
 ): Promise<HTMLDivElement> => {
@@ -40,17 +39,18 @@ export const setupPlaceholder = async (
   return placeholder;
 };
 
-const getPosterUrl = async (info: mediaInfo_Host) => {
+const getPosterUrl = async (info: HostMediaInfo) => {
   const { id: videoId } = info;
   switch (info.host) {
-    case Host.youtube:
+    case "youtube":
       return `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-    case Host.bili:
+    case "bilibili":
       return null; // no placeholder for bili videos
-    case Host.vimeo:
+    case "vimeo":
       return await fetchVimeoPoster(info.src);
     default:
-      assertNever(info.host);
+      console.log(`Unsupported host to get poster: ${info.host}`);
+      return null;
   }
 };
 

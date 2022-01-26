@@ -4,13 +4,13 @@ import "./style/ytb.less";
 import "./style/caption-fix.less";
 
 import assertNever from "assert-never";
+import { ExtensionAccepted, MediaType } from "mx-lib";
 import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";
 import { getCMLinkHandler, getLinkProcessor } from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
 import { setupRec } from "./modules/audio-rec";
-import { acceptedExt } from "./modules/media-info";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -153,13 +153,13 @@ export default class MediaExtended extends Plugin {
 
   unregisterExtensions() {
     this.app.viewRegistry.unregisterExtensions(getExts());
-    for (const [type, exts] of acceptedExt) {
+    for (const [type, exts] of ExtensionAccepted) {
       switch (type) {
-        case "audio":
-        case "video":
+        case MediaType.Audio:
+        case MediaType.Video:
           this.app.viewRegistry.registerExtensions(exts, type);
           break;
-        case "media":
+        case MediaType.Unknown:
           this.app.viewRegistry.registerExtensions(exts, "video");
           break;
         default:
@@ -175,4 +175,4 @@ export default class MediaExtended extends Plugin {
 }
 
 const getExts = () =>
-  [...acceptedExt.values()].reduce((acc, val) => acc.concat(val), []);
+  [...ExtensionAccepted.values()].reduce((acc, val) => acc.concat(val), []);

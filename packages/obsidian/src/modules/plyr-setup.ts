@@ -3,6 +3,7 @@ import "dashjs/dist/dash.all.debug";
 import assertNever from "assert-never";
 import type dashjs from "dashjs";
 import { around } from "monkey-around";
+import { MediaInfoType, MediaType, parseTF, TimeSpan } from "mx-lib";
 import { Vault } from "obsidian";
 import Plyr from "plyr";
 import { parse } from "query-string";
@@ -10,15 +11,7 @@ import { parse } from "query-string";
 import MediaExtended from "../mx-main";
 import { recToPlyrControls } from "../settings";
 import { fetchPosterFunc, getPort } from "./bili-bridge";
-import {
-  getLink,
-  Host,
-  isDirect,
-  isHost,
-  isInternal,
-  mediaInfo,
-} from "./media-info";
-import { parseTF, TimeSpan } from "./temporal-frag";
+import { getLink, MediaInfo } from "./media-info";
 
 /** Player with temporal fragments */
 export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
@@ -178,7 +171,7 @@ const getYtbOptions = (timeSpan: TimeSpan | null, useYtControls: boolean) => {
 };
 
 export const getPlyr = (
-  info: mediaInfo,
+  info: MediaInfo,
   plugin: MediaExtended,
   changeOpts?: (options: Plyr.Options) => void,
 ): Plyr_TF => {
@@ -187,7 +180,7 @@ export const getPlyr = (
   const { app } = plugin;
   const { useYoutubeControls } = plugin.settings;
 
-  const isYtb = isHost(info) && info.host === Host.youtube;
+  const isYtb = info.from === MediaInfoType.Host && info.host === "youtube";
   const ytbOptions = isYtb ? getYtbOptions(timeSpan, useYoutubeControls) : null;
   const defaultPlyrOption: Plyr.Options = {
     invertTime: false,
@@ -200,9 +193,14 @@ export const getPlyr = (
   const playerEl = createDiv().appendChild(createEl("video"));
   const player = new Plyr(playerEl, options);
 
-  if (isHost(info) && info.host === Host.bili) {
-    const vid = info.iframe.searchParams.has("aid") ? "av" + info.id : info.id;
-    const page = info.src.searchParams.get("p");
+  if (
+    info.from === MediaInfoType.Host &&
+    info.host === "bilibili" &&
+    info.iframe
+  ) {
+    const { iframe, id } = info,
+      vid = iframe.searchParams.has("aid") ? "av" + id : id,
+      page = info.src.searchParams.get("p");
     // @ts-ignore
     const dash = dashjs.MediaPlayer().create();
     const src = new URL("http://localhost/geturl/" + vid);
@@ -220,9 +218,9 @@ export const getPlyr = (
     });
     const fetchBiliPoster = fetchPosterFunc(app);
     const getPoster = async () => {
-      const posterUrl = info.iframe.searchParams.has("aid")
-        ? await fetchBiliPoster(+info.id)
-        : await fetchBiliPoster(info.id);
+      const posterUrl = iframe.searchParams.has("aid")
+        ? await fetchBiliPoster(+id)
+        : await fetchBiliPoster(id);
       if (posterUrl) player.poster = posterUrl;
       else console.error("unable to fetch poster");
     };
@@ -235,7 +233,7 @@ export const getPlyr = (
 
   setHashOpt(player);
   setPlayerTF(player);
-  if (isInternal(info) && info.subtitles.length > 0) {
+  if (info.from === MediaInfoType.Obsidian && info.subtitles.length > 0) {
     // hide poster to make subtitle selectable
     const posterEl: HTMLElement | undefined = (player.elements as any).poster;
     if (posterEl) posterEl.addClass("visuallyhidden");
@@ -260,8 +258,12 @@ export const getPlyr = (
 };
 
 /** check media type that can not be determined by extension and switch source accordingly */
-export const checkMediaType = (info: mediaInfo, player: Plyr) => {
-  if (!isHost(info) && info.type === "media" && player.isHTML5) {
+export const checkMediaType = (info: MediaInfo, player: Plyr) => {
+  if (
+    info.from !== MediaInfoType.Host &&
+    info.type === MediaType.Unknown &&
+    player.isHTML5
+  ) {
     // using plyr.source setter to update will trigger event twice
     let count = 0;
     const handler = () => {
@@ -296,27 +298,25 @@ export const checkMediaType = (info: mediaInfo, player: Plyr) => {
 };
 
 export const infoToSource = (
-  info: mediaInfo,
+  info: MediaInfo,
   vault: Vault,
 ): Plyr.SourceInfo => {
-  if (isHost(info)) {
-    if (info.host === Host.bili)
+  if (info.from === MediaInfoType.Host) {
+    if (info.host === "bilibili")
       throw new Error("Bilibili not supported in Plyr");
     else
       return {
         type: "video",
-        sources: [
-          { src: info.id, provider: Host[info.host] as "vimeo" | "youtube" },
-        ],
+        sources: [{ src: info.id, provider: info.host as "vimeo" | "youtube" }],
       };
   } else {
-    const type = info.type === "media" ? "video" : info.type;
-    if (isDirect(info)) {
+    const type = info.type === MediaType.Unknown ? "video" : info.type;
+    if (info.from === MediaInfoType.Direct) {
       return {
         type,
         sources: [{ src: getLink(info).href }],
       };
-    } else if (isInternal(info)) {
+    } else if (info.from === MediaInfoType.Obsidian) {
       if (info.subtitles.length > 0 && info.trackInfo === undefined)
         throw new Error("trackInfo not updated");
       else

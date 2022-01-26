@@ -1,3 +1,4 @@
+import { getMediaType, MediaInfoType, MediaType } from "mx-lib";
 import {
   MarkdownPostProcessor,
   MarkdownView,
@@ -8,27 +9,20 @@ import {
 import { MEDIA_VIEW_TYPE, MediaView, openNewView } from "./media-view";
 import { Await } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
-import {
-  getMediaInfo,
-  getMediaType,
-  Host,
-  isHost,
-  mediaInfo,
-  resolveInfo,
-} from "./modules/media-info";
+import { getMediaInfo, MediaInfo, resolveInfo } from "./modules/media-info";
 import MediaExtended from "./mx-main";
 
 type evtHandler = (e: Event) => void;
 
 export const getOpenLink = (
-  info: mediaInfo,
+  info: MediaInfo,
   plugin: MediaExtended,
 ): evtHandler => {
   const { workspace } = plugin.app;
   return (e) => {
     if (
-      isHost(info) &&
-      info.host === Host.bili &&
+      info.from === MediaInfoType.Host &&
+      info.host === "bilibili" &&
       (!isAvailable(plugin.app) || !plugin.settings.interalBiliPlayback)
     )
       return;
@@ -62,7 +56,11 @@ export const getOpenLink = (
         if (isInfoEqual) {
           player.play();
         } else {
-          if (!isHost(info) && info.type === "media" && player.isHTML5) {
+          if (
+            info.from !== MediaInfoType.Host &&
+            info.type === MediaType.Unknown &&
+            player.isHTML5
+          ) {
             player.once("ready", function () {
               const promise = this.play();
               let count = 0;
@@ -129,7 +127,7 @@ export const getCMLinkHandler = (plugin: MediaExtended) => {
           activeLeaf.file.path,
         );
         if (!file) return;
-        info = await getMediaInfo(file, hash);
+        info = await getMediaInfo({ file, hash });
       } else {
         if (
           del.hasClass("cm-formatting") &&

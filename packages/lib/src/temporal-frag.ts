@@ -6,6 +6,7 @@ export const TFDef = {
   npt_sec: /^\d+(?:\.\d+)?$/,
   npt_mmss: /^(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/,
   npt_hhmmss: /^(?<hh>\d+):(?<mm>[0-5]\d):(?<ss>[0-5]\d(?:\.\d+)?)$/,
+  npt_time: /^(?:npt:)?([\d\.:]+)$/,
 };
 
 /** parse temporal fragment from hash */
@@ -67,21 +68,16 @@ const getTimeSpan = (
 };
 
 const convertTime = (input: string): number | null => {
-  const npttimedef = /^(?:npt:)?([\d\.:]+)$/;
-  if (npttimedef.test(input)) {
-    const rawTime = (input.match(npttimedef) as RegExpMatchArray)[1];
-
-    let match;
-
+  let match;
+  if ((match = input.match(TFDef.npt_time))) {
+    const rawTime = match[1];
     if ((match = TFDef.npt_sec.exec(rawTime)) !== null) {
       return +match[0];
-    } else if ((match = TFDef.npt_mmss.exec(rawTime)) !== null) {
-      if (!match.groups) throw new Error("npt_mmss match error");
-      const { mm, ss } = match.groups;
+    } else if ((match = rawTime.match(TFDef.npt_mmss)) !== null) {
+      const { mm, ss } = match.groups!;
       return +mm * 60 + +ss;
-    } else if ((match = TFDef.npt_hhmmss.exec(rawTime)) !== null) {
-      if (!match.groups) throw new Error("npt_hhmmss match error");
-      const { hh, mm, ss } = match.groups;
+    } else if ((match = rawTime.match(TFDef.npt_hhmmss)) !== null) {
+      const { hh, mm, ss } = match.groups!;
       return +hh * 60 * 60 + +mm * 60 + +ss;
     } else return null;
   } else {

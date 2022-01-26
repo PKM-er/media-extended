@@ -1,16 +1,15 @@
 {
-  "name": "mx-obsidian",
+  "name": "mx-lib",
   "version": "2.11.1",
-  "description": "Media(Video/Audio) Playback Enhancement for Obsidian.md",
-  "main": "main.js",
+  "description": "Library for media extended browser extension and obsidian plugin",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "cross-env BUILD=dev node esbuild.config.mjs",
-    "check": "tsc --noEmit",
-    "build": "cross-env BUILD=production node esbuild.config.mjs",
+    "build": "tsc",
     "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)'",
-    "eslint": "eslint . --ext .ts,.tsx --fix",
-    "version": "node version-bump.mjs && git add manifest.json versions.json"
+    "eslint": "eslint . --ext .ts,.tsx --fix"
   },
+  "private": "true",
   "keywords": [],
   "author": "AidenLx",
   "license": "MIT",
@@ -47,8 +46,5 @@
     "tslib": "^2.3.1",
     "typescript": "^4.5.5",
     "url-parse": "^1.5.4"
-  },
-  "dependencies": {
-    "mx-lib": "^2.11.1"
   }
 }

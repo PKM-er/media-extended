@@ -1,13 +1,14 @@
 import "./style/ratio.less";
 
 import { isCssValue } from "@tinyfe/parse-unit";
+import { MediaInfoType } from "mx-lib";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
 
 import { setRatioWidth } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
 import { setupIFrame } from "./modules/iframe";
-import { Host, isHost, isInternal, resolveInfo } from "./modules/media-info";
+import { resolveInfo } from "./modules/media-info";
 import { setupPlaceholder } from "./modules/placeholder";
 import { getContainer, getPlyr, getSetupTool } from "./modules/plyr-setup";
 import { MediaResource } from "./modules/subtitle";
@@ -36,7 +37,7 @@ export const getEmbedProcessor = (
        */
       const setPlyr = async (placeholder = false): Promise<HTMLDivElement> => {
         let objectUrls: string[] | undefined = undefined;
-        if (isInternal(info)) {
+        if (info.from === MediaInfoType.Obsidian) {
           const trackInfo = await info.updateTrackInfo(plugin.app.vault);
           if (trackInfo) objectUrls = trackInfo.objUrls;
         }
@@ -55,14 +56,15 @@ export const getEmbedProcessor = (
         return container;
       };
 
-      if (isHost(info)) {
+      if (info.from === MediaInfoType.Host) {
         const {
           thumbnailPlaceholder: placeholder,
           interalBiliPlayback: biliEnabled,
         } = plugin.settings;
         const shouldIframe =
-          info.host === Host.bili && (!isAvailable(plugin.app) || !biliEnabled);
-        const shouldPlaceholder = placeholder && info.host !== Host.bili;
+          info.host === "bilibili" &&
+          (!isAvailable(plugin.app) || !biliEnabled);
+        const shouldPlaceholder = placeholder && info.host !== "bilibili";
 
         const getRealPlayer = async () => {
           if (shouldIframe) return setupIFrame(info);

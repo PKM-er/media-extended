@@ -1,6 +1,7 @@
 import assertNever from "assert-never";
 import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
+import { DirectLinkInfo, HostMediaInfo, MediaInfoType, TimeSpan } from "mx-lib";
 import {
   App,
   FileView,
@@ -17,13 +18,9 @@ import {
 import { insertToCursor, mainpart } from "./misc";
 import {
   getLink,
-  getMediaInfo as getMediaInfo,
+  getMediaInfo,
   getSrcFile,
-  Host,
-  isDirect,
-  isHost,
-  isInternal,
-  mediaInfo,
+  MediaInfo,
   updateTrackInfo,
 } from "./modules/media-info";
 import {
@@ -32,7 +29,6 @@ import {
   getSetupTool,
   Plyr_TF,
 } from "./modules/plyr-setup";
-import { TimeSpan } from "./modules/temporal-frag";
 import MediaExtended from "./mx-main";
 
 export const MEDIA_VIEW_TYPE = "media-view";
@@ -42,7 +38,7 @@ export class MediaView extends FileView {
   allowNoFile = true;
 
   core: {
-    info: mediaInfo;
+    info: MediaInfo;
     player: Plyr_TF;
   } | null = null;
 
@@ -55,7 +51,7 @@ export class MediaView extends FileView {
   private controls: Map<string, HTMLElement>;
 
   async onLoadFile(file: TFile): Promise<void> {
-    const info = await getMediaInfo(file, "");
+    const info = await getMediaInfo({ file, hash: "" });
     if (info) {
       this.setInfo(info);
     } else new Notice("Fail to open file");
@@ -65,7 +61,7 @@ export class MediaView extends FileView {
     if (this.file && this.file === file && this.core) {
       const { info } = this.core;
       const { currentTime } = this.core.player;
-      await this.setInfo(await getMediaInfo(file, info.hash));
+      await this.setInfo(await getMediaInfo({ file, hash: info.hash }));
       if (this.player) {
         // await this.player.play();
         this.player.once("canplay", function () {
@@ -82,10 +78,10 @@ export class MediaView extends FileView {
     if (this.file && this.file === file) this.leaf.detach();
   }
 
-  get info(): mediaInfo | null {
+  get info(): MediaInfo | null {
     return this.core?.info ?? null;
   }
-  async setInfo(info: mediaInfo | null) {
+  async setInfo(info: MediaInfo | null) {
     if (info === null) {
       this.showEmpty();
       if (info) this.unloadCore();
@@ -95,7 +91,7 @@ export class MediaView extends FileView {
       this.showEmpty(true);
       if (info) this.unloadCore();
 
-      if (isInternal(info)) {
+      if (info.from === MediaInfoType.Obsidian) {
         this.file = info.getSrcFile(this.app.vault);
         await info.updateTrackInfo(this.app.vault);
       }
@@ -140,7 +136,7 @@ export class MediaView extends FileView {
     return state;
   }
   async setState(state: any, result: ViewStateResult): Promise<void> {
-    let info = state.info as mediaInfo | null | undefined;
+    let info = state.info as MediaInfo | null | undefined;
     const currentTime = state.currentTime as number;
     const resumeProgress = () => {
       if (currentTime)
@@ -158,16 +154,16 @@ export class MediaView extends FileView {
     try {
       if (!info) {
         if (info === null) await this.setInfo(info);
-      } else if (isHost(info)) {
+      } else if (info.from === MediaInfoType.Host) {
         info.src = new URL(info.src as any);
         info.iframe = new URL(info.iframe as any);
         await this.setInfo(info);
         resumeProgress();
-      } else if (isDirect(info)) {
+      } else if (info.from === MediaInfoType.Direct) {
         info.src = new URL(info.src as any);
         await this.setInfo(info);
         resumeProgress();
-      } else if (isInternal(info)) {
+      } else if (info.from === MediaInfoType.Obsidian) {
         await this.setInfo({
           ...info,
           updateTrackInfo,
@@ -221,7 +217,7 @@ export class MediaView extends FileView {
     super.onMoreOptionsMenu(menu);
   }
 
-  constructor(leaf: WorkspaceLeaf, plugin: MediaExtended, info?: mediaInfo) {
+  constructor(leaf: WorkspaceLeaf, plugin: MediaExtended, info?: MediaInfo) {
     super(leaf);
     this.plugin = plugin;
     this.emptyEl = this.setEmpty();
@@ -314,7 +310,7 @@ export class MediaView extends FileView {
   unloadCore() {
     if (this.core) {
       const { info, player } = this.core;
-      if (isInternal(info) && info.trackInfo)
+      if (info.from === MediaInfoType.Obsidian && info.trackInfo)
         info.trackInfo.objUrls.forEach((url) => URL.revokeObjectURL(url));
       if (player.pip) player.pip = false;
       player.destroy();
@@ -342,9 +338,13 @@ export class MediaView extends FileView {
     };
     if (this.core) {
       const { info, player } = this.core;
-      if (isInternal(info) || isDirect(info)) return getName(info.filename);
+      if (
+        info.from === MediaInfoType.Obsidian ||
+        info.from === MediaInfoType.Direct
+      )
+        return getName(info.filename);
       else {
-        if (info.host === Host.youtube || info.host === Host.vimeo) {
+        if (info.host === "youtube" || info.host === "vimeo") {
           // @ts-ignore
           const getTitle = (): string | undefined => player?.config?.title;
           let title;
@@ -361,24 +361,26 @@ export class MediaView extends FileView {
             }, 200);
           }
         }
-        return Host[info.host] + ": " + info.id;
+        return info.host + ": " + info.id;
       }
     } else return "";
   }
 
-  isEqual(newMedia: mediaInfo): Boolean {
-    if (this.info === null) return false;
-    if (isInternal(newMedia) && isInternal(this.info)) {
+  isEqual(newMedia: MediaInfo): Boolean {
+    if (this.info === null || this.info.from !== newMedia.from) return false;
+    if (this.info.from === MediaInfoType.Obsidian) {
       return newMedia.src === this.info.src;
-    } else if (isDirect(newMedia) && isDirect(this.info)) {
-      return mainpart(getLink(newMedia)) === mainpart(getLink(this.info));
-    } else if (isHost(newMedia) && isHost(this.info)) {
+    } else if (this.info.from === MediaInfoType.Direct) {
+      const newInfo = newMedia as DirectLinkInfo;
+      return mainpart(getLink(newInfo)) === mainpart(getLink(this.info));
+    } else if (this.info.from === MediaInfoType.Host) {
+      const newInfo = newMedia as HostMediaInfo;
       return (
-        newMedia.host === this.info.host &&
-        newMedia.id === this.info.id &&
+        newInfo.host === this.info.host &&
+        newInfo.id === this.info.id &&
         !(
-          newMedia.host === Host.bili &&
-          newMedia.src.searchParams.get("p") !==
+          newInfo.host === "bilibili" &&
+          newInfo.src.searchParams.get("p") !==
             this.info.src.searchParams.get("p")
         )
       );
@@ -422,7 +424,7 @@ export class MediaView extends FileView {
       /^00:/g,
       "",
     );
-    if (isInternal(this.info)) {
+    if (this.info.from === MediaInfoType.Obsidian) {
       const linktext = this.app.metadataCache.fileToLinktext(
         this.info.getSrcFile(this.app.vault),
         sourcePath ?? "",
@@ -509,7 +511,7 @@ export class PromptModal extends Modal {
 }
 
 export const openNewView = (
-  info: mediaInfo,
+  info: MediaInfo,
   leaf: WorkspaceLeaf,
   plugin: MediaExtended,
 ) => {
