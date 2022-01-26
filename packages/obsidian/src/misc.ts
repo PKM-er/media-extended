@@ -1,4 +1,3 @@
-import parseUnit from "@tinyfe/parse-unit";
 import type { request } from "https";
 import { MarkdownView, Platform } from "obsidian";
 
@@ -37,8 +36,7 @@ export const setRatioWidth = (
   maxHeight: string,
   ratio: number,
 ) => {
-  let [val, unit] = parseUnit(maxHeight);
-  el.style.setProperty("--max-ratio-width", val * ratio + unit);
+  el.style.setProperty("--max-ratio-width", `calc(${maxHeight} * ${ratio})`);
 };
 
 export const insertToCursor = (str: string, view: MarkdownView) => {

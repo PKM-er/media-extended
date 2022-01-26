@@ -1,6 +1,5 @@
 import "./style/ratio.less";
 
-import { isCssValue } from "@tinyfe/parse-unit";
 import { MediaInfoType } from "mx-lib";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
@@ -9,6 +8,7 @@ import { setRatioWidth } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
 import { setupIFrame } from "./modules/iframe";
 import { resolveInfo } from "./modules/media-info";
+import { isCssValue } from "./modules/parse-unit";
 import { setupPlaceholder } from "./modules/placeholder";
 import { getContainer, getPlyr, getSetupTool } from "./modules/plyr-setup";
 import { MediaResource } from "./modules/subtitle";

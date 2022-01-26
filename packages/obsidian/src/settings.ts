@@ -1,7 +1,7 @@
-import { isCssValue } from "@tinyfe/parse-unit";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
 import { getPortSetting, isAvailable } from "./modules/bili-bridge";
+import { isCssValue } from "./modules/parse-unit";
 import { PlyrControls, PlyrControlsSetting } from "./modules/plyr-controls";
 import MediaExtended from "./mx-main";
 
