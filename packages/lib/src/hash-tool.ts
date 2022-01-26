@@ -8,8 +8,7 @@ export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
 export type Player = HTMLMediaElement | Plyr;
 
 interface TemporalFrag {
-  readonly timeSpan: TimeSpan | null;
-  setTimeSpan(span: TimeSpan | null): void;
+  timeSpan: TimeSpan | null;
   sourceBak: Plyr.SourceInfo;
 }
 
@@ -27,76 +26,59 @@ export const isHTMLMediaEl_TF = (
   );
 };
 
+/**
+ * if current is out of range when start playing,
+ * move currentTime back to timeSpan.start
+ **/
+const onplay = (e: Event) => {
+  const playerTF = e.target as Player_TF;
+  if (!playerTF.timeSpan) return;
+
+  const {
+    timeSpan: { start, end },
+    currentTime,
+  } = playerTF;
+  if (currentTime > end || currentTime < start) {
+    playerTF.currentTime = start;
+  }
+};
+/**
+ * if currentTime reaches end, pause video
+ * or play at start when loop is enabled
+ */
+const ontimeupdate = async (e: Event) => {
+  const playerTF = e.target as Player_TF;
+  if (!playerTF.timeSpan) return;
+
+  const {
+    timeSpan: { start, end },
+    currentTime,
+  } = playerTF;
+  if (currentTime > end) {
+    if (!playerTF.loop) {
+      playerTF.pause();
+    } else {
+      playerTF.currentTime = start;
+      // continue to play in loop
+      // if temporal fragment (#t=,2 at the end of src) paused the video
+      if (playerTF.paused) await playerTF.play();
+    }
+  } else if (currentTime < start) {
+    playerTF.currentTime = start;
+  }
+};
+
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initPlayer(this: HashTool, player: Player) {
   const playerTF = player as Player_TF;
-
-  /**
-   * if current is out of range when start playing,
-   * move currentTime back to timeSpan.start
-   **/
-  const onplaying = (e: Event) => {
-    if (!playerTF.timeSpan) return;
-
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = playerTF;
-    if (currentTime > end || currentTime < start) {
-      playerTF.currentTime = start;
-    }
-  };
-  /**
-   * if currentTime reaches end, pause video
-   * or play at start when loop is enabled
-   */
-  const ontimeupdate = (e: Event) => {
-    if (!playerTF.timeSpan) return;
-
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = playerTF;
-    if (currentTime > end) {
-      if (!playerTF.loop) {
-        playerTF.pause();
-      } else {
-        playerTF.currentTime = start;
-        // continue to play in loop
-        // if temporal fragment (#t=,2 at the end of src) paused the video
-        if (playerTF.paused) playerTF.play();
-      }
-    }
-  };
-
-  /** when update, inject event handler to restrict play range */
-  playerTF.setTimeSpan = (span: TimeSpan | null) => {
-    // @ts-ignore
-    playerTF.timeSpan = span;
-
-    if (span) {
-      if (playerTF instanceof HTMLMediaElement && !playerTF.onplaying) {
-        (playerTF as HTMLMediaElement).onplaying = onplaying;
-        (playerTF as HTMLMediaElement).ontimeupdate = ontimeupdate;
-      } else {
-        (playerTF as Plyr).on("playing", onplaying);
-        (playerTF as Plyr).on("timeupdate", ontimeupdate);
-      }
-      // set currentTime
-      playerTF.currentTime = span.start ?? 0;
-    } else {
-      if (playerTF instanceof HTMLMediaElement) {
-        playerTF.onplaying = null;
-        playerTF.ontimeupdate = null;
-      } else {
-        playerTF.off("playing", onplaying);
-        playerTF.off("timeupdate", ontimeupdate);
-      }
-      // reset currentTime
-      playerTF.currentTime = 0;
-    }
-  };
-  playerTF.setTimeSpan(this.timeSpan);
+  if (playerTF instanceof HTMLMediaElement) {
+    playerTF.addEventListener("timeupdate", ontimeupdate);
+    playerTF.addEventListener("play", onplay);
+  } else {
+    playerTF.on("timeupdate", ontimeupdate);
+    playerTF.on("play", onplay);
+  }
+  this.setTimeSpan(playerTF);
 }
 
 /** Player Properties that can be controlled by hash */
@@ -153,6 +135,18 @@ export class HashTool {
         if (player instanceof HTMLMediaElement && this.getQuery(query))
           player[key] = true;
       } else if (this.getQuery(query)) player[key] = true;
+    }
+  }
+
+  /** when update, inject event handler to restrict play range */
+  public setTimeSpan(player: Player_TF) {
+    if (
+      (this.timeSpan && this.timeSpan.raw !== player.timeSpan?.raw) ||
+      (this.timeSpan === null && player.timeSpan !== null)
+    ) {
+      player.timeSpan = this.timeSpan;
+      // set currentTime
+      if (this.timeSpan) player.currentTime = this.timeSpan.start ?? 0;
     }
   }
 }

@@ -32,7 +32,10 @@ export default {
     simpleReloader(),
     resolve(),
     commonjs(),
-    typescript(),
+    typescript({
+      include: ["src/**/*.ts", "src/**/*.tsx", "../lib/src/**/*.ts"],
+      outDir: "dist",
+    }),
     // Empties the output dir before a new build
     emptyDir(),
     // Outputs a zip file in ./releases

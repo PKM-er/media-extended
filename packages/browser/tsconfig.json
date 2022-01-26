@@ -1,4 +1,7 @@
 {
   "extends": "@aidenlx/ts-config/tsconfig.json",
-  "include": ["src/**/*.tsx", "src/**/*.ts"]
+  "compilerOptions": {
+    "jsx": "react",
+  },
+  "include": ["src/**/*.tsx", "src/**/*.ts", "../lib/src/**/*.ts"]
 }

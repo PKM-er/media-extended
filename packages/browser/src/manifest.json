@@ -6,7 +6,8 @@
   "content_scripts": [
     {
       "js": ["content/index.ts"],
-      "matches": ["https://*/*", "http://*/*"]
+      "matches": ["https://*.youtube.com/*","https://*.bilibili.com/*"],
+      "run_at": "document_end"
     }
   ],
   "browser_action": {

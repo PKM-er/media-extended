@@ -290,21 +290,13 @@ export class MediaView extends FileView {
     return mainEl;
   }
 
-  get timeSpan(): TimeSpan | null {
-    return this.player?.timeSpan ?? null;
-  }
-  set timeSpan(timeSpan: TimeSpan | null) {
-    if (this.player) this.player.setTimeSpan(timeSpan);
-    else throw new Error("trying to set timeSpan on empty media view");
-  }
-
   set hash(hash: string) {
     if (!this.player)
       throw new Error("trying to set timeSpan on empty media view");
 
     const hashTool = new HashTool(hash);
 
-    this.player.setTimeSpan(hashTool.timeSpan);
+    hashTool.setTimeSpan(this.player);
     this.player.autoplay = hashTool.is("autoplay");
     this.player.loop = hashTool.is("loop");
     this.player.muted = hashTool.is("muted");
