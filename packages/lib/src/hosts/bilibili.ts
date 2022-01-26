@@ -1,4 +1,5 @@
-import { HostInfoHandler, MediaInfoType } from "../info";
+import { MediaInfoType } from "../defs";
+import { HostInfoHandler } from "../media-info";
 
 const host = "bilibili",
   from = MediaInfoType.Host;

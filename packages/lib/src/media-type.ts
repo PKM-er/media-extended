@@ -1,9 +1,5 @@
-export enum MediaType {
-  Audio = "audio",
-  Video = "video",
-  /** media that cannot determine if audio or video */
-  Unknown = "media",
-}
+import { MediaType } from "./defs";
+
 export const ExtensionAccepted: Map<MediaType, string[]> = new Map([
   [MediaType.Audio, ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
   [MediaType.Video, ["mp4", "ogv"]],

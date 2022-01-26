@@ -4,7 +4,7 @@ import "./style/ytb.less";
 import "./style/caption-fix.less";
 
 import assertNever from "assert-never";
-import { ExtensionAccepted, MediaType } from "mx-lib";
+import { ExtensionAccepted, MediaType } from "mx-lib/";
 import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";

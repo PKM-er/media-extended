@@ -2,10 +2,8 @@
   "name": "mx-lib",
   "version": "2.11.1",
   "description": "Library for media extended browser extension and obsidian plugin",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
     "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)'",
     "eslint": "eslint . --ext .ts,.tsx --fix"
   },

@@ -1,6 +1,6 @@
 import { parse } from "query-string";
 
-export const TFDef = {
+const TFDef = {
   tFrag: /^(?<start>[\w:\.]*?)(?:,(?<end>[\w:\.]+?))?$/,
 
   npt_sec: /^\d+(?:\.\d+)?$/,
