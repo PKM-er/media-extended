@@ -1,6 +1,6 @@
 import "./style/ratio.less";
 
-import { MediaInfoType } from "mx-lib";
+import { HashTool, MediaInfoType } from "mx-lib";
 import { MarkdownPostProcessor } from "obsidian";
 import type Plyr from "plyr";
 
@@ -10,7 +10,7 @@ import { setupIFrame } from "./modules/iframe";
 import { resolveInfo } from "./modules/media-info";
 import { isCssValue } from "./modules/parse-unit";
 import { setupPlaceholder } from "./modules/placeholder";
-import { getContainer, getPlyr, getSetupTool } from "./modules/plyr-setup";
+import { getContainer, getPlyr } from "./modules/plyr-setup";
 import { MediaResource } from "./modules/subtitle";
 import MediaExtended from "./mx-main";
 
@@ -26,7 +26,7 @@ export const getEmbedProcessor = (
     secEl.querySelectorAll(selector).forEach(async (el) => {
       const info = await resolveInfo(el, type, plugin.app, ctx);
       if (!info) return;
-      const { is } = getSetupTool(info.hash);
+      const hashTool = new HashTool(info.hash);
 
       let newEl: HTMLDivElement | null = null;
       const height = plugin.sizeSettings.embedMaxHeight;
@@ -42,7 +42,7 @@ export const getEmbedProcessor = (
           if (trackInfo) objectUrls = trackInfo.objUrls;
         }
         const player = getPlyr(info, plugin, (opts) => {
-          if (plugin.settings.hideEmbedControls && !is("controls"))
+          if (plugin.settings.hideEmbedControls && !hashTool.is("controls"))
             opts.controls = ["play-large"];
         });
         ratioSetup(player);

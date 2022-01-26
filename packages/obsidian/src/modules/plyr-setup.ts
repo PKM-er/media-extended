@@ -3,156 +3,14 @@ import "dashjs/dist/dash.all.debug";
 import assertNever from "assert-never";
 import type dashjs from "dashjs";
 import { around } from "monkey-around";
-import { MediaInfoType, MediaType, parseTF, TimeSpan } from "mx-lib";
+import { HashTool, MediaInfoType, MediaType, Plyr_TF, TimeSpan } from "mx-lib";
 import { Vault } from "obsidian";
 import Plyr from "plyr";
-import { parse } from "query-string";
 
 import MediaExtended from "../mx-main";
 import { recToPlyrControls } from "../settings";
 import { fetchPosterFunc, getPort } from "./bili-bridge";
 import { getLink, MediaInfo } from "./media-info";
-
-/** Player with temporal fragments */
-export type Player_TF = HTMLMediaEl_TF | Plyr_TF;
-export type Player = HTMLMediaElement | Plyr;
-
-interface TemporalFrag {
-  readonly timeSpan: TimeSpan | null;
-  setTimeSpan(span: TimeSpan | null): void;
-  sourceBak: Plyr.SourceInfo;
-}
-
-/** Plyr with temporal fragments */
-export type Plyr_TF = TemporalFrag & Plyr;
-/** HTMLMediaElement with temporal fragments */
-export type HTMLMediaEl_TF = TemporalFrag & HTMLMediaElement;
-
-export const isHTMLMediaEl_TF = (
-  el: HTMLMediaElement,
-): el is HTMLMediaEl_TF => {
-  return (
-    Boolean((el as HTMLMediaEl_TF).timeSpan) ||
-    (el as HTMLMediaEl_TF).timeSpan === null
-  );
-};
-
-/** Player Properties that can be controlled by hash */
-type PlayerProperties = "loop" | "muted" | "autoplay" | "controls";
-
-type setupTool = {
-  timeSpan: TimeSpan | null;
-  is: (prop: PlayerProperties) => boolean;
-  setHashOpt: (player: Player) => void;
-  setPlayerTF: (player: Player) => void;
-};
-
-export const getSetupTool = (hash: string | null): setupTool => {
-  const timeSpan = hash ? parseTF(hash) : null;
-  const hashQuery = hash ? parse(hash) : null;
-  const getQuery = (query: string) =>
-    hashQuery ? hashQuery[query] === null : false;
-  // null: exist, with no value (#loop)
-
-  const hashOpts = new Map<string, PlayerProperties>([
-    ["loop", "loop"],
-    ["mute", "muted"],
-    ["play", "autoplay"],
-    ["controls", "controls"],
-  ]);
-
-  return {
-    timeSpan,
-    is: (prop) => {
-      if (!hash) return false;
-      for (const [query, key] of hashOpts) {
-        if (prop === key && getQuery(query)) return true;
-      }
-      return false;
-    },
-    setPlayerTF: (player) => {
-      PlayerTFSetup(player, timeSpan);
-    },
-    setHashOpt: (player) =>
-      hashOpts.forEach((key, query) => {
-        if (key === "controls") {
-          if (player instanceof HTMLMediaElement && getQuery(query))
-            player[key] = true;
-        } else if (getQuery(query)) player[key] = true;
-      }),
-  };
-};
-
-export const PlayerTFSetup = (player: Player, timeSpan?: TimeSpan | null) => {
-  const playerTF = player as Player_TF;
-
-  /**
-   * if current is out of range when start playing,
-   * move currentTime back to timeSpan.start
-   **/
-  const onplaying = (e: Event) => {
-    if (!playerTF.timeSpan) return;
-
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = playerTF;
-    if (currentTime > end || currentTime < start) {
-      playerTF.currentTime = start;
-    }
-  };
-  /**
-   * if currentTime reaches end, pause video
-   * or play at start when loop is enabled
-   */
-  const ontimeupdate = (e: Event) => {
-    if (!playerTF.timeSpan) return;
-
-    const {
-      timeSpan: { start, end },
-      currentTime,
-    } = playerTF;
-    if (currentTime > end) {
-      if (!playerTF.loop) {
-        playerTF.pause();
-      } else {
-        playerTF.currentTime = start;
-        // continue to play in loop
-        // if temporal fragment (#t=,2 at the end of src) paused the video
-        if (playerTF.paused) playerTF.play();
-      }
-    }
-  };
-
-  /** when update, inject event handler to restrict play range */
-  playerTF.setTimeSpan = (span: TimeSpan | null) => {
-    // @ts-ignore
-    playerTF.timeSpan = span;
-
-    if (span) {
-      if (playerTF instanceof HTMLMediaElement && !playerTF.onplaying) {
-        (playerTF as HTMLMediaElement).onplaying = onplaying;
-        (playerTF as HTMLMediaElement).ontimeupdate = ontimeupdate;
-      } else {
-        (playerTF as Plyr).on("playing", onplaying);
-        (playerTF as Plyr).on("timeupdate", ontimeupdate);
-      }
-      // set currentTime
-      playerTF.currentTime = span.start ?? 0;
-    } else {
-      if (playerTF instanceof HTMLMediaElement) {
-        playerTF.onplaying = null;
-        playerTF.ontimeupdate = null;
-      } else {
-        playerTF.off("playing", onplaying);
-        playerTF.off("timeupdate", ontimeupdate);
-      }
-      // reset currentTime
-      playerTF.currentTime = 0;
-    }
-  };
-  playerTF.setTimeSpan(timeSpan ?? null);
-};
 
 const getYtbOptions = (timeSpan: TimeSpan | null, useYtControls: boolean) => {
   let options: Plyr.Options = {};
@@ -175,20 +33,22 @@ export const getPlyr = (
   plugin: MediaExtended,
   changeOpts?: (options: Plyr.Options) => void,
 ): Plyr_TF => {
-  const { is, setHashOpt, setPlayerTF, timeSpan } = getSetupTool(info.hash);
+  const hashTool = new HashTool(info.hash);
 
   const { app } = plugin;
   const { useYoutubeControls } = plugin.settings;
 
   const isYtb = info.from === MediaInfoType.Host && info.host === "youtube";
-  const ytbOptions = isYtb ? getYtbOptions(timeSpan, useYoutubeControls) : null;
+  const ytbOptions = isYtb
+    ? getYtbOptions(hashTool.timeSpan, useYoutubeControls)
+    : null;
   const defaultPlyrOption: Plyr.Options = {
     invertTime: false,
     controls: recToPlyrControls(plugin.sizeSettings.plyrControls),
   };
   let options = { ...defaultPlyrOption, ...ytbOptions };
   if (changeOpts) changeOpts(options);
-  options.autoplay = is("autoplay");
+  options.autoplay = hashTool.is("autoplay");
 
   const playerEl = createDiv().appendChild(createEl("video"));
   const player = new Plyr(playerEl, options);
@@ -231,8 +91,8 @@ export const getPlyr = (
     (player as Plyr_TF).sourceBak = source;
   }
 
-  setHashOpt(player);
-  setPlayerTF(player);
+  hashTool.initPlayer(player);
+  hashTool.applyAttrs(player);
   if (info.from === MediaInfoType.Obsidian && info.subtitles.length > 0) {
     // hide poster to make subtitle selectable
     const posterEl: HTMLElement | undefined = (player.elements as any).poster;

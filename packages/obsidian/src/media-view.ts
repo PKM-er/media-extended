@@ -1,7 +1,14 @@
 import assertNever from "assert-never";
 import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
-import { DirectLinkInfo, HostMediaInfo, MediaInfoType, TimeSpan } from "mx-lib";
+import {
+  DirectLinkInfo,
+  HashTool,
+  HostMediaInfo,
+  MediaInfoType,
+  Plyr_TF,
+  TimeSpan,
+} from "mx-lib";
 import {
   App,
   FileView,
@@ -23,12 +30,7 @@ import {
   MediaInfo,
   updateTrackInfo,
 } from "./modules/media-info";
-import {
-  getContainer,
-  getPlyr,
-  getSetupTool,
-  Plyr_TF,
-} from "./modules/plyr-setup";
+import { getContainer, getPlyr } from "./modules/plyr-setup";
 import MediaExtended from "./mx-main";
 
 export const MEDIA_VIEW_TYPE = "media-view";
@@ -300,11 +302,12 @@ export class MediaView extends FileView {
     if (!this.player)
       throw new Error("trying to set timeSpan on empty media view");
 
-    const { timeSpan, is } = getSetupTool(hash);
-    this.player.setTimeSpan(timeSpan);
-    this.player.autoplay = is("autoplay");
-    this.player.loop = is("loop");
-    this.player.muted = is("muted");
+    const hashTool = new HashTool(hash);
+
+    this.player.setTimeSpan(hashTool.timeSpan);
+    this.player.autoplay = hashTool.is("autoplay");
+    this.player.loop = hashTool.is("loop");
+    this.player.muted = hashTool.is("muted");
   }
 
   unloadCore() {
