@@ -6,6 +6,7 @@ import {
   MediaType,
   ObsidianMediaInfo,
 } from "mx-lib";
+import { ObsidianInfoHandler } from "mx-lib/src/media-info";
 import {
   App,
   MarkdownPostProcessorContext,
@@ -18,33 +19,81 @@ import {
 import { getBiliRedirectUrl } from "../misc";
 import { getSubtitles, trackInfo } from "./subtitle";
 import { getSubtitleTracks } from "./subtitle";
-export interface InternalMediaInfo extends ObsidianMediaInfo {
+interface InternalMediaInfoInterface extends ObsidianMediaInfo {
   trackInfo?: trackInfo;
-  updateTrackInfo(
-    this: InternalMediaInfo,
-    vault: Vault,
-  ): Promise<trackInfo | null>;
-  getSrcFile(this: InternalMediaInfo, vault: Vault): TFile;
+  updateTrackInfo(vault: Vault): Promise<trackInfo | null>;
+  getSrcFile(vault: Vault): TFile;
 }
 
-const obHandler = (
-  file: TFile,
-  hash: string,
-  type: MediaType,
-): InternalMediaInfo => {
-  if (!hash.startsWith("#")) hash = "#" + hash;
-  const sub = getSubtitles(file);
-  return {
-    from: MediaInfoType.Obsidian,
-    type,
-    filename: file.name,
-    src: file.path,
-    subtitles: sub ? sub.map((f) => f.path) : [],
-    hash,
-    updateTrackInfo,
-    getSrcFile,
-  };
-};
+export const isObsidianMediaInfo = (info: any): info is ObsidianMediaInfo =>
+  (info as ObsidianMediaInfo)?.from === MediaInfoType.Obsidian;
+export class InternalMediaInfo implements InternalMediaInfoInterface {
+  from = MediaInfoType.Obsidian as const;
+  type: MediaType;
+  filename: string;
+  /** relative path for media file */
+  src: string;
+  /** paths for subtitles, could be empty */
+  subtitles: string[];
+  hash: string;
+  trackInfo?: trackInfo;
+
+  private vault: Vault;
+  constructor(info: [file: TFile, hash: string, type: MediaType]);
+  constructor(info: ObsidianMediaInfo, vault: Vault);
+  constructor(
+    fileOrInfo:
+      | [file: TFile, hash: string, type: MediaType]
+      | ObsidianMediaInfo,
+    vault?: Vault,
+  ) {
+    if (isObsidianMediaInfo(fileOrInfo)) {
+      this.type = fileOrInfo.type;
+      this.filename = fileOrInfo.filename;
+      this.src = fileOrInfo.src;
+      this.subtitles = fileOrInfo.subtitles;
+      this.hash = fileOrInfo.hash;
+      this.vault = vault!;
+    } else {
+      const [file, hash, type] = fileOrInfo;
+      this.type = type;
+      this.filename = file.name;
+      this.src = file.path;
+      this.subtitles = getSubtitles(file).map((f) => f.path);
+      this.hash = hash.startsWith("#") ? hash : `#${hash}`;
+      this.vault = file.vault;
+    }
+  }
+  async updateTrackInfo(): Promise<trackInfo | null> {
+    if (this.subtitles.length > 0) {
+      const track = await getSubtitleTracks(this.subtitles, this.vault);
+      this.trackInfo = track;
+      return track;
+    } else return null;
+  }
+  getSrcFile(): TFile {
+    const aFile = this.vault.getAbstractFileByPath(this.src);
+    if (aFile && aFile instanceof TFile) return aFile;
+    else throw new Error("src file not found for path: " + this.src);
+  }
+  toJSON() {
+    const json: ObsidianMediaInfo = {
+      from: this.from,
+      src: this.src,
+      type: this.type,
+      filename: this.src,
+      subtitles: this.subtitles,
+      hash: this.hash,
+    };
+    return json;
+  }
+}
+
+/**
+ * Obsidian Media Info Handler
+ */
+const obsidian: ObsidianInfoHandler<InternalMediaInfo> = (...args) =>
+  new InternalMediaInfo(args);
 const getBiliFullLink = async (src: URL): Promise<URL> => {
   if (src.hostname !== "b23.tv" || !Platform.isDesktopApp) return src;
   try {
@@ -68,7 +117,7 @@ export const getMediaInfo = async (
       return null;
     }
   } else source = src;
-  return getMediaInfo0(source, { obsidian: obHandler });
+  return getMediaInfo0(source, { obsidian });
 };
 
 /**
@@ -96,7 +145,7 @@ export const getLink = (
 
 export const resolveInfo = async (
   el: Element,
-  type: string,
+  type: "internal" | "external",
   app: App,
   ctx: MarkdownPostProcessorContext,
 ) => {
@@ -123,16 +172,3 @@ export const resolveInfo = async (
     } else return getMediaInfo(src);
   }
 };
-
-export async function updateTrackInfo(this: InternalMediaInfo, vault: Vault) {
-  if (this.subtitles.length > 0) {
-    const track = await getSubtitleTracks(this.subtitles, vault);
-    this.trackInfo = track;
-    return track;
-  } else return null;
-}
-export function getSrcFile(this: InternalMediaInfo, vault: Vault) {
-  const aFile = vault.getAbstractFileByPath(this.src);
-  if (aFile && aFile instanceof TFile) return aFile;
-  else throw new Error("src file not found for path: " + this.src);
-}

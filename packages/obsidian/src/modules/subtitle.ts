@@ -3,7 +3,7 @@ import { MarkdownRenderChild, TAbstractFile, TFile, Vault } from "obsidian";
 import Plyr from "plyr";
 import SrtCvt from "srt-webvtt";
 
-export const getSubtitles = (video: TFile): TFile[] | null => {
+export const getSubtitles = (video: TFile): TFile[] => {
   const { basename: videoName, parent: folder } = video;
 
   // for video file "hello.mp4"
@@ -27,7 +27,7 @@ export const getSubtitles = (video: TFile): TFile[] | null => {
     });
   }
 
-  if (subtitles.length === 0) return null;
+  if (subtitles.length === 0) return subtitles;
   else {
     const vttNames = subtitles
       .filter((file) => file.extension === "vtt")

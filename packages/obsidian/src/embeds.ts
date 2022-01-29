@@ -38,7 +38,7 @@ export const getEmbedProcessor = (
       const setPlyr = async (placeholder = false): Promise<HTMLDivElement> => {
         let objectUrls: string[] | undefined = undefined;
         if (info.from === MediaInfoType.Obsidian) {
-          const trackInfo = await info.updateTrackInfo(plugin.app.vault);
+          const trackInfo = await info.updateTrackInfo();
           if (trackInfo) objectUrls = trackInfo.objUrls;
         }
         const player = getPlyr(info, plugin, (opts) => {

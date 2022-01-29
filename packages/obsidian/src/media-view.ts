@@ -26,9 +26,9 @@ import { insertToCursor, mainpart } from "./misc";
 import {
   getLink,
   getMediaInfo,
-  getSrcFile,
+  InternalMediaInfo,
+  isObsidianMediaInfo,
   MediaInfo,
-  updateTrackInfo,
 } from "./modules/media-info";
 import { getContainer, getPlyr } from "./modules/plyr-setup";
 import MediaExtended from "./mx-main";
@@ -94,8 +94,8 @@ export class MediaView extends FileView {
       if (info) this.unloadCore();
 
       if (info.from === MediaInfoType.Obsidian) {
-        this.file = info.getSrcFile(this.app.vault);
-        await info.updateTrackInfo(this.app.vault);
+        this.file = info.getSrcFile();
+        await info.updateTrackInfo();
       }
 
       const player = getPlyr(info, this.plugin);
@@ -133,26 +133,30 @@ export class MediaView extends FileView {
   }
   getState(): any {
     let state = super.getState();
-    state.info = { ...this.info, trackInfo: undefined };
+    state.info = this.info;
     state.currentTime = this.core ? this.core.player.currentTime : 0;
     return state;
+  }
+  setProgressTo(time: number, delay?: number) {
+    return new Promise<void>((resolve, reject) =>
+      window.setTimeout(async () => {
+        if (this.core) {
+          const { player } = this.core;
+          player.once("playing", () => {
+            player.currentTime = time;
+            player.pause();
+          });
+          await player.play();
+          resolve();
+        } else {
+          reject("fail to set currentTime: media view empty");
+        }
+      }, delay),
+    );
   }
   async setState(state: any, result: ViewStateResult): Promise<void> {
     let info = state.info as MediaInfo | null | undefined;
     const currentTime = state.currentTime as number;
-    const resumeProgress = () => {
-      if (currentTime)
-        window.setTimeout(() => {
-          if (this.core) {
-            const { player } = this.core;
-            player.once("playing", () => {
-              player.currentTime = currentTime;
-              player.pause();
-            });
-            player.play();
-          } else console.error("fail to set currentTime: media view empty");
-        }, 1e3);
-    };
     try {
       if (!info) {
         if (info === null) await this.setInfo(info);
@@ -160,18 +164,17 @@ export class MediaView extends FileView {
         info.src = new URL(info.src as any);
         info.iframe = new URL(info.iframe as any);
         await this.setInfo(info);
-        resumeProgress();
+        if (currentTime) this.setProgressTo(currentTime);
       } else if (info.from === MediaInfoType.Direct) {
         info.src = new URL(info.src as any);
         await this.setInfo(info);
-        resumeProgress();
-      } else if (info.from === MediaInfoType.Obsidian) {
-        await this.setInfo({
-          ...info,
-          updateTrackInfo,
-          getSrcFile,
-        });
-        resumeProgress();
+        if (currentTime) this.setProgressTo(currentTime);
+      } else if (isObsidianMediaInfo(info)) {
+        if (!(info instanceof InternalMediaInfo)) {
+          info = new InternalMediaInfo(info);
+        }
+        await this.setInfo(info);
+        if (currentTime) this.setProgressTo(currentTime);
       } else assertNever(info);
     } catch (e) {
       console.error(e);
@@ -421,7 +424,7 @@ export class MediaView extends FileView {
     );
     if (this.info.from === MediaInfoType.Obsidian) {
       const linktext = this.app.metadataCache.fileToLinktext(
-        this.info.getSrcFile(this.app.vault),
+        this.info.getSrcFile(),
         sourcePath ?? "",
         true,
       );

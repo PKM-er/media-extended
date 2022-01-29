@@ -17,13 +17,18 @@ function* hostInfoHandlers(addition?: HostInfoHandler[]) {
   if (addition) yield* addition;
 }
 
+export type ObsidianInfoHandler<T extends ObsidianMediaInfo> = (
+  file: TFile,
+  hash: string,
+  type: MediaType,
+) => T | null;
 /**
  * @param obsidian function to get media info from obsidian file
  */
 export const getMediaInfo = async <Ob extends ObsidianMediaInfo>(
   src: URL | { file: TFile; hash: string },
   handlers?: {
-    obsidian?: (file: TFile, hash: string, type: MediaType) => Ob | null;
+    obsidian?: ObsidianInfoHandler<Ob>;
     hosts?: HostInfoHandler[];
   },
 ): Promise<Ob | DirectLinkInfo | HostMediaInfo | null> => {
