@@ -10,6 +10,9 @@
     "start": "rollup -c -w"
   },
   "devDependencies": {
+    "@aidenlx/eslint-config": "^0.1.2",
+    "@aidenlx/prettier-config": "^0.1.0",
+    "@aidenlx/ts-config": "^0.1.2",
     "@rollup/plugin-alias": "^3.1.8",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.0.6",

@@ -1,8 +1,22 @@
 # npm
 node_modules
-yarn.lock
+# yarn.lock
 package-lock.json
 
 # build
 build
 dist
+
+# npm
+node_modules
+package-lock.json
+# yarn.lock
+
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
