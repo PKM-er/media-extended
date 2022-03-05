@@ -7,7 +7,7 @@ import {
   ObsidianMediaInfo,
 } from "mx-lib";
 import { ObsidianInfoHandler } from "mx-lib/src/media-info";
-import { Platform, TFile, Vault } from "obsidian";
+import { App, Platform, TFile, Vault } from "obsidian";
 
 import { getBiliRedirectUrl } from "../misc";
 import { getSubtitles, trackInfo } from "./subtitle";
@@ -31,14 +31,14 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
   hash: string;
   trackInfo?: trackInfo;
 
-  private vault: Vault;
-  constructor(info: [file: TFile, hash: string, type: MediaType]);
-  constructor(info: ObsidianMediaInfo, vault: Vault);
+  private get vault(): Vault {
+    return this.app.vault;
+  }
   constructor(
     fileOrInfo:
       | [file: TFile, hash: string, type: MediaType]
       | ObsidianMediaInfo,
-    vault?: Vault,
+    public app: App,
   ) {
     if (isObsidianMediaInfo(fileOrInfo)) {
       this.type = fileOrInfo.type;
@@ -46,7 +46,6 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
       this.src = fileOrInfo.src;
       this.subtitles = fileOrInfo.subtitles;
       this.hash = fileOrInfo.hash;
-      this.vault = vault!;
     } else {
       const [file, hash, type] = fileOrInfo;
       this.type = type;
@@ -54,7 +53,6 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
       this.src = file.path;
       this.subtitles = getSubtitles(file).map((f) => f.path);
       this.hash = hash.startsWith("#") ? hash : `#${hash}`;
-      this.vault = file.vault;
     }
   }
   async updateTrackInfo(): Promise<trackInfo | null> {
@@ -81,12 +79,6 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
     return json;
   }
 }
-
-/**
- * Obsidian Media Info Handler
- */
-const obsidian: ObsidianInfoHandler<InternalMediaInfo> = (...args) =>
-  new InternalMediaInfo(args);
 const getBiliFullLink = async (src: URL): Promise<URL> => {
   if (src.hostname !== "b23.tv" || !Platform.isDesktopApp) return src;
   try {
@@ -100,6 +92,7 @@ const getBiliFullLink = async (src: URL): Promise<URL> => {
 export type MediaInfo = InternalMediaInfo | HostMediaInfo | DirectLinkInfo;
 export const getMediaInfo = async (
   src: string | { file: TFile; hash: string },
+  app: App,
 ) => {
   let source: URL | { file: TFile; hash: string };
   if (typeof src === "string") {
@@ -110,7 +103,11 @@ export const getMediaInfo = async (
       return null;
     }
   } else source = src;
-  return getMediaInfo0(source, { obsidian });
+  return getMediaInfo0(source, {
+    obsidian: (file, hash, type) => {
+      return new InternalMediaInfo([file, hash, type], app);
+    },
+  });
 };
 
 /**

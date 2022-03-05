@@ -40,13 +40,13 @@ const resolveInfo = async (
       ctx.sourcePath,
     ) as TFile | null;
 
-    return file ? getMediaInfo({ file, hash }) : null;
+    return file ? getMediaInfo({ file, hash }, app) : null;
   } else {
     const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
     if (!src) {
       console.info("fail to get embed src: %o, escaping", el);
       return null;
-    } else return getMediaInfo(src);
+    } else return getMediaInfo(src, app);
   }
 };
 

@@ -16,13 +16,13 @@ export const getMediaInfo = async (
   app: App,
 ) => {
   if (typeof info === "string") {
-    return getMediaInfo0(info);
+    return getMediaInfo0(info, app);
   } else {
     const { linktext, sourcePath } = info;
     const { path, subpath: hash } = parseLinktext(linktext);
     const media = app.metadataCache.getFirstLinkpathDest(path, sourcePath);
     if (!media) return null;
-    return getMediaInfo0({ file: media, hash });
+    return getMediaInfo0({ file: media, hash }, app);
   }
 };
 

@@ -53,7 +53,7 @@ export class MediaView extends FileView {
   private controls: Map<string, HTMLElement>;
 
   async onLoadFile(file: TFile): Promise<void> {
-    const info = await getMediaInfo({ file, hash: "" });
+    const info = await getMediaInfo({ file, hash: "" }, this.app);
     if (info) {
       this.setInfo(info);
     } else new Notice("Fail to open file");
@@ -63,7 +63,9 @@ export class MediaView extends FileView {
     if (this.file && this.file === file && this.core) {
       const { info } = this.core;
       const { currentTime } = this.core.player;
-      await this.setInfo(await getMediaInfo({ file, hash: info.hash }));
+      await this.setInfo(
+        await getMediaInfo({ file, hash: info.hash }, this.app),
+      );
       if (this.player) {
         // await this.player.play();
         this.player.once("canplay", function () {
@@ -171,7 +173,7 @@ export class MediaView extends FileView {
         if (currentTime) this.setProgressTo(currentTime);
       } else if (isObsidianMediaInfo(info)) {
         if (!(info instanceof InternalMediaInfo)) {
-          info = new InternalMediaInfo(info);
+          info = new InternalMediaInfo(info, this.app);
         }
         await this.setInfo(info);
         if (currentTime) this.setProgressTo(currentTime);
@@ -481,7 +483,7 @@ export class PromptModal extends Modal {
     modalEl.createDiv({ cls: "modal-button-container" }, (div) => {
       div.createEl("button", { cls: "mod-cta", text: "Open" }, (el) =>
         el.onClickEvent(async () => {
-          const result = await getMediaInfo(input.value);
+          const result = await getMediaInfo(input.value, this.app);
           if (result) {
             if (this.view) {
               await this.view.setInfo(result);
