@@ -7,14 +7,7 @@ import {
   ObsidianMediaInfo,
 } from "mx-lib";
 import { ObsidianInfoHandler } from "mx-lib/src/media-info";
-import {
-  App,
-  MarkdownPostProcessorContext,
-  parseLinktext,
-  Platform,
-  TFile,
-  Vault,
-} from "obsidian";
+import { Platform, TFile, Vault } from "obsidian";
 
 import { getBiliRedirectUrl } from "../misc";
 import { getSubtitles, trackInfo } from "./subtitle";
@@ -140,35 +133,5 @@ export const getLink = (
     if (src.protocol === "file:")
       return new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
     else return src;
-  }
-};
-
-export const resolveInfo = async (
-  el: Element,
-  type: "internal" | "external",
-  app: App,
-  ctx: MarkdownPostProcessorContext,
-) => {
-  if (type === "internal") {
-    const linktext =
-      el instanceof HTMLAnchorElement ? el.dataset.href : el.getAttr("src");
-    if (!linktext) {
-      console.error("no linktext in internal embed: %o, escaping", el);
-      return null;
-    }
-    // resolve linktext, check if exist
-    const { subpath: hash, path } = parseLinktext(linktext);
-    const file = app.metadataCache.getFirstLinkpathDest(
-      path,
-      ctx.sourcePath,
-    ) as TFile | null;
-
-    return file ? getMediaInfo({ file, hash }) : null;
-  } else {
-    const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
-    if (!src) {
-      console.info("fail to get embed src: %o, escaping", el);
-      return null;
-    } else return getMediaInfo(src);
   }
 };

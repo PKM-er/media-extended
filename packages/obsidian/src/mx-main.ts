@@ -8,7 +8,7 @@ import { ExtensionAccepted, MediaType } from "mx-lib/";
 import { Plugin } from "obsidian";
 
 import { getEmbedProcessor } from "./embeds";
-import { getCMLinkHandler, getLinkProcessor } from "./links";
+import registerLinkHandlers from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
 import { setupRec } from "./modules/audio-rec";
 import {
@@ -19,13 +19,10 @@ import {
   SizeSettings,
 } from "./settings";
 
-const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
 
   recStartTime: number | null = null;
-
-  private cmLinkHandler = getCMLinkHandler(this);
 
   async loadSettings() {
     this.settings = { ...this.settings, ...(await this.loadData()) };
@@ -87,28 +84,13 @@ export default class MediaExtended extends Plugin {
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
+    registerLinkHandlers(this);
     // register embed handlers
     if (this.settings.mediaFragmentsEmbed) {
       this.registerMarkdownPostProcessor(getEmbedProcessor(this, "internal"));
     }
-    if (this.settings.timestampLink) {
-      this.registerMarkdownPostProcessor(getLinkProcessor(this, "internal"));
-    }
-
-    // register link handlers
     if (this.settings.extendedImageEmbedSyntax) {
       this.registerMarkdownPostProcessor(getEmbedProcessor(this, "external"));
-    }
-    this.registerMarkdownPostProcessor(getLinkProcessor(this, "external"));
-
-    if (!this.app.isMobile) {
-      this.registerCodeMirror((cm) => {
-        const warpEl = cm.getWrapperElement();
-        warpEl.on("mousedown", linkSelector, this.cmLinkHandler);
-        this.register(() =>
-          warpEl.off("mousedown", linkSelector, this.cmLinkHandler),
-        );
-      });
     }
 
     this.registerExtensions();

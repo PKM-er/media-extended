@@ -1,18 +1,54 @@
 import "./style/ratio.less";
 
 import { HashTool, MediaInfoType } from "mx-lib";
-import { MarkdownPostProcessor } from "obsidian";
+import {
+  App,
+  MarkdownPostProcessor,
+  MarkdownPostProcessorContext,
+  parseLinktext,
+  TFile,
+} from "obsidian";
 import type Plyr from "plyr";
 
 import { setRatioWidth } from "./misc";
 import { isAvailable } from "./modules/bili-bridge";
 import { setupIFrame } from "./modules/iframe";
-import { resolveInfo } from "./modules/media-info";
+import { getMediaInfo } from "./modules/media-info";
 import { isCssValue } from "./modules/parse-unit";
 import { setupPlaceholder } from "./modules/placeholder";
 import { getContainer, getPlyr } from "./modules/plyr-setup";
 import { MediaResource } from "./modules/subtitle";
 import MediaExtended from "./mx-main";
+
+const resolveInfo = async (
+  el: Element,
+  type: "internal" | "external",
+  app: App,
+  ctx: MarkdownPostProcessorContext,
+) => {
+  if (type === "internal") {
+    const linktext =
+      el instanceof HTMLAnchorElement ? el.dataset.href : el.getAttr("src");
+    if (!linktext) {
+      console.error("no linktext in internal embed: %o, escaping", el);
+      return null;
+    }
+    // resolve linktext, check if exist
+    const { subpath: hash, path } = parseLinktext(linktext);
+    const file = app.metadataCache.getFirstLinkpathDest(
+      path,
+      ctx.sourcePath,
+    ) as TFile | null;
+
+    return file ? getMediaInfo({ file, hash }) : null;
+  } else {
+    const src = el instanceof HTMLAnchorElement ? el.href : el.getAttr("src");
+    if (!src) {
+      console.info("fail to get embed src: %o, escaping", el);
+      return null;
+    } else return getMediaInfo(src);
+  }
+};
 
 export const getEmbedProcessor = (
   plugin: MediaExtended,
