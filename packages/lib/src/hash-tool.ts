@@ -30,53 +30,51 @@ export const isHTMLMediaEl_TF = (
  * if current is out of range when start playing,
  * move currentTime back to timeSpan.start
  **/
-const onplay = (e: Event) => {
-  const playerTF = e.target as Player_TF;
-  if (!playerTF.timeSpan) return;
-
+function onplay(this: Player_TF) {
+  if (!this.timeSpan) return;
   const {
     timeSpan: { start, end },
     currentTime,
-  } = playerTF;
+  } = this;
+  console.log(start, end, currentTime);
   if (currentTime > end || currentTime < start) {
-    playerTF.currentTime = start;
+    console.log("yes");
+    this.currentTime = start;
   }
-};
+}
 /**
  * if currentTime reaches end, pause video
  * or play at start when loop is enabled
  */
-const ontimeupdate = async (e: Event) => {
-  const playerTF = e.target as Player_TF;
-  if (!playerTF.timeSpan) return;
-
+async function ontimeupdate(this: Player_TF) {
+  if (!this.timeSpan) return;
   const {
     timeSpan: { start, end },
     currentTime,
-  } = playerTF;
+  } = this;
   if (currentTime > end) {
-    if (!playerTF.loop) {
-      playerTF.pause();
+    if (!this.loop) {
+      this.pause();
     } else {
-      playerTF.currentTime = start;
+      this.currentTime = start;
       // continue to play in loop
       // if temporal fragment (#t=,2 at the end of src) paused the video
-      if (playerTF.paused) await playerTF.play();
+      if (this.paused) await this.play();
     }
   } else if (currentTime < start) {
-    playerTF.currentTime = start;
+    this.currentTime = start;
   }
-};
+}
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function initPlayer(this: HashTool, player: Player) {
   const playerTF = player as Player_TF;
   if (playerTF instanceof HTMLMediaElement) {
-    playerTF.addEventListener("timeupdate", ontimeupdate);
-    playerTF.addEventListener("play", onplay);
+    playerTF.addEventListener("timeupdate", ontimeupdate.bind(playerTF));
+    playerTF.addEventListener("play", onplay.bind(playerTF));
   } else {
-    playerTF.on("timeupdate", ontimeupdate);
-    playerTF.on("play", onplay);
+    playerTF.on("timeupdate", ontimeupdate.bind(playerTF));
+    playerTF.on("play", onplay.bind(playerTF));
   }
   this.setTimeSpan(playerTF);
 }
