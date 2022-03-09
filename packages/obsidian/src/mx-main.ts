@@ -7,7 +7,7 @@ import assertNever from "assert-never";
 import { ExtensionAccepted, MediaType } from "mx-lib/";
 import { Plugin } from "obsidian";
 
-import { getEmbedProcessor } from "./embeds";
+import registerEmbedHandlers from "./embed";
 import registerLinkHandlers from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
 import { setupRec } from "./modules/audio-rec";
@@ -85,13 +85,7 @@ export default class MediaExtended extends Plugin {
     this.addSettingTab(new MESettingTab(this.app, this));
 
     registerLinkHandlers(this);
-    // register embed handlers
-    if (this.settings.mediaFragmentsEmbed) {
-      this.registerMarkdownPostProcessor(getEmbedProcessor(this, "internal"));
-    }
-    if (this.settings.extendedImageEmbedSyntax) {
-      this.registerMarkdownPostProcessor(getEmbedProcessor(this, "external"));
-    }
+    registerEmbedHandlers(this);
 
     this.registerExtensions();
 

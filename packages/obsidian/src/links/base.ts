@@ -1,30 +1,12 @@
 import { MediaInfoType, MediaType } from "mx-lib";
-import { App, parseLinktext, WorkspaceLeaf } from "obsidian";
+import { WorkspaceLeaf } from "obsidian";
 
 import { MEDIA_VIEW_TYPE, MediaView, openNewView } from "../media-view";
 import { isAvailable } from "../modules/bili-bridge";
-import {
-  getMediaInfo as getMediaInfo0,
-  MediaInfo,
-} from "../modules/media-info";
+import { MediaInfo } from "../modules/media-info";
 import type MediaExtended from "../mx-main";
 
 export const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
-
-export const getMediaInfo = async (
-  info: { linktext: string; sourcePath: string } | string /** link */,
-  app: App,
-) => {
-  if (typeof info === "string") {
-    return getMediaInfo0(info, app);
-  } else {
-    const { linktext, sourcePath } = info;
-    const { path, subpath: hash } = parseLinktext(linktext);
-    const media = app.metadataCache.getFirstLinkpathDest(path, sourcePath);
-    if (!media) return null;
-    return getMediaInfo0({ file: media, hash }, app);
-  }
-};
 
 const OpenLink = (
   info: MediaInfo,

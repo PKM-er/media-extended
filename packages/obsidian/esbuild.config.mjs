@@ -10,13 +10,37 @@ if you want to view the source visit the plugins github repository
 
 const isProd = process.env.BUILD === "production";
 
+const cmModules = [
+  "@codemirror/autocomplete",
+  "@codemirror/closebrackets",
+  "@codemirror/collab",
+  "@codemirror/commands",
+  "@codemirror/comment",
+  "@codemirror/fold",
+  "@codemirror/gutter",
+  "@codemirror/highlight",
+  "@codemirror/history",
+  "@codemirror/language",
+  "@codemirror/lint",
+  "@codemirror/matchbrackets",
+  "@codemirror/panel",
+  "@codemirror/rangeset",
+  "@codemirror/rectangular-selection",
+  "@codemirror/search",
+  "@codemirror/state",
+  "@codemirror/stream-parser",
+  "@codemirror/text",
+  "@codemirror/tooltip",
+  "@codemirror/view",
+];
+
 try {
   await build({
     entryPoints: ["src/mx-main.ts"],
     bundle: true,
     watch: !isProd,
     platform: "browser",
-    external: ["obsidian", "https"],
+    external: ["obsidian", "https", ...cmModules],
     format: "cjs",
     mainFields: ["browser", "module", "main"],
     banner: { js: banner },

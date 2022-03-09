@@ -3,8 +3,9 @@ import "obsidian";
 import { around } from "monkey-around";
 import { MarkdownView } from "obsidian";
 
+import { getInternalMediaInfo, getMediaInfo } from "../modules/media-info";
 import type MediaExtended from "../mx-main";
-import OpenLink, { getMediaInfo } from "./base";
+import OpenLink from "./base";
 
 declare module "obsidian" {
   interface MarkdownView {
@@ -24,7 +25,7 @@ export const patchEditorClick = (plugin: MediaExtended) => {
           try {
             if ("internal-link" === token.type) {
               if (!plugin.settings.timestampLink) fallback();
-              getMediaInfo(
+              getInternalMediaInfo(
                 { linktext: token.text, sourcePath: this.file.path },
                 this.app,
               ).then((info) => {

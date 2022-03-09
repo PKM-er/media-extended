@@ -105,9 +105,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@codemirror/language@npm:^0.19.0, @codemirror/language@npm:^0.19.8":
+  version: 0.19.8
+  resolution: "@codemirror/language@npm:0.19.8"
+  dependencies:
+    "@codemirror/state": ^0.19.0
+    "@codemirror/text": ^0.19.0
+    "@codemirror/view": ^0.19.0
+    "@lezer/common": ^0.15.5
+    "@lezer/lr": ^0.15.0
+  checksum: 2cf06a2c962a0a732e0f1e90a0df421806fca34140f6bec98087748a15ccd910466888bfff2d29c38d721e4da71b217499271a66cdbbd47501698aed389e5a04
+  languageName: node
+  linkType: hard
+
 "@codemirror/rangeset@npm:^0.19.5":
   version: 0.19.8
   resolution: "@codemirror/rangeset@npm:0.19.8::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40codemirror%2Frangeset%2F-%2Frangeset-0.19.8.tgz"
+  dependencies:
+    "@codemirror/state": ^0.19.0
+  checksum: 2cb4fb31878f8f05c4e843fe01570b18c3bcaedb241af3187bbc6416cb6763736c5f103e77b10a935d9c77a13b642d36f7631e791a6ee5ed9c065ff6d1eb068c
+  languageName: node
+  linkType: hard
+
+"@codemirror/rangeset@npm:^0.19.8":
+  version: 0.19.8
+  resolution: "@codemirror/rangeset@npm:0.19.8"
   dependencies:
     "@codemirror/state": ^0.19.0
   checksum: 2cb4fb31878f8f05c4e843fe01570b18c3bcaedb241af3187bbc6416cb6763736c5f103e77b10a935d9c77a13b642d36f7631e791a6ee5ed9c065ff6d1eb068c
@@ -123,10 +145,45 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@codemirror/state@npm:^0.19.9":
+  version: 0.19.9
+  resolution: "@codemirror/state@npm:0.19.9"
+  dependencies:
+    "@codemirror/text": ^0.19.0
+  checksum: 5d20c80e51eab6f82be28edadd9e774c864c48e4ba15c23b39277bcb3948f5b716ba07fdefcda556324dbfba19de8f91defa7e338390a714f9deb1e92f5d21bf
+  languageName: node
+  linkType: hard
+
+"@codemirror/stream-parser@github:lishid/stream-parser":
+  version: 0.19.6
+  resolution: "@codemirror/stream-parser@https://github.com/lishid/stream-parser.git#commit=26c8edae7bdf63dc34d358d1de640bdd12e7b09f"
+  dependencies:
+    "@codemirror/language": ^0.19.0
+    "@codemirror/state": ^0.19.0
+    "@codemirror/text": ^0.19.0
+    "@lezer/common": ^0.15.0
+    "@lezer/lr": ^0.15.0
+  checksum: 32eebc69eb1c367332917ba9fe09327bf71e4afc02262b74e0b1fc844eef69c098691acc0ed302dc53a040f08dadfcaebdada15ac1469ec544339ab82a39e3c5
+  languageName: node
+  linkType: hard
+
 "@codemirror/text@npm:^0.19.0":
   version: 0.19.6
   resolution: "@codemirror/text@npm:0.19.6::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40codemirror%2Ftext%2F-%2Ftext-0.19.6.tgz"
   checksum: 685e46c1f0114a216081b7a070460e1b0db9c51b0a2b361e9ed90e5ea2ed89d86a7a834b76f7c63b27fd192809d9414e7a15e0d186bd15cdb5d4f85639d434f0
+  languageName: node
+  linkType: hard
+
+"@codemirror/view@npm:^0.19.0, @codemirror/view@npm:^0.19.46":
+  version: 0.19.46
+  resolution: "@codemirror/view@npm:0.19.46"
+  dependencies:
+    "@codemirror/rangeset": ^0.19.5
+    "@codemirror/state": ^0.19.3
+    "@codemirror/text": ^0.19.0
+    style-mod: ^4.0.0
+    w3c-keyname: ^2.2.4
+  checksum: 5ac7cbb485a93c1003ab16385f999ef1292965838e32191b0d4b0d79f508cbc843e7ce66f4ef1143950ecdb47913fb035fcb22cd53057cd442f8c9eef716e6b6
   languageName: node
   linkType: hard
 
@@ -285,6 +342,22 @@ __metadata:
     globby: ^7.1.1
     load-json-file: ^4.0.0
   checksum: aefb2fcbd1d11f771df83c071b26f01a7ab9f53f55ac9229041f83038809b134a93057e53265fe83094239f2658ef1e125b0291db8967abe4f07da38b871f819
+  languageName: node
+  linkType: hard
+
+"@lezer/common@npm:^0.15.0, @lezer/common@npm:^0.15.11, @lezer/common@npm:^0.15.5":
+  version: 0.15.11
+  resolution: "@lezer/common@npm:0.15.11"
+  checksum: 5cabce5493b9392bb54816d6b921dae20d154b175423479b408e990fdf572fd2ed77a6b2df0ed6ef26d779eeb66ec737d10aa2312e1ffecbcec22e14b19f7be3
+  languageName: node
+  linkType: hard
+
+"@lezer/lr@npm:^0.15.0":
+  version: 0.15.8
+  resolution: "@lezer/lr@npm:0.15.8"
+  dependencies:
+    "@lezer/common": ^0.15.0
+  checksum: e741225d6ac9cf08f8016bad49622fbd4a4e0d20c2e8c2b38a0abf0ddca69c58275b0ebdb9d5dde2905cf84f6977bc302f7ed5e5ba42c23afa27e9e65b900f36
   languageName: node
   linkType: hard
 
@@ -1511,6 +1584,13 @@ __metadata:
   version: 3.3.0
   resolution: "ci-info@npm:3.3.0"
   checksum: c3d86fe374938ecda5093b1ba39acb535d8309185ba3f23587747c6a057e63f45419b406d880304dbc0e1d72392c9a33e42fe9a1e299209bc0ded5efaa232b66
+  languageName: node
+  linkType: hard
+
+"classnames@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "classnames@npm:2.3.1"
+  checksum: 14db8889d56c267a591f08b0834989fe542d47fac659af5a539e110cc4266694e8de86e4e3bbd271157dbd831361310a8293e0167141e80b0f03a0f175c80960
   languageName: node
   linkType: hard
 
@@ -4954,6 +5034,12 @@ __metadata:
     "@aidenlx/prettier-config": ^0.1.0
     "@aidenlx/release-it-config": ^0.1.7
     "@aidenlx/ts-config": ^0.1.2
+    "@codemirror/language": ^0.19.8
+    "@codemirror/rangeset": ^0.19.8
+    "@codemirror/state": ^0.19.9
+    "@codemirror/stream-parser": "github:lishid/stream-parser"
+    "@codemirror/view": ^0.19.46
+    "@lezer/common": ^0.15.11
     "@types/dom-mediacapture-record": ^1.0.11
     "@types/hh-mm-ss": ^1.2.1
     "@types/node": ^17.0.10
@@ -4961,6 +5047,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": ^5.10.0
     "@typescript-eslint/parser": ^5.10.0
     assert-never: ^1.2.1
+    classnames: ^2.3.1
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
     dashjs: ^4.2.1

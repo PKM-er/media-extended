@@ -1,11 +1,11 @@
 import "obsidian";
 
 import { around } from "monkey-around";
-import { EventHelper, Keymap, parseLinktext } from "obsidian";
+import { EventHelper, Keymap } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
 
+import { getInternalMediaInfo, getMediaInfo } from "../modules/media-info";
 import type MediaExtended from "../mx-main";
-import { getMediaInfo } from "./base";
 import OpenLink from "./base";
 
 type MarkedCtor = typeof EventHelper & { __MX_PATCHED__?: true };
@@ -34,7 +34,7 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
         const fallback = () => next.call(this, evt, target, linktext, ...args);
         if (!plugin.settings.timestampLink) fallback();
         try {
-          getMediaInfo(
+          getInternalMediaInfo(
             { linktext, sourcePath: this.getFile().path },
             this.app,
           ).then((info) => {

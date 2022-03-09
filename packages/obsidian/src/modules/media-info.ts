@@ -7,7 +7,7 @@ import {
   ObsidianMediaInfo,
 } from "mx-lib";
 import { ObsidianInfoHandler } from "mx-lib/src/media-info";
-import { App, Platform, TFile, Vault } from "obsidian";
+import { App, parseLinktext, Platform, TFile, Vault } from "obsidian";
 
 import { getBiliRedirectUrl } from "../misc";
 import { getSubtitles, trackInfo } from "./subtitle";
@@ -108,6 +108,25 @@ export const getMediaInfo = async (
       return new InternalMediaInfo([file, hash, type], app);
     },
   });
+};
+export const getInternalMediaInfo = async (
+  info: {
+    linktext: string;
+    /** path of note that holds the link */
+    sourcePath: string;
+    /** media file path */
+    file?: TFile;
+  },
+  app: App,
+) => {
+  let { linktext, sourcePath, file } = info;
+  let { path, subpath: hash } = parseLinktext(linktext);
+  if (!file) {
+    let media = app.metadataCache.getFirstLinkpathDest(path, sourcePath);
+    if (!media || !(media instanceof TFile)) return null;
+    file = media;
+  }
+  return getMediaInfo({ file, hash }, app);
 };
 
 /**
