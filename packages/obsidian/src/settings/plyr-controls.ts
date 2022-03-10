@@ -205,3 +205,8 @@ export class PlyrControlsSetting {
     });
   }
 }
+
+export const recToPlyrControls = (rec: Record<PlyrControls, boolean>) =>
+  ([...Object.entries(rec)] as [PlyrControls, boolean][])
+    .filter((v) => v[1])
+    .map((v) => v[0]);

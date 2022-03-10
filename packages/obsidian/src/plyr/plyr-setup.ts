@@ -7,10 +7,10 @@ import { HashTool, MediaInfoType, MediaType, Plyr_TF, TimeSpan } from "mx-lib";
 import { Vault } from "obsidian";
 import Plyr from "plyr";
 
+import { getLink, MediaInfo } from "../base/media-info";
+import { fetchPosterFunc, getPort } from "../feature/bili-bridge";
 import MediaExtended from "../mx-main";
 import { recToPlyrControls } from "../settings";
-import { fetchPosterFunc, getPort } from "./bili-bridge";
-import { getLink, MediaInfo } from "./media-info";
 
 const getYtbOptions = (timeSpan: TimeSpan | null, useYtControls: boolean) => {
   let options: Plyr.Options = {};

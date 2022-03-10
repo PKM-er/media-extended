@@ -8,9 +8,9 @@ import { ExtensionAccepted, MediaType } from "mx-lib/";
 import { Plugin } from "obsidian";
 
 import registerEmbedHandlers from "./embed";
+import { setupRec } from "./feature/audio-rec";
 import registerLinkHandlers from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
-import { setupRec } from "./modules/audio-rec";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,

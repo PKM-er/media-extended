@@ -1,77 +1,11 @@
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
-import { getPortSetting, isAvailable } from "./modules/bili-bridge";
-import { isCssValue } from "./modules/parse-unit";
-import { PlyrControls, PlyrControlsSetting } from "./modules/plyr-controls";
-import MediaExtended from "./mx-main";
-
-export const hideYtbRecommClass = "alx-hide-ytb-recomm";
-
-export interface MxSettings {
-  mediaFragmentsEmbed: boolean;
-  timestampLink: boolean;
-  extendedImageEmbedSyntax: boolean;
-  thumbnailPlaceholder: boolean;
-  useYoutubeControls: boolean;
-  interalBiliPlayback: boolean;
-  hideYtbRecomm: boolean;
-  embedMaxHeight: string;
-  embedMaxHeightMobile: string;
-  embedMinWidth: string;
-  embedMinWidthMobile: string;
-  plyrControls: Record<PlyrControls, boolean>;
-  plyrControlsMobile: Record<PlyrControls, boolean>;
-  timestampTemplate: string;
-  timestampOffset: number;
-  hideEmbedControls: boolean;
-}
-
-export const DEFAULT_SETTINGS: MxSettings = {
-  mediaFragmentsEmbed: true,
-  timestampLink: true,
-  extendedImageEmbedSyntax: true,
-  thumbnailPlaceholder: false,
-  useYoutubeControls: false,
-  interalBiliPlayback: true,
-  hideYtbRecomm: false,
-  embedMaxHeight: "30vh",
-  embedMinWidth: "400px",
-  plyrControls: {
-    restart: false, // Restart playback
-    rewind: false, // Rewind by the seek time (default 10 seconds)
-    play: true, // Play/pause playback
-    "fast-forward": false, // Fast forward by the seek time (default 10 seconds)
-    progress: true, // The progress bar and scrubber for playback and buffering
-    "current-time": true, // The current time of playback
-    duration: true, // The full duration of the media
-    mute: false, // Toggle mute
-    volume: true, // Volume control
-    captions: true, // Toggle captions
-    settings: true, // Settings menu
-    pip: false, // Picture-in-picture (currently Safari only)
-    fullscreen: true, // Toggle fullscreen
-  },
-  embedMaxHeightMobile: "20vh",
-  embedMinWidthMobile: "200px",
-  plyrControlsMobile: {
-    restart: false, // Restart playback
-    rewind: false, // Rewind by the seek time (default 10 seconds)
-    play: true, // Play/pause playback
-    "fast-forward": false, // Fast forward by the seek time (default 10 seconds)
-    progress: true, // The progress bar and scrubber for playback and buffering
-    "current-time": false, // The current time of playback
-    duration: false, // The full duration of the media
-    mute: false, // Toggle mute
-    volume: true, // Volume control
-    captions: true, // Toggle captions
-    settings: true, // Settings menu
-    pip: false, // Picture-in-picture (currently Safari only)
-    fullscreen: true, // Toggle fullscreen
-  },
-  timestampTemplate: "\n{{TIMESTAMP}}\n",
-  timestampOffset: 0,
-  hideEmbedControls: false,
-};
+import { getPortSetting, isAvailable } from "../feature/bili-bridge";
+import { isCssValue } from "../modules/parse-unit";
+import type MediaExtended from "../mx-main";
+import { hideYtbRecommClass } from "./misc";
+import { PlyrControls, PlyrControlsSetting } from "./plyr-controls";
+import { MxSettings } from "./settings";
 
 export type SizeSettings = {
   embedMaxHeight: string;
@@ -79,17 +13,12 @@ export type SizeSettings = {
   plyrControls: Record<PlyrControls, boolean>;
 };
 
-export const recToPlyrControls = (rec: Record<PlyrControls, boolean>) =>
-  ([...Object.entries(rec)] as [PlyrControls, boolean][])
-    .filter((v) => v[1])
-    .map((v) => v[0]);
-
 type option = {
   k: keyof MxSettings;
   name: string;
   desc: string | ((el: DocumentFragment) => void);
 };
-export class MESettingTab extends PluginSettingTab {
+export default class MESettingTab extends PluginSettingTab {
   plugin: MediaExtended;
 
   constructor(app: App, plugin: MediaExtended) {

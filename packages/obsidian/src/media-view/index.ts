@@ -22,16 +22,16 @@ import {
   WorkspaceLeaf,
 } from "obsidian";
 
-import { insertToCursor, mainpart } from "./misc";
 import {
   getLink,
   getMediaInfo,
   InternalMediaInfo,
   isObsidianMediaInfo,
   MediaInfo,
-} from "./modules/media-info";
-import { getContainer, getPlyr } from "./modules/plyr-setup";
-import MediaExtended from "./mx-main";
+} from "../base/media-info";
+import { insertToCursor, mainpart } from "../misc";
+import type MediaExtended from "../mx-main";
+import { getContainer, getPlyr } from "../plyr/plyr-setup";
 
 export const MEDIA_VIEW_TYPE = "media-view";
 

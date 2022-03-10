@@ -4,7 +4,7 @@ import { around } from "monkey-around";
 import { EventHelper, Keymap } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
 
-import { getInternalMediaInfo, getMediaInfo } from "../modules/media-info";
+import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
 import type MediaExtended from "../mx-main";
 import OpenLink from "./base";
 

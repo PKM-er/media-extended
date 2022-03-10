@@ -1,18 +1,17 @@
 import "../style/ratio.less";
 
-import { HashTool, MediaInfoType } from "mx-lib";
+import { HashTool, HostMediaInfo, MediaInfoType } from "mx-lib";
 import { MarkdownRenderChild } from "obsidian";
 import type Plyr from "plyr";
 
+import { MediaInfo } from "../base/media-info";
+import { isAvailable } from "../feature/bili-bridge";
+import { MediaResource } from "../feature/subtitle";
 import { setRatioWidth } from "../misc";
-import { isAvailable } from "../modules/bili-bridge";
-import { setupIFrame } from "../modules/iframe";
-import { MediaInfo } from "../modules/media-info";
 import { isCssValue } from "../modules/parse-unit";
-import { setupPlaceholder } from "../modules/placeholder";
-import { getContainer, getPlyr } from "../modules/plyr-setup";
-import { MediaResource } from "../modules/subtitle";
 import type MediaExtended from "../mx-main";
+import { getContainer, getPlyr } from "../plyr/plyr-setup";
+import { setupPlaceholder } from "./placeholder";
 
 const getPlayer = async (
   info: MediaInfo,
@@ -136,4 +135,22 @@ const setRatio = (player: Plyr, maxHeight: string) => {
       setRatioWidth(container, maxHeight, 16 / 9);
     });
   }
+};
+
+const setupIFrame = (info: HostMediaInfo) => {
+  if (info.iframe)
+    return createEl("iframe", {
+      cls: "bili-iframe",
+      attr: {
+        src: info.iframe.toString(),
+        scrolling: "no",
+        border: "0",
+        frameborder: "no",
+        framespacing: "0",
+        allowfullscreen: false,
+        sandbox:
+          "allow-forms allow-presentation allow-same-origin allow-scripts allow-modals",
+      },
+    });
+  else throw new TypeError("iframe url missing in info");
 };
