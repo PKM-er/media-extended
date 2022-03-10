@@ -1,0 +1,140 @@
+.button() {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  & > svg {
+    /** `absolute` so icons are placed on top of each other. */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: opacity ease 150ms;
+  }
+}
+
+vds-media-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    vds-play-button {
+      .button();
+      &[media-paused] .pause {
+        opacity: 0;
+      }
+      &:not([media-paused]) .play {
+        opacity: 0;
+      }
+    }
+    vds-fullscreen-button {
+      .button();
+      &[media-fullscreen] .expand {
+        opacity: 0;
+      }
+      &:not([media-fullscreen]) .minimize {
+        opacity: 0;
+      }
+    }
+    vds-time-slider {
+      .slider();
+			vds-slider-value-text {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				position: absolute;
+				/* slightly above the thumb. */
+				top: -32px;
+				left: 0;
+				/* fixed width so value updates don't re-size. */
+				width: calc(var(--thumb-width) + 8px);
+				opacity: 0;
+				transition: opacity ease 150ms;
+				/* re-position to center. */
+				transform: translateX(-50%);
+				will-change: left;
+				color: #000;
+				border-radius: 2px;
+				background-color: #fff;
+			}
+			
+			/* position text at pointer when device pointing in slider. */
+			&[pointing] vds-slider-value-text {
+				opacity: 1;
+				left: var(--vds-slider-pointer-percent);
+			}
+			
+    }
+  }
+}
+
+.slider() {
+  --height: 48px;
+  --thumb-width: 24px;
+  --track-height: 4px;
+
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: var(--height);
+  /** Prevent thumb flowing out of slider. */
+  margin: 0 calc(var(--thumb-width) / 2);
+  cursor: pointer;
+
+  & .slider-track {
+    background-color: #6366f1;
+    width: 100%;
+    height: var(--track-height);
+    position: absolute;
+    top: 50%;
+    left: 0;
+    z-index: 0;
+    transform: translateY(-50%);
+  }
+
+  & .slider-track.fill {
+    background-color: #a5b4fc;
+    transform-origin: left center;
+    transform: translateY(-50%) scaleX(var(--vds-slider-fill-rate));
+    will-change: transform;
+    z-index: 1; /** above track. */
+  }
+
+  & .slider-thumb-container {
+    position: absolute;
+    top: 0;
+    left: var(--vds-slider-fill-percent);
+    width: var(--thumb-width);
+    height: 100%;
+    transform: translateX(-50%); /** re-center along x-axis. */
+    z-index: 2; /** above track fill. */
+    will-change: left;
+  }
+
+  &[dragging] .slider-thumb-container {
+    left: var(--vds-slider-pointer-percent);
+  }
+
+  & .slider-thumb {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: var(--thumb-width);
+    height: var(--thumb-width);
+    border-radius: 9999px;
+    background-color: #fff;
+    transform: translateY(-50%);
+  }
+}

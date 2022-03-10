@@ -11,6 +11,7 @@ import registerEmbedHandlers from "./embed";
 import { setupRec } from "./feature/audio-rec";
 import registerLinkHandlers from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
+import { MediaView as MediaView2, VIEW_TYPE } from "./media-view-v2";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -124,6 +125,7 @@ export default class MediaExtended extends Plugin {
     const exts = getExts();
     this.app.viewRegistry.unregisterExtensions(exts);
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
+    this.registerView(VIEW_TYPE, (leaf) => new MediaView2(leaf));
     this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_TYPE);
   }
 

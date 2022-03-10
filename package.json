@@ -1,9 +1,17 @@
 {
   "name": "@aidenlx/media-extended",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/preact",
+      "**/preact-render-to-string",
+      "**/react",
+      "**/react-dom"
+    ]
+  },
   "devDependencies": {
     "cz-conventional-changelog": "^3.3.0"
   },
