@@ -1,22 +1,30 @@
 import type { AudioPlayerElement, VideoPlayerElement } from "@vidstack/player";
-import { Scope, View, WorkspaceLeaf } from "obsidian";
+import {
+  App,
+  MarkdownRenderChild,
+  Scope,
+  TFile,
+  View,
+  WorkspaceLeaf,
+} from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { getLink, InternalMediaInfo } from "../base/media-info";
 import Player from "./player";
 
 export const VIEW_TYPE = "media-view-v2";
 export default class MediaView extends View {
   player: VideoPlayerElement | AudioPlayerElement | null = null;
   _scope: Scope;
-  /** implicitly called by leaf  */
+  // no need to manage this manually,
+  // as it's implicitly called and handled by the WorkspaceLeaf
   get scope() {
     return this._scope;
   }
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
-    this._scope = new Scope(this.app.scope);
-    this.registerKeyboardEvents();
+    this._scope = getPlayerKeyboardScope(new Scope(this.app.scope), this);
   }
   getViewType(): string {
     return VIEW_TYPE;
@@ -36,47 +44,75 @@ export default class MediaView extends View {
       />,
       this.containerEl,
     );
-    //
-    // no need for this when it's inside a WorkspaceLeaf, as it's automatically pushed
-    //
-    // this.registerDomEvent(this.containerEl, "focusin", (evt) => {
-    //   console.log("in", evt);
-    //   this.pushScope();
-    // });
-    // this.registerDomEvent(this.containerEl, "focusout", (evt) => {
-    //   console.log("out", evt);
-    //   this.popScope();
-    // });
-    // this.pushScope();
   }
   protected async onClose() {
     ReactDOM.unmountComponentAtNode(this.containerEl);
-    // this.popScope();
   }
 
-  // pushScope() {
-  //   this.app.keymap.pushScope(this.scope);
-  // }
-  // popScope() {
-  //   this.app.keymap.popScope(this.scope);
-  // }
-  registerKeyboardEvents() {
-    const toRegister: Parameters<Scope["register"]>[] = [
-      [[], "ArrowLeft", () => ((this.player!.currentTime -= 5), false)],
-      [[], "ArrowRight", () => ((this.player!.currentTime += 5), false)],
-      [[], "ArrowUp", () => ((this.player!.volume += 0.1), false)],
-      [[], "ArrowDown", () => ((this.player!.volume -= 0.1), false)],
-      [
-        [],
-        " ",
-        () => (
-          this.player!.paused ? this.player!.play() : this.player!.pause(),
-          false
-        ),
-      ],
-    ];
-    for (const params of toRegister) {
-      this._scope.register(...params);
-    }
+  static displayInEl(
+    info: InternalMediaInfo,
+    app: App,
+    containerEl: HTMLElement,
+  ): PlayerRenderChild {
+    return new PlayerRenderChild(info, app, containerEl);
+  }
+}
+
+const getPlayerKeyboardScope = (
+  scope: Scope,
+  rec: Record<"player", VideoPlayerElement | AudioPlayerElement | null>,
+) => {
+  const toRegister: Parameters<Scope["register"]>[] = [
+    [[], "ArrowLeft", () => ((rec.player!.currentTime -= 5), false)],
+    [[], "ArrowRight", () => ((rec.player!.currentTime += 5), false)],
+    [[], "ArrowUp", () => ((rec.player!.volume += 0.1), false)],
+    [[], "ArrowDown", () => ((rec.player!.volume -= 0.1), false)],
+    [
+      [],
+      " ",
+      () => (
+        rec.player!.paused ? rec.player!.play() : rec.player!.pause(), false
+      ),
+    ],
+  ];
+  for (const params of toRegister) {
+    scope.register(...params);
+  }
+  return scope;
+};
+
+export class PlayerRenderChild extends MarkdownRenderChild {
+  player: VideoPlayerElement | AudioPlayerElement | null = null;
+
+  public inEditor = false;
+
+  constructor(
+    private info: InternalMediaInfo,
+    private app: App,
+    containerEl: HTMLElement,
+  ) {
+    super(containerEl);
+  }
+  scope = getPlayerKeyboardScope(new Scope(this.app.scope), this);
+  onload(): void {
+    ReactDOM.render(
+      <Player
+        src={getLink(this.info, this.app.vault)}
+        view={this}
+        nativeControls={this.inEditor}
+        onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
+        onBlur={this.inEditor ? undefined : this.popScope.bind(this)}
+      />,
+      this.containerEl,
+    );
+  }
+  pushScope() {
+    this.app.keymap.pushScope(this.scope);
+  }
+  popScope() {
+    this.app.keymap.popScope(this.scope);
+  }
+  onunload(): void {
+    ReactDOM.unmountComponentAtNode(this.containerEl);
   }
 }

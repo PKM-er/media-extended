@@ -1,7 +1,9 @@
-import { MarkdownPostProcessor, MarkdownPostProcessorContext } from "obsidian";
+import { MarkdownPostProcessor } from "obsidian";
 
-import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
+import { getMediaInfo } from "../base/media-info";
+import { CONTROLS_ENABLED_CLASS } from "../media-view-v2";
 import type MediaExtended from "../mx-main";
+import { ElementWithRenderChild } from "./base";
 import getPlayer from "./get-player";
 
 const getEmbedProcessor = (
@@ -12,36 +14,29 @@ const getEmbedProcessor = (
     type === "internal"
       ? "span.internal-embed, div.internal-embed"
       : "img[referrerpolicy]";
-  const getInfoFromEl: (
-    warpper: HTMLElement,
-    ctx: MarkdownPostProcessorContext,
-  ) => ReturnType<typeof getMediaInfo> =
-    type === "internal"
-      ? async (el, ctx) => {
-          const linktext = el.getAttr("src");
-          if (!linktext) return null;
-          return getInternalMediaInfo(
-            { linktext, sourcePath: ctx.sourcePath },
-            plugin.app,
-          );
-        }
-      : async (el) => {
-          const src = (el as HTMLImageElement).src;
-          if (!src) return null;
-          return getMediaInfo(src, plugin.app);
-        };
   return async (secEl, ctx) => {
     for (const warpper of secEl.querySelectorAll(selector)) {
-      const elToGetInfo = warpper as HTMLElement;
-
-      const info = await getInfoFromEl(elToGetInfo, ctx);
-      if (!info) return;
-      const [playerEl, children] = await getPlayer(info, elToGetInfo, plugin);
-      children.forEach(ctx.addChild.bind(ctx));
       if (type === "internal") {
-        elToGetInfo.empty();
-        elToGetInfo.append(playerEl);
+        warpper.addClass(CONTROLS_ENABLED_CLASS);
+        let observer = new MutationObserver(() => {
+          let child;
+          if (
+            (warpper as HTMLElement).hasClass("is-loaded") &&
+            (child = (warpper as ElementWithRenderChild).renderChild)
+          ) {
+            ctx.addChild(child);
+            observer.disconnect();
+          }
+        });
+        observer.observe(warpper, { attributeFilter: ["class"] });
       } else {
+        const elToGetInfo = warpper as HTMLImageElement;
+        const src = elToGetInfo.src;
+        if (!src) return;
+        const info = await getMediaInfo(src, plugin.app);
+        if (!info) return;
+        const [playerEl, children] = await getPlayer(info, elToGetInfo, plugin);
+        children.forEach(ctx.addChild.bind(ctx));
         elToGetInfo.replaceWith(
           createSpan(
             {

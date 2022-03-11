@@ -126,7 +126,7 @@ export const getInternalMediaInfo = async (
     if (!media || !(media instanceof TFile)) return null;
     file = media;
   }
-  return getMediaInfo({ file, hash }, app);
+  return getMediaInfo({ file, hash }, app) as Promise<InternalMediaInfo | null>;
 };
 
 /**
