@@ -7,7 +7,6 @@ import {
   MediaType,
   ObsidianMediaInfo,
 } from "./defs";
-import { getMediaType } from "./media-type";
 
 export type HostInfoHandler = (src: URL) => HostMediaInfo | null;
 
@@ -27,6 +26,7 @@ export type ObsidianInfoHandler<T extends ObsidianMediaInfo> = (
  */
 export const getMediaInfo = async <Ob extends ObsidianMediaInfo>(
   src: URL | { file: TFile; hash: string },
+  getMediaType: (src: string | URL | { extension: string }) => MediaType | null,
   handlers?: {
     obsidian?: ObsidianInfoHandler<Ob>;
     hosts?: HostInfoHandler[];

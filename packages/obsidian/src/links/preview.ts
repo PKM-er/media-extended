@@ -28,24 +28,24 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
           fallback();
         }
       },
-    onInternalLinkClick: (next) =>
-      function (this: EventHelper, evt, target, linktext, ...args) {
-        evt.preventDefault();
-        const fallback = () => next.call(this, evt, target, linktext, ...args);
-        if (!plugin.settings.timestampLink) fallback();
-        try {
-          getInternalMediaInfo(
-            { linktext, sourcePath: this.getFile().path },
-            this.app,
-          ).then((info) => {
-            if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
-            else fallback();
-          });
-        } catch (error) {
-          console.error(error);
-          fallback();
-        }
-      },
+    // onInternalLinkClick: (next) =>
+    //   function (this: EventHelper, evt, target, linktext, ...args) {
+    //     evt.preventDefault();
+    //     const fallback = () => next.call(this, evt, target, linktext, ...args);
+    //     if (!plugin.settings.timestampLink) fallback();
+    //     try {
+    //       getInternalMediaInfo(
+    //         { linktext, sourcePath: this.getFile().path },
+    //         this.app,
+    //       ).then((info) => {
+    //         if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
+    //         else fallback();
+    //       });
+    //     } catch (error) {
+    //       console.error(error);
+    //       fallback();
+    //     }
+    //   },
   });
   plugin.register(() => {
     delete EventHelper.__MX_PATCHED__;

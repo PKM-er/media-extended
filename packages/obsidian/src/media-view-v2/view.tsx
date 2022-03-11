@@ -1,52 +1,125 @@
 import type { AudioPlayerElement, VideoPlayerElement } from "@vidstack/player";
 import {
   App,
+  Component,
+  debounce,
+  EditableFileView,
+  KeymapEventHandler,
   MarkdownRenderChild,
   Scope,
   TFile,
-  View,
   WorkspaceLeaf,
 } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { getLink, InternalMediaInfo } from "../base/media-info";
+import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
+import { ExtensionAccepted } from "../base/media-type";
+import { MediaViewEvents } from "./events";
+import getPlayerKeymaps from "./keymap";
 import Player from "./player";
 
 export const VIEW_TYPE = "media-view-v2";
-export default class MediaView extends View {
+
+interface PlayerComponent extends Component {
+  scope: Scope;
+  keymap: KeymapEventHandler[] | null;
+  events: MediaViewEvents;
+  player: VideoPlayerElement | AudioPlayerElement | null;
+}
+
+export default class MediaView
+  extends EditableFileView
+  implements PlayerComponent
+{
   player: VideoPlayerElement | AudioPlayerElement | null = null;
-  _scope: Scope;
   // no need to manage this manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
-  get scope() {
-    return this._scope;
+  scope = new Scope(this.app.scope);
+  keymap: KeymapEventHandler[] | null = null;
+
+  events = new MediaViewEvents();
+
+  _hash = "";
+  _file: TFile | null = null;
+  private async _getInfo(): Promise<InternalMediaInfo | null> {
+    return this._file
+      ? ((await getMediaInfo(
+          { file: this._file, hash: this._hash },
+          this.app,
+        )) as InternalMediaInfo)
+      : null;
+  }
+
+  public triggerInfoUpdate = debounce(
+    async () => {
+      const info = await this._getInfo();
+      if (!info) return;
+      this.events.trigger("file-loaded", info);
+      console.log("triggerd", info);
+    },
+    200,
+    true,
+  );
+  public async setInfo(info: { hash?: string; file?: TFile }, trigger = true) {
+    let shouldUpdate = false;
+    const { hash, file = this.file } = info;
+    if (hash && this._hash !== hash) {
+      this._hash = hash;
+      shouldUpdate = true;
+    }
+    if (file.path !== this._file?.path) {
+      this._file = file;
+      shouldUpdate = true;
+    }
+    if (trigger && shouldUpdate) {
+      this.triggerInfoUpdate();
+    }
+  }
+
+  canAcceptExtension(ext: string): boolean {
+    for (const exts of ExtensionAccepted.values()) {
+      if (exts.includes(ext)) return true;
+    }
+    return false;
   }
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
-    this._scope = getPlayerKeyboardScope(new Scope(this.app.scope), this);
+    registerPlayerEvents(this);
   }
+
+  setEphemeralState(state: any): void {
+    const { subpath } = state;
+    this.setInfo({ hash: subpath });
+    super.setEphemeralState(state);
+  }
+
   getViewType(): string {
     return VIEW_TYPE;
   }
-  getDisplayText(): string {
-    return "media";
-  }
-  protected async onOpen() {
+
+  loadingPlayer!: Promise<void>;
+  async onLoadFile(file: TFile): Promise<void> {
+    super.onLoadFile(file);
+    this.setInfo({ file }, false);
+    const info = await this._getInfo();
+    if (!info) return;
     ReactDOM.render(
-      <Player
-        src={
-          new URL(
-            `app://local/%2FUsers%2Faidenlx%2FDocuments%2FVaults%2FMed%2F_%E9%99%84%E4%BB%B6%2F%E8%A1%80%E5%8E%8B%E6%B5%8B%E9%87%8F%2FS2_9.mp4`,
-          )
-        }
-        view={this}
-      />,
-      this.containerEl,
+      <Player info={info} events={this.events} />,
+      this.contentEl,
     );
   }
-  protected async onClose() {
-    ReactDOM.unmountComponentAtNode(this.containerEl);
+  async onClose() {
+    ReactDOM.unmountComponentAtNode(this.contentEl);
+    super.onClose();
+  }
+
+  async onRename(file: TFile) {
+    this.events.trigger(
+      "file-loaded",
+      (await getMediaInfo({ file, hash: "" }, this.app)) as InternalMediaInfo,
+    );
+    return super.onRename(file);
   }
 
   static displayInEl(
@@ -58,31 +131,36 @@ export default class MediaView extends View {
   }
 }
 
-const getPlayerKeyboardScope = (
-  scope: Scope,
-  rec: Record<"player", VideoPlayerElement | AudioPlayerElement | null>,
-) => {
-  const toRegister: Parameters<Scope["register"]>[] = [
-    [[], "ArrowLeft", () => ((rec.player!.currentTime -= 5), false)],
-    [[], "ArrowRight", () => ((rec.player!.currentTime += 5), false)],
-    [[], "ArrowUp", () => ((rec.player!.volume += 0.1), false)],
-    [[], "ArrowDown", () => ((rec.player!.volume -= 0.1), false)],
-    [
-      [],
-      " ",
-      () => (
-        rec.player!.paused ? rec.player!.play() : rec.player!.pause(), false
-      ),
-    ],
-  ];
-  for (const params of toRegister) {
-    scope.register(...params);
-  }
-  return scope;
+const registerPlayerEvents = (component: PlayerComponent) => {
+  // let loaded: () => void;
+  // component.loadingPlayer = new Promise<void>((resolve) => (loaded = resolve));
+  component.registerEvent(
+    component.events.on("player-init", (player) => {
+      component.player = player;
+      component.keymap = getPlayerKeymaps(component.scope, player);
+      // console.log(component.loadingPlayer, loaded);
+      // loaded();
+    }),
+  );
+  component.registerEvent(
+    component.events.on("player-destroy", () => {
+      component.player = null;
+      if (component.keymap) {
+        component.keymap.forEach((k) => component.scope.unregister(k));
+        component.keymap = null;
+      }
+    }),
+  );
 };
 
-export class PlayerRenderChild extends MarkdownRenderChild {
+export class PlayerRenderChild
+  extends MarkdownRenderChild
+  implements PlayerComponent
+{
   player: VideoPlayerElement | AudioPlayerElement | null = null;
+  scope = new Scope(this.app.scope);
+  events = new MediaViewEvents();
+  keymap: KeymapEventHandler[] | null = null;
 
   public inEditor = false;
 
@@ -92,13 +170,15 @@ export class PlayerRenderChild extends MarkdownRenderChild {
     containerEl: HTMLElement,
   ) {
     super(containerEl);
+    registerPlayerEvents(this);
   }
-  scope = getPlayerKeyboardScope(new Scope(this.app.scope), this);
+
+  loadingPlayer!: Promise<void>;
   onload(): void {
     ReactDOM.render(
       <Player
-        src={getLink(this.info, this.app.vault)}
-        view={this}
+        info={this.info}
+        events={this.events}
         nativeControls={this.inEditor}
         onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
         onBlur={this.inEditor ? undefined : this.popScope.bind(this)}

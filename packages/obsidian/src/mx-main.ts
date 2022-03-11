@@ -4,14 +4,17 @@ import "./style/ytb.less";
 import "./style/caption-fix.less";
 
 import assertNever from "assert-never";
-import { ExtensionAccepted, MediaType } from "mx-lib/";
 import { Plugin } from "obsidian";
 
+import { ExtensionAccepted, MediaType } from "./base/media-type";
 import registerEmbedHandlers from "./embed";
 import { setupRec } from "./feature/audio-rec";
 import registerLinkHandlers from "./links";
 import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
-import { MediaView as MediaView2, VIEW_TYPE } from "./media-view-v2";
+import {
+  MediaView as MediaView2,
+  VIEW_TYPE as MEDIA_VIEW_2_TYPE,
+} from "./media-view-v2";
 import {
   DEFAULT_SETTINGS,
   hideYtbRecommClass,
@@ -125,8 +128,8 @@ export default class MediaExtended extends Plugin {
     const exts = getExts();
     this.app.viewRegistry.unregisterExtensions(exts);
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
-    this.registerView(VIEW_TYPE, (leaf) => new MediaView2(leaf));
-    this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_TYPE);
+    this.registerView(MEDIA_VIEW_2_TYPE, (leaf) => new MediaView2(leaf));
+    this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_2_TYPE);
   }
 
   unregisterExtensions() {

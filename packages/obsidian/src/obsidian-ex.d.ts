@@ -36,8 +36,8 @@ declare module "obsidian" {
   }
 
   interface FileView {
-    onDelete(file: TFile): void;
-    onRename(file: TFile): void;
+    onDelete(file: TFile): Promise<void>;
+    onRename(file: TFile): Promise<void>;
   }
 
   interface WorkspaceSplit {

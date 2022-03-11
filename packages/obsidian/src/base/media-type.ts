@@ -1,4 +1,5 @@
-import { MediaType } from "./defs";
+import { MediaType } from "mx-lib/src/defs";
+export { MediaType };
 
 export const ExtensionAccepted: Map<MediaType, string[]> = new Map([
   [MediaType.Audio, ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],

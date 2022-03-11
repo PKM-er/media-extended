@@ -6,13 +6,14 @@ import {
   MediaType,
   ObsidianMediaInfo,
 } from "mx-lib";
-import { ObsidianInfoHandler } from "mx-lib/src/media-info";
 import { App, parseLinktext, Platform, TFile, Vault } from "obsidian";
 
 import { getSubtitles, trackInfo } from "../feature/subtitle";
 import { getSubtitleTracks } from "../feature/subtitle";
 import { getBiliRedirectUrl } from "../misc";
+import { getMediaType } from "./media-type";
 interface InternalMediaInfoInterface extends ObsidianMediaInfo {
+  resourcePath: string;
   trackInfo?: trackInfo;
   updateTrackInfo(vault: Vault): Promise<trackInfo | null>;
   getSrcFile(vault: Vault): TFile;
@@ -30,6 +31,9 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
   subtitles: string[];
   hash: string;
   trackInfo?: trackInfo;
+  public get resourcePath() {
+    return this.vault.getResourcePath(this.getSrcFile()) + this.hash;
+  }
 
   private get vault(): Vault {
     return this.app.vault;
@@ -103,7 +107,7 @@ export const getMediaInfo = async (
       return null;
     }
   } else source = src;
-  return getMediaInfo0(source, {
+  return getMediaInfo0(source, getMediaType, {
     obsidian: (file, hash, type) => {
       return new InternalMediaInfo([file, hash, type], app);
     },
@@ -132,22 +136,9 @@ export const getInternalMediaInfo = async (
 /**
  * get links that is safe to use in obsidian
  */
-export const getLink = (
-  ...args: [info: InternalMediaInfo, vault: Vault] | [info: DirectLinkInfo]
-): URL => {
-  const [info, vault] = args;
-  if (info.from === MediaInfoType.Obsidian) {
-    if (!vault) throw new Error("vault not provided");
-    const { src, hash } = info;
-    const file = vault.getAbstractFileByPath(src);
-    if (file && file instanceof TFile) {
-      const resourcePath = vault.getResourcePath(file);
-      return new URL(resourcePath + hash);
-    } else throw new Error("no file found for path: " + src);
-  } else {
-    const { src } = info;
-    if (src.protocol === "file:")
-      return new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
-    else return src;
-  }
+export const getLink = (info: DirectLinkInfo): URL => {
+  const { src } = info;
+  if (src.protocol === "file:")
+    return new URL(src.href.replace(/^file:\/\/\//, "app://local/"));
+  else return src;
 };

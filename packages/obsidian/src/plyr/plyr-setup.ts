@@ -182,7 +182,7 @@ export const infoToSource = (
       else
         return {
           type,
-          sources: [{ src: getLink(info, vault).href }],
+          sources: [{ src: info.resourcePath }],
           tracks: info.trackInfo ? info.trackInfo.tracks : undefined,
         };
     } else {
