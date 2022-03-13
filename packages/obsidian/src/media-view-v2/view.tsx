@@ -17,7 +17,7 @@ import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
 import { ExtensionAccepted } from "../base/media-type";
 import { MediaViewEvents } from "./events";
 import getPlayerKeymaps from "./keymap";
-import Player from "./player";
+import Player, { ShowControls } from "./player";
 
 export const VIEW_TYPE = "media-view-v2";
 
@@ -179,7 +179,7 @@ export class PlayerRenderChild
       <Player
         info={this.info}
         events={this.events}
-        nativeControls={this.inEditor}
+        controls={this.inEditor ? ShowControls.native : ShowControls.none}
         onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
         onBlur={this.inEditor ? undefined : this.popScope.bind(this)}
       />,

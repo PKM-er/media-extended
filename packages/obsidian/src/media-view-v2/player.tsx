@@ -9,14 +9,17 @@ import type {
   VideoPlayerElement,
 } from "@vidstack/player";
 import assertNever from "assert-never";
+import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";
+import { parse as parseQS } from "query-string";
 import React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { InternalMediaInfo } from "../base/media-info";
 import { MediaType } from "../base/media-type";
 import PlayerControls from "./controls";
 import { MediaViewEvents } from "./events";
+import { is, useFrag, useHashProps } from "./hash-tool";
 
 declare global {
   namespace JSX {
@@ -28,10 +31,15 @@ declare global {
   }
 }
 
+export const enum ShowControls {
+  none,
+  native,
+  full,
+}
 interface PlayerProps {
   info: InternalMediaInfo;
   events?: MediaViewEvents;
-  nativeControls?: boolean;
+  controls?: ShowControls;
   onFocus?: React.FocusEventHandler<VideoPlayerElement | AudioPlayerElement>;
   onBlur?: React.FocusEventHandler<VideoPlayerElement | AudioPlayerElement>;
 }
@@ -39,7 +47,7 @@ interface PlayerProps {
 const Player = ({
   info,
   events,
-  nativeControls = false,
+  controls = ShowControls.full,
   onFocus,
   onBlur,
 }: PlayerProps) => {
@@ -50,7 +58,6 @@ const Player = ({
   useEffect(() => {
     let refs: EventRef[] = [];
     if (events) {
-      console.log("init", playerRef.current);
       if (playerRef.current) {
         events.trigger("player-init", playerRef.current);
       } else {
@@ -58,8 +65,6 @@ const Player = ({
       }
       refs.push(
         events.on("file-loaded", (info) => {
-          // check info different here
-          console.log("recieved", info);
           setMediaInfo(info);
         }),
       );
@@ -67,35 +72,46 @@ const Player = ({
     return () => {
       events && refs.forEach(events.offref.bind(events));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const params = {
-    tabIndex: 0,
-    src: mediaInfo?.resourcePath,
-    controls: nativeControls,
-    onFocus,
-    onBlur,
-  };
-  const ui = (
-    <vds-media-ui slot="ui">
-      {!nativeControls && <PlayerControls />}
-    </vds-media-ui>
-  );
+  }, [events]);
+
+  const timeSpan = useMemo(() => parseTF(mediaInfo.hash), [mediaInfo.hash]);
+  const hashQuery = useMemo(() => parseQS(mediaInfo.hash), [mediaInfo.hash]);
+  const controlsEnabled = useMemo(() => is(hashQuery, "controls"), [hashQuery]);
+
+  useFrag(timeSpan, playerRef);
+  useHashProps(hashQuery, playerRef);
+  if (controls === ShowControls.none && controlsEnabled) {
+    controls = ShowControls.full;
+  }
+
+  const playerProps = useMemo(
+      () => ({
+        ref: playerRef as any,
+        tabIndex: 0,
+        src: mediaInfo.resourcePath,
+        controls: controls === ShowControls.native,
+        onFocus,
+        onBlur,
+      }),
+      // update only when vault path changed
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [mediaInfo.src, controls, onFocus, onBlur],
+    ),
+    ui = useMemo(
+      () => (
+        <vds-media-ui slot="ui">
+          {controls === ShowControls.full && <PlayerControls />}
+        </vds-media-ui>
+      ),
+      [controls],
+    );
 
   switch (mediaInfo.type) {
     case MediaType.Audio:
-      return (
-        <vds-audio-player ref={playerRef as any} {...params}>
-          {ui}
-        </vds-audio-player>
-      );
+      return <vds-audio-player {...playerProps}>{ui}</vds-audio-player>;
     case MediaType.Video:
     case MediaType.Unknown:
-      return (
-        <vds-video-player ref={playerRef as any} {...params}>
-          {ui}
-        </vds-video-player>
-      );
+      return <vds-video-player {...playerProps}>{ui}</vds-video-player>;
     default:
       assertNever(mediaInfo.type);
   }

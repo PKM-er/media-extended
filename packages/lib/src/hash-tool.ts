@@ -36,9 +36,7 @@ function onplay(this: Player_TF) {
     timeSpan: { start, end },
     currentTime,
   } = this;
-  console.log(start, end, currentTime);
   if (currentTime > end || currentTime < start) {
-    console.log("yes");
     this.currentTime = start;
   }
 }

@@ -32,6 +32,9 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
   hash: string;
   trackInfo?: trackInfo;
   public get resourcePath() {
+    return this.vault.getResourcePath(this.getSrcFile());
+  }
+  public get resourcePathWithHash() {
     return this.vault.getResourcePath(this.getSrcFile()) + this.hash;
   }
 
