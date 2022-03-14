@@ -1,4 +1,4 @@
-import { AudioPlayerElement, VideoPlayerElement } from "@vidstack/player";
+import type { AudioPlayerElement, VideoPlayerElement } from "@aidenlx/player";
 import { KeymapEventHandler, KeymapEventListener, Scope } from "obsidian";
 
 const getPlayerKeymaps = (

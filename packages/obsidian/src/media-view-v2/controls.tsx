@@ -1,30 +1,34 @@
-import "@vidstack/player/define/vds-play-button.js";
-import "@vidstack/player/define/vds-time-slider.js";
-import "@vidstack/player/define/vds-fullscreen-button.js";
-import "@vidstack/player/define/vds-slider-value-text.js";
+import "@aidenlx/player/define/vds-play-button.js";
+import "@aidenlx/player/define/vds-timespan-slider.js";
+import "@aidenlx/player/define/vds-fullscreen-button.js";
+import "@aidenlx/player/define/vds-slider-value-text.js";
 
 import type {
   FullscreenButtonElement,
   PlayButtonElement,
   SliderElement,
   SliderValueTextElement,
-} from "@vidstack/player";
+} from "@aidenlx/player";
 import { setIcon } from "obsidian";
 import React from "react";
 import { useEffect, useRef } from "react";
-
 declare global {
   namespace JSX {
     interface IntrinsicElements {
       "vds-play-button": React.HTMLProps<PlayButtonElement>;
-      "vds-time-slider": React.HTMLProps<SliderElement>;
+      "vds-timespan-slider": React.HTMLProps<SliderElement>;
       "vds-fullscreen-button": React.HTMLProps<FullscreenButtonElement>;
       "vds-slider-value-text": Partial<SliderValueTextElement>;
     }
   }
 }
 
-const PlayerControls = () => {
+export interface ControlsProps {
+  min?: number;
+  max?: number;
+}
+
+const PlayerControls = ({ min, max }: ControlsProps) => {
   const playBtn = useIcon<PlayButtonElement>(["play", "pause"]);
   const fullscreenBtn = useIcon<FullscreenButtonElement>([
     "expand",
@@ -33,7 +37,7 @@ const PlayerControls = () => {
   return (
     <div className="controls">
       <vds-play-button ref={playBtn} />
-      <vds-time-slider>
+      <vds-timespan-slider min={min} max={max}>
         <vds-slider-value-text
           type="pointer"
           format="time"
@@ -43,7 +47,7 @@ const PlayerControls = () => {
         <div className="slider-thumb-container">
           <div className="slider-thumb"></div>
         </div>
-      </vds-time-slider>
+      </vds-timespan-slider>
       <vds-fullscreen-button ref={fullscreenBtn} />
     </div>
   );

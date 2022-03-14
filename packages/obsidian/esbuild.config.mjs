@@ -33,6 +33,25 @@ const cmModules = [
   "@codemirror/tooltip",
   "@codemirror/view",
 ];
+import { promises } from "fs";
+const { readFile } = promises;
+
+/**
+ * @type {import("esbuild").Plugin}
+ */
+const patchVidPlayer = {
+  name: "obsidian-plugin",
+  setup: (build) => {
+    build.onLoad(
+      { filter: /vid-player-src\/src\/.+\.ts$/ },
+      async ({ path }) => {
+        let code = await readFile(path, "utf8");
+        code = code.replace(/__DEV__/g, isProd ? "false" : "true");
+        return { contents: code, loader: "ts" };
+      },
+    );
+  },
+};
 
 try {
   await build({
@@ -50,7 +69,7 @@ try {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: "build/main.js",
-    plugins: [lessLoader(), obPlugin()],
+    plugins: [lessLoader(), obPlugin(), patchVidPlayer],
   });
 } catch (err) {
   console.error(err);

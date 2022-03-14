@@ -1,4 +1,4 @@
-import type { AudioPlayerElement, VideoPlayerElement } from "@vidstack/player";
+import type { AudioPlayerElement, VideoPlayerElement } from "@aidenlx/player";
 import { EventRef, Events } from "obsidian";
 
 import { InternalMediaInfo } from "../base/media-info";

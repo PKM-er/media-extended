@@ -3,7 +3,7 @@ import type {
   MediaPlayingEvent,
   MediaTimeUpdateEvent,
   VideoPlayerElement,
-} from "@vidstack/player";
+} from "@aidenlx/player";
 import type { TimeSpan } from "mx-lib";
 import type { ParsedQuery } from "query-string";
 import { useEffect } from "react";

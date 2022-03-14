@@ -3,7 +3,7 @@
   "compilerOptions": {
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",
-    "types": ["@vidstack/player/globals", "node"],
+    "types": ["@aidenlx/player/globals", "node"],
     "experimentalDecorators": true,
     "skipLibCheck": true
   },

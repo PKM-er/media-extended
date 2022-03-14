@@ -1,13 +1,13 @@
-import "@vidstack/player/define/vds-audio-player.js";
-import "@vidstack/player/define/vds-video-player.js";
-import "@vidstack/player/define/vds-media-ui.js";
+import "@aidenlx/player/define/vds-audio-player.js";
+import "@aidenlx/player/define/vds-video-player.js";
+import "@aidenlx/player/define/vds-media-ui.js";
 import "./player.less";
 
 import type {
   AudioPlayerElement,
   MediaUiElement,
   VideoPlayerElement,
-} from "@vidstack/player";
+} from "@aidenlx/player";
 import assertNever from "assert-never";
 import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";
@@ -100,10 +100,12 @@ const Player = ({
     ui = useMemo(
       () => (
         <vds-media-ui slot="ui">
-          {controls === ShowControls.full && <PlayerControls />}
+          {controls === ShowControls.full && (
+            <PlayerControls min={timeSpan?.start} max={timeSpan?.end} />
+          )}
         </vds-media-ui>
       ),
-      [controls],
+      [controls, timeSpan?.end, timeSpan?.start],
     );
 
   switch (mediaInfo.type) {

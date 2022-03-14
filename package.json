@@ -4,12 +4,6 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**/preact",
-      "**/preact-render-to-string",
-      "**/react",
-      "**/react-dom"
     ]
   },
   "devDependencies": {
@@ -20,5 +14,5 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "packageManager": "yarn@3.1.1"
+  "packageManager": "yarn@3.2.0"
 }
