@@ -1,7 +1,6 @@
 import "@aidenlx/player/define/vds-audio-player.js";
 import "@aidenlx/player/define/vds-video-player.js";
 import "@aidenlx/player/define/vds-media-ui.js";
-import "./player.less";
 
 import type {
   AudioPlayerElement,
@@ -17,9 +16,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { InternalMediaInfo } from "../base/media-info";
 import { MediaType } from "../base/media-type";
-import PlayerControls from "./controls";
 import { MediaViewEvents } from "./events";
 import { is, useFrag, useHashProps } from "./hash-tool";
+import PlayerControls from "./ui";
 
 declare global {
   namespace JSX {

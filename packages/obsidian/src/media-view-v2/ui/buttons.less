@@ -1,0 +1,57 @@
+.button() {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+  & > svg {
+    /** `absolute` so icons are placed on top of each other. */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: opacity ease 150ms;
+  }
+}
+
+vds-play-button {
+  .button();
+  &[media-paused] .pause {
+    opacity: 0;
+  }
+  &:not([media-paused]) .play {
+    opacity: 0;
+  }
+}
+vds-fullscreen-button {
+  .button();
+  &[media-fullscreen] .expand {
+    opacity: 0;
+  }
+  &:not([media-fullscreen]) .minimize {
+    opacity: 0;
+  }
+}
+
+vds-mute-button {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
+}
+
+vds-mute-button {
+  .button();
+  &[media-muted] .volume-x {
+    opacity: 0;
+  }
+
+  &:not([media-muted]) .volume {
+    opacity: 0;
+  }
+}

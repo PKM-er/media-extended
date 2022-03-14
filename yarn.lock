@@ -529,6 +529,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@popperjs/core@npm:^2.9.0":
+  version: 2.11.4
+  resolution: "@popperjs/core@npm:2.11.4"
+  checksum: 36168d274aa164368a50aef2e7b2f858e1b9145d9250af9dc1315ff719d874a367177760f8285efb75c8cf48267194a50e7dc9cdb41bf0b1958c38805c13564c
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-alias@npm:^3.1.8":
   version: 3.1.9
   resolution: "@rollup/plugin-alias@npm:3.1.9::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2F%40rollup%2Fplugin-alias%2F-%2Fplugin-alias-3.1.9.tgz"
@@ -5064,6 +5071,7 @@ __metadata:
     react-dom: "npm:@preact/compat@^17.0.2"
     release-it: ^14.12.5
     srt-webvtt: ^1.3.2
+    tippy.js: ^6.3.7
     tslib: ^2.3.1
     typescript: ^4.5.5
     url-parse: ^1.5.4
@@ -6607,6 +6615,15 @@ __metadata:
   version: 2.3.8
   resolution: "through@npm:2.3.8::__archiveUrl=https%3A%2F%2Fregistry.npmmirror.com%2Fthrough%2F-%2Fthrough-2.3.8.tgz"
   checksum: a38c3e059853c494af95d50c072b83f8b676a9ba2818dcc5b108ef252230735c54e0185437618596c790bbba8fcdaef5b290405981ffa09dce67b1f1bf190cbd
+  languageName: node
+  linkType: hard
+
+"tippy.js@npm:^6.3.7":
+  version: 6.3.7
+  resolution: "tippy.js@npm:6.3.7"
+  dependencies:
+    "@popperjs/core": ^2.9.0
+  checksum: cac955318a65288e8d2dca05059878b003c6e66f92c94f7810f5bc5448eb6646abdf7dacc9bd00020e2611592598d0aae3a28ec9a45349a159603c3fdddce5fb
   languageName: node
   linkType: hard
 
