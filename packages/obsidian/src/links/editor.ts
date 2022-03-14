@@ -23,8 +23,10 @@ export const patchEditorClick = (plugin: MediaExtended) => {
         function (this: MarkdownView, token, newLeaf, ...args) {
           const fallback = () => next.call(this, token, newLeaf, ...args);
           try {
-            if ("internal-link" === token.type) {
-              if (!plugin.settings.timestampLink) fallback();
+            /* if (
+              "internal-link" === token.type &&
+              plugin.settings.timestampLink
+            ) {
               getInternalMediaInfo(
                 { linktext: token.text, sourcePath: this.file.path },
                 this.app,
@@ -32,7 +34,7 @@ export const patchEditorClick = (plugin: MediaExtended) => {
                 if (info) OpenLink(info, newLeaf, plugin);
                 else fallback();
               });
-            } else if ("external-link" === token.type) {
+            } else  */ if ("external-link" === token.type) {
               getMediaInfo(token.text, this.app).then((info) => {
                 if (info) OpenLink(info, newLeaf, plugin);
                 else fallback();
