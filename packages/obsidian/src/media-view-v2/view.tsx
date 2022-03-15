@@ -173,7 +173,8 @@ export class PlayerRenderChild
   }
 
   loadingPlayer!: Promise<void>;
-  onload(): void {
+  async onload() {
+    await wait(0);
     ReactDOM.render(
       <Player
         info={this.info}
@@ -195,3 +196,4 @@ export class PlayerRenderChild
     ReactDOM.unmountComponentAtNode(this.containerEl);
   }
 }
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
