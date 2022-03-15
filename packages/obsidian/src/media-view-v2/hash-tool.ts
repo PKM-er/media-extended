@@ -1,8 +1,7 @@
 import type {
-  AudioPlayerElement,
   MediaPlayingEvent,
+  MediaProviderElement,
   MediaTimeUpdateEvent,
-  VideoPlayerElement,
 } from "@aidenlx/player";
 import type { TimeSpan } from "mx-lib";
 import type { ParsedQuery } from "query-string";
@@ -10,7 +9,7 @@ import { useEffect } from "react";
 
 export const useFrag = (
   timeSpan: TimeSpan | null,
-  ref: React.RefObject<VideoPlayerElement | AudioPlayerElement>,
+  ref: React.RefObject<MediaProviderElement>,
 ) => {
   useEffect(() => {
     const onPlaying = (evt: MediaPlayingEvent) => {
@@ -68,7 +67,7 @@ const hashOpts = new Map<string, PlayerProperties>([
  */
 export const useHashProps = (
   query: ParsedQuery<string>,
-  ref: React.RefObject<VideoPlayerElement | AudioPlayerElement>,
+  ref: React.RefObject<MediaProviderElement>,
 ) => {
   useEffect(() => {
     const player = ref.current;

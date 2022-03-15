@@ -1,4 +1,4 @@
-import type { AudioPlayerElement, VideoPlayerElement } from "@aidenlx/player";
+import type { MediaProviderElement } from "@aidenlx/player";
 import {
   App,
   Component,
@@ -25,14 +25,14 @@ interface PlayerComponent extends Component {
   scope: Scope;
   keymap: KeymapEventHandler[] | null;
   events: MediaViewEvents;
-  player: VideoPlayerElement | AudioPlayerElement | null;
+  player: MediaProviderElement | null;
 }
 
 export default class MediaView
   extends EditableFileView
   implements PlayerComponent
 {
-  player: VideoPlayerElement | AudioPlayerElement | null = null;
+  player: MediaProviderElement | null = null;
   // no need to manage this manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
   scope = new Scope(this.app.scope);
@@ -156,7 +156,7 @@ export class PlayerRenderChild
   extends MarkdownRenderChild
   implements PlayerComponent
 {
-  player: VideoPlayerElement | AudioPlayerElement | null = null;
+  player: MediaProviderElement | null = null;
   scope = new Scope(this.app.scope);
   events = new MediaViewEvents();
   keymap: KeymapEventHandler[] | null = null;

@@ -4,6 +4,7 @@ import "@aidenlx/player/define/vds-media-ui.js";
 
 import type {
   AudioPlayerElement,
+  MediaProviderElement,
   MediaUiElement,
   VideoPlayerElement,
 } from "@aidenlx/player";
@@ -39,8 +40,8 @@ interface PlayerProps {
   info: InternalMediaInfo;
   events?: MediaViewEvents;
   controls?: ShowControls;
-  onFocus?: React.FocusEventHandler<VideoPlayerElement | AudioPlayerElement>;
-  onBlur?: React.FocusEventHandler<VideoPlayerElement | AudioPlayerElement>;
+  onFocus?: React.FocusEventHandler<MediaProviderElement>;
+  onBlur?: React.FocusEventHandler<MediaProviderElement>;
 }
 
 const Player = ({
@@ -50,7 +51,7 @@ const Player = ({
   onFocus,
   onBlur,
 }: PlayerProps) => {
-  const playerRef = useRef<VideoPlayerElement | AudioPlayerElement>(null);
+  const playerRef = useRef<MediaProviderElement>(null);
 
   const [mediaInfo, setMediaInfo] = useState(info);
 

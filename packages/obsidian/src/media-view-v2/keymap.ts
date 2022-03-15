@@ -1,9 +1,9 @@
-import type { AudioPlayerElement, VideoPlayerElement } from "@aidenlx/player";
+import type { MediaProviderElement } from "@aidenlx/player";
 import { KeymapEventHandler, KeymapEventListener, Scope } from "obsidian";
 
 const getPlayerKeymaps = (
   scope: Scope,
-  player: AudioPlayerElement | VideoPlayerElement,
+  player: MediaProviderElement,
 ): KeymapEventHandler[] => {
   const forward = (second: number) => {
       player.currentTime += second;
