@@ -100,7 +100,11 @@ const Player = ({
       () => (
         <vds-media-ui slot="ui">
           {controls === ShowControls.full && (
-            <PlayerControls min={timeSpan?.start} max={timeSpan?.end} />
+            <PlayerControls
+              min={timeSpan?.start}
+              max={timeSpan?.end}
+              boundary={playerRef}
+            />
           )}
         </vds-media-ui>
       ),

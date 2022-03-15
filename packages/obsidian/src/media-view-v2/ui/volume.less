@@ -1,45 +1,50 @@
-vds-timespan-slider,
-vds-time-slider {
-  .slider();
-  vds-slider-value-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    /* slightly above the thumb. */
-    top: -32px;
-    left: 0;
-    /* fixed width so value updates don't re-size. */
-    width: calc(var(--thumb-width) + 8px);
-    opacity: 0;
-    transition: opacity ease 150ms;
-    /* re-position to center. */
-    transform: translateX(-50%);
-    will-change: left;
-    color: #000;
-    border-radius: 2px;
-    background-color: #fff;
-  }
+.volume-slider-container {
+  --height: 48px;
+  --thumb-width: 24px;
+  --track-height: 4px;
+  /* fixed width so value updates don't re-size. */
+  padding: 0 calc(var(--thumb-width) / 2);
+  opacity: 1;
+  transition: opacity ease 150ms;
 
-  /* position text at pointer when device pointing in slider. */
-  &[pointing] vds-slider-value-text {
-    opacity: 1;
-    left: var(--vds-slider-pointer-percent);
+  vds-volume-slider {
+    .slider();
+    vds-slider-value-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      /* slightly above the thumb. */
+      top: -32px;
+      left: 0;
+      /* fixed width so value updates don't re-size. */
+      width: calc(var(--thumb-width) + 8px);
+      opacity: 0;
+      transition: opacity ease 150ms;
+      /* re-position to center. */
+      transform: translateX(-50%);
+      will-change: left;
+      color: #000;
+      border-radius: 2px;
+      background-color: #fff;
+    }
+
+    /* position text at pointer when device pointing in slider. */
+    &[pointing] vds-slider-value-text {
+      opacity: 1;
+      left: var(--vds-slider-pointer-percent);
+    }
   }
 }
 
 .slider() {
-  --height: 48px;
-  --thumb-width: 24px;
-  --track-height: 4px;
-
   display: flex;
   align-items: center;
   position: relative;
-  width: 100%;
+  width: 100px;
   height: var(--height);
   /** Prevent thumb flowing out of slider. */
-  margin: 0 calc(var(--thumb-width) / 2);
+  // margin: 0 calc(var(--thumb-width) / 2);
   cursor: pointer;
 
   & .slider-track {

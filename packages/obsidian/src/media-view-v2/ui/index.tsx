@@ -1,6 +1,7 @@
 import "@aidenlx/player/define/vds-play-button.js";
 import "@aidenlx/player/define/vds-timespan-slider.js";
 import "@aidenlx/player/define/vds-fullscreen-button.js";
+import "@aidenlx/player/define/vds-mute-button.js";
 import "@aidenlx/player/define/vds-slider-value-text.js";
 import "./buttons.less";
 import "./basic.less";
@@ -8,6 +9,7 @@ import "./sliders.less";
 
 import type {
   FullscreenButtonElement,
+  MuteButtonElement,
   PlayButtonElement,
   SliderElement,
   SliderValueTextElement,
@@ -15,12 +17,14 @@ import type {
 import React from "react";
 
 import { useIcon } from "./utils";
+import VolumeControl from "./volume";
 declare global {
   namespace JSX {
     interface IntrinsicElements {
       "vds-play-button": React.HTMLProps<PlayButtonElement>;
       "vds-timespan-slider": React.HTMLProps<SliderElement>;
       "vds-fullscreen-button": React.HTMLProps<FullscreenButtonElement>;
+      "vds-mute-button": React.HTMLProps<MuteButtonElement>;
       "vds-slider-value-text": Partial<SliderValueTextElement>;
     }
   }
@@ -29,9 +33,10 @@ declare global {
 export interface ControlsProps {
   min?: number;
   max?: number;
+  boundary: React.RefObject<HTMLElement>;
 }
 
-const PlayerControls = ({ min, max }: ControlsProps) => {
+const PlayerControls = ({ min, max, boundary }: ControlsProps) => {
   const playBtn = useIcon<PlayButtonElement>(["play", "pause"]);
   const fullscreenBtn = useIcon<FullscreenButtonElement>([
     "expand",
@@ -51,6 +56,7 @@ const PlayerControls = ({ min, max }: ControlsProps) => {
           <div className="slider-thumb"></div>
         </div>
       </vds-timespan-slider>
+      <VolumeControl boundary={boundary} />
       <vds-fullscreen-button ref={fullscreenBtn} />
     </div>
   );

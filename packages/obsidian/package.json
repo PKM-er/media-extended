@@ -26,6 +26,7 @@
     "@codemirror/state": "^0.19.9",
     "@codemirror/stream-parser": "github:lishid/stream-parser",
     "@codemirror/view": "^0.19.46",
+    "@floating-ui/react-dom": "^0.6.0",
     "@lezer/common": "^0.15.11",
     "@types/dom-mediacapture-record": "^1.0.11",
     "@types/hh-mm-ss": "^1.2.1",
