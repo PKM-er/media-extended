@@ -49,9 +49,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aidenlx/player@npm:^0.12.3-rc.2":
-  version: 0.12.3-rc.2
-  resolution: "@aidenlx/player@npm:0.12.3-rc.2"
+"@aidenlx/player@portal:/Users/aidenlx/repo/obsidian/player::locator=%40aidenlx%2Fmedia-extended%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@aidenlx/player@portal:/Users/aidenlx/repo/obsidian/player::locator=%40aidenlx%2Fmedia-extended%40workspace%3A."
   dependencies:
     "@types/fscreen": ^1.0.1
     fscreen: ^1.2.0
@@ -59,9 +59,8 @@ __metadata:
     just-throttle: ^4.0.1
   peerDependencies:
     lit: ^2.1.1
-  checksum: 68a0e5608d02b6b1d947a63f53be4feb4a18b6f6356ebda47b1b942ff238b97712dcb85bcb30d9ae83fd5cf2986eef72f2be959b6bdd2d344d023df2ff53e8b6
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@aidenlx/prettier-config@npm:^0.1.0":
   version: 0.1.0

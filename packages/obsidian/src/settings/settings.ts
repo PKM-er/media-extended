@@ -17,6 +17,7 @@ export interface MxSettings {
   timestampTemplate: string;
   timestampOffset: number;
   hideEmbedControls: boolean;
+  livePreview: boolean;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -64,4 +65,5 @@ export const DEFAULT_SETTINGS: MxSettings = {
   timestampTemplate: "\n{{TIMESTAMP}}\n",
   timestampOffset: 0,
   hideEmbedControls: false,
+  livePreview: true,
 };

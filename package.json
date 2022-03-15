@@ -14,5 +14,8 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "packageManager": "yarn@3.2.0"
+  "packageManager": "yarn@3.2.0",
+  "resolutions": {
+    "@aidenlx/player": "portal:/Users/aidenlx/repo/obsidian/player"
+  }
 }

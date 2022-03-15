@@ -74,32 +74,31 @@ const patchMediaEmbed = (plugin: MediaExtended) => {
   const displayInEl = (next: displayInElFunc): displayInElFunc =>
     async function (this: any, file, app, containerEl, ...args) {
       const fallback = () => next.call(this, file, app, containerEl, ...args);
-      if (!plugin.settings.mediaFragmentsEmbed) return fallback();
       try {
-        let info = await getInternalMediaInfo(
-          {
-            linktext: containerEl.getAttr("src") ?? file.path,
-            sourcePath: file.path,
-            file,
-          },
-          app,
-        );
-        if (!info) return fallback();
-        const child = MediaView.displayInEl(info, app, containerEl);
-        // if passed to md postprocessor
-        if (containerEl.hasClass(CONTROLS_ENABLED_CLASS)) {
+        if (
+          containerEl instanceof HTMLDivElement &&
+          plugin.settings.livePreview
+        ) {
+          containerEl.style.display = "none"; // prevent default live preview player from rendering
+        } else if (
+          containerEl instanceof HTMLSpanElement &&
+          plugin.settings.mediaFragmentsEmbed &&
+          containerEl.hasClass(CONTROLS_ENABLED_CLASS) // handled by md postprocessor
+        ) {
+          let info = await getInternalMediaInfo(
+            {
+              linktext: containerEl.getAttr("src") ?? file.path,
+              sourcePath: file.path,
+              file,
+            },
+            app,
+          );
+          if (!info) return fallback();
+          const child = MediaView.displayInEl(info, app, containerEl);
           (containerEl as ElementWithRenderChild).renderChild = child;
-        } else {
-          child.inEditor = true;
-          const interval = window.setInterval(() => {
-            if (!containerEl.isConnected) {
-              child.unload();
-              window.clearInterval(interval);
-            }
-          }, 5e3);
-        }
-        child.load();
-        containerEl.addClass("is-loaded");
+          child.load();
+          containerEl.addClass("is-loaded");
+        } else fallback();
       } catch (error) {
         return fallback();
       }
