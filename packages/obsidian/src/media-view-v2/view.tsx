@@ -56,7 +56,6 @@ export default class MediaView
       const info = await this._getInfo();
       if (!info) return;
       this.events.trigger("file-loaded", info);
-      console.log("triggerd", info);
     },
     200,
     true,
@@ -179,7 +178,7 @@ export class PlayerRenderChild
       <Player
         info={this.info}
         events={this.events}
-        controls={this.inEditor ? ShowControls.native : ShowControls.none}
+        controls={this.inEditor ? ShowControls.native : ShowControls.full}
         onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
         onBlur={this.inEditor ? undefined : this.popScope.bind(this)}
       />,
