@@ -10,13 +10,14 @@ import {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import React from "react";
+import React, { createContext } from "react";
 import ReactDOM from "react-dom";
 
 import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
 import { ExtensionAccepted } from "../base/media-type";
 import { MediaViewEvents } from "./events";
 import getPlayerKeymaps from "./keymap";
+import { PlayerContext } from "./misc";
 import Player, { ShowControls } from "./player";
 
 export const VIEW_TYPE = "media-view-v2";
@@ -45,7 +46,7 @@ export default class MediaView
   private async _getInfo(): Promise<InternalMediaInfo | null> {
     return this._file
       ? ((await getMediaInfo(
-          { file: this._file, hash: this._hash },
+          { type: "internal", file: this._file, hash: this._hash },
           this.app,
         )) as InternalMediaInfo)
       : null;
@@ -97,14 +98,21 @@ export default class MediaView
     return VIEW_TYPE;
   }
 
-  loadingPlayer!: Promise<void>;
   async onLoadFile(file: TFile): Promise<void> {
     super.onLoadFile(file);
     this.setInfo({ file }, false);
     const info = await this._getInfo();
     if (!info) return;
     ReactDOM.render(
-      <Player info={info} events={this.events} />,
+      <PlayerContext.Provider
+        value={{
+          app: this.app,
+          inEditor: false,
+          events: this.events,
+        }}
+      >
+        <Player info={info} />
+      </PlayerContext.Provider>,
       this.contentEl,
     );
   }
@@ -116,7 +124,10 @@ export default class MediaView
   async onRename(file: TFile) {
     this.events.trigger(
       "file-loaded",
-      (await getMediaInfo({ file, hash: "" }, this.app)) as InternalMediaInfo,
+      (await getMediaInfo(
+        { type: "internal", file, hash: "" },
+        this.app,
+      )) as InternalMediaInfo,
     );
     return super.onRename(file);
   }
@@ -125,20 +136,17 @@ export default class MediaView
     info: InternalMediaInfo,
     app: App,
     containerEl: HTMLElement,
+    inEditor = false,
   ): PlayerRenderChild {
-    return new PlayerRenderChild(info, app, containerEl);
+    return new PlayerRenderChild(info, app, containerEl, inEditor);
   }
 }
 
 const registerPlayerEvents = (component: PlayerComponent) => {
-  // let loaded: () => void;
-  // component.loadingPlayer = new Promise<void>((resolve) => (loaded = resolve));
   component.registerEvent(
     component.events.on("player-init", (player) => {
       component.player = player;
       component.keymap = getPlayerKeymaps(component.scope, player);
-      // console.log(component.loadingPlayer, loaded);
-      // loaded();
     }),
   );
   component.registerEvent(
@@ -161,28 +169,34 @@ export class PlayerRenderChild
   events = new MediaViewEvents();
   keymap: KeymapEventHandler[] | null = null;
 
-  public inEditor = false;
-
   constructor(
     private info: InternalMediaInfo,
     private app: App,
     containerEl: HTMLElement,
+    private inEditor: boolean,
   ) {
     super(containerEl);
     registerPlayerEvents(this);
   }
 
-  loadingPlayer!: Promise<void>;
   async onload() {
     await wait(0);
     ReactDOM.render(
-      <Player
-        info={this.info}
-        events={this.events}
-        controls={this.inEditor ? ShowControls.native : ShowControls.full}
-        onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
-        onBlur={this.inEditor ? undefined : this.popScope.bind(this)}
-      />,
+      <PlayerContext.Provider
+        value={{
+          app: this.app,
+          inEditor: this.inEditor,
+          events: this.events,
+        }}
+      >
+        <Player
+          info={this.info}
+          controls={ShowControls.full}
+          onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
+          onBlur={this.inEditor ? undefined : this.popScope.bind(this)}
+        />
+      </PlayerContext.Provider>,
+
       this.containerEl,
     );
   }

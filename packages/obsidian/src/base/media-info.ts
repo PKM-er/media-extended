@@ -1,3 +1,4 @@
+import assertNever from "assert-never";
 import {
   DirectLinkInfo,
   getMediaInfo as getMediaInfo0,
@@ -5,6 +6,7 @@ import {
   MediaInfoType,
   MediaType,
   ObsidianMediaInfo,
+  parseSizeSyntax,
 } from "mx-lib";
 import { App, parseLinktext, Platform, TFile, Vault } from "obsidian";
 
@@ -25,12 +27,16 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
   from = MediaInfoType.Obsidian as const;
   type: MediaType;
   filename: string;
-  /** relative path for media file */
+  /** in-vault relative path for media file */
   src: string;
   /** paths for subtitles, could be empty */
   subtitles: string[];
   hash: string;
   trackInfo?: trackInfo;
+  title: string | undefined;
+  get size() {
+    return parseSizeSyntax(this.title) ?? {};
+  }
   public get resourcePath() {
     return this.vault.getResourcePath(this.getSrcFile());
   }
@@ -43,7 +49,7 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
   }
   constructor(
     fileOrInfo:
-      | [file: TFile, hash: string, type: MediaType]
+      | [file: TFile, hash: string, type: MediaType, title?: string]
       | ObsidianMediaInfo,
     public app: App,
   ) {
@@ -53,13 +59,15 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
       this.src = fileOrInfo.src;
       this.subtitles = fileOrInfo.subtitles;
       this.hash = fileOrInfo.hash;
+      this.title = fileOrInfo.title;
     } else {
-      const [file, hash, type] = fileOrInfo;
+      const [file, hash, type, title] = fileOrInfo;
       this.type = type;
       this.filename = file.name;
       this.src = file.path;
       this.subtitles = getSubtitles(file).map((f) => f.path);
       this.hash = hash.startsWith("#") ? hash : `#${hash}`;
+      this.title = title;
     }
   }
   async updateTrackInfo(): Promise<trackInfo | null> {
@@ -75,13 +83,14 @@ export class InternalMediaInfo implements InternalMediaInfoInterface {
     else throw new Error("src file not found for path: " + this.src);
   }
   toJSON() {
-    const json: ObsidianMediaInfo = {
+    const json: Omit<ObsidianMediaInfo, "size"> = {
       from: this.from,
       src: this.src,
       type: this.type,
       filename: this.src,
       subtitles: this.subtitles,
       hash: this.hash,
+      title: this.title,
     };
     return json;
   }
@@ -98,42 +107,74 @@ const getBiliFullLink = async (src: URL): Promise<URL> => {
 };
 export type MediaInfo = InternalMediaInfo | HostMediaInfo | DirectLinkInfo;
 export const getMediaInfo = async (
-  src: string | { file: TFile; hash: string },
+  src:
+    | {
+        type: "external";
+        link: string;
+        title?: string | undefined;
+      }
+    | {
+        type: "internal";
+        file: TFile;
+        hash: string;
+        title?: string | undefined;
+      },
   app: App,
 ) => {
-  let source: URL | { file: TFile; hash: string };
-  if (typeof src === "string") {
+  let source: Parameters<typeof getMediaInfo0>[0];
+  if (src.type === "external") {
+    let link;
     try {
-      source = new URL(src);
-      source = await getBiliFullLink(source);
+      link = await getBiliFullLink(new URL(src.link));
     } catch (error) {
       return null;
     }
-  } else source = src;
+    source = { ...src, link };
+  } else if (src.type === "internal") {
+    source = src;
+  } else assertNever(src);
   return getMediaInfo0(source, getMediaType, {
     obsidian: (file, hash, type) => {
       return new InternalMediaInfo([file, hash, type], app);
     },
   });
 };
+
 export const getInternalMediaInfo = async (
   info: {
     linktext: string;
     /** path of note that holds the link */
     sourcePath: string;
+    title?: string;
     /** media file path */
     file?: TFile;
   },
   app: App,
 ) => {
-  let { linktext, sourcePath, file } = info;
+  let { linktext, sourcePath, file, title } = info;
+  let result = getMediaFileHashFromLinktext(linktext, sourcePath, app, file);
+  if (!result) return null;
+  return getMediaInfo(
+    { type: "internal", title, ...result },
+    app,
+  ) as Promise<InternalMediaInfo | null>;
+};
+
+export const getMediaFileHashFromLinktext = (
+  linktext: string,
+  /** path of note that holds the link */
+  sourcePath: string,
+  app: App,
+  /** media file path */
+  file?: TFile,
+) => {
   let { path, subpath: hash } = parseLinktext(linktext);
   if (!file) {
     let media = app.metadataCache.getFirstLinkpathDest(path, sourcePath);
     if (!media || !(media instanceof TFile)) return null;
     file = media;
   }
-  return getMediaInfo({ file, hash }, app) as Promise<InternalMediaInfo | null>;
+  return { file, hash };
 };
 
 /**

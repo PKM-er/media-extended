@@ -33,7 +33,10 @@ const getEmbedProcessor = (
         const elToGetInfo = warpper as HTMLImageElement;
         const src = elToGetInfo.src;
         if (!src) return;
-        const info = await getMediaInfo(src, plugin.app);
+        const info = await getMediaInfo(
+          { type: "external", link: src },
+          plugin.app,
+        );
         if (!info) return;
         const [playerEl, children] = await getPlayer(info, elToGetInfo, plugin);
         children.forEach(ctx.addChild.bind(ctx));

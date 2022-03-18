@@ -12,14 +12,15 @@ import assertNever from "assert-never";
 import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";
 import { parse as parseQS } from "query-string";
-import React from "react";
+import React, { useContext } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { InternalMediaInfo } from "../base/media-info";
 import { MediaType } from "../base/media-type";
-import { MediaViewEvents } from "./events";
 import { is, useFrag, useHashProps } from "./hash-tool";
+import { PlayerContext } from "./misc";
 import PlayerControls from "./ui";
+import { useIcon } from "./ui/utils";
 
 declare global {
   namespace JSX {
@@ -38,7 +39,6 @@ export const enum ShowControls {
 }
 interface PlayerProps {
   info: InternalMediaInfo;
-  events?: MediaViewEvents;
   controls?: ShowControls;
   onFocus?: React.FocusEventHandler<MediaProviderElement>;
   onBlur?: React.FocusEventHandler<MediaProviderElement>;
@@ -46,7 +46,6 @@ interface PlayerProps {
 
 const Player = ({
   info,
-  events,
   controls = ShowControls.full,
   onFocus,
   onBlur,
@@ -55,6 +54,7 @@ const Player = ({
 
   const [mediaInfo, setMediaInfo] = useState(info);
 
+  const { events, inEditor } = useContext(PlayerContext);
   useEffect(() => {
     let refs: EventRef[] = [];
     if (events) {
@@ -112,14 +112,32 @@ const Player = ({
       [controls, timeSpan?.end, timeSpan?.start],
     );
 
+  let player;
   switch (mediaInfo.type) {
     case MediaType.Audio:
-      return <vds-audio-player {...playerProps}>{ui}</vds-audio-player>;
+      player = <vds-audio-player {...playerProps}>{ui}</vds-audio-player>;
+      break;
     case MediaType.Video:
     case MediaType.Unknown:
-      return <vds-video-player {...playerProps}>{ui}</vds-video-player>;
+      player = <vds-video-player {...playerProps}>{ui}</vds-video-player>;
+      break;
     default:
       assertNever(mediaInfo.type);
   }
+
+  const editBtn = useIcon(["pencil"]);
+  return (
+    <>
+      {player}
+      {inEditor && (
+        <div
+          aria-label="Edit Source Markdown"
+          className="edit-block-button"
+          role="button"
+          ref={editBtn}
+        />
+      )}
+    </>
+  );
 };
 export default Player;

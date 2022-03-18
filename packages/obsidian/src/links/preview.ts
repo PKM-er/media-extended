@@ -19,7 +19,7 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
         evt.preventDefault();
         const fallback = () => next.call(this, evt, target, link, ...args);
         try {
-          getMediaInfo(link, this.app).then((info) => {
+          getMediaInfo({ type: "external", link }, this.app).then((info) => {
             if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
             else fallback();
           });

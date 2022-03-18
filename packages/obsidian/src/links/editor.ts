@@ -35,7 +35,10 @@ export const patchEditorClick = (plugin: MediaExtended) => {
                 else fallback();
               });
             } else  */ if ("external-link" === token.type) {
-              getMediaInfo(token.text, this.app).then((info) => {
+              getMediaInfo(
+                { type: "external", link: token.text },
+                this.app,
+              ).then((info) => {
                 if (info) OpenLink(info, newLeaf, plugin);
                 else fallback();
               });

@@ -19,13 +19,15 @@ interface MediaInfoBase {
   src: string | URL;
   /** starts with "#" */
   hash: string;
+  title: string | undefined;
+  size: Partial<Record<"x" | "y", number>>;
 }
 
 export interface ObsidianMediaInfo extends MediaInfoBase {
   from: MediaInfoType.Obsidian;
   type: MediaType;
   filename: string;
-  /** relative path for media file */
+  /** in-vault relative path for media file */
   src: string;
   /** paths for subtitles, could be empty */
   subtitles: string[];

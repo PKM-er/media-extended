@@ -53,7 +53,10 @@ export class MediaView extends FileView {
   private controls: Map<string, HTMLElement>;
 
   async onLoadFile(file: TFile): Promise<void> {
-    const info = await getMediaInfo({ file, hash: "" }, this.app);
+    const info = await getMediaInfo(
+      { type: "internal", file, hash: "" },
+      this.app,
+    );
     if (info) {
       this.setInfo(info);
     } else new Notice("Fail to open file");
@@ -64,7 +67,10 @@ export class MediaView extends FileView {
       const { info } = this.core;
       const { currentTime } = this.core.player;
       await this.setInfo(
-        await getMediaInfo({ file, hash: info.hash }, this.app),
+        await getMediaInfo(
+          { type: "internal", file, hash: info.hash },
+          this.app,
+        ),
       );
       if (this.player) {
         // await this.player.play();
@@ -77,7 +83,7 @@ export class MediaView extends FileView {
     super.onRename(file);
   }
 
-  onDelete(file: TFile) {
+  async onDelete(file: TFile) {
     super.onDelete(file);
     if (this.file && this.file === file) this.leaf.detach();
   }
@@ -483,7 +489,10 @@ export class PromptModal extends Modal {
     modalEl.createDiv({ cls: "modal-button-container" }, (div) => {
       div.createEl("button", { cls: "mod-cta", text: "Open" }, (el) =>
         el.onClickEvent(async () => {
-          const result = await getMediaInfo(input.value, this.app);
+          const result = await getMediaInfo(
+            { type: "external", link: input.value },
+            this.app,
+          );
           if (result) {
             if (this.view) {
               await this.view.setInfo(result);
