@@ -10,15 +10,16 @@ import React, {
   useEffect,
   useMemo,
   useState,
-} from "react";
+} from "preact/compat";
 
 import { PlayerContext } from "../misc";
 import { useIcon } from "./utils";
-declare global {
-  namespace JSX {
+
+declare module "preact/src/jsx" {
+  namespace JSXInternal {
     interface IntrinsicElements {
-      "vds-mute-button": React.HTMLProps<MuteButtonElement>;
-      "vds-volume-slider": React.HTMLProps<VolumeSliderElement>;
+      "vds-mute-button": HTMLAttributes<MuteButtonElement>;
+      "vds-volume-slider": HTMLAttributes<VolumeSliderElement>;
     }
   }
 }

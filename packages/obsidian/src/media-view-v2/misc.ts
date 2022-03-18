@@ -1,7 +1,7 @@
 import { MediaProviderElement } from "@aidenlx/player";
 import { TimeSpan } from "mx-lib";
 import type { App } from "obsidian";
-import React from "react";
+import React from "preact/compat";
 
 // import type MediaExtended from "../mx-main";
 import { MediaViewEvents } from "./events";

@@ -10,7 +10,7 @@ import {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import React from "react";
+import React from "preact/compat";
 import ReactDOM from "react-dom";
 
 import { getMediaInfo, InternalMediaInfo } from "../base/media-info";

@@ -11,9 +11,9 @@ import type {
 import assertNever from "assert-never";
 import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";
+import React, { useContext } from "preact/compat";
+import { useEffect, useMemo, useRef, useState } from "preact/compat";
 import { parse as parseQS } from "query-string";
-import React, { useContext } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
 
 import { InternalMediaInfo } from "../base/media-info";
 import { MediaType } from "../base/media-type";
@@ -22,12 +22,12 @@ import { ControlsContext, PlayerContext } from "./misc";
 import PlayerControls from "./ui";
 import { useIcon } from "./ui/utils";
 
-declare global {
-  namespace JSX {
+declare module "preact/src/jsx" {
+  namespace JSXInternal {
     interface IntrinsicElements {
-      "vds-audio-player": React.HTMLProps<AudioPlayerElement>;
-      "vds-video-player": React.HTMLProps<VideoPlayerElement>;
-      "vds-media-ui": React.HTMLProps<MediaUiElement>;
+      "vds-audio-player": HTMLAttributes<AudioPlayerElement>;
+      "vds-video-player": HTMLAttributes<VideoPlayerElement>;
+      "vds-media-ui": HTMLAttributes<MediaUiElement>;
     }
   }
 }
@@ -40,8 +40,8 @@ export const enum ShowControls {
 interface PlayerProps {
   info: InternalMediaInfo;
   controls?: ShowControls;
-  onFocus?: React.FocusEventHandler<MediaProviderElement>;
-  onBlur?: React.FocusEventHandler<MediaProviderElement>;
+  onFocus?: (evt: FocusEvent) => any;
+  onBlur?: (evt: FocusEvent) => any;
 }
 
 const Player = ({

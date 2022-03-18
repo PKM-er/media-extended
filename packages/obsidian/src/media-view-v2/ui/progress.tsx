@@ -1,6 +1,19 @@
-import React, { useContext, useMemo } from "react";
+import "@aidenlx/player/define/vds-timespan-slider.js";
+import "@aidenlx/player/define/vds-slider-value-text.js";
+
+import type { SliderElement, SliderValueTextElement } from "@aidenlx/player";
+import React, { useContext, useMemo } from "preact/compat";
 
 import { ControlsContext } from "../misc";
+
+declare module "preact/src/jsx" {
+  namespace JSXInternal {
+    interface IntrinsicElements {
+      "vds-timespan-slider": HTMLAttributes<SliderElement>;
+      "vds-slider-value-text": Partial<SliderValueTextElement>;
+    }
+  }
+}
 
 const ProgressBar = () => {
   const { timeSpan } = useContext(ControlsContext);

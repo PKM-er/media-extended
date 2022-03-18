@@ -4,22 +4,22 @@ import type {
   MediaTimeUpdateEvent,
 } from "@aidenlx/player";
 import type { TimeSpan } from "mx-lib";
+import { useEffect } from "preact/compat";
 import type { ParsedQuery } from "query-string";
-import { useEffect } from "react";
 
 export const useFrag = (
   timeSpan: TimeSpan | null,
   ref: React.RefObject<MediaProviderElement>,
 ) => {
   useEffect(() => {
-    const onPlaying = (evt: MediaPlayingEvent) => {
+    const onPlaying = ((evt: MediaPlayingEvent) => {
       const { start, end } = timeSpan!,
         player = evt.target;
       if (player.currentTime > end || player.currentTime < start) {
         player.currentTime = start;
       }
-    };
-    const onTimeUpdate = (evt: MediaTimeUpdateEvent) => {
+    }) as any;
+    const onTimeUpdate = ((evt: MediaTimeUpdateEvent) => {
       const { start, end } = timeSpan!,
         player = evt.target;
       if (player.currentTime > end) {
@@ -34,7 +34,7 @@ export const useFrag = (
       } else if (player.currentTime < start) {
         player.currentTime = start;
       }
-    };
+    }) as any;
     const player = ref.current;
     if (timeSpan && player) {
       if (player.paused && player.currentTime !== timeSpan.start) {

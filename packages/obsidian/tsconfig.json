@@ -2,7 +2,8 @@
   "extends": "@aidenlx/ts-config/tsconfig.json",
   "compilerOptions": {
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "types": ["@aidenlx/player/globals", "node"],
     "experimentalDecorators": true,
     "skipLibCheck": true

@@ -1,5 +1,10 @@
 import { captureScreenshot } from "mx-lib";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "preact/compat";
 
 import { ControlsContext, PlayerContext } from "../misc";
 import Button from "./button";

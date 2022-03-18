@@ -1,5 +1,5 @@
 import { setIcon } from "obsidian";
-import { useCallback } from "react";
+import { useCallback } from "preact/compat";
 
 export const useIcon = <T extends HTMLElement>(icons: string[], size = 24) =>
   useCallback((node: T | null) => {

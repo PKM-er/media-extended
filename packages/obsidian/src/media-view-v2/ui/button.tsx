@@ -1,19 +1,19 @@
-import React, { useCallback } from "react";
+import React, { forwardRef, useCallback } from "preact/compat";
 
 interface ButtonProps {
   disabled?: boolean;
   hidden?: boolean;
-  onClick: (evt: React.PointerEvent | React.KeyboardEvent) => void;
+  onClick: (evt: PointerEvent | KeyboardEvent) => void;
   "aria-label": string;
 }
-const Button = React.forwardRef<HTMLDivElement, ButtonProps>(
+const Button = forwardRef<HTMLDivElement, ButtonProps>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function Button(
     { disabled = false, hidden = false, onClick, "aria-label": ariaLabel },
     ref,
   ) {
     const handleClick = useCallback(
-        (evt: React.PointerEvent | React.KeyboardEvent) => {
+        (evt: PointerEvent | KeyboardEvent) => {
           if (
             disabled ||
             // not keyboard click
@@ -26,10 +26,11 @@ const Button = React.forwardRef<HTMLDivElement, ButtonProps>(
         [disabled, onClick],
       ),
       handleClickCapture = useCallback(
-        (evt: React.MouseEvent) => {
+        (evt: MouseEvent) => {
           if (disabled) {
             evt.preventDefault();
             evt.stopPropagation();
+            evt.stopImmediatePropagation();
           }
         },
         [disabled],
