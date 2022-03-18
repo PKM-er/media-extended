@@ -1,4 +1,4 @@
-.button() {
+[role="button"] {
   position: relative;
   width: 24px;
   height: 24px;
@@ -18,30 +18,19 @@
 }
 
 vds-play-button {
-  .button();
-  &[media-paused] .pause {
-    opacity: 0;
-  }
+  &[media-paused] .pause,
   &:not([media-paused]) .play {
     opacity: 0;
   }
 }
 vds-fullscreen-button {
-  .button();
-  &[media-fullscreen] .expand {
-    opacity: 0;
-  }
+  &[media-fullscreen] .expand,
   &:not([media-fullscreen]) .minimize {
     opacity: 0;
   }
 }
-
 vds-mute-button {
-  .button();
-  &[media-muted] .volume-x {
-    opacity: 0;
-  }
-
+  &[media-muted] .volume-x,
   &:not([media-muted]) .volume {
     opacity: 0;
   }

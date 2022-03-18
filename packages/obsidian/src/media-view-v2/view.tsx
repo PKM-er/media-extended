@@ -10,7 +10,7 @@ import {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import React, { createContext } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 
 import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
@@ -109,6 +109,7 @@ export default class MediaView
           app: this.app,
           inEditor: false,
           events: this.events,
+          containerEl: this.contentEl,
         }}
       >
         <Player info={info} />
@@ -143,21 +144,24 @@ export default class MediaView
 }
 
 const registerPlayerEvents = (component: PlayerComponent) => {
-  component.registerEvent(
-    component.events.on("player-init", (player) => {
+  const { events } = component;
+  [
+    events.on("player-init", (player) => {
       component.player = player;
       component.keymap = getPlayerKeymaps(component.scope, player);
     }),
-  );
-  component.registerEvent(
-    component.events.on("player-destroy", () => {
+    events.on("player-destroy", () => {
       component.player = null;
       if (component.keymap) {
         component.keymap.forEach((k) => component.scope.unregister(k));
         component.keymap = null;
       }
     }),
-  );
+    events.on("screenshot", async (data) => {
+      const blob = await data;
+      // TODO
+    }),
+  ].forEach(component.registerEvent.bind(component));
 };
 
 export class PlayerRenderChild
@@ -187,6 +191,7 @@ export class PlayerRenderChild
           app: this.app,
           inEditor: this.inEditor,
           events: this.events,
+          containerEl: this.containerEl,
         }}
       >
         <Player

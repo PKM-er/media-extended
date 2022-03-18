@@ -18,7 +18,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { InternalMediaInfo } from "../base/media-info";
 import { MediaType } from "../base/media-type";
 import { is, useFrag, useHashProps } from "./hash-tool";
-import { PlayerContext } from "./misc";
+import { ControlsContext, PlayerContext } from "./misc";
 import PlayerControls from "./ui";
 import { useIcon } from "./ui/utils";
 
@@ -99,17 +99,14 @@ const Player = ({
     ),
     ui = useMemo(
       () => (
-        <vds-media-ui slot="ui">
-          {controls === ShowControls.full && (
-            <PlayerControls
-              min={timeSpan?.start}
-              max={timeSpan?.end}
-              boundary={playerRef}
-            />
-          )}
-        </vds-media-ui>
+        <ControlsContext.Provider value={{ timeSpan, player: playerRef }}>
+          <vds-media-ui slot="ui">
+            {controls === ShowControls.full && <PlayerControls />}
+          </vds-media-ui>
+        </ControlsContext.Provider>
       ),
-      [controls, timeSpan?.end, timeSpan?.start],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [controls, timeSpan?.start, timeSpan?.end],
     );
 
   let player;

@@ -9,13 +9,17 @@ import "./sliders.less";
 
 import type {
   FullscreenButtonElement,
+  MediaProviderElement,
   MuteButtonElement,
   PlayButtonElement,
   SliderElement,
   SliderValueTextElement,
 } from "@aidenlx/player";
+import { TimeSpan } from "mx-lib";
 import React from "react";
 
+import ProgressBar from "./progress";
+import ScreenshotButton from "./screenshot-btn";
 import { useIcon } from "./utils";
 import VolumeControl from "./volume";
 declare global {
@@ -30,13 +34,7 @@ declare global {
   }
 }
 
-export interface ControlsProps {
-  min?: number;
-  max?: number;
-  boundary: React.RefObject<HTMLElement>;
-}
-
-const PlayerControls = ({ min, max, boundary }: ControlsProps) => {
+const PlayerControls = () => {
   const playBtn = useIcon<PlayButtonElement>(["play", "pause"]);
   const fullscreenBtn = useIcon<FullscreenButtonElement>([
     "expand",
@@ -45,18 +43,9 @@ const PlayerControls = ({ min, max, boundary }: ControlsProps) => {
   return (
     <div className="controls">
       <vds-play-button ref={playBtn} />
-      <vds-timespan-slider min={min} max={max}>
-        <vds-slider-value-text
-          type="pointer"
-          format="time"
-        ></vds-slider-value-text>
-        <div className="slider-track"></div>
-        <div className="slider-track fill"></div>
-        <div className="slider-thumb-container">
-          <div className="slider-thumb"></div>
-        </div>
-      </vds-timespan-slider>
-      <VolumeControl boundary={boundary} />
+      <ProgressBar />
+      <VolumeControl />
+      <ScreenshotButton />
       <vds-fullscreen-button ref={fullscreenBtn} />
     </div>
   );

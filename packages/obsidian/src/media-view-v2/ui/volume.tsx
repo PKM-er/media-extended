@@ -4,8 +4,15 @@ import "./volume.less";
 
 import type { MuteButtonElement, VolumeSliderElement } from "@aidenlx/player";
 import { autoUpdate, shift, useFloating } from "@floating-ui/react-dom";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
+import { PlayerContext } from "../misc";
 import { useIcon } from "./utils";
 declare global {
   namespace JSX {
@@ -16,14 +23,13 @@ declare global {
   }
 }
 
-interface VolumeControlProps {
-  boundary?: React.RefObject<HTMLElement>;
-}
-const VolumeControl = ({ boundary }: VolumeControlProps) => {
+const VolumeControl = () => {
   const muteBtn = useIcon<MuteButtonElement>(["volume-x", "volume"]);
+  const { containerEl } = useContext(PlayerContext);
+
   const { x, y, reference, floating, strategy, update, refs } = useFloating({
     placement: "top",
-    middleware: [shift({ boundary: boundary?.current ?? undefined })],
+    middleware: [shift({ boundary: containerEl })],
   });
   const muteRef = useCallback(
     (btn: MuteButtonElement | null) => btn && (muteBtn(btn), reference(btn)),
