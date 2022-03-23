@@ -4,12 +4,12 @@ import type {
   MediaTimeUpdateEvent,
 } from "@aidenlx/player";
 import type { TimeSpan } from "mx-lib";
-import { useEffect } from "preact/compat";
+import { Ref, useEffect } from "preact/compat";
 import type { ParsedQuery } from "query-string";
 
 export const useFrag = (
   timeSpan: TimeSpan | null,
-  ref: React.RefObject<MediaProviderElement>,
+  ref: Ref<MediaProviderElement>,
 ) => {
   useEffect(() => {
     const onPlaying = ((evt: MediaPlayingEvent) => {
@@ -67,7 +67,7 @@ const hashOpts = new Map<string, PlayerProperties>([
  */
 export const useHashProps = (
   query: ParsedQuery<string>,
-  ref: React.RefObject<MediaProviderElement>,
+  ref: Ref<MediaProviderElement>,
 ) => {
   useEffect(() => {
     const player = ref.current;

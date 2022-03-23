@@ -20,7 +20,7 @@ export const RevealInEditorClass = "vid-reveal-in-editor";
 
 export interface ControlsProps {
   timeSpan: TimeSpan | null;
-  player: React.RefObject<MediaProviderElement>;
+  player: React.Ref<MediaProviderElement>;
 }
 
 export const ControlsContext = React.createContext<ControlsProps>({} as any);

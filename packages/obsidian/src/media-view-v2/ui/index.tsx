@@ -13,6 +13,7 @@ import React from "preact/compat";
 
 import ProgressBar from "./progress";
 import ScreenshotButton from "./screenshot-btn";
+import SpeedControl from "./speed";
 import { useIcon } from "./utils";
 import VolumeControl from "./volume";
 
@@ -37,6 +38,7 @@ const PlayerControls = () => {
       <ProgressBar />
       <VolumeControl />
       <ScreenshotButton />
+      <SpeedControl />
       <vds-fullscreen-button ref={fullscreenBtn} />
     </div>
   );
