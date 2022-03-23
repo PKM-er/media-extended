@@ -4,7 +4,7 @@
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "types": ["@aidenlx/player/globals", "node"],
+    "types": ["@vidstack/player/globals", "node"],
     "experimentalDecorators": true,
     "skipLibCheck": true
   },

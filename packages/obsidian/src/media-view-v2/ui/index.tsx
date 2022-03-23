@@ -1,6 +1,6 @@
-import "@aidenlx/player/define/vds-play-button.js";
-import "@aidenlx/player/define/vds-fullscreen-button.js";
-import "@aidenlx/player/define/vds-mute-button.js";
+import "@vidstack/player/define/vds-play-button.js";
+import "@vidstack/player/define/vds-fullscreen-button.js";
+import "@vidstack/player/define/vds-mute-button.js";
 import "./buttons.less";
 import "./basic.less";
 import "./sliders.less";
@@ -8,7 +8,7 @@ import "./sliders.less";
 import type {
   FullscreenButtonElement,
   PlayButtonElement,
-} from "@aidenlx/player";
+} from "@vidstack/player";
 import React from "preact/compat";
 
 import ProgressBar from "./progress";

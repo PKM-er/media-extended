@@ -1,4 +1,4 @@
-import { MediaProviderElement } from "@aidenlx/player";
+import { MediaProviderElement } from "@vidstack/player";
 import { TimeSpan } from "mx-lib";
 import type { App } from "obsidian";
 import React from "preact/compat";

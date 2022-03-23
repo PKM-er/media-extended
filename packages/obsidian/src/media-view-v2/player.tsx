@@ -1,13 +1,13 @@
-import "@aidenlx/player/define/vds-audio-player.js";
-import "@aidenlx/player/define/vds-video-player.js";
-import "@aidenlx/player/define/vds-media-ui.js";
+import "@vidstack/player/define/vds-audio-player.js";
+import "@vidstack/player/define/vds-video-player.js";
+import "@vidstack/player/define/vds-media-ui.js";
 
 import type {
   AudioPlayerElement,
   MediaProviderElement,
   MediaUiElement,
   VideoPlayerElement,
-} from "@aidenlx/player";
+} from "@vidstack/player";
 import assertNever from "assert-never";
 import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";

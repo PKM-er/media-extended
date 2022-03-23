@@ -1,4 +1,4 @@
-import type { MediaProviderElement } from "@aidenlx/player";
+import type { MediaProviderElement } from "@vidstack/player";
 import {
   App,
   Component,

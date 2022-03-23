@@ -1,9 +1,9 @@
-import "@aidenlx/player/define/vds-mute-button.js";
-import "@aidenlx/player/define/vds-volume-slider.js";
+import "@vidstack/player/define/vds-mute-button.js";
+import "@vidstack/player/define/vds-volume-slider.js";
 import "./volume.less";
 
-import type { MuteButtonElement, VolumeSliderElement } from "@aidenlx/player";
 import { autoUpdate, shift, useFloating } from "@floating-ui/react-dom";
+import type { MuteButtonElement, VolumeSliderElement } from "@vidstack/player";
 import React, {
   useCallback,
   useContext,

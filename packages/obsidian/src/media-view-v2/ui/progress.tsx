@@ -1,7 +1,7 @@
-import "@aidenlx/player/define/vds-timespan-slider.js";
-import "@aidenlx/player/define/vds-slider-value-text.js";
+import "@vidstack/player/define/vds-timespan-slider.js";
+import "@vidstack/player/define/vds-slider-value-text.js";
 
-import type { SliderElement, SliderValueTextElement } from "@aidenlx/player";
+import type { SliderElement, SliderValueTextElement } from "@vidstack/player";
 import React, { useContext, useMemo } from "preact/compat";
 
 import { ControlsContext } from "../misc";
