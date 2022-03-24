@@ -1,17 +1,8 @@
-import "@vidstack/player/define/vds-audio-player.js";
-import "@vidstack/player/define/vds-video-player.js";
-import "@vidstack/player/define/vds-media-ui.js";
-
-import type {
-  AudioPlayerElement,
-  MediaProviderElement,
-  MediaUiElement,
-  VideoPlayerElement,
-} from "@vidstack/player";
 import assertNever from "assert-never";
 import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";
 import React, {
+  forwardRef,
   useContext,
   useEffect,
   useMemo,
@@ -25,17 +16,8 @@ import { MediaType } from "../base/media-type";
 import PlayerControls from "./controls";
 import { is, useFrag, useHashProps } from "./hash-tool";
 import { ControlsContext, PlayerContext } from "./misc";
+import H5MediaProvider from "./provider/html5";
 import { useIcon } from "./utils";
-
-declare module "preact/src/jsx" {
-  namespace JSXInternal {
-    interface IntrinsicElements {
-      "vds-audio-player": HTMLAttributes<AudioPlayerElement>;
-      "vds-video-player": HTMLAttributes<VideoPlayerElement>;
-      "vds-media-ui": HTMLAttributes<MediaUiElement>;
-    }
-  }
-}
 
 export const enum ShowControls {
   none,
@@ -55,7 +37,7 @@ const Player = ({
   onFocus,
   onBlur,
 }: PlayerProps) => {
-  const playerRef = useRef<MediaProviderElement>(null);
+  const playerRef = useRef<HTMLMediaElement>(null);
 
   const [mediaInfo, setMediaInfo] = useState(info);
 
@@ -89,48 +71,25 @@ const Player = ({
     controls = ShowControls.full;
   }
 
-  const playerProps = useMemo(
-      () => ({
-        ref: playerRef as any,
-        tabIndex: 0,
-        src: mediaInfo.resourcePath,
-        controls: controls === ShowControls.native,
-        onFocus,
-        onBlur,
-      }),
-      // update only when vault path changed
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [mediaInfo.src, controls, onFocus, onBlur],
-    ),
-    ui = useMemo(
-      () => (
-        <ControlsContext.Provider value={{ timeSpan, player: playerRef }}>
-          <vds-media-ui slot="ui">
-            {controls === ShowControls.full && <PlayerControls />}
-          </vds-media-ui>
-        </ControlsContext.Provider>
-      ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [controls, timeSpan?.start, timeSpan?.end],
-    );
-
-  let player;
-  switch (mediaInfo.type) {
-    case MediaType.Audio:
-      player = <vds-audio-player {...playerProps}>{ui}</vds-audio-player>;
-      break;
-    case MediaType.Video:
-    case MediaType.Unknown:
-      player = <vds-video-player {...playerProps}>{ui}</vds-video-player>;
-      break;
-    default:
-      assertNever(mediaInfo.type);
-  }
-
   const editBtn = useIcon(["pencil"]);
+  const src = useMemo(() => mediaInfo.resourcePath, [mediaInfo.src]);
   return (
     <>
-      {player}
+      <div className="provider">
+        <H5MediaProvider
+          type={mediaInfo.type}
+          ref={playerRef}
+          src={src}
+          controls={controls === ShowControls.native}
+        />
+      </div>
+      <div className="media-ui" onFocus={onFocus} onBlur={onBlur}>
+        {controls === ShowControls.full && (
+          <ControlsContext.Provider value={{ timeSpan, player: playerRef }}>
+            <PlayerControls />
+          </ControlsContext.Provider>
+        )}
+      </div>
       {inEditor && (
         <div
           aria-label="Edit Source Markdown"

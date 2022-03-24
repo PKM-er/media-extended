@@ -1,0 +1,33 @@
+.provider {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  touch-action: manipulation;
+  video {
+    display: inline-block;
+    border-radius: inherit;
+    vertical-align: middle;
+    outline: 0px;
+    border: 0px;
+    user-select: none;
+    .default(width, 100%);
+    .default(height, 100%);
+  }
+}
+
+.media-ui {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.default(@prop,@val) {
+  @selector: ~"[@{prop}]";
+  &:not(@{selector}) {
+    @{prop}: @val;
+  }
+}

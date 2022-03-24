@@ -22,6 +22,7 @@ const Button = forwardRef<HTMLDivElement, ButtonProps>(
           )
             return;
           onClick(evt);
+          console.log("click");
         },
         [disabled, onClick],
       ),

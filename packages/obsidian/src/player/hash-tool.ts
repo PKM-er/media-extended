@@ -1,27 +1,22 @@
-import type {
-  MediaPlayingEvent,
-  MediaProviderElement,
-  MediaTimeUpdateEvent,
-} from "@vidstack/player";
 import type { TimeSpan } from "mx-lib";
 import { Ref, useEffect } from "preact/compat";
 import type { ParsedQuery } from "query-string";
 
 export const useFrag = (
   timeSpan: TimeSpan | null,
-  ref: Ref<MediaProviderElement>,
+  ref: Ref<HTMLMediaElement>,
 ) => {
   useEffect(() => {
-    const onPlaying = ((evt: MediaPlayingEvent) => {
+    const onPlaying = (evt: Event) => {
       const { start, end } = timeSpan!,
-        player = evt.target;
+        player = evt.target as HTMLMediaElement;
       if (player.currentTime > end || player.currentTime < start) {
         player.currentTime = start;
       }
-    }) as any;
-    const onTimeUpdate = ((evt: MediaTimeUpdateEvent) => {
+    };
+    const onTimeUpdate = (evt: Event) => {
       const { start, end } = timeSpan!,
-        player = evt.target;
+        player = evt.target as HTMLMediaElement;
       if (player.currentTime > end) {
         if (!player.loop) {
           player.pause();
@@ -34,18 +29,18 @@ export const useFrag = (
       } else if (player.currentTime < start) {
         player.currentTime = start;
       }
-    }) as any;
+    };
     const player = ref.current;
     if (timeSpan && player) {
       if (player.paused && player.currentTime !== timeSpan.start) {
         player.currentTime = timeSpan.start;
       }
       const options: AddEventListenerOptions = { passive: true };
-      player.addEventListener("vds-playing", onPlaying, options);
-      player.addEventListener("vds-time-update", onTimeUpdate, options);
+      player.addEventListener("playing", onPlaying, options);
+      player.addEventListener("time-update", onTimeUpdate, options);
       return () => {
-        player.removeEventListener("vds-playing", onPlaying, options);
-        player.removeEventListener("vds-time-update", onTimeUpdate, options);
+        player.removeEventListener("playing", onPlaying, options);
+        player.removeEventListener("time-update", onTimeUpdate, options);
       };
     }
     // https://epicreact.dev/why-you-shouldnt-put-refs-in-a-dependency-array/
@@ -67,7 +62,7 @@ const hashOpts = new Map<string, PlayerProperties>([
  */
 export const useHashProps = (
   query: ParsedQuery<string>,
-  ref: Ref<MediaProviderElement>,
+  ref: Ref<HTMLMediaElement>,
 ) => {
   useEffect(() => {
     const player = ref.current;

@@ -1,4 +1,3 @@
-import { MediaProviderElement } from "@vidstack/player";
 import { TimeSpan } from "mx-lib";
 import type { App } from "obsidian";
 import React from "preact/compat";
@@ -18,7 +17,7 @@ export const PlayerContext = React.createContext<PlayerContext>({} as any);
 
 export interface ControlsProps {
   timeSpan: TimeSpan | null;
-  player: React.Ref<MediaProviderElement>;
+  player: React.Ref<HTMLMediaElement>;
 }
 
 export const ControlsContext = React.createContext<ControlsProps>({} as any);

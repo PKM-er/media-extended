@@ -1,14 +1,10 @@
-import type { MediaProviderElement } from "@vidstack/player";
 import { EventRef, Events } from "obsidian";
 
 import { InternalMediaInfo } from "../base/media-info";
 
 export class MediaViewEvents extends Events {
   on(name: "file-loaded", callback: (info: InternalMediaInfo) => any): EventRef;
-  on(
-    name: "player-init",
-    callback: (el: MediaProviderElement) => any,
-  ): EventRef;
+  on(name: "player-init", callback: (el: HTMLMediaElement) => any): EventRef;
   on(name: "player-destroy", callback: () => any): EventRef;
   on(
     name: "screenshot",
@@ -18,7 +14,7 @@ export class MediaViewEvents extends Events {
     return super.on(name, callback);
   }
 
-  trigger(name: "player-init", el: MediaProviderElement): void;
+  trigger(name: "player-init", el: HTMLMediaElement): void;
   trigger(name: "screenshot", data: Promise<Blob | null>): void;
   trigger(name: "player-destroy"): void;
   trigger(name: "file-loaded", info: InternalMediaInfo): void;
