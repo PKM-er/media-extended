@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "../style/plyr-controls.less";
 
 import MediaExtended from "../mx-main";

@@ -8,8 +8,8 @@ import React, {
 } from "preact/compat";
 
 import { ControlsContext, PlayerContext } from "../misc";
+import { useIcon } from "../utils";
 import SpeedSlider from "./speed-slider";
-import { useIcon } from "./utils";
 
 const SpeedControl = () => {
   const speedBtn = useIcon<HTMLDivElement>(["gauge"]);

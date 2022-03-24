@@ -13,7 +13,7 @@ import React, {
 } from "preact/compat";
 
 import { PlayerContext } from "../misc";
-import { useIcon } from "./utils";
+import { useIcon } from "../utils";
 
 declare module "preact/src/jsx" {
   namespace JSXInternal {

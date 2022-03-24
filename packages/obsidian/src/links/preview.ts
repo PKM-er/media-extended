@@ -4,9 +4,9 @@ import { around } from "monkey-around";
 import { EventHelper, Keymap } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
 
-import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
+// import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
+// import OpenLink from "../legacy/open-link";
 import type MediaExtended from "../mx-main";
-import OpenLink from "./base";
 
 type MarkedCtor = typeof EventHelper & { __MX_PATCHED__?: true };
 const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
@@ -14,20 +14,20 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
   if (EventHelper.__MX_PATCHED__) return;
 
   const unloadPatches = around(EventHelper.prototype, {
-    onExternalLinkClick: (next) =>
-      function (this: EventHelper, evt, target, link, ...args) {
-        evt.preventDefault();
-        const fallback = () => next.call(this, evt, target, link, ...args);
-        try {
-          getMediaInfo({ type: "external", link }, this.app).then((info) => {
-            if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
-            else fallback();
-          });
-        } catch (error) {
-          console.error(error);
-          fallback();
-        }
-      },
+    // onExternalLinkClick: (next) =>
+    //   function (this: EventHelper, evt, target, link, ...args) {
+    //     evt.preventDefault();
+    //     const fallback = () => next.call(this, evt, target, link, ...args);
+    //     try {
+    //       getMediaInfo({ type: "external", link }, this.app).then((info) => {
+    //         if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
+    //         else fallback();
+    //       });
+    //     } catch (error) {
+    //       console.error(error);
+    //       fallback();
+    //     }
+    //   },
     // onInternalLinkClick: (next) =>
     //   function (this: EventHelper, evt, target, linktext, ...args) {
     //     evt.preventDefault();

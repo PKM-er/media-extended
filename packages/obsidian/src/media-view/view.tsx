@@ -11,14 +11,16 @@ import {
   WorkspaceLeaf,
 } from "obsidian";
 import React from "preact/compat";
-import ReactDOM from "react-dom";
+import ReactDOM from "preact/compat";
 
 import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
 import { ExtensionAccepted } from "../base/media-type";
-import { MediaViewEvents } from "./events";
+import Player, {
+  MediaViewEvents,
+  PlayerContext,
+  ShowControls,
+} from "../player";
 import getPlayerKeymaps from "./keymap";
-import { PlayerContext } from "./misc";
-import Player, { ShowControls } from "./player";
 
 export const VIEW_TYPE = "media-view-v2";
 

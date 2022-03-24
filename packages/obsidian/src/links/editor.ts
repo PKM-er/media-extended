@@ -3,9 +3,9 @@ import "obsidian";
 import { around } from "monkey-around";
 import { MarkdownView } from "obsidian";
 
-import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
+// import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
+// import OpenLink from "../legacy/open-link";
 import type MediaExtended from "../mx-main";
-import OpenLink from "./base";
 
 declare module "obsidian" {
   interface MarkdownView {
@@ -34,7 +34,7 @@ export const patchEditorClick = (plugin: MediaExtended) => {
                 if (info) OpenLink(info, newLeaf, plugin);
                 else fallback();
               });
-            } else  */ if ("external-link" === token.type) {
+            } else  */ /* if ("external-link" === token.type) {
               getMediaInfo(
                 { type: "external", link: token.text },
                 this.app,
@@ -42,7 +42,7 @@ export const patchEditorClick = (plugin: MediaExtended) => {
                 if (info) OpenLink(info, newLeaf, plugin);
                 else fallback();
               });
-            } else fallback();
+            } else */ fallback();
           } catch (error) {
             console.error(error);
             fallback();

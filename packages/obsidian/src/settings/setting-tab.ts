@@ -1,17 +1,17 @@
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
 import { getPortSetting, isAvailable } from "../feature/bili-bridge";
-import { isCssValue } from "../modules/parse-unit";
+// import { PlyrControls, PlyrControlsSetting } from "../legacy/plyr-controls";
+// import { isCssValue } from "../modules/parse-unit";
 import type MediaExtended from "../mx-main";
 import { hideYtbRecommClass } from "./misc";
-import { PlyrControls, PlyrControlsSetting } from "./plyr-controls";
 import { MxSettings } from "./settings";
 
-export type SizeSettings = {
-  embedMaxHeight: string;
-  embedMinWidth: string;
-  plyrControls: Record<PlyrControls, boolean>;
-};
+// export type SizeSettings = {
+//   embedMaxHeight: string;
+//   embedMinWidth: string;
+//   plyrControls: Record<PlyrControls, boolean>;
+// };
 
 type option = {
   k: keyof MxSettings;
@@ -120,88 +120,88 @@ export default class MESettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Player" });
 
-    setToggle({
-      k: "thumbnailPlaceholder",
-      name: "Placeholder in favor of full player",
-      desc: (descEl) => {
-        descEl.appendText(
-          "If enabled, thumbnail placeholder will be used in favor of full player when page loads",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Works with for Youtube/Vimeo/bilibili embeds");
-        descEl.createEl("br");
-        descEl.appendText(
-          "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Restart the app to take effects");
-      },
-    });
-    setToggle({
-      k: "hideEmbedControls",
-      name: "Hide Embed Controls By Default",
-      desc: (descEl) => {
-        descEl.appendText(
-          "If enabled, embeds are rendered similar to images with all controls hidden, click on embeds to play/pause",
-        );
-        descEl.createEl("br");
-        descEl.appendText(
-          "You can still enable controls manually by append #controls to link",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Restart the app to take effects");
-      },
-    });
+    // setToggle({
+    //   k: "thumbnailPlaceholder",
+    //   name: "Placeholder in favor of full player",
+    //   desc: (descEl) => {
+    //     descEl.appendText(
+    //       "If enabled, thumbnail placeholder will be used in favor of full player when page loads",
+    //     );
+    //     descEl.createEl("br");
+    //     descEl.appendText("Works with for Youtube/Vimeo/bilibili embeds");
+    //     descEl.createEl("br");
+    //     descEl.appendText(
+    //       "Helpful when numerous video from Youtube/Vimeo/... is embeded in one single file",
+    //     );
+    //     descEl.createEl("br");
+    //     descEl.appendText("Restart the app to take effects");
+    //   },
+    // });
+    // setToggle({
+    //   k: "hideEmbedControls",
+    //   name: "Hide Embed Controls By Default",
+    //   desc: (descEl) => {
+    //     descEl.appendText(
+    //       "If enabled, embeds are rendered similar to images with all controls hidden, click on embeds to play/pause",
+    //     );
+    //     descEl.createEl("br");
+    //     descEl.appendText(
+    //       "You can still enable controls manually by append #controls to link",
+    //     );
+    //     descEl.createEl("br");
+    //     descEl.appendText("Restart the app to take effects");
+    //   },
+    // });
 
-    const plyrControls = new Setting(containerEl)
-      .setName("Plyr Controls")
-      .setDesc(
-        createFragment((descEl) => {
-          descEl.appendText("Show or hide certain plyr controls");
-          descEl.createEl("br");
-          descEl.appendText("Restart the app to take effects");
-        }),
-      );
-    new PlyrControlsSetting(
-      plyrControls.settingEl.createDiv({ cls: "plyr-ctrls-container" }),
-      this.plugin,
-    );
+    // const plyrControls = new Setting(containerEl)
+    //   .setName("Plyr Controls")
+    //   .setDesc(
+    //     createFragment((descEl) => {
+    //       descEl.appendText("Show or hide certain plyr controls");
+    //       descEl.createEl("br");
+    //       descEl.appendText("Restart the app to take effects");
+    //     }),
+    //   );
+    // new PlyrControlsSetting(
+    //   plyrControls.settingEl.createDiv({ cls: "plyr-ctrls-container" }),
+    //   this.plugin,
+    // );
 
-    new Setting(containerEl)
-      .setName("Maximum Player Height for Embeds")
-      .setDesc("Reload app to take effects")
-      .addText((text) => {
-        const save = debounce(
-          async (value: string) =>
-            await this.plugin.setSizeSettings({ embedMaxHeight: value }),
-          500,
-          true,
-        );
-        text
-          .setValue(this.plugin.sizeSettings.embedMaxHeight)
-          .onChange(async (value: string) => {
-            text.inputEl.toggleClass("incorrect", !isCssValue(value));
-            if (isCssValue(value)) save(value);
-          });
-      });
-    new Setting(containerEl)
-      .setName("Minimum Player Width for Embeds")
-      .addText((text) => {
-        const save = debounce(
-          async (value: string) => {
-            this.plugin.setEmbedMinWidth(value);
-            await this.plugin.setSizeSettings({ embedMinWidth: value });
-          },
-          500,
-          true,
-        );
-        text
-          .setValue(this.plugin.sizeSettings.embedMinWidth)
-          .onChange(async (value: string) => {
-            text.inputEl.toggleClass("incorrect", !isCssValue(value));
-            if (isCssValue(value)) save(value);
-          });
-      });
+    // new Setting(containerEl)
+    //   .setName("Maximum Player Height for Embeds")
+    //   .setDesc("Reload app to take effects")
+    //   .addText((text) => {
+    //     const save = debounce(
+    //       async (value: string) =>
+    //         await this.plugin.setSizeSettings({ embedMaxHeight: value }),
+    //       500,
+    //       true,
+    //     );
+    //     text
+    //       .setValue(this.plugin.sizeSettings.embedMaxHeight)
+    //       .onChange(async (value: string) => {
+    //         text.inputEl.toggleClass("incorrect", !isCssValue(value));
+    //         if (isCssValue(value)) save(value);
+    //       });
+    //   });
+    // new Setting(containerEl)
+    //   .setName("Minimum Player Width for Embeds")
+    //   .addText((text) => {
+    //     const save = debounce(
+    //       async (value: string) => {
+    //         this.plugin.setEmbedMinWidth(value);
+    //         await this.plugin.setSizeSettings({ embedMinWidth: value });
+    //       },
+    //       500,
+    //       true,
+    //     );
+    //     text
+    //       .setValue(this.plugin.sizeSettings.embedMinWidth)
+    //       .onChange(async (value: string) => {
+    //         text.inputEl.toggleClass("incorrect", !isCssValue(value));
+    //         if (isCssValue(value)) save(value);
+    //       });
+    //   });
   }
   noteTaking(): void {
     let { containerEl } = this;
@@ -263,31 +263,31 @@ export default class MESettingTab extends PluginSettingTab {
 
     containerEl.createEl("h2", { text: "Youtube" });
 
-    setToggle({
-      k: "useYoutubeControls",
-      name: "Use Youtube Built-in Controls",
-      desc: (descEl) => {
-        descEl.appendText(
-          "If enabled, Youtube's built-in Controls will be used in favor of Plyr controls",
-        );
-        descEl.createEl("br");
-        descEl.appendText(
-          "Useful when need access to CC (Closed Captioning) and chapters progress bar",
-        );
-        descEl.createEl("br");
-        descEl.appendText("Restart the app to take effects");
-      },
-    });
-    if (!this.plugin.settings.useYoutubeControls) {
-      setToggle(
-        {
-          k: "hideYtbRecomm",
-          name: "Hide Recommend Videos",
-          desc: "Blur on pause to hide annoying recommend videos, ignored when Youtube Built-in Controls enabled",
-        },
-        (value) => document.body.toggleClass(hideYtbRecommClass, value),
-      );
-    }
+    // setToggle({
+    //   k: "useYoutubeControls",
+    //   name: "Use Youtube Built-in Controls",
+    //   desc: (descEl) => {
+    //     descEl.appendText(
+    //       "If enabled, Youtube's built-in Controls will be used in favor of Plyr controls",
+    //     );
+    //     descEl.createEl("br");
+    //     descEl.appendText(
+    //       "Useful when need access to CC (Closed Captioning) and chapters progress bar",
+    //     );
+    //     descEl.createEl("br");
+    //     descEl.appendText("Restart the app to take effects");
+    //   },
+    // });
+    // if (!this.plugin.settings.useYoutubeControls) {
+    //   setToggle(
+    //     {
+    //       k: "hideYtbRecomm",
+    //       name: "Hide Recommend Videos",
+    //       desc: "Blur on pause to hide annoying recommend videos, ignored when Youtube Built-in Controls enabled",
+    //     },
+    //     (value) => document.body.toggleClass(hideYtbRecommClass, value),
+    //   );
+    // }
   }
   bili(): void {
     let { containerEl } = this;
@@ -313,16 +313,16 @@ export default class MESettingTab extends PluginSettingTab {
         }),
       );
     if (!this.app.isMobile && isAvailable(this.app)) {
-      internalBili.addToggle((toggle) => {
-        let { settings } = this.plugin;
-        toggle
-          .setValue(settings.interalBiliPlayback)
-          .onChange(async (value) => {
-            settings.interalBiliPlayback = value;
-            this.plugin.saveData(settings);
-            this.display();
-          });
-      });
+      // internalBili.addToggle((toggle) => {
+      //   let { settings } = this.plugin;
+      //   toggle
+      //     .setValue(settings.interalBiliPlayback)
+      //     .onChange(async (value) => {
+      //       settings.interalBiliPlayback = value;
+      //       this.plugin.saveData(settings);
+      //       this.display();
+      //     });
+      // });
       getPortSetting(this.app)(containerEl);
     }
   }

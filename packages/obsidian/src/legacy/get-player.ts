@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "../style/ratio.less";
 
 import { HashTool, HostMediaInfo, MediaInfoType } from "mx-lib";
@@ -6,12 +7,12 @@ import type Plyr from "plyr";
 
 import { MediaInfo } from "../base/media-info";
 import { isAvailable } from "../feature/bili-bridge";
-import { MediaResource } from "../feature/subtitle";
 import { setRatioWidth } from "../misc";
 import { isCssValue } from "../modules/parse-unit";
 import type MediaExtended from "../mx-main";
-import { getContainer, getPlyr } from "../plyr/plyr-setup";
 import { setupPlaceholder } from "./placeholder";
+import { getContainer, getPlyr } from "./plyr-setup";
+import { MediaResource } from "./subtitle";
 
 const getPlayer = async (
   info: MediaInfo,

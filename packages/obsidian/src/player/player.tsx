@@ -11,16 +11,21 @@ import type {
 import assertNever from "assert-never";
 import { parseTF } from "mx-lib";
 import { EventRef } from "obsidian";
-import React, { useContext } from "preact/compat";
-import { useEffect, useMemo, useRef, useState } from "preact/compat";
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/compat";
 import { parse as parseQS } from "query-string";
 
 import { InternalMediaInfo } from "../base/media-info";
 import { MediaType } from "../base/media-type";
+import PlayerControls from "./controls";
 import { is, useFrag, useHashProps } from "./hash-tool";
 import { ControlsContext, PlayerContext } from "./misc";
-import PlayerControls from "./ui";
-import { useIcon } from "./ui/utils";
+import { useIcon } from "./utils";
 
 declare module "preact/src/jsx" {
   namespace JSXInternal {

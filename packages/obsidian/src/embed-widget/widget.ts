@@ -6,8 +6,7 @@ import { Platform, setIcon } from "obsidian";
 import ReactDOM from "react-dom";
 
 import { getInternalMediaInfo, MediaInfo } from "../base/media-info";
-import { MediaView, PlayerRenderChild } from "../media-view-v2";
-import { RevealInEditorClass } from "../media-view-v2/misc";
+import { MediaView, PlayerRenderChild } from "../media-view";
 import type MediaExtended from "../mx-main";
 abstract class LPWidget extends WidgetType {}
 

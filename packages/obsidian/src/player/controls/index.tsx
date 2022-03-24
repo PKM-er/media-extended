@@ -11,10 +11,10 @@ import type {
 } from "@vidstack/player";
 import React from "preact/compat";
 
+import { useIcon } from "../utils";
 import ProgressBar from "./progress";
 import ScreenshotButton from "./screenshot-btn";
 import SpeedControl from "./speed";
-import { useIcon } from "./utils";
 import VolumeControl from "./volume";
 
 declare module "preact/src/jsx" {

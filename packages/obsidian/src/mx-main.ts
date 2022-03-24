@@ -9,19 +9,10 @@ import { Plugin } from "obsidian";
 import { ExtensionAccepted, MediaType } from "./base/media-type";
 import registerEmbedHandlers from "./embed";
 import { setupRec } from "./feature/audio-rec";
+// import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./legacy/media-view";
 import registerLinkHandlers from "./links";
-import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./media-view";
-import {
-  MediaView as MediaView2,
-  VIEW_TYPE as MEDIA_VIEW_2_TYPE,
-} from "./media-view-v2";
-import {
-  DEFAULT_SETTINGS,
-  hideYtbRecommClass,
-  MESettingTab,
-  MxSettings,
-  SizeSettings,
-} from "./settings";
+import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "./media-view";
+import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
@@ -36,45 +27,45 @@ export default class MediaExtended extends Plugin {
     await this.saveData(this.settings);
   }
 
-  setEmbedMinWidth = (value?: string) =>
-    document.documentElement.style.setProperty(
-      "--plyr-min-width",
-      value ?? this.sizeSettings.embedMinWidth,
-    );
-  get sizeSettings() {
-    return {
-      embedMaxHeight: this.app.isMobile
-        ? this.settings.embedMaxHeightMobile
-        : this.settings.embedMaxHeight,
-      embedMinWidth: this.app.isMobile
-        ? this.settings.embedMinWidthMobile
-        : this.settings.embedMinWidth,
-      plyrControls: this.app.isMobile
-        ? this.settings.plyrControlsMobile
-        : this.settings.plyrControls,
-    };
-  }
-  setSizeSettings = async (to: Partial<SizeSettings>): Promise<void> => {
-    let save: Partial<MxSettings>;
-    if (this.app.isMobile) {
-      save = {
-        embedMaxHeightMobile: to.embedMaxHeight,
-        embedMinWidthMobile: to.embedMinWidth,
-        plyrControlsMobile: to.plyrControls,
-      };
-    } else {
-      save = to;
-    }
-    const mergeObject = (A: any, B: any) => {
-      let res: any = {};
-      Object.keys({ ...A, ...B }).map((key) => {
-        res[key] = B[key] || A[key];
-      });
-      return res;
-    };
-    this.settings = mergeObject(this.settings, save);
-    await this.saveSettings();
-  };
+  // setEmbedMinWidth = (value?: string) =>
+  //   document.documentElement.style.setProperty(
+  //     "--plyr-min-width",
+  //     value ?? this.sizeSettings.embedMinWidth,
+  //   );
+  // get sizeSettings() {
+  //   return {
+  //     embedMaxHeight: this.app.isMobile
+  //       ? this.settings.embedMaxHeightMobile
+  //       : this.settings.embedMaxHeight,
+  //     embedMinWidth: this.app.isMobile
+  //       ? this.settings.embedMinWidthMobile
+  //       : this.settings.embedMinWidth,
+  //     plyrControls: this.app.isMobile
+  //       ? this.settings.plyrControlsMobile
+  //       : this.settings.plyrControls,
+  //   };
+  // }
+  // setSizeSettings = async (to: Partial<SizeSettings>): Promise<void> => {
+  //   let save: Partial<MxSettings>;
+  //   if (this.app.isMobile) {
+  //     save = {
+  //       embedMaxHeightMobile: to.embedMaxHeight,
+  //       embedMinWidthMobile: to.embedMinWidth,
+  //       plyrControlsMobile: to.plyrControls,
+  //     };
+  //   } else {
+  //     save = to;
+  //   }
+  //   const mergeObject = (A: any, B: any) => {
+  //     let res: any = {};
+  //     Object.keys({ ...A, ...B }).map((key) => {
+  //       res[key] = B[key] || A[key];
+  //     });
+  //     return res;
+  //   };
+  //   this.settings = mergeObject(this.settings, save);
+  //   await this.saveSettings();
+  // };
 
   async onload(): Promise<void> {
     console.log("loading media-extended");
@@ -83,8 +74,8 @@ export default class MediaExtended extends Plugin {
 
     setupRec.call(this);
 
-    document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
-    this.setEmbedMinWidth();
+    // document.body.toggleClass(hideYtbRecommClass, this.settings.hideYtbRecomm);
+    // this.setEmbedMinWidth();
 
     this.addSettingTab(new MESettingTab(this.app, this));
 
@@ -93,43 +84,43 @@ export default class MediaExtended extends Plugin {
 
     this.registerExtensions();
 
-    this.addCommand({
-      id: "get-timestamp",
-      name: "Get timestamp from player",
-      editorCheckCallback: (checking, _editor, view) => {
-        const getMediaView = (group: string) =>
-          this.app.workspace
-            .getGroupLeaves(group)
-            .find((leaf) => (leaf.view as MediaView).getTimeStamp !== undefined)
-            ?.view as MediaView | undefined;
-        const group: null | string = view.leaf.group;
-        if (checking) {
-          if (group) {
-            const mediaView = getMediaView(group);
-            if (mediaView && (mediaView as MediaView).getTimeStamp())
-              return true;
-          }
-          return false;
-        } else if (group) {
-          getMediaView(group)?.addTimeStampToMDView(view);
-        }
-      },
-    });
-    this.addCommand({
-      id: "open-media-link",
-      name: "Open Media from Link",
-      callback: () => {
-        new PromptModal(this).open();
-      },
-    });
+    // this.addCommand({
+    //   id: "get-timestamp",
+    //   name: "Get timestamp from player",
+    //   editorCheckCallback: (checking, _editor, view) => {
+    //     const getMediaView = (group: string) =>
+    //       this.app.workspace
+    //         .getGroupLeaves(group)
+    //         .find((leaf) => (leaf.view as MediaView).getTimeStamp !== undefined)
+    //         ?.view as MediaView | undefined;
+    //     const group: null | string = view.leaf.group;
+    //     if (checking) {
+    //       if (group) {
+    //         const mediaView = getMediaView(group);
+    //         if (mediaView && (mediaView as MediaView).getTimeStamp())
+    //           return true;
+    //       }
+    //       return false;
+    //     } else if (group) {
+    //       getMediaView(group)?.addTimeStampToMDView(view);
+    //     }
+    //   },
+    // });
+    // this.addCommand({
+    //   id: "open-media-link",
+    //   name: "Open Media from Link",
+    //   callback: () => {
+    //     new PromptModal(this).open();
+    //   },
+    // });
   }
 
   registerExtensions() {
     const exts = getExts();
     this.app.viewRegistry.unregisterExtensions(exts);
-    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
-    this.registerView(MEDIA_VIEW_2_TYPE, (leaf) => new MediaView2(leaf));
-    this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_2_TYPE);
+    // this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
+    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf));
+    this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_TYPE);
   }
 
   unregisterExtensions() {

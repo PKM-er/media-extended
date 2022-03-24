@@ -10,8 +10,7 @@ import {
 } from "mx-lib";
 import { App, parseLinktext, Platform, TFile, Vault } from "obsidian";
 
-import { getSubtitles, trackInfo } from "../feature/subtitle";
-import { getSubtitleTracks } from "../feature/subtitle";
+import { getSubtitles, getSubtitleTracks, trackInfo } from "../legacy/subtitle";
 import { getBiliRedirectUrl } from "../misc";
 import { getMediaType } from "./media-type";
 interface InternalMediaInfoInterface extends ObsidianMediaInfo {

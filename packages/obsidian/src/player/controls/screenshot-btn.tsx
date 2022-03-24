@@ -7,8 +7,8 @@ import React, {
 } from "preact/compat";
 
 import { ControlsContext, PlayerContext } from "../misc";
+import { useIcon } from "../utils";
 import Button from "./button";
-import { useIcon } from "./utils";
 
 const ScreenshotButton = ({ disabled = false }: { disabled?: boolean }) => {
   const ScreenshotBtn = useIcon(["camera"]);

@@ -16,8 +16,6 @@ interface PlayerContext {
 
 export const PlayerContext = React.createContext<PlayerContext>({} as any);
 
-export const RevealInEditorClass = "vid-reveal-in-editor";
-
 export interface ControlsProps {
   timeSpan: TimeSpan | null;
   player: React.Ref<MediaProviderElement>;

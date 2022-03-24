@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "dashjs/dist/dash.all.debug";
 
 import assertNever from "assert-never";
