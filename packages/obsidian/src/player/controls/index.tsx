@@ -4,14 +4,15 @@ import "@vidstack/player/define/vds-mute-button.js";
 import "./buttons.less";
 import "./basic.less";
 import "./sliders.less";
+import "react-devtools-core";
 
+import { useIcon } from "@player/utils";
 import type {
   FullscreenButtonElement,
   PlayButtonElement,
 } from "@vidstack/player";
 import React from "preact/compat";
 
-import { useIcon } from "../utils";
 import ProgressBar from "./progress";
 import ScreenshotButton from "./screenshot-btn";
 import SpeedControl from "./speed";

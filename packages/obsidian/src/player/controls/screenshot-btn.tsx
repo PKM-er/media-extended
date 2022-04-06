@@ -1,3 +1,4 @@
+import { useIcon } from "@player/utils";
 import { captureScreenshot } from "mx-lib";
 import React, {
   useCallback,
@@ -7,7 +8,6 @@ import React, {
 } from "preact/compat";
 
 import { ControlsContext, PlayerContext } from "../misc";
-import { useIcon } from "../utils";
 import Button from "./button";
 
 const ScreenshotButton = ({ disabled = false }: { disabled?: boolean }) => {

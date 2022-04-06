@@ -1,11 +1,14 @@
 {
   "extends": "@aidenlx/ts-config/tsconfig.json",
   "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@player/*": ["player/*"],
+      "@player": ["player"]
+    },
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
-    "types": ["@vidstack/player/globals", "node"],
-    "experimentalDecorators": true,
+    "jsx": "react",
+    "types": ["node"],
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]

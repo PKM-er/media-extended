@@ -1,4 +1,4 @@
-import type { MediaProviderElement } from "@vidstack/player";
+import Player from "@player";
 import {
   App,
   Component,
@@ -10,38 +10,28 @@ import {
   TFile,
   WorkspaceLeaf,
 } from "obsidian";
-import React from "preact/compat";
-import ReactDOM from "preact/compat";
+import React from "react";
+import ReactDOM from "react-dom";
 
 import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
 import { ExtensionAccepted } from "../base/media-type";
-import Player, {
-  MediaViewEvents,
-  PlayerContext,
-  ShowControls,
-} from "../player";
-import getPlayerKeymaps from "./keymap";
+// import getPlayerKeymaps from "./keymap";
 
 export const VIEW_TYPE = "media-view-v2";
 
 interface PlayerComponent extends Component {
   scope: Scope;
   keymap: KeymapEventHandler[] | null;
-  events: MediaViewEvents;
-  player: MediaProviderElement | null;
 }
 
 export default class MediaView
   extends EditableFileView
   implements PlayerComponent
 {
-  player: MediaProviderElement | null = null;
   // no need to manage this manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
   scope = new Scope(this.app.scope);
   keymap: KeymapEventHandler[] | null = null;
-
-  events = new MediaViewEvents();
 
   _hash = "";
   _file: TFile | null = null;
@@ -58,7 +48,7 @@ export default class MediaView
     async () => {
       const info = await this._getInfo();
       if (!info) return;
-      this.events.trigger("file-loaded", info);
+      // this.events.trigger("file-loaded", info);
     },
     200,
     true,
@@ -105,19 +95,7 @@ export default class MediaView
     this.setInfo({ file }, false);
     const info = await this._getInfo();
     if (!info) return;
-    ReactDOM.render(
-      <PlayerContext.Provider
-        value={{
-          app: this.app,
-          inEditor: false,
-          events: this.events,
-          containerEl: this.contentEl,
-        }}
-      >
-        <Player info={info} />
-      </PlayerContext.Provider>,
-      this.contentEl,
-    );
+    ReactDOM.render(<div>Player</div>, this.contentEl);
   }
   async onClose() {
     ReactDOM.unmountComponentAtNode(this.contentEl);
@@ -125,13 +103,13 @@ export default class MediaView
   }
 
   async onRename(file: TFile) {
-    this.events.trigger(
-      "file-loaded",
-      (await getMediaInfo(
-        { type: "internal", file, hash: "" },
-        this.app,
-      )) as InternalMediaInfo,
-    );
+    // this.events.trigger(
+    //   "file-loaded",
+    //   (await getMediaInfo(
+    //     { type: "internal", file, hash: "" },
+    //     this.app,
+    //   )) as InternalMediaInfo,
+    // );
     return super.onRename(file);
   }
 
@@ -146,33 +124,31 @@ export default class MediaView
 }
 
 const registerPlayerEvents = (component: PlayerComponent) => {
-  const { events } = component;
-  [
-    events.on("player-init", (player) => {
-      component.player = player;
-      component.keymap = getPlayerKeymaps(component.scope, player);
-    }),
-    events.on("player-destroy", () => {
-      component.player = null;
-      if (component.keymap) {
-        component.keymap.forEach((k) => component.scope.unregister(k));
-        component.keymap = null;
-      }
-    }),
-    events.on("screenshot", async (data) => {
-      const blob = await data;
-      // TODO
-    }),
-  ].forEach(component.registerEvent.bind(component));
+  // const { events } = component;
+  // [
+  //   events.on("player-init", (player) => {
+  //     component.player = player;
+  //     component.keymap = getPlayerKeymaps(component.scope, player);
+  //   }),
+  //   events.on("player-destroy", () => {
+  //     component.player = null;
+  //     if (component.keymap) {
+  //       component.keymap.forEach((k) => component.scope.unregister(k));
+  //       component.keymap = null;
+  //     }
+  //   }),
+  //   events.on("screenshot", async (data) => {
+  //     const blob = await data;
+  //     // TODO
+  //   }),
+  // ].forEach(component.registerEvent.bind(component));
 };
 
 export class PlayerRenderChild
   extends MarkdownRenderChild
   implements PlayerComponent
 {
-  player: MediaProviderElement | null = null;
   scope = new Scope(this.app.scope);
-  events = new MediaViewEvents();
   keymap: KeymapEventHandler[] | null = null;
 
   constructor(
@@ -187,25 +163,7 @@ export class PlayerRenderChild
 
   async onload() {
     await wait(0);
-    ReactDOM.render(
-      <PlayerContext.Provider
-        value={{
-          app: this.app,
-          inEditor: this.inEditor,
-          events: this.events,
-          containerEl: this.containerEl,
-        }}
-      >
-        <Player
-          info={this.info}
-          controls={ShowControls.full}
-          onFocus={this.inEditor ? undefined : this.pushScope.bind(this)}
-          onBlur={this.inEditor ? undefined : this.popScope.bind(this)}
-        />
-      </PlayerContext.Provider>,
-
-      this.containerEl,
-    );
+    ReactDOM.render(<Player />, this.containerEl);
   }
   pushScope() {
     this.app.keymap.pushScope(this.scope);

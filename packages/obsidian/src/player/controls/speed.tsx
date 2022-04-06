@@ -1,4 +1,5 @@
 import { autoUpdate, shift, useFloating } from "@floating-ui/react-dom";
+import { useIcon } from "@player/utils";
 import React, {
   useCallback,
   useContext,
@@ -8,7 +9,6 @@ import React, {
 } from "preact/compat";
 
 import { ControlsContext, PlayerContext } from "../misc";
-import { useIcon } from "../utils";
 import SpeedSlider from "./speed-slider";
 
 const SpeedControl = () => {

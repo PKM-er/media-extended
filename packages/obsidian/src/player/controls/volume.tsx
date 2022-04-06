@@ -3,6 +3,7 @@ import "@vidstack/player/define/vds-volume-slider.js";
 import "./volume.less";
 
 import { autoUpdate, shift, useFloating } from "@floating-ui/react-dom";
+import { useIcon } from "@player/utils";
 import type { MuteButtonElement, VolumeSliderElement } from "@vidstack/player";
 import React, {
   useCallback,
@@ -13,7 +14,6 @@ import React, {
 } from "preact/compat";
 
 import { PlayerContext } from "../misc";
-import { useIcon } from "../utils";
 
 declare module "preact/src/jsx" {
   namespace JSXInternal {

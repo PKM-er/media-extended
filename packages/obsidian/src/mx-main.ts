@@ -1,4 +1,3 @@
-import "plyr/dist/plyr.css";
 import "./style/main.less";
 import "./style/ytb.less";
 import "./style/caption-fix.less";
