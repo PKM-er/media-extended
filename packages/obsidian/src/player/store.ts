@@ -5,7 +5,7 @@ import interfaceReducer from "@slice/interface";
 import providerReducer from "@slice/provider";
 import youtubeReducer from "@slice/youtube";
 
-export const createStore = () =>
+export const createStore = (name: string) =>
   configureStore({
     reducer: {
       controls: controlsReducer,
@@ -14,6 +14,8 @@ export const createStore = () =>
       youtube: youtubeReducer,
       html5: html5Reducer,
     },
+    devTools: false,
+    enhancers: [],
   });
 
 export type PlayerStore = ReturnType<typeof createStore>;

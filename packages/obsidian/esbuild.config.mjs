@@ -34,8 +34,29 @@ const cmModules = [
   "@codemirror/view",
 ];
 
+import { promises } from "fs";
+/**
+ * @type {import("esbuild").Plugin}
+ */
+const remoteRedux = {
+  name: "obsidian-plugin",
+  setup: (build) => {
+    if (isProd) return;
+    build.onLoad({ filter: /src\/player\/store\.ts$/ }, async (args) => ({
+      contents: (
+        `import devToolsEnhancer from "remote-redux-devtools";` +
+        (await promises.readFile(args.path, "utf8"))
+      ).replace(
+        `enhancers: []`,
+        `enhancers: [devToolsEnhancer({ realtime: true, hostname: "localhost", port: 8000, name })]`,
+      ),
+      loader: "ts",
+    }));
+  },
+};
+
 try {
-  await build({
+  const result = await build({
     entryPoints: ["src/mx-main.ts"],
     bundle: true,
     watch: !isProd,
@@ -50,8 +71,14 @@ try {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: "build/main.js",
-    plugins: [lessLoader(), obPlugin()],
+    plugins: [lessLoader(), obPlugin(), remoteRedux],
+    // metafile: true,
   });
+  // await promises.writeFile(
+  //   "meta.json",
+  //   JSON.stringify(result.metafile),
+  //   "utf8",
+  // );
 } catch (err) {
   console.error(err);
   process.exit(1);

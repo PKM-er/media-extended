@@ -60,7 +60,7 @@ export default class MediaView
   }
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
-    this.store = createStore();
+    this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
     this.keymap = getPlayerKeymaps(this);
   }
@@ -122,7 +122,9 @@ export class PlayerRenderChild
     private inEditor: boolean,
   ) {
     super(containerEl);
-    this.store = createStore();
+    this.store = createStore(
+      `media embed (${inEditor ? "live" : "read"}) ` + Date.now(),
+    );
     this.store.dispatch(initAction);
     this.scope = new Scope(this.app.scope);
     this.keymap = getPlayerKeymaps(this);
