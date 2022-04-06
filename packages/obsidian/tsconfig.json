@@ -4,7 +4,12 @@
     "baseUrl": "src",
     "paths": {
       "@player/*": ["player/*"],
-      "@player": ["player"]
+      "@player": ["player"],
+      "@render/*": ["render/*"],
+      "@view": ["media-view"],
+      "@base/*": ["base/*"],
+      "@plugin": ["mx-main"],
+      "@settings": ["settings"]
     },
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",

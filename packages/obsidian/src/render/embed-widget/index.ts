@@ -1,4 +1,5 @@
-import type MediaExtended from "../mx-main";
+import type MediaExtended from "@plugin";
+
 import defineStatefulDecoration from "./state";
 
 const setupEmbedWidget = (plugin: MediaExtended) => {

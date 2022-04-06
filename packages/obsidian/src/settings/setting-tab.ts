@@ -1,11 +1,11 @@
+// import { PlyrControls, PlyrControlsSetting } from "../legacy/plyr-controls";
+// import { isCssValue } from "../modules/parse-unit";
+import type MediaExtended from "@plugin";
+import { MxSettings } from "@settings";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
 import { getPortSetting, isAvailable } from "../feature/bili-bridge";
-// import { PlyrControls, PlyrControlsSetting } from "../legacy/plyr-controls";
-// import { isCssValue } from "../modules/parse-unit";
-import type MediaExtended from "../mx-main";
 import { hideYtbRecommClass } from "./misc";
-import { MxSettings } from "./settings";
 
 // export type SizeSettings = {
 //   embedMaxHeight: string;

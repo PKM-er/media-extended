@@ -1,12 +1,12 @@
+import { getMediaFileHashFromLinktext } from "@base/media-info";
+import { getMediaType } from "@base/media-type";
 import { syntaxTree } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
 import { tokenClassNodeProp } from "@codemirror/stream-parser";
 import { Decoration, WidgetType } from "@codemirror/view";
+import type MediaExtended from "@plugin";
 import { editorViewField, Platform } from "obsidian";
 
-import { getMediaFileHashFromLinktext } from "../base/media-info";
-import { getMediaType } from "../base/media-type";
-import MediaExtended from "../mx-main";
 import {
   getUrlFromMarkdown,
   isMdFavorInternalLink,

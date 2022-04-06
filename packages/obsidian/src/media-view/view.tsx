@@ -1,3 +1,5 @@
+import { getMediaInfo, InternalMediaInfo } from "@base/media-info";
+import { ExtensionAccepted } from "@base/media-type";
 import Player from "@player";
 import {
   App,
@@ -12,9 +14,6 @@ import {
 } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
-
-import { getMediaInfo, InternalMediaInfo } from "../base/media-info";
-import { ExtensionAccepted } from "../base/media-type";
 // import getPlayerKeymaps from "./keymap";
 
 export const VIEW_TYPE = "media-view-v2";

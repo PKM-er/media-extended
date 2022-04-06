@@ -1,13 +1,12 @@
+import { getInternalMediaInfo, MediaInfo } from "@base/media-info";
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
+import type MediaExtended from "@plugin";
+import { MediaView, PlayerRenderChild } from "@view";
 import cls from "classnames";
 import { parseSizeSyntax } from "mx-lib";
 import { Platform, setIcon } from "obsidian";
 import ReactDOM from "react-dom";
-
-import { getInternalMediaInfo, MediaInfo } from "../base/media-info";
-import { MediaView, PlayerRenderChild } from "../media-view";
-import type MediaExtended from "../mx-main";
 abstract class LPWidget extends WidgetType {}
 
 type ElWithInfo = HTMLElement & {

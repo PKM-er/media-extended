@@ -1,8 +1,8 @@
 import { EditorState, StateField, Transaction } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import type MediaExtended from "@plugin";
 import { editorEditorField, editorLivePreviewField } from "obsidian";
 
-import type MediaExtended from "../mx-main";
 import getPlayerDecos from "./syntax-to-decos";
 import UnionRanges from "./union";
 

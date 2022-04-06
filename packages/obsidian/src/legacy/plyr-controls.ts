@@ -1,7 +1,7 @@
 // @ts-nocheck
 import "../style/plyr-controls.less";
 
-import MediaExtended from "../mx-main";
+import type MediaExtended from "@plugin";
 
 export type PlyrControls =
   | "restart"

@@ -1,6 +1,9 @@
 // @ts-nocheck
 import "dashjs/dist/dash.all.debug";
 
+import { getLink, MediaInfo } from "@base/media-info";
+import type MediaExtended from "@plugin";
+import { recToPlyrControls } from "@settings";
 import assertNever from "assert-never";
 import type dashjs from "dashjs";
 import { around } from "monkey-around";
@@ -8,10 +11,7 @@ import { HashTool, MediaInfoType, MediaType, Plyr_TF, TimeSpan } from "mx-lib";
 import { Vault } from "obsidian";
 import Plyr from "plyr";
 
-import { getLink, MediaInfo } from "../base/media-info";
 import { fetchPosterFunc, getPort } from "../feature/bili-bridge";
-import MediaExtended from "../mx-main";
-import { recToPlyrControls } from "../settings";
 
 const getYtbOptions = (timeSpan: TimeSpan | null, useYtControls: boolean) => {
   let options: Plyr.Options = {};

@@ -1,9 +1,9 @@
+import type MediaExtended from "@plugin";
 import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
 import { MarkdownView, TAbstractFile, TFile } from "obsidian";
 
 import { insertToCursor } from "../misc";
-import MediaExtended from "../mx-main";
 
 export function setupRec(this: MediaExtended) {
   const { vault, fileManager, workspace } = this.app;

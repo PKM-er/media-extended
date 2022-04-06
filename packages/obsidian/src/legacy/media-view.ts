@@ -1,3 +1,11 @@
+import {
+  getLink,
+  getMediaInfo,
+  InternalMediaInfo,
+  isObsidianMediaInfo,
+  MediaInfo,
+} from "@base/media-info";
+import type MediaExtended from "@plugin";
 import assertNever from "assert-never";
 import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
@@ -22,15 +30,7 @@ import {
   WorkspaceLeaf,
 } from "obsidian";
 
-import {
-  getLink,
-  getMediaInfo,
-  InternalMediaInfo,
-  isObsidianMediaInfo,
-  MediaInfo,
-} from "../base/media-info";
 import { insertToCursor, mainpart } from "../misc";
-import type MediaExtended from "../mx-main";
 import { getContainer, getPlyr } from "./plyr-setup";
 
 export const MEDIA_VIEW_TYPE = "media-view";

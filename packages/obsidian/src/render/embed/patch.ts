@@ -1,11 +1,11 @@
 import "obsidian";
 
+import { getInternalMediaInfo } from "@base/media-info";
+import type MediaExtended from "@plugin";
+import { CONTROLS_ENABLED_CLASS, MediaView } from "@view";
 import { around } from "monkey-around";
 import type { AudioView, displayInElFunc, VideoView } from "obsidian";
 
-import { getInternalMediaInfo } from "../base/media-info";
-import { CONTROLS_ENABLED_CLASS, MediaView } from "../media-view";
-import type MediaExtended from "../mx-main";
 import { ElementWithRenderChild, getViewCtorOfType } from "./base";
 
 declare module "obsidian" {

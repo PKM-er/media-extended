@@ -1,4 +1,4 @@
-import { PlayerRenderChild } from "../media-view";
+import { PlayerRenderChild } from "@view";
 
 export type ElementWithRenderChild = HTMLElement & {
   renderChild?: PlayerRenderChild;

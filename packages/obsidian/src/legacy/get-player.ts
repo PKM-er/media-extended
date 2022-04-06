@@ -1,15 +1,15 @@
 // @ts-nocheck
 import "../style/ratio.less";
 
+import { MediaInfo } from "@base/media-info";
+import type MediaExtended from "@plugin";
 import { HashTool, HostMediaInfo, MediaInfoType } from "mx-lib";
 import { MarkdownRenderChild } from "obsidian";
 import type Plyr from "plyr";
 
-import { MediaInfo } from "../base/media-info";
 import { isAvailable } from "../feature/bili-bridge";
 import { setRatioWidth } from "../misc";
 import { isCssValue } from "../modules/parse-unit";
-import type MediaExtended from "../mx-main";
 import { setupPlaceholder } from "./placeholder";
 import { getContainer, getPlyr } from "./plyr-setup";
 import { MediaResource } from "./subtitle";

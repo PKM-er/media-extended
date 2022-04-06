@@ -1,4 +1,5 @@
-import type MediaExtended from "../mx-main";
+import type MediaExtended from "@plugin";
+
 import { patchEditorClick } from "./editor";
 import patchPreviewLinks from "./preview";
 

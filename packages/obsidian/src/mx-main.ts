@@ -2,16 +2,16 @@ import "./style/main.less";
 import "./style/ytb.less";
 import "./style/caption-fix.less";
 
+import { ExtensionAccepted, MediaType } from "@base/media-type";
+import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
+import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
 import assertNever from "assert-never";
 import { Plugin } from "obsidian";
 
-import { ExtensionAccepted, MediaType } from "./base/media-type";
-import registerEmbedHandlers from "./embed";
 import { setupRec } from "./feature/audio-rec";
+import registerEmbedHandlers from "./render/embed";
 // import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./legacy/media-view";
-import registerLinkHandlers from "./links";
-import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "./media-view";
-import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "./settings";
+import registerLinkHandlers from "./render/links";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;

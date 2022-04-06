@@ -1,5 +1,6 @@
-import setupEmbedWidget from "../embed-widget";
-import type MediaExtended from "../mx-main";
+import type MediaExtended from "@plugin";
+import setupEmbedWidget from "@render/embed-widget";
+
 import patchMediaEmbed from "./patch";
 import getEmbedProcessor from "./preview";
 

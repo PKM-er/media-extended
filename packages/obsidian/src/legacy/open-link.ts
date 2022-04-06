@@ -1,11 +1,11 @@
 // @ts-nocheck
+import { MediaInfo } from "@base/media-info";
+import type MediaExtended from "@plugin";
+import { MEDIA_VIEW_TYPE, MediaView, openNewView } from "@view";
 import { MediaInfoType, MediaType } from "mx-lib";
 import { WorkspaceLeaf } from "obsidian";
 
-import { MediaInfo } from "../base/media-info";
 import { isAvailable } from "../feature/bili-bridge";
-import type MediaExtended from "../mx-main";
-import { MEDIA_VIEW_TYPE, MediaView, openNewView } from "./media-view";
 
 export const linkSelector = "span.cm-url, span.cm-hmd-internal-link";
 

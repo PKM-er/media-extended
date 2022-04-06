@@ -1,9 +1,9 @@
+// import { getMediaInfo } from "@base/media-info";
+// import getPlayer from "../legacy/get-player";
+import type MediaExtended from "@plugin";
+import { CONTROLS_ENABLED_CLASS } from "@view";
 import { MarkdownPostProcessor, MarkdownPostProcessorContext } from "obsidian";
 
-// import { getMediaInfo } from "../base/media-info";
-// import getPlayer from "../legacy/get-player";
-import { CONTROLS_ENABLED_CLASS } from "../media-view";
-import type MediaExtended from "../mx-main";
 import { ElementWithRenderChild } from "./base";
 
 const getEmbedProcessor = (

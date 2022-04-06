@@ -1,12 +1,11 @@
 import "obsidian";
 
+// import { getInternalMediaInfo, getMediaInfo } from "@base/media-info";
+// import OpenLink from "../legacy/open-link";
+import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
 import { EventHelper, Keymap } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
-
-// import { getInternalMediaInfo, getMediaInfo } from "../base/media-info";
-// import OpenLink from "../legacy/open-link";
-import type MediaExtended from "../mx-main";
 
 type MarkedCtor = typeof EventHelper & { __MX_PATCHED__?: true };
 const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
