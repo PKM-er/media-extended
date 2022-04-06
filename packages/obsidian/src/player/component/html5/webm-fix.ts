@@ -1,6 +1,6 @@
 import { useAppDispatch } from "@player/hooks";
-import { LARGE_CURRENT_TIME } from "@player/slice/controls";
-import { switchToAudio } from "@player/slice/provider";
+import { LARGE_CURRENT_TIME } from "@slice/controls";
+import { switchToAudio } from "@slice/provider";
 import { useCallback, useState } from "react";
 
 import { EventHandler } from "./event";

@@ -4,12 +4,14 @@
     "baseUrl": "src",
     "paths": {
       "@player/*": ["player/*"],
+      "@slice/*": ["player/slice/*"],
       "@player": ["player"],
       "@render/*": ["render/*"],
       "@view": ["media-view"],
       "@base/*": ["base/*"],
       "@plugin": ["mx-main"],
-      "@settings": ["settings"]
+      "@settings": ["settings"],
+      "@misc": ["misc"]
     },
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",

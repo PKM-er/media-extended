@@ -1,6 +1,9 @@
 import { AppThunk } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { HashTool, parseTF } from "mx-lib";
+import { parse as parseQS } from "query-string";
 
+import { is } from "../utils/hash-tool";
 import { setVolumeByOffest as setVolumeByOffestYtb } from "./youtube";
 
 export const LARGE_CURRENT_TIME = 1e101;
@@ -69,6 +72,17 @@ export const controlsSlice = createSlice({
   name: "controls",
   initialState,
   reducers: {
+    setHash: (state, action: PayloadAction<string>) => {
+      const timeSpan = parseTF(action.payload),
+        query = parseQS(action.payload);
+      if (timeSpan) {
+        state.fragment = [timeSpan.start, timeSpan.end];
+      }
+      state.loop = is(query, "loop");
+      state.autoplay = is(query, "autoplay");
+      state.muted = is(query, "muted");
+      // state.controls = is("controls");
+    },
     setFragment: (
       state,
       action: PayloadAction<null | Partial<Record<"start" | "end", number>>>,
@@ -112,9 +126,6 @@ export const controlsSlice = createSlice({
     },
     toggleMute: (state) => {
       state.muted = !state.muted;
-    },
-    setAutoPlay: (state, action: PayloadAction<boolean>) => {
-      state.autoplay = action.payload;
     },
     setVolume: (state, action: PayloadAction<number>) => {
       setVolumeTo(action.payload, state);
@@ -172,7 +183,11 @@ export const controlsSlice = createSlice({
       state.muted = action.payload.muted;
     },
     handleDurationChange: (state, action: PayloadAction<number | null>) => {
-      state.duration = action.payload;
+      if (typeof action.payload === "number" && action.payload <= 0) {
+        state.duration === null;
+      } else {
+        state.duration = action.payload;
+      }
     },
     handleSeeking: (state) => {
       state.seeking = true;
@@ -224,7 +239,6 @@ export const {
   toggleFullscreen,
   setMute,
   toggleMute,
-  setAutoPlay,
   setVolume,
   userSeeking,
   userSeekStart,
@@ -237,7 +251,10 @@ export const setPlaybackRate =
   (rate: number): AppThunk =>
   (dispatch, getState) => {
     const { provider, youtube } = getState();
-    if (provider.from === "youtube") {
+    if (
+      provider.source?.from === "host" &&
+      provider.source.provider === "youtube"
+    ) {
       const speeds = youtube.availableSpeeds;
       const max = speeds.length === 1 ? 2 : speeds[speeds.length - 1],
         min = speeds.length === 1 ? 0.25 : speeds[0];
@@ -252,7 +269,7 @@ export const setVolumeByOffest =
   (percent: number): AppThunk =>
   (dispatch, getState) => {
     const { provider } = getState();
-    if (provider.from === "youtube") {
+    if (provider.source?.provider === "youtube") {
       dispatch(setVolumeByOffestYtb(percent));
     } else dispatch(controlsSlice.actions.setVolumeByOffest(percent));
   };
@@ -276,11 +293,34 @@ export const {
 export default controlsSlice.reducer;
 
 export const seekTo =
-  (currentTime: number): AppThunk =>
+  (targetTime: number): AppThunk =>
   async (dispatch) => {
-    dispatch(userSeekStart([currentTime, true]));
+    dispatch(userSeekStart([targetTime, true]));
     await wait(0);
     dispatch(userSeekEnd());
+  };
+export const seekByOffset =
+  (second: number): AppThunk =>
+  async (dispatch, getState) => {
+    if (second === 0) return;
+    const currentTime = getState().controls.currentTime,
+      duration = getState().controls.duration;
+    let targetTime = currentTime + second;
+    if (targetTime < 0) targetTime = 0;
+    else if (duration !== null && targetTime > duration) {
+      targetTime = duration;
+    }
+    dispatch(userSeekStart([targetTime, true]));
+    await wait(0);
+    dispatch(userSeekEnd());
+  };
+
+export const setHash =
+  (hash: string): AppThunk =>
+  async (dispatch) => {
+    // const { is } = new HashTool(hash);
+    dispatch(controlsSlice.actions.setHash(hash));
+    // dispatch(setControls(is("controls")));
   };
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

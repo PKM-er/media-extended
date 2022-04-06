@@ -1,6 +1,5 @@
 import "obsidian";
 
-// import { getInternalMediaInfo, getMediaInfo } from "@base/media-info";
 // import OpenLink from "../legacy/open-link";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";

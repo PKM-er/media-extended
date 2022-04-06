@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { createPlayer, destroyPlayer } from "@player/slice/html5";
-import { setRatio } from "@player/slice/interface";
 import AspectRatio from "@player/utils/aspect-ratio";
+import { createPlayer, destroyPlayer } from "@slice/html5";
+import { setRatio } from "@slice/interface";
 import { useMemoizedFn } from "ahooks";
 import React, { RefCallback, useCallback, useRef } from "react";
 
@@ -109,11 +109,12 @@ const useRefCallback = (
 };
 
 const HTMLPlayer = () => {
-  const provider = useAppSelector((state) => state.provider);
+  const source = useAppSelector((state) => state.provider.source),
+    tracks = useAppSelector((state) => state.provider.tracks);
 
   const autoPlay = useAppSelector((state) => state.controls.autoplay),
     loop = useAppSelector((state) => state.controls.loop),
-    controls = useAppSelector((state) => state.interface.nativeControls);
+    controls = useAppSelector((state) => state.interface.controls === "native");
 
   const refObj = useRef<HTMLMediaElement | null>(null),
     ref = useRefCallback(refObj);
@@ -129,20 +130,18 @@ const HTMLPlayer = () => {
     ...useEvents(),
   };
   let player;
-  if (provider) {
+  if (source) {
     const children = (
       <>
-        {provider.sources.map((p) => (
-          <source key={p.src} {...p} />
-        ))}
-        {provider.tracks.map((p) => (
+        <source src={source.src} />
+        {tracks.map((p) => (
           <track key={p.src} {...p} />
         ))}
       </>
     );
-    if (provider.from === "video") {
+    if (source.provider === "video") {
       player = <video {...props}>{children}</video>;
-    } else if (provider.from === "audio") {
+    } else if (source.provider === "audio") {
       player = <audio {...props}>{children}</audio>;
     }
   }

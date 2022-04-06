@@ -5,7 +5,7 @@ import {
   handleSeeked,
   handleSeeking,
   updateSeeking,
-} from "@player/slice/controls";
+} from "@slice/controls";
 import { useCallback } from "react";
 
 import { EventHandler } from "./event";
@@ -77,7 +77,7 @@ export const useProgress = () => {
 /* update buffered state on mount */
 export const useUpdateBuffer = (ref: PlayerRef) => {
   useSubscribe(
-    (state) => state.provider,
+    (state) => state.provider.source,
     (_, dispatch, media) => {
       if (!media) return;
       const buffered = getBuffered(media.instance);

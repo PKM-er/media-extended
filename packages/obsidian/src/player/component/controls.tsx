@@ -12,8 +12,8 @@ import {
   userSeekEnd,
   userSeeking,
   userSeekStart,
-} from "@player/slice/controls";
-import { resetProvider, setProvider } from "@player/slice/provider";
+} from "@slice/controls";
+import { resetProvider, setMediaUrlSrc } from "@slice/provider";
 import React from "react";
 
 import useFullScreen from "./fullscreen";
@@ -105,20 +105,24 @@ const ProviderSelector = () => {
       <button aria-label="reset" onClick={() => dispatch(resetProvider())}>
         reset
       </button>
-      <button onClick={() => dispatch(setProvider(video as any))}>video</button>
-      <button onClick={() => dispatch(setProvider(audioOnlyWebm as any))}>
+      <button onClick={() => dispatch(setMediaUrlSrc(video.sources[0]))}>
+        video
+      </button>
+      <button
+        onClick={() => dispatch(setMediaUrlSrc(audioOnlyWebm.sources[0]))}
+      >
         audioonly
       </button>
-      <button onClick={() => dispatch(setProvider(recording as any))}>
+      <button onClick={() => dispatch(setMediaUrlSrc(recording.sources[0]))}>
         recording
       </button>
-      <button onClick={() => dispatch(setProvider(youtube1 as any))}>
+      <button onClick={() => dispatch(setMediaUrlSrc(youtube1.sources[0]))}>
         youtube1
       </button>
-      <button onClick={() => dispatch(setProvider(youtube2 as any))}>
+      <button onClick={() => dispatch(setMediaUrlSrc(youtube2.sources[0]))}>
         youtube2
       </button>
-      <button onClick={() => dispatch(setProvider(youtube43 as any))}>
+      <button onClick={() => dispatch(setMediaUrlSrc(youtube43.sources[0]))}>
         youtube 4:3
       </button>
     </div>

@@ -1,4 +1,3 @@
-// import { getMediaInfo } from "@base/media-info";
 // import getPlayer from "../legacy/get-player";
 import type MediaExtended from "@plugin";
 import { CONTROLS_ENABLED_CLASS } from "@view";

@@ -1,10 +1,9 @@
-import { MediaType } from "mx-lib/src/defs";
-export { MediaType };
+export type MediaType = "video" | "audio" | "unknown";
 
 export const ExtensionAccepted: Map<MediaType, string[]> = new Map([
-  [MediaType.Audio, ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
-  [MediaType.Video, ["mp4", "ogv"]],
-  [MediaType.Unknown, ["webm"]],
+  ["audio", ["mp3", "wav", "m4a", "ogg", "3gp", "flac"]],
+  ["video", ["mp4", "ogv"]],
+  ["unknown", ["webm"]],
 ]);
 
 const isFile = (src: any): src is { extension: string } =>

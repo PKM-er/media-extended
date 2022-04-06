@@ -1,26 +1,19 @@
-// import type { MediaProviderElement } from "@vidstack/player";
+import { seekByOffset, setVolumeByOffest, togglePlay } from "@slice/controls";
 import { KeymapEventHandler, KeymapEventListener, Scope } from "obsidian";
 
-const getPlayerKeymaps = (
-  scope: Scope,
-  player: MediaProviderElement,
-): KeymapEventHandler[] => {
-  const forward = (second: number) => {
-      player.currentTime += second;
-    },
-    volumeUp = (percent: number) => {
-      player.volume += percent;
-    },
-    togglePlay = () => (player.paused ? player.play() : player.pause());
+import { PlayerComponent } from "./view";
+
+const getPlayerKeymaps = (component: PlayerComponent): KeymapEventHandler[] => {
   const toRegister: [key: string | null, func: KeymapEventListener][] = [
-    ["ArrowRight", () => forward(5)],
-    ["ArrowLeft", () => forward(-5)],
-    ["ArrowUp", () => volumeUp(0.1)],
-    ["ArrowDown", () => volumeUp(-0.1)],
-    [" ", togglePlay],
+    ["ArrowRight", () => component.store.dispatch(seekByOffset(5))],
+    ["ArrowLeft", () => component.store.dispatch(seekByOffset(-5))],
+    ["ArrowUp", () => component.store.dispatch(setVolumeByOffest(10))],
+    ["ArrowDown", () => component.store.dispatch(setVolumeByOffest(-10))],
+    [" ", () => component.store.dispatch(togglePlay)],
   ];
   return toRegister.map(([key, func]) =>
-    scope.register([], key, (evt, ctx) => func(evt, ctx) ?? false),
+    component.scope.register([], key, (evt, ctx) => func(evt, ctx) ?? false),
   );
 };
+
 export default getPlayerKeymaps;

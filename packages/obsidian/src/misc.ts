@@ -64,3 +64,43 @@ export const getBiliRedirectUrl = (id: string): Promise<string> =>
     } else
       reject(new TypeError("Calling node https in non-electron environment"));
   });
+
+export type Size = [width: number, height: number];
+const sizeSyntaxAllowedChar = /^[\d\sx]+$/,
+  sizeDefPattern = /^\s*(\d+)\s*$/;
+export const parseSizeSyntax = (str: string | undefined): Size | null => {
+  if (!str || !sizeSyntaxAllowedChar.test(str)) return null;
+  let [x, y, ...rest] = str.split("x");
+  if (rest.length > 0) return null;
+  x = x?.match(sizeDefPattern)?.[1]!;
+  y = y?.match(sizeDefPattern)?.[1]!;
+  if (!x && !y) return null;
+  return [x ? parseInt(x) : -1, y ? parseInt(y) : -1];
+};
+
+export const parseSizeFromLinkTitle = (
+  linkTitle: string,
+): [title: string, size: Size | null] => {
+  const pipeLoc = linkTitle.lastIndexOf("|");
+  let size,
+    title = linkTitle;
+  if (pipeLoc === -1) {
+    size = parseSizeSyntax(linkTitle);
+    if (size) title = "";
+  } else {
+    size = parseSizeSyntax(title.substring(pipeLoc + 1));
+    if (size) title = title.substring(0, pipeLoc);
+  }
+  return [title, size];
+};
+
+import Url from "url-parse";
+/**
+ * get links that is safe to use in obsidian
+ */
+export const getLink = (url: string): string => {
+  const { protocol } = Url(url);
+  if (protocol === "file:") {
+    return "app://local/" + url.substring("file:///".length);
+  } else return url;
+};

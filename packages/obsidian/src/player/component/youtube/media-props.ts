@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { AppDispatch } from "@player/store";
 import {
   handleDurationChange,
   handleEnded,
@@ -9,8 +10,7 @@ import {
   handleSeeked,
   handleTimeUpdate,
   handleWaiting,
-} from "@player/slice/controls";
-import { AppDispatch } from "@player/store";
+} from "@slice/controls";
 import { useMemoizedFn } from "ahooks";
 import assertNever from "assert-never";
 
@@ -44,7 +44,9 @@ export const useStateChangeHandler = () => {
     paused = useAppSelector((state) => state.controls.paused),
     hasStarted = useAppSelector((state) => state.controls.hasStarted),
     duration = useAppSelector((state) => state.controls.duration),
-    customControls = useAppSelector((state) => state.interface.customControls),
+    customControls = useAppSelector(
+      (state) => state.interface.controls === "custom",
+    ),
     muted = useAppSelector((state) => state.controls.muted);
   const onStateChange = useMemoizedFn<EventHandlers["onStateChange"]>(
     ({ data, target: instance }) => {

@@ -1,4 +1,5 @@
 import { useAppDispatch } from "@player/hooks";
+import { CoreEventHandler } from "@player/utils";
 import {
   handleDurationChange,
   handleEnded,
@@ -8,8 +9,7 @@ import {
   handleTimeUpdate,
   handleVolumeChange,
   handleWaiting,
-} from "@player/slice/controls";
-import { CoreEventHandler } from "@player/utils";
+} from "@slice/controls";
 import { useCallback } from "react";
 
 import { ApplyHookType } from "./utils";

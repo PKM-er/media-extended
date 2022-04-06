@@ -10,15 +10,15 @@ import YoutubePlayer from "./component/youtube";
 
 const Player = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const from = useAppSelector((state) => state.provider.from);
+  const provider = useAppSelector((state) => state.provider.source?.provider);
 
   return (
-    <div className="container" ref={containerRef}>
-      {from === "audio" || from === "video" ? (
+    <div className="mx-player" ref={containerRef}>
+      {provider === "audio" || provider === "video" ? (
         <HTMLPlayer />
-      ) : (
+      ) : provider === "youtube" ? (
         <YoutubePlayer />
-      )}
+      ) : null}
       <Controls containerRef={containerRef} />
     </div>
   );

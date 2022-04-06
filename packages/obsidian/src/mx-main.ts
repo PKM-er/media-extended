@@ -126,11 +126,11 @@ export default class MediaExtended extends Plugin {
     this.app.viewRegistry.unregisterExtensions(getExts());
     for (const [type, exts] of ExtensionAccepted) {
       switch (type) {
-        case MediaType.Audio:
-        case MediaType.Video:
+        case "audio":
+        case "video":
           this.app.viewRegistry.registerExtensions(exts, type);
           break;
-        case MediaType.Unknown:
+        case "unknown":
           this.app.viewRegistry.registerExtensions(exts, "video");
           break;
         default:

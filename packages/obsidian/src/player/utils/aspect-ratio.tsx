@@ -20,10 +20,10 @@ export default React.forwardRef(function AspectRatio(
   { className = DEFAULT_CLASS_NAME, children, style, ...restProps }: Props,
   ref: React.Ref<HTMLDivElement>,
 ) {
-  const from = useAppSelector((state) => state.provider.from);
+  const provider = useAppSelector((state) => state.provider.source?.provider);
   let ratio = useAppSelector((state) => state.interface.ratio);
-  if (ratio === null && from) {
-    ratio = DefaultRatio[from];
+  if (ratio === null && provider) {
+    ratio = DefaultRatio[provider];
   }
   const newStyle =
     ratio === null

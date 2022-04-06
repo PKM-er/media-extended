@@ -1,7 +1,11 @@
 import "obsidian";
 
-import { getInternalMediaInfo } from "@base/media-info";
 import type MediaExtended from "@plugin";
+import {
+  getFileHashFromLinktext,
+  getInfoFromWarpper,
+  setObsidianMedia,
+} from "@slice/set-media";
 import { CONTROLS_ENABLED_CLASS, MediaView } from "@view";
 import { around } from "monkey-around";
 import type { AudioView, displayInElFunc, VideoView } from "obsidian";
@@ -40,16 +44,19 @@ const patchMediaEmbed = (plugin: MediaExtended) => {
           plugin.settings.mediaFragmentsEmbed &&
           containerEl.hasClass(CONTROLS_ENABLED_CLASS) // handled by md postprocessor
         ) {
-          let info = await getInternalMediaInfo(
-            {
-              linktext: containerEl.getAttr("src") ?? file.path,
-              sourcePath: file.path,
-              file,
-            },
-            app,
-          );
+          const info = getInfoFromWarpper(containerEl);
           if (!info) return fallback();
-          const child = MediaView.displayInEl(info, app, containerEl);
+          const [, hash] = getFileHashFromLinktext(
+            info.linktext,
+            file.path,
+            file,
+          )!;
+
+          const child = MediaView.displayInEl(
+            setObsidianMedia(file, hash, info.linkTitle),
+            app,
+            containerEl,
+          );
           (containerEl as ElementWithRenderChild).renderChild = child;
           child.load();
           containerEl.addClass("is-loaded");

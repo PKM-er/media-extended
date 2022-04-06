@@ -1,7 +1,7 @@
 import "./fullscreen.less";
 
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { handleFullscreenChange, setFullscreen } from "@player/slice/controls";
+import { handleFullscreenChange, setFullscreen } from "@slice/controls";
 import fscreen from "fscreen";
 import React, { useCallback, useEffect } from "react";
 

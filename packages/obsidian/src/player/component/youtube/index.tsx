@@ -1,9 +1,6 @@
-import "js-video-url-parser/lib/provider/youtube";
-
 import { useAppSelector } from "@player/hooks";
-import { handleSeeking, handleTimeUpdate } from "@player/slice/controls";
 import { YoutubeMedia } from "@player/utils/media-warpper";
-import urlParser from "js-video-url-parser/lib/base";
+import { handleSeeking, handleTimeUpdate } from "@slice/controls";
 import { useRef } from "react";
 import React from "react";
 
@@ -66,8 +63,9 @@ const useActions = (ref: PlayerRef) => {
 
 const YoutubePlayer = () => {
   const videoId = useAppSelector((state) => {
-    if (state.provider.from !== "youtube") return null;
-    return urlParser.parse(state.provider.sources[0].src)?.id;
+    const source = state.provider.source;
+    if (source?.from !== "host" || source.provider !== "youtube") return null;
+    return source.id;
   });
 
   const ref: PlayerRef = useRef(null);

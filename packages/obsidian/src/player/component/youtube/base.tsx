@@ -1,16 +1,16 @@
 import config from "@player/config";
 import { useAppDispatch } from "@player/hooks";
 import { useAppSelector } from "@player/hooks";
-import { ControlsState, handleVolumeChange } from "@player/slice/controls";
-import { InterfaceState, setRatio } from "@player/slice/interface";
+import AspectRatio from "@player/utils/aspect-ratio";
+import { useWillUnmount } from "@player/utils/hooks";
+import { ControlsState, handleVolumeChange } from "@slice/controls";
+import { InterfaceState, setRatio } from "@slice/interface";
 import {
   destroyPlayer,
   initializePlayer,
   resetPlayer,
   setVolumeByOffestDone,
-} from "@player/slice/youtube";
-import AspectRatio from "@player/utils/aspect-ratio";
-import { useWillUnmount } from "@player/utils/hooks";
+} from "@slice/youtube";
 import { useInterval, useUpdateEffect } from "ahooks";
 import React, { useEffect, useRef } from "react";
 import { useState } from "react";
@@ -27,11 +27,6 @@ type YoutubePlayerProps = Omit<
   Omit<YoutubePlayerEvents, "onReady"> & {
     videoId: string;
   };
-
-const propsRequireReset: {
-  controls: (keyof ControlsState)[];
-  interface: (keyof InterfaceState)[];
-} = { controls: ["autoplay"], interface: ["nativeControls"] };
 
 const useUpdateVideoId = (
   newId: string,
@@ -69,10 +64,7 @@ const useResetToApplyProps = (
   videoId: string,
 ) => {
   useSubscribe(
-    (state) => [
-      ...propsRequireReset.controls.map((prop) => state.controls[prop]),
-      ...propsRequireReset.interface.map((prop) => state.interface[prop]),
-    ],
+    (state) => [state.controls.autoplay, state.interface.controls === "native"],
     ([, prev], dispatch) => {
       if (prev && containerRef.current) {
         dispatch(resetPlayer(playerRef, containerRef.current, videoId));

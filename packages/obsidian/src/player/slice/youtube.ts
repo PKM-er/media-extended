@@ -79,7 +79,7 @@ export const initializePlayer = createAsyncThunk<
 
     const state = getState(),
       { muted, autoplay, loop } = state.controls,
-      { nativeControls, customControls } = state.interface;
+      { controls } = state.interface;
 
     const elToReplace = document.createElement("div");
     // @ts-ignore something wrong with type checking in react-script...
@@ -93,7 +93,7 @@ export const initializePlayer = createAsyncThunk<
         mute: +muted,
         autoplay: +autoplay,
         loop: +loop,
-        controls: +nativeControls,
+        controls: +(controls === "native"),
       },
       events: {
         onReady: ({ target }) => {
@@ -108,7 +108,7 @@ export const initializePlayer = createAsyncThunk<
     });
     let iframe;
     // Set the tabindex to avoid focus entering iframe
-    if (customControls && (iframe = player.getIframe())) {
+    if (controls === "custom" && (iframe = player.getIframe())) {
       iframe.tabIndex = -1;
     }
     ref.current = player;

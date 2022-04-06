@@ -1,10 +1,10 @@
-import { getInternalMediaInfo, MediaInfo } from "@base/media-info";
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
+import { parseSizeSyntax } from "@misc";
 import type MediaExtended from "@plugin";
+import { getFileHashFromLinktext, setObsidianMedia } from "@slice/set-media";
 import { MediaView, PlayerRenderChild } from "@view";
 import cls from "classnames";
-import { parseSizeSyntax } from "mx-lib";
 import { Platform, setIcon } from "obsidian";
 import ReactDOM from "react-dom";
 abstract class LPWidget extends WidgetType {}
@@ -99,10 +99,8 @@ export default class InternalPlayerWidget extends WidgetType {
         this.setPos(domToUpdate);
       }
     } else {
-      getInternalMediaInfo(this, this.plugin.app).then(
-        (mediaInfo) =>
-          mediaInfo && info.child.events.trigger("file-loaded", mediaInfo),
-      );
+      const action = this.getSetMediaAction();
+      action && info.child.store.dispatch(action);
     }
     return true;
   }
@@ -121,8 +119,11 @@ export default class InternalPlayerWidget extends WidgetType {
     );
   }
 
-  getInfo() {
-    return getInternalMediaInfo(this, this.plugin.app);
+  getSetMediaAction() {
+    const result = getFileHashFromLinktext(this.linktext, this.sourcePath);
+    if (result) {
+      return setObsidianMedia(...result, this.title);
+    } else return null;
   }
   toDOM(view: EditorView) {
     const container = createDiv("internal-embed cm-embed-block");
@@ -133,22 +134,21 @@ export default class InternalPlayerWidget extends WidgetType {
     //   "mousedown",
     //   (evt) => 0 === evt.button && view.hasFocus && evt.preventDefault(),
     // );
-    this.getInfo().then((info) => {
-      if (info) {
-        const child = MediaView.displayInEl(
-          info,
-          this.plugin.app,
-          container,
-          true,
-        );
-        child.load();
-        this.hookClickHandler(view, container);
-        this.setInfo(container, child);
-      } else {
-        container.setText("Failed to get media info");
-      }
-      this.resizeWidget(view, container);
-    });
+    const action = this.getSetMediaAction();
+    if (action) {
+      const child = MediaView.displayInEl(
+        action,
+        this.plugin.app,
+        container,
+        true,
+      );
+      child.load();
+      this.hookClickHandler(view, container);
+      this.setInfo(container, child);
+    } else {
+      container.setText("Failed to get media info");
+    }
+    this.resizeWidget(view, container);
 
     return container;
   }
@@ -175,16 +175,16 @@ export default class InternalPlayerWidget extends WidgetType {
     } else {
       dom.removeAttribute("alt");
     }
+    const apply = (attr: "width" | "height", val: number) => {
+      if (val < 0) dom.style.removeProperty(attr);
+      else dom.style[attr] = `${val}px`;
+    };
     if (size) {
-      size.x
-        ? (dom.style.width = `${size.x}px`)
-        : dom.style.removeProperty("width");
-      size.y
-        ? (dom.style.height = `${size.y}px`)
-        : dom.style.removeProperty("height");
+      apply("width", size[0]);
+      apply("height", size[1]);
     } else {
-      dom.style.removeProperty("width");
-      dom.style.removeProperty("height");
+      apply("width", -1);
+      apply("height", -1);
     }
   }
 }

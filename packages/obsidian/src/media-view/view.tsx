@@ -1,6 +1,5 @@
-import { getMediaInfo, InternalMediaInfo } from "@base/media-info";
 import { ExtensionAccepted } from "@base/media-type";
-import Player from "@player";
+import { createStore, Player, PlayerStore } from "@player";
 import {
   App,
   Component,
@@ -14,14 +13,23 @@ import {
 } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
-// import getPlayerKeymaps from "./keymap";
+
+import { setHash } from "../player/slice/controls";
+import { setObsidianMediaSrc } from "../player/slice/provider";
+import { AppThunk } from "../player/store";
+import getPlayerKeymaps from "./keymap";
 
 export const VIEW_TYPE = "media-view-v2";
 
-interface PlayerComponent extends Component {
+export interface PlayerComponent extends Component {
+  store: PlayerStore;
   scope: Scope;
-  keymap: KeymapEventHandler[] | null;
+  keymap: KeymapEventHandler[];
 }
+
+const unloadKeymap = (scope: Scope, keymap: KeymapEventHandler[]) => {
+  keymap.forEach((k) => scope.unregister(k));
+};
 
 export default class MediaView
   extends EditableFileView
@@ -29,44 +37,20 @@ export default class MediaView
 {
   // no need to manage this manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
-  scope = new Scope(this.app.scope);
-  keymap: KeymapEventHandler[] | null = null;
+  scope;
+  keymap;
+  store;
 
-  _hash = "";
-  _file: TFile | null = null;
-  private async _getInfo(): Promise<InternalMediaInfo | null> {
-    return this._file
-      ? ((await getMediaInfo(
-          { type: "internal", file: this._file, hash: this._hash },
-          this.app,
-        )) as InternalMediaInfo)
-      : null;
-  }
-
-  public triggerInfoUpdate = debounce(
-    async () => {
-      const info = await this._getInfo();
-      if (!info) return;
-      // this.events.trigger("file-loaded", info);
-    },
+  setHash = debounce(
+    (hash: string) => this.store.dispatch(setHash(hash)),
     200,
     true,
   );
-  public async setInfo(info: { hash?: string; file?: TFile }, trigger = true) {
-    let shouldUpdate = false;
-    const { hash, file = this.file } = info;
-    if (hash && this._hash !== hash) {
-      this._hash = hash;
-      shouldUpdate = true;
-    }
-    if (file.path !== this._file?.path) {
-      this._file = file;
-      shouldUpdate = true;
-    }
-    if (trigger && shouldUpdate) {
-      this.triggerInfoUpdate();
-    }
-  }
+  setFile = debounce(
+    (file: TFile) => this.store.dispatch(setObsidianMediaSrc(file)),
+    200,
+    true,
+  );
 
   canAcceptExtension(ext: string): boolean {
     for (const exts of ExtensionAccepted.values()) {
@@ -76,12 +60,14 @@ export default class MediaView
   }
   constructor(leaf: WorkspaceLeaf) {
     super(leaf);
-    registerPlayerEvents(this);
+    this.store = createStore();
+    this.scope = new Scope(this.app.scope);
+    this.keymap = getPlayerKeymaps(this);
   }
 
   setEphemeralState(state: any): void {
     const { subpath } = state;
-    this.setInfo({ hash: subpath });
+    this.setHash(subpath);
     super.setEphemeralState(state);
   }
 
@@ -90,13 +76,12 @@ export default class MediaView
   }
 
   async onLoadFile(file: TFile): Promise<void> {
+    this.setFile(file);
     super.onLoadFile(file);
-    this.setInfo({ file }, false);
-    const info = await this._getInfo();
-    if (!info) return;
-    ReactDOM.render(<div>Player</div>, this.contentEl);
+    ReactDOM.render(<Player store={this.store} />, this.contentEl);
   }
   async onClose() {
+    unloadKeymap(this.scope, this.keymap);
     ReactDOM.unmountComponentAtNode(this.contentEl);
     super.onClose();
   }
@@ -113,56 +98,38 @@ export default class MediaView
   }
 
   static displayInEl(
-    info: InternalMediaInfo,
+    initAction: AppThunk,
     app: App,
     containerEl: HTMLElement,
     inEditor = false,
   ): PlayerRenderChild {
-    return new PlayerRenderChild(info, app, containerEl, inEditor);
+    return new PlayerRenderChild(initAction, app, containerEl, inEditor);
   }
 }
-
-const registerPlayerEvents = (component: PlayerComponent) => {
-  // const { events } = component;
-  // [
-  //   events.on("player-init", (player) => {
-  //     component.player = player;
-  //     component.keymap = getPlayerKeymaps(component.scope, player);
-  //   }),
-  //   events.on("player-destroy", () => {
-  //     component.player = null;
-  //     if (component.keymap) {
-  //       component.keymap.forEach((k) => component.scope.unregister(k));
-  //       component.keymap = null;
-  //     }
-  //   }),
-  //   events.on("screenshot", async (data) => {
-  //     const blob = await data;
-  //     // TODO
-  //   }),
-  // ].forEach(component.registerEvent.bind(component));
-};
 
 export class PlayerRenderChild
   extends MarkdownRenderChild
   implements PlayerComponent
 {
-  scope = new Scope(this.app.scope);
-  keymap: KeymapEventHandler[] | null = null;
+  scope;
+  keymap;
+  store;
 
   constructor(
-    private info: InternalMediaInfo,
+    initAction: AppThunk,
     private app: App,
     containerEl: HTMLElement,
     private inEditor: boolean,
   ) {
     super(containerEl);
-    registerPlayerEvents(this);
+    this.store = createStore();
+    this.store.dispatch(initAction);
+    this.scope = new Scope(this.app.scope);
+    this.keymap = getPlayerKeymaps(this);
   }
 
   async onload() {
-    await wait(0);
-    ReactDOM.render(<Player />, this.containerEl);
+    ReactDOM.render(<Player store={this.store} />, this.containerEl);
   }
   pushScope() {
     this.app.keymap.pushScope(this.scope);
@@ -171,6 +138,7 @@ export class PlayerRenderChild
     this.app.keymap.popScope(this.scope);
   }
   onunload(): void {
+    unloadKeymap(this.scope, this.keymap);
     ReactDOM.unmountComponentAtNode(this.containerEl);
   }
 }

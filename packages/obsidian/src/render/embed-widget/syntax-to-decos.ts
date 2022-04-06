@@ -1,4 +1,3 @@
-import { getMediaFileHashFromLinktext } from "@base/media-info";
 import { getMediaType } from "@base/media-type";
 import { syntaxTree } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
@@ -7,6 +6,7 @@ import { Decoration, WidgetType } from "@codemirror/view";
 import type MediaExtended from "@plugin";
 import { editorViewField, Platform } from "obsidian";
 
+import { getFileHashFromLinktext } from "../../player/slice/set-media";
 import {
   getUrlFromMarkdown,
   isMdFavorInternalLink,
@@ -47,12 +47,8 @@ const getPlayerDecos = (
     to: number,
   ): PlayerWidget | null => {
     const { href: linktext, title } = parseLinktextAlias(linktextAlias);
-    const result = getMediaFileHashFromLinktext(
-      linktext,
-      sourcePath,
-      plugin.app,
-    );
-    if (!result || !getMediaType(result.file)) return null;
+    const result = getFileHashFromLinktext(linktext, sourcePath);
+    if (!result || !getMediaType(result[0])) return null;
     let widget = new PlayerWidget(
       plugin,
       linktext,
