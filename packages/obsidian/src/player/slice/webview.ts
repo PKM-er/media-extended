@@ -1,15 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-export interface HTML5State {
+export interface WebviewState {
   playerReady: boolean;
 }
 
-const initialState: HTML5State = {
+const initialState: WebviewState = {
   playerReady: false,
 };
 
-export const HTML5Slice = createSlice({
-  name: "html5",
+export const WebviewSlice = createSlice({
+  name: "webview",
   initialState,
   reducers: {
     createPlayer: (state) => {
@@ -21,6 +21,6 @@ export const HTML5Slice = createSlice({
   },
 });
 
-export const { createPlayer, destroyPlayer } = HTML5Slice.actions;
+export const { createPlayer, destroyPlayer } = WebviewSlice.actions;
 
-export default HTML5Slice.reducer;
+export default WebviewSlice.reducer;
