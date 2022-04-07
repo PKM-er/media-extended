@@ -6,8 +6,8 @@
     "plugin:workspaces/recommended"
   ],
   "rules": {
-    "import/no-unresolved": "off",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "import/no-unresolved": [2, { "ignore": ["\\.less$", "@electron/remote"] }]
   },
   "settings": {
     "react": {
