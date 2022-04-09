@@ -1,9 +1,11 @@
 import { useAppSelector } from "@player/hooks";
-import { useLatest } from "ahooks";
+import { useLatest, useUpdateEffect } from "ahooks";
+import { debounce } from "obsidian";
 import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -119,11 +121,12 @@ export const setDevTools = (
   open: boolean | DevToolsMode,
   view: Electron.BrowserView,
 ) => {
-  if (open && !view.webContents.isDevToolsOpened()) {
+  let opened = view.webContents.isDevToolsOpened();
+  if (open && !opened) {
     view.webContents.openDevTools({
       mode: typeof open === "string" ? open : "detach",
     });
-  } else if (!open && view.webContents.isDevToolsOpened()) {
+  } else if (!open && opened) {
     view.webContents.closeDevTools();
   }
 };
@@ -132,27 +135,43 @@ export const useChangableProp = (
   props: Pick<BrowserViewProps, "userAgent" | "devtools" | "muted">,
   viewRef: BrowserViewRef,
 ) => {
+  type View = Electron.BrowserView;
+  const setUserAgentRef = useRef(
+    debounce(
+      (ua: string, view: View) => view.webContents.setUserAgent(ua),
+      500,
+      true,
+    ),
+  );
   // src changes are handled in loadSrc hook
-  useEffect(
+  useUpdateEffect(
     () => {
       if (viewRef.current && props.userAgent !== undefined)
-        viewRef.current.webContents.setUserAgent(props.userAgent);
+        setUserAgentRef.current(props.userAgent, viewRef.current);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ready, props.userAgent],
   );
-  useEffect(
+  const setDevToolsRef = useRef(debounce(setDevTools, 500, true));
+  useUpdateEffect(
     () => {
       if (viewRef.current && props.devtools !== undefined)
-        setDevTools(props.devtools, viewRef.current);
+        setDevToolsRef.current(props.devtools, viewRef.current);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ready, props.devtools],
   );
-  useEffect(
+  const setAudioMutedRef = useRef(
+    debounce(
+      (muted: boolean, view: View) => view.webContents.setAudioMuted(muted),
+      200,
+      true,
+    ),
+  );
+  useUpdateEffect(
     () => {
       if (viewRef.current && props.muted !== undefined)
-        viewRef.current.webContents.setAudioMuted(props.muted);
+        setAudioMutedRef.current(props.muted, viewRef.current);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ready, props.muted],
