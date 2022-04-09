@@ -27,7 +27,7 @@
     "@codemirror/view": "^0.19.47",
     "@floating-ui/react-dom": "^0.6.0",
     "@lezer/common": "^0.15.11",
-    "@mui/material": "^5.5.2",
+    "@mui/base": "^5.0.0-alpha.75",
     "@reduxjs/toolkit": "^1.8.1",
     "@types/dom-mediacapture-record": "^1.0.11",
     "@types/fscreen": "^1.0.1",

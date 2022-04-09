@@ -4,7 +4,7 @@ import { useLatest } from "ahooks";
 import equal from "fast-deep-equal/es6";
 import { MutableRefObject, useEffect, useRef } from "react";
 
-import { Media } from "./media-warpper";
+import { Media } from "./media";
 
 export type SubscribeHookType<R, M extends Media> = <T>(
   selector: (state: RootState) => T,

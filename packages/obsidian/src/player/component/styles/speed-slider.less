@@ -1,0 +1,18 @@
+@import "./slider.less";
+
+.speed-slider {
+  margin-top: 20px;
+  background-color: white;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  column-gap: 5px;
+  .MuiSlider-root {
+    min-width: 200px;
+  }
+  input[type="number"] {
+    &:invalid {
+      color: var(--text-error);
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { useMemoizedFn } from "ahooks";
 
-import { Media } from "./media-warpper";
+import { Media } from "./media";
 
 export const noop = () => {};
 

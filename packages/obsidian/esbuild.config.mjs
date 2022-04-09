@@ -35,11 +35,12 @@ const cmModules = [
 ];
 
 import { promises } from "fs";
+import { join } from "path";
 /**
  * @type {import("esbuild").Plugin}
  */
 const remoteRedux = {
-  name: "obsidian-plugin",
+  name: "enable-remote-redux-devtools",
   setup: (build) => {
     if (isProd) return;
     build.onLoad({ filter: /src\/player\/store\.ts$/ }, async (args) => ({
@@ -52,6 +53,22 @@ const remoteRedux = {
       ),
       loader: "ts",
     }));
+  },
+};
+
+/**
+ * @type {import("esbuild").Plugin}
+ */
+const LessPathAlias = {
+  name: "less-path-alias",
+  setup: (build) => {
+    build.onResolve(
+      { filter: /^@styles.+\.less$/, namespace: "file" },
+      async ({ path, namespace }) => {
+        path = path.replace("@styles", "player/component/styles");
+        return { path: join(process.cwd(), "src", path), namespace };
+      },
+    );
   },
 };
 
@@ -77,7 +94,7 @@ try {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: "build/main.js",
-    plugins: [lessLoader(), obPlugin(), remoteRedux],
+    plugins: [LessPathAlias, lessLoader(), obPlugin(), remoteRedux],
     // metafile: true,
   });
   // await promises.writeFile(

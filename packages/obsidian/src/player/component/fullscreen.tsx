@@ -1,53 +1,37 @@
-import "./fullscreen.less";
+import "@styles/fullscreen.less";
 
-import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { handleFullscreenChange, setFullscreen } from "@slice/controls";
+import { useAppSelector } from "@player/hooks";
 import fscreen from "fscreen";
-import React, { useCallback, useEffect } from "react";
+import { useRefEffect } from "react-use-ref-effect";
 
 const isFullscreenEnabled = fscreen.fullscreenEnabled;
 
-const FULL_SCREEN_FALLBACK_CLASS = "fullscreen-fallback";
+const FULL_SCREEN_FALLBACK_CLASS = "mx__fullscreen-fallback";
 
-const useFullScreen = (ref: React.RefObject<HTMLElement>) => {
+const enterFullscreen = async (container: HTMLElement) => {
+  if (fscreen.fullscreenElement) {
+    await fscreen.exitFullscreen();
+  }
+  await fscreen.requestFullscreen(container);
+};
+const exitFullscreen = async (container: HTMLElement) => {
+  if (fscreen.fullscreenElement === container) await fscreen.exitFullscreen();
+};
+
+const useFullScreen = () => {
   const fullscreen = useAppSelector((state) => state.controls.fullscreen);
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    const handleChange = () => {
-      dispatch(
-        handleFullscreenChange(fscreen.fullscreenElement === ref.current),
-      );
-    };
-    fscreen.addEventListener("fullscreenchange", handleChange);
-    return () => fscreen.removeEventListener("fullscreenchange", handleChange);
-  }, [dispatch, ref]);
-
-  return {
-    fullscreen,
-    isFullscreenEnabled,
-    enterFullscreen: useCallback(async () => {
-      if (!ref.current) return;
+  return useRefEffect<HTMLElement>(
+    (container) => {
       if (isFullscreenEnabled) {
-        if (fscreen.fullscreenElement) {
-          await fscreen.exitFullscreen();
-        }
-        await fscreen.requestFullscreen(ref.current);
+        fullscreen ? enterFullscreen(container) : exitFullscreen(container);
       } else {
-        ref.current.classList.add(FULL_SCREEN_FALLBACK_CLASS);
+        container.classList[fullscreen ? "add" : "remove"](
+          FULL_SCREEN_FALLBACK_CLASS,
+        );
       }
-      dispatch(setFullscreen(true));
-    }, [dispatch, ref]),
-    exitFullscreen: useCallback(async () => {
-      if (isFullscreenEnabled) {
-        if (fscreen.fullscreenElement === ref.current)
-          await fscreen.exitFullscreen();
-      } else if (ref.current) {
-        ref.current.classList.remove(FULL_SCREEN_FALLBACK_CLASS);
-      }
-      dispatch(setFullscreen(false));
-    }, [dispatch, ref]),
-  };
+    },
+    [fullscreen],
+  );
 };
 
 export default useFullScreen;

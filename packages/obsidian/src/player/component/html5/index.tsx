@@ -1,8 +1,12 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import AspectRatio from "@player/utils/aspect-ratio";
-import { createPlayer, destroyPlayer } from "@slice/html5";
+import {
+  captureScreenshotDone,
+  createPlayer,
+  destroyPlayer,
+} from "@slice/html5";
 import { setRatio } from "@slice/interface";
 import { useMemoizedFn } from "ahooks";
+import { captureScreenshot } from "mx-lib";
 import React, { RefCallback, useCallback, useRef } from "react";
 
 import { useApplyTimeFragment, useTimeFragmentEvents } from "../hooks/fragment";
@@ -36,6 +40,27 @@ const useActions = (
   useUpdateBuffer(ref);
   useUpdateSeekState(ref);
   useLoadSources(ref);
+};
+
+const useCaptureScreenshot = (
+  ref: React.MutableRefObject<HTMLMediaElement | null>,
+) => {
+  useSubscribe(
+    (state) => state.html5.captureScreenshot,
+    async (capture, dispatch, media) => {
+      if (!capture) return;
+      if (!(media.instance instanceof HTMLVideoElement)) {
+        console.error("trying to capture screenshot on non-video element");
+      } else {
+        const result = await captureScreenshot(media.instance);
+        if (result) {
+          app.vault.trigger("mx-screenshot", result);
+        }
+      }
+      dispatch(captureScreenshotDone());
+    },
+    { immediate: true, ref },
+  );
 };
 
 const useUpdateRatio = () => {
@@ -120,6 +145,7 @@ const HTMLPlayer = () => {
     ref = useRefCallback(refObj);
 
   useActions(refObj);
+  useCaptureScreenshot(refObj);
 
   const props = {
     ref,
@@ -145,6 +171,6 @@ const HTMLPlayer = () => {
       player = <audio {...props}>{children}</audio>;
     }
   }
-  return <AspectRatio>{player}</AspectRatio>;
+  return player ?? null;
 };
 export default HTMLPlayer;

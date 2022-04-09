@@ -20,6 +20,7 @@ declare module "obsidian" {
 
   interface Vault {
     exists: DataAdapter["exists"];
+    on(name: "mx-screenshot", callback: (blob: Blob) => any): EventRef;
   }
 
   interface ViewRegistry {

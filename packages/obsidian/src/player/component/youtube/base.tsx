@@ -1,10 +1,9 @@
 import config from "@player/config";
 import { useAppDispatch } from "@player/hooks";
 import { useAppSelector } from "@player/hooks";
-import AspectRatio from "@player/utils/aspect-ratio";
 import { useWillUnmount } from "@player/utils/hooks";
-import { ControlsState, handleVolumeChange } from "@slice/controls";
-import { InterfaceState, setRatio } from "@slice/interface";
+import { handleVolumeChange } from "@slice/controls";
+import { setRatio } from "@slice/interface";
 import {
   destroyPlayer,
   initializePlayer,
@@ -17,6 +16,7 @@ import { useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
+import VideoWarpper from "../video-warpper";
 import { useEvent, YoutubePlayerEvents } from "./event";
 import { PlayerRef, useSubscribe } from "./utils";
 
@@ -129,7 +129,13 @@ const YoutubePlayer = React.forwardRef<YT.Player | null, YoutubePlayerProps>(
 
     useWillUnmount(() => dispatch(destroyPlayer(playerRef)));
 
-    return <AspectRatio ref={containerRef} {...containerProps} />;
+    return (
+      <div
+        className="mx__youtube-player"
+        ref={containerRef}
+        {...containerProps}
+      />
+    );
   },
 );
 

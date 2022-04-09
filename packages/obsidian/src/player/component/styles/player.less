@@ -1,0 +1,41 @@
+.mx-player {
+  -webkit-font-smoothing: antialiased;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  line-height: 1.7;
+  max-width: 100%;
+  min-width: 200px;
+  position: relative;
+  text-shadow: none;
+  transition: box-shadow 0.3s ease;
+  z-index: 0;
+}
+
+.mx-player {
+  .mx__controls {
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+    bottom: 0;
+    color: #fff;
+    left: 0;
+    padding: 5px;
+    padding-top: 20px;
+    position: absolute;
+    right: 0;
+    transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+    z-index: 3;
+  }
+  .mx__video-wrapper {
+    background: #000;
+    height: 100%;
+    margin: auto;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+  }
+}

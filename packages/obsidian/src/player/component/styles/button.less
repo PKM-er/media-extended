@@ -1,13 +1,12 @@
-[role="button"],
-.player-controls-button {
+.button-basic() {
   position: relative;
   width: 24px;
   height: 24px;
   border-radius: 4px;
   cursor: pointer;
-  color: white;
-  & > svg {
-    /** `absolute` so icons are placed on top of each other. */
+  // color: white;
+
+  & > * {
     position: absolute;
     top: 0;
     left: 0;
@@ -16,4 +15,17 @@
     opacity: 1;
     transition: opacity ease 150ms;
   }
+}
+
+button.mx__toggle-button {
+  .button-basic();
+
+  &.selected > *:last-child,
+  &:not(.selected) > *:first-child {
+    opacity: 0;
+  }
+}
+
+button.mx__button {
+  .button-basic();
 }

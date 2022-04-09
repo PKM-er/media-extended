@@ -1,5 +1,5 @@
 import { AppDispatch } from "@player/store";
-import type { Media } from "@player/utils/media-warpper";
+import type { Media } from "@player/utils/media";
 import type { SubscribeHookType } from "@player/utils/subscribe";
 import { useLatest } from "ahooks";
 import { MutableRefObject } from "react";

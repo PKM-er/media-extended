@@ -1,9 +1,9 @@
-import "./speed-slider.less";
+import "@styles/speed-slider.less";
 
 import { SliderUnstyled } from "@mui/base";
-import React, { useContext, useEffect, useState } from "preact/compat";
-
-import { ControlsContext } from "../misc";
+import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { setPlaybackRate } from "@slice/controls";
+import React, { useCallback } from "react";
 
 const valuetext = (speed: number) => `${speed}×`,
   valueLabelFormat = (speed: number) => `${speed}×`,
@@ -45,32 +45,32 @@ const max = 16,
   min = 0.25;
 
 const SpeedSlider = () => {
-  const { player } = useContext(ControlsContext);
-  const [speed, setSpeed] = useState(1);
-  useEffect(() => {
-    const engine = player.current?.engine;
-    if (engine instanceof HTMLMediaElement) {
-      const handleRateChange = () => {
-        setSpeed(engine.playbackRate);
-      };
-      engine.addEventListener("ratechange", handleRateChange);
-      return () => engine.removeEventListener("ratechange", handleRateChange);
-    }
-  }, [player]);
-  useEffect(() => {
-    const engine = player.current?.engine;
-    if (engine instanceof HTMLMediaElement) {
-      engine.playbackRate = speed;
-    }
-  }, [speed, player]);
+  const speed = useAppSelector((state) => state.controls.playbackRate);
+  const dispatch = useAppDispatch();
   const value = speedToVal(speed);
+
+  const handleSilderChange = useCallback(
+      (_e: any, newValue: number | number[]) => {
+        dispatch(setPlaybackRate(valToSpeed(newValue as number)));
+      },
+      [dispatch],
+    ),
+    handleInputChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
+      (event) => {
+        const input = event.target as HTMLInputElement;
+        if (input.validity.valid && input.value) {
+          dispatch(setPlaybackRate(+input.value));
+        }
+      },
+      [dispatch],
+    );
+
   return (
     <div className="speed-slider">
       <SliderUnstyled
+        track={false}
         value={typeof value === "number" ? value : 0}
-        onChange={(event: Event, newValue: number | number[]) => {
-          setSpeed(valToSpeed(newValue as number));
-        }}
+        onChange={handleSilderChange}
         scale={valToSpeed}
         marks={marks}
         getAriaValueText={valuetext}
@@ -90,12 +90,7 @@ const SpeedSlider = () => {
         max={max}
         value={speed}
         aria-label="Speed Input"
-        onChange={(event) => {
-          const input = event.target as HTMLInputElement;
-          if (input.validity.valid && input.value) {
-            setSpeed(+input.value);
-          }
-        }}
+        onChange={handleInputChange}
       />
     </div>
   );

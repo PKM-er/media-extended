@@ -2,7 +2,7 @@ import {
   CoreEventHandler,
   useEventHandler as useEventHandler0,
 } from "@player/utils";
-import { HTMLMedia } from "@player/utils/media-warpper";
+import { HTMLMedia } from "@player/utils/media";
 import React, { HTMLAttributes, ReactEventHandler } from "react";
 
 export type EventHandler = CoreEventHandler<HTMLMedia>;

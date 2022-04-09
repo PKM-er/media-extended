@@ -1,3 +1,4 @@
+import { wait } from "@misc";
 import { AppThunk } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { HashTool, parseTF } from "mx-lib";
@@ -133,7 +134,7 @@ export const controlsSlice = createSlice({
     setVolumeByOffest: (state, action: PayloadAction<number>) => {
       setVolumeTo(state.volume + action.payload / 100, state);
     },
-    userSeekStart: (
+    userSeek: (
       state,
       action: PayloadAction<number | [time: number, noPause: boolean]>,
     ) => {
@@ -144,15 +145,15 @@ export const controlsSlice = createSlice({
       } else {
         [time, noPause] = action.payload;
       }
-      state.userSeek = {
-        currentTime: time,
-        pausedBeforeSeek: noPause ? null : state.paused,
-      };
-      noPause || (state.paused = true);
-    },
-    userSeeking: (state, action: PayloadAction<number>) => {
+
       if (state.userSeek) {
-        state.userSeek.currentTime = action.payload;
+        state.userSeek.currentTime = time;
+      } else {
+        state.userSeek = {
+          currentTime: time,
+          pausedBeforeSeek: noPause ? null : state.paused,
+        };
+        noPause || (state.paused = true);
       }
     },
     userSeekEnd: (state) => {
@@ -240,8 +241,7 @@ export const {
   setMute,
   toggleMute,
   setVolume,
-  userSeeking,
-  userSeekStart,
+  userSeek,
   userSeekEnd,
   updateSeeking,
 } = controlsSlice.actions;
@@ -295,7 +295,7 @@ export default controlsSlice.reducer;
 export const seekTo =
   (targetTime: number): AppThunk =>
   async (dispatch) => {
-    dispatch(userSeekStart([targetTime, true]));
+    dispatch(userSeek([targetTime, true]));
     await wait(0);
     dispatch(userSeekEnd());
   };
@@ -310,7 +310,7 @@ export const seekByOffset =
     else if (duration !== null && targetTime > duration) {
       targetTime = duration;
     }
-    dispatch(userSeekStart([targetTime, true]));
+    dispatch(userSeek([targetTime, true]));
     await wait(0);
     dispatch(userSeekEnd());
   };
@@ -322,8 +322,6 @@ export const setHash =
     dispatch(controlsSlice.actions.setHash(hash));
     // dispatch(setControls(is("controls")));
   };
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const setVolumeTo = (newVolume: number, state: ControlsState) => {
   if (newVolume < 0) {

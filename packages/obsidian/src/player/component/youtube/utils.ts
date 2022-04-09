@@ -1,4 +1,4 @@
-import { YoutubeMedia } from "@player/utils/media-warpper";
+import { YoutubeMedia } from "@player/utils/media";
 import { getSubscribeHook } from "@player/utils/subscribe";
 import { MutableRefObject } from "react";
 

@@ -104,3 +104,6 @@ export const getLink = (url: string): string => {
     return "app://local/" + url.substring("file:///".length);
   } else return url;
 };
+
+export const wait = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));

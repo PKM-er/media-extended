@@ -11,7 +11,9 @@
       "@base/*": ["base/*"],
       "@plugin": ["mx-main"],
       "@settings": ["settings"],
-      "@misc": ["misc"]
+      "@misc": ["misc"],
+      "@hook-utils": ["player/utils/hooks"],
+      "@styles/*": ["player/component/styles/*"],
     },
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",

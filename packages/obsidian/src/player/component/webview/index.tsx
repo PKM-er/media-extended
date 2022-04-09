@@ -3,13 +3,13 @@
 // import camelCase from "lodash.camelcase";
 // import { changableProps, events, methods, props } from "./constants";
 
+import { useAppSelector } from "@player/hooks";
 import { useLatest } from "ahooks";
 import React, { useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
-import { useAppSelector } from "../../hooks";
 import { createPlayer, destroyPlayer } from "../../slice/webview";
 import {
   ElectronWebviewEventProps,

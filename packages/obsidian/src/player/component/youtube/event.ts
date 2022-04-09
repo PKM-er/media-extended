@@ -3,7 +3,7 @@ import {
   CoreEventHandler,
   useEventHandler as useEventHandler0,
 } from "@player/utils";
-import { YoutubeMedia } from "@player/utils/media-warpper";
+import { YoutubeMedia } from "@player/utils/media";
 import { useLatest } from "ahooks";
 import { useLayoutEffect } from "react";
 

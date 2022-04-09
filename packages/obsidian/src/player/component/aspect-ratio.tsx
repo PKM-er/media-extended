@@ -1,3 +1,5 @@
+import "@styles/aspect-ratio.less";
+
 import { useAppSelector } from "@player/hooks";
 import cls from "classnames";
 // from https://github.com/roderickhsiao/react-aspect-ratio
@@ -37,7 +39,7 @@ export default React.forwardRef(function AspectRatio(
   return (
     <div
       ref={ref}
-      className={cls(DEFAULT_CLASS_NAME, { active: !!ratio })}
+      className={cls(className, { active: !!ratio })}
       style={newStyle}
       {...restProps}
     >

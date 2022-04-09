@@ -1,5 +1,5 @@
 import { useAppSelector } from "@player/hooks";
-import { YoutubeMedia } from "@player/utils/media-warpper";
+import { YoutubeMedia } from "@player/utils/media";
 import { handleSeeking, handleTimeUpdate } from "@slice/controls";
 import { useRef } from "react";
 import React from "react";
