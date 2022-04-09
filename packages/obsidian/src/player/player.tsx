@@ -8,10 +8,11 @@ import useFullScreen from "./component/fullscreen";
 import HTMLPlayer from "./component/html5";
 import VideoWarpper from "./component/video-warpper";
 import YoutubePlayer from "./component/youtube";
+import { selectPlayerType } from "./slice/provider";
 
 const Player = () => {
   const containerRef = useFullScreen();
-  const provider = useAppSelector((state) => state.provider.source?.provider);
+  const provider = useAppSelector(selectPlayerType);
 
   return (
     <div className="mx-player" ref={containerRef}>

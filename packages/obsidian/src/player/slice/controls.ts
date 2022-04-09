@@ -5,6 +5,7 @@ import { HashTool, parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
 import { is } from "../utils/hash-tool";
+import { selectPlayerType } from "./provider";
 import { setVolumeByOffest as setVolumeByOffestYtb } from "./youtube";
 
 export const LARGE_CURRENT_TIME = 1e101;
@@ -250,11 +251,10 @@ const trunc = (number: number) => Math.trunc(number * 20) / 20;
 export const setPlaybackRate =
   (rate: number): AppThunk =>
   (dispatch, getState) => {
-    const { provider, youtube } = getState();
-    if (
-      provider.source?.from === "host" &&
-      provider.source.provider === "youtube"
-    ) {
+    const state = getState(),
+      type = selectPlayerType(state),
+      { youtube } = state;
+    if (type === "youtube") {
       const speeds = youtube.availableSpeeds;
       const max = speeds.length === 1 ? 2 : speeds[speeds.length - 1],
         min = speeds.length === 1 ? 0.25 : speeds[0];
@@ -268,8 +268,8 @@ export const setPlaybackRate =
 export const setVolumeByOffest =
   (percent: number): AppThunk =>
   (dispatch, getState) => {
-    const { provider } = getState();
-    if (provider.source?.provider === "youtube") {
+    const type = selectPlayerType(getState());
+    if (type === "youtube") {
       dispatch(setVolumeByOffestYtb(percent));
     } else dispatch(controlsSlice.actions.setVolumeByOffest(percent));
   };

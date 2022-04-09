@@ -1,7 +1,7 @@
 import "js-video-url-parser/lib/provider/youtube";
 
 import { getMediaType, MediaType } from "@base/media-type";
-import { AppDispatch, AppThunk } from "@player/store";
+import { AppDispatch, AppThunk, RootState } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import urlParser from "js-video-url-parser/lib/base";
 import { TFile } from "obsidian";
@@ -16,36 +16,52 @@ interface Caption {
   default: boolean;
 }
 
-type ProviderType = "video" | "audio" | "youtube" | "vimeo" | null;
-
+type HTML5PlayerType = "audio" | "video";
+type BrowserViewType = "browser-view";
 interface SourceBase {
-  provider: ProviderType;
+  playerType: HTML5PlayerType | BrowserViewType | "youtube" | "vimeo" | null;
   src: string;
   title: string;
   linkTitle?: string;
 }
 
-type NativeMediaType = "audio" | "video";
 interface ObsidianMedia extends SourceBase {
   from: "obsidian";
-  provider: NativeMediaType;
+  playerType: HTML5PlayerType;
   /** in-vault relative path for media file */
   path: string;
   filename: string;
 }
 interface DirectLinkMedia extends SourceBase {
   from: "direct";
-  provider: NativeMediaType;
+  playerType: HTML5PlayerType;
 }
 
-interface VideoHostMedia extends SourceBase {
-  from: "host";
-  provider: Exclude<ProviderType, NativeMediaType>;
+interface VideoHostMediaBase extends SourceBase {
+  from: "youtube" | "bilibili" | "vimeo" | "general";
+  playerType: "youtube" | "vimeo" | BrowserViewType;
   id: string;
   title: string;
 }
 
-type Source = ObsidianMedia | DirectLinkMedia | VideoHostMedia;
+interface BilibiliMedia extends VideoHostMediaBase {
+  from: "bilibili";
+  playerType: BrowserViewType;
+}
+interface GeneralHostMedia extends VideoHostMediaBase {
+  from: "bilibili";
+  playerType: BrowserViewType;
+}
+interface YouTubeMedia extends VideoHostMediaBase {
+  from: "youtube";
+  playerType: "youtube";
+}
+interface VimeoMedia extends VideoHostMediaBase {
+  from: "vimeo";
+  playerType: "vimeo";
+}
+
+type Source = ObsidianMedia | DirectLinkMedia | BilibiliMedia | YouTubeMedia;
 
 interface Subtitle {
   src: string;
@@ -82,6 +98,9 @@ const serializeTFile = (file: TFile): SerializableTFile => {
   };
 };
 
+export const selectPlayerType = (state: RootState) =>
+  state.provider.source?.playerType ?? null;
+
 export const providerSlice = createSlice({
   name: "provider",
   initialState,
@@ -93,7 +112,7 @@ export const providerSlice = createSlice({
       const [file, type] = action.payload;
       const media: ObsidianMedia = {
         from: "obsidian",
-        provider: type === "unknown" ? "video" : type,
+        playerType: type === "unknown" ? "video" : type,
         path: file.path,
         filename: file.name,
         src: app.vault.getResourcePath(file as TFile),
@@ -110,7 +129,7 @@ export const providerSlice = createSlice({
         filename = decodeURI(pathname).split("/").pop();
       const media: DirectLinkMedia = {
         from: "direct",
-        provider: type === "unknown" ? "video" : type,
+        playerType: type === "unknown" ? "video" : type,
         src,
         title: filename ? filename : src,
       };
@@ -121,11 +140,17 @@ export const providerSlice = createSlice({
       action: PayloadAction<[url: string, provider: string, id: string]>,
     ) => {
       const [src, provider, id] = action.payload;
-      let media: VideoHostMedia;
+      let media;
       switch (provider) {
         case "youtube":
           // use id as fallback title, will update later
-          media = { from: "host", provider: provider, id, title: id, src };
+          media = {
+            from: provider,
+            playerType: "youtube",
+            id,
+            title: id,
+            src,
+          } as YouTubeMedia;
           break;
         default:
           console.error("given url not supported: ", src);
@@ -142,7 +167,7 @@ export const providerSlice = createSlice({
         state.source?.from === "obsidian" ||
         state.source?.from === "direct"
       ) {
-        state.source.provider = "audio";
+        state.source.playerType = "audio";
       } else {
         console.error("unable to switch to audio for hosted media");
       }

@@ -165,9 +165,9 @@ const HTMLPlayer = () => {
         ))}
       </>
     );
-    if (source.provider === "video") {
+    if (source.playerType === "video") {
       player = <video {...props}>{children}</video>;
-    } else if (source.provider === "audio") {
+    } else if (source.playerType === "audio") {
       player = <audio {...props}>{children}</audio>;
     }
   }

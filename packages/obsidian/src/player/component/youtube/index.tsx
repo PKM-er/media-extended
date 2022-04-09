@@ -64,7 +64,7 @@ const useActions = (ref: PlayerRef) => {
 const YoutubePlayer = () => {
   const videoId = useAppSelector((state) => {
     const source = state.provider.source;
-    if (source?.from !== "host" || source.provider !== "youtube") return null;
+    if (source?.playerType !== "youtube") return null;
     return source.id;
   });
 

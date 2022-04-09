@@ -8,6 +8,7 @@ import {
 import React, { useCallback } from "react";
 
 import { captureScreenshot } from "../../slice/html5";
+import { selectPlayerType } from "../../slice/provider";
 import Button from "./basic/button";
 import Toggle from "./basic/toggle";
 
@@ -81,7 +82,7 @@ export const ScreenshotButton = React.forwardRef<HTMLButtonElement, {}>(
       [dispatch],
     );
     const isSupported = useAppSelector(
-      (state) => state.provider.source?.provider === "video",
+      (state) => selectPlayerType(state) === "video",
     );
     return isSupported ? (
       <Button

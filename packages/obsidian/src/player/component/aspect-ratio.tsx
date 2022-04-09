@@ -1,9 +1,11 @@
+// from https://github.com/roderickhsiao/react-aspect-ratio
 import "@styles/aspect-ratio.less";
 
 import { useAppSelector } from "@player/hooks";
 import cls from "classnames";
-// from https://github.com/roderickhsiao/react-aspect-ratio
 import React, { HTMLProps, PropsWithoutRef } from "react";
+
+import { selectPlayerType } from "../slice/provider";
 
 const CUSTOM_PROPERTY_NAME = "--aspect-ratio";
 const DEFAULT_CLASS_NAME = "react-aspect-ratio-placeholder";
@@ -15,6 +17,7 @@ const DefaultRatio = {
   audio: null,
   youtube: "16/9",
   vimeo: "16/9",
+  "browser-view": "16/9",
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -22,7 +25,7 @@ export default React.forwardRef(function AspectRatio(
   { className = DEFAULT_CLASS_NAME, children, style, ...restProps }: Props,
   ref: React.Ref<HTMLDivElement>,
 ) {
-  const provider = useAppSelector((state) => state.provider.source?.provider);
+  const provider = useAppSelector(selectPlayerType);
   let ratio = useAppSelector((state) => state.interface.ratio);
   if (ratio === null && provider) {
     ratio = DefaultRatio[provider];
