@@ -10,7 +10,12 @@ import React, {
 } from "react";
 
 import { BrowserViewProps } from "./component";
-import { BrowserViewRef, DevToolsMode, getElectronRect } from "./utils";
+import {
+  BrowserViewRef,
+  DevToolsMode,
+  getElectronRect,
+  hideView,
+} from "./utils";
 
 export const useViewHidden = (
   hideViewPropRef: React.MutableRefObject<boolean>,
@@ -59,7 +64,7 @@ export const useHideView = (
     if (!containerRef.current || !viewRef.current) return;
     if (hidden === true) {
       // hide view during the update
-      viewRef.current.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+      hideView(viewRef.current);
     } else {
       const rect = getElectronRect(
         hidden === false

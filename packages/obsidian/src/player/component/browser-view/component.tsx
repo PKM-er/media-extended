@@ -10,7 +10,8 @@ import { useDispatch } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
-import { useAppSelector } from "../../hooks";
+import { IMessagePort, Message } from "./comms";
+import createChannel from "./create-channel";
 import {
   setDevTools,
   useApplyRepositioning,
@@ -24,11 +25,16 @@ import {
   destroyView,
   DevToolsMode,
   getElectronRect,
+  initObsidianPort,
   WebContensEventsMap,
   WebContentsEventProps,
 } from "./utils";
 
-export type BrowserViewProps = { src: string } & Partial<
+export type BrowserViewProps = {
+  src: string;
+  portRef?: React.RefCallback<IMessagePort<any, any>> &
+    React.MutableRefObject<IMessagePort<any, any> | null>;
+} & Partial<
   {
     hidden: boolean;
     hideView: boolean;
@@ -43,17 +49,24 @@ export type BrowserViewProps = { src: string } & Partial<
     }
 >;
 
-const BrowserViewComponent = React.forwardRef<
-  Electron.BrowserView,
-  BrowserViewProps
-  // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
->(function ElectronWebview(
-  { hidden: hiddenProp = false, hideView = false, ...props },
-  ref,
-) {
+const BrowserViewComponent = (
+  {
+    hidden: hiddenProp = false,
+    hideView = false,
+    portRef,
+    ...props
+  }: BrowserViewProps,
+  ref: React.ForwardedRef<Electron.BrowserView>,
+) => {
   const internalRef = useRef<Electron.BrowserView>(null),
     viewRef = useMergeRefs([internalRef, ref]),
     winRef = useRef<Electron.BrowserWindow>(getCurrentWindow());
+
+  /**
+   * using queue and send port to  on didNavigate
+   * to avoid sending message before ipcRender is ready
+   */
+  const sendPortQueueRef = useRef<(() => void) | null>(null);
 
   const [viewReady, setViewReady] = useState(false);
 
@@ -82,10 +95,46 @@ const BrowserViewComponent = React.forwardRef<
     devtools !== undefined && setDevTools(devtools, view);
     muted !== undefined && view.webContents.setAudioMuted(muted);
 
-    viewRef.current = view;
     setViewReady(true);
     console.log("browserview mounted");
     dispatch(createPlayer(view.webContents.id));
+    viewRef.current = view;
+
+    //#region message channel setup
+    // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+    const unloadPort = (function initPort() {
+      if (!portRef) return () => {};
+      const handleWillNav = () => {
+          console.log("view reloaded");
+          const prevPort = portRef.current;
+          if (prevPort) {
+            portRef.current = null;
+            prevPort.close();
+          }
+          if (view) {
+            sendPortQueueRef.current = createChannel(view);
+            initObsidianPort(view.webContents.id, portRef);
+          }
+        },
+        handleDidNav = () => {
+          console.log("view navigated");
+          if (sendPortQueueRef.current) {
+            sendPortQueueRef.current();
+            sendPortQueueRef.current = null;
+          }
+        };
+      view.webContents.on("will-navigate", handleWillNav);
+      view.webContents.on("did-navigate", handleDidNav);
+      sendPortQueueRef.current = createChannel(view);
+      initObsidianPort(view.webContents.id, portRef);
+      return () => {
+        view.webContents.off("will-navigate", handleWillNav);
+        view.webContents.off("did-navigate", handleDidNav);
+        portRef.current?.close();
+      };
+    })();
+
+    //#endregion
 
     let requestUpdate = debounce(
       () => {
@@ -109,6 +158,7 @@ const BrowserViewComponent = React.forwardRef<
     );
 
     return () => {
+      unloadPort();
       if (viewRef.current) destroyView(viewRef.current, winRef.current);
       resizeObserver.disconnect();
       viewRef.current = null;
@@ -133,6 +183,6 @@ const BrowserViewComponent = React.forwardRef<
       style={{ width: "100%", height: "100%", minHeight: 10, ...props.style }}
     />
   );
-});
+};
 
-export default BrowserViewComponent;
+export default React.forwardRef(BrowserViewComponent);
