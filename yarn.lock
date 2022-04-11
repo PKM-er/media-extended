@@ -368,6 +368,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@juggle/resize-observer@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "@juggle/resize-observer@npm:3.3.1"
+  checksum: ddabc4044276a2cb57d469c4917206c7e39f2463aa8e3430e33e4eda554412afe29c22afa40e6708b49dad5d56768dc83acd68a704b1dcd49a0906bb96b991b2
+  languageName: node
+  linkType: hard
+
 "@lezer/common@npm:^0.15.0, @lezer/common@npm:^0.15.11, @lezer/common@npm:^0.15.5":
   version: 0.15.11
   resolution: "@lezer/common@npm:0.15.11"
@@ -616,6 +623,39 @@ __metadata:
   version: 2.11.4
   resolution: "@popperjs/core@npm:2.11.4"
   checksum: 36168d274aa164368a50aef2e7b2f858e1b9145d9250af9dc1315ff719d874a367177760f8285efb75c8cf48267194a50e7dc9cdb41bf0b1958c38805c13564c
+  languageName: node
+  linkType: hard
+
+"@react-hook/latest@npm:^1.0.2":
+  version: 1.0.3
+  resolution: "@react-hook/latest@npm:1.0.3"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 2408c9cd35c5cfa7697b6da3bc5eebef254a932ade70955074c474f23be7dd3e2f81bbba12edcc9208bd0f89c6ed366d6b11d4f6d7b1052877a0bac8f74afad4
+  languageName: node
+  linkType: hard
+
+"@react-hook/passive-layout-effect@npm:^1.2.0":
+  version: 1.2.1
+  resolution: "@react-hook/passive-layout-effect@npm:1.2.1"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 217cb8aa90fb8e677672319a9a466d7752890cf4357c76df000b207696e9cc717cf2ee88080671cc9dae238a82f92093ab4f61ab2f6032d2a8db958fc7d99b5d
+  languageName: node
+  linkType: hard
+
+"@react-hook/resize-observer@npm:^1.2.5":
+  version: 1.2.5
+  resolution: "@react-hook/resize-observer@npm:1.2.5"
+  dependencies:
+    "@juggle/resize-observer": ^3.3.1
+    "@react-hook/latest": ^1.0.2
+    "@react-hook/passive-layout-effect": ^1.2.0
+    "@types/raf-schd": ^4.0.0
+    raf-schd: ^4.0.2
+  peerDependencies:
+    react: ">=16.8"
+  checksum: a2f3b333e344adb3d7a4cfd2bc77fd75054b07063fba706d57bef0c497650c3e82038eafb64fa4148c08527e8b0a34f2f70392da1700a7a0d9676ee8ba795c16
   languageName: node
   linkType: hard
 
@@ -964,6 +1004,13 @@ __metadata:
   version: 15.7.4
   resolution: "@types/prop-types@npm:15.7.4"
   checksum: ef6e1899e59b876c273811b1bd845022fc66d5a3d11cb38a25b6c566b30514ae38fe20a40f67622f362a4f4f7f9224e22d8da101cff3d6e97e11d7b4c307cfc1
+  languageName: node
+  linkType: hard
+
+"@types/raf-schd@npm:^4.0.0":
+  version: 4.0.1
+  resolution: "@types/raf-schd@npm:4.0.1"
+  checksum: 0babaa85541aadc6e5f8aa64ec79cd68bf67ea56abb7610c8daf3ca5f4b1a75d12e4e147a0b5434938a4031650ebddc733021ec4e7db4f11f7955390ec32c917
   languageName: node
   linkType: hard
 
@@ -5219,6 +5266,7 @@ __metadata:
     "@floating-ui/react-dom": ^0.6.0
     "@lezer/common": ^0.15.11
     "@mui/base": ^5.0.0-alpha.75
+    "@react-hook/resize-observer": ^1.2.5
     "@reduxjs/toolkit": ^1.8.1
     "@types/dom-mediacapture-record": ^1.0.11
     "@types/fscreen": ^1.0.1
@@ -5988,6 +6036,13 @@ __metadata:
   version: 5.1.1
   resolution: "quick-lru@npm:5.1.1"
   checksum: a516faa25574be7947969883e6068dbe4aa19e8ef8e8e0fd96cddd6d36485e9106d85c0041a27153286b0770b381328f4072aa40d3b18a19f5f7d2b78b94b5ed
+  languageName: node
+  linkType: hard
+
+"raf-schd@npm:^4.0.2":
+  version: 4.0.3
+  resolution: "raf-schd@npm:4.0.3"
+  checksum: 45514041c5ad31fa96aef3bb3c572a843b92da2f2cd1cb4a47c9ad58e48761d3a4126e18daa32b2bfa0bc2551a42d8f324a0e40e536cb656969929602b4e8b58
   languageName: node
   linkType: hard
 

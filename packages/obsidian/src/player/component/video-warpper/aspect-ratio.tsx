@@ -2,10 +2,9 @@
 import "@styles/aspect-ratio.less";
 
 import { useAppSelector } from "@player/hooks";
+import { selectPlayerType } from "@slice/provider";
 import cls from "classnames";
 import React, { HTMLProps, PropsWithoutRef } from "react";
-
-import { selectPlayerType } from "../slice/provider";
 
 const CUSTOM_PROPERTY_NAME = "--aspect-ratio";
 const DEFAULT_CLASS_NAME = "react-aspect-ratio-placeholder";
