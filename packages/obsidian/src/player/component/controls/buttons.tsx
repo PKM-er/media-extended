@@ -1,4 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { captureScreenshot } from "@player/slice/provider";
 import {
   setVolumeByOffest,
   toggleFullscreen,
@@ -7,8 +8,6 @@ import {
 } from "@slice/controls";
 import React, { useCallback } from "react";
 
-import { captureScreenshot } from "../../slice/html5";
-import { selectPlayerType } from "../../slice/provider";
 import Button from "./basic/button";
 import Toggle from "./basic/toggle";
 
@@ -82,7 +81,7 @@ export const ScreenshotButton = React.forwardRef<HTMLButtonElement, {}>(
       [dispatch],
     );
     const isSupported = useAppSelector(
-      (state) => selectPlayerType(state) === "video",
+      (state) => state.provider.captureScreenshot !== null,
     );
     return isSupported ? (
       <Button

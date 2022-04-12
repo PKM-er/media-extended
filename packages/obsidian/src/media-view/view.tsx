@@ -1,7 +1,6 @@
 import { ExtensionAccepted } from "@base/media-type";
 import { createStore, Player, PlayerStore } from "@player";
 import {
-  App,
   Component,
   debounce,
   EditableFileView,
@@ -14,6 +13,8 @@ import {
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { getPluginFullDir } from "../misc";
+import type MediaExtended from "../mx-main";
 import { setHash } from "../player/slice/controls";
 import { setObsidianMediaSrc } from "../player/slice/provider";
 import { AppThunk } from "../player/store";
@@ -58,7 +59,7 @@ export default class MediaView
     }
     return false;
   }
-  constructor(leaf: WorkspaceLeaf) {
+  constructor(leaf: WorkspaceLeaf, private plugin: MediaExtended) {
     super(leaf);
     this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
@@ -78,7 +79,10 @@ export default class MediaView
   async onLoadFile(file: TFile): Promise<void> {
     this.setFile(file);
     super.onLoadFile(file);
-    ReactDOM.render(<Player store={this.store} />, this.contentEl);
+    ReactDOM.render(
+      <Player store={this.store} pluginDir={getPluginFullDir(this.plugin)} />,
+      this.contentEl,
+    );
   }
   async onClose() {
     unloadKeymap(this.scope, this.keymap);
@@ -99,11 +103,11 @@ export default class MediaView
 
   static displayInEl(
     initAction: AppThunk,
-    app: App,
+    plugin: MediaExtended,
     containerEl: HTMLElement,
     inEditor = false,
   ): PlayerRenderChild {
-    return new PlayerRenderChild(initAction, app, containerEl, inEditor);
+    return new PlayerRenderChild(initAction, plugin, containerEl, inEditor);
   }
 }
 
@@ -115,9 +119,13 @@ export class PlayerRenderChild
   keymap;
   store;
 
+  get app() {
+    return this.plugin.app;
+  }
+
   constructor(
     initAction: AppThunk,
-    private app: App,
+    private plugin: MediaExtended,
     containerEl: HTMLElement,
     private inEditor: boolean,
   ) {
@@ -131,7 +139,14 @@ export class PlayerRenderChild
   }
 
   async onload() {
-    ReactDOM.render(<Player store={this.store} />, this.containerEl);
+    ReactDOM.render(
+      <Player
+        store={this.store}
+        inEditor={this.inEditor}
+        pluginDir={getPluginFullDir(this.plugin)}
+      />,
+      this.containerEl,
+    );
   }
   pushScope() {
     this.app.keymap.pushScope(this.scope);

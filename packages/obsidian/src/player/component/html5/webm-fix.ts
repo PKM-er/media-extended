@@ -1,6 +1,6 @@
 import { useAppDispatch } from "@player/hooks";
 import { LARGE_CURRENT_TIME } from "@slice/controls";
-import { switchToAudio } from "@slice/provider";
+import { switchToAudio, unknownTypeDetermined } from "@slice/provider";
 import { useCallback, useState } from "react";
 
 import { EventHandler } from "./event";
@@ -18,6 +18,7 @@ export const useWebmFixes = () => {
       ) {
         dispatch(switchToAudio());
       } else {
+        dispatch(unknownTypeDetermined());
         setHeight(undefined);
       }
 

@@ -5,6 +5,7 @@ declare module "obsidian" {
     isMobile: boolean;
     plugins: {
       plugins: Record<string, any>;
+      manifests: Record<string, { dir: string; [k: string]: any } | undefined>;
     };
     internalPlugins: {
       plugins: Record<string, any>;
@@ -20,7 +21,7 @@ declare module "obsidian" {
 
   interface Vault {
     exists: DataAdapter["exists"];
-    on(name: "mx-screenshot", callback: (blob: Blob) => any): EventRef;
+    on(name: "mx-screenshot", callback: (ab: ArrayBuffer) => any): EventRef;
   }
 
   interface ViewRegistry {

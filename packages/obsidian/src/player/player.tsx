@@ -1,28 +1,40 @@
 import "@styles/player.less";
 
-import { useAppSelector } from "@player/hooks";
+import { useAppDispatch, useAppSelector } from "@player/hooks";
 import React from "react";
 
+import BilibiliPlayer from "./component/bilibili";
+import { useUpdateOnResize } from "./component/browser-view/use-update-bound";
 import Controls from "./component/controls";
 import useFullScreen from "./component/fullscreen";
 import HTMLPlayer from "./component/html5";
 import VideoWarpper, { useKeepRatio } from "./component/video-warpper";
 import YoutubePlayer from "./component/youtube";
+import { reposition, repositionDone } from "./slice/browser-view";
 import { selectPlayerType } from "./slice/provider";
 
 const Player = () => {
   const containerRef = useFullScreen();
-  const provider = useAppSelector(selectPlayerType);
+  const playerType = useAppSelector(selectPlayerType),
+    provider = useAppSelector((state) => state.provider.source?.from);
 
   const keepRatio = useKeepRatio(containerRef);
+  const dispatch = useAppDispatch();
+  useUpdateOnResize(
+    containerRef,
+    () => dispatch(reposition()),
+    () => dispatch(repositionDone()),
+  );
 
   return (
     <div className="mx-player" ref={containerRef}>
       <VideoWarpper keepRatio={keepRatio}>
-        {provider === "audio" || provider === "video" ? (
+        {playerType === "audio" || playerType === "video" ? (
           <HTMLPlayer />
-        ) : provider === "youtube" ? (
+        ) : playerType === "youtube" ? (
           <YoutubePlayer />
+        ) : provider === "bilibili" ? (
+          <BilibiliPlayer />
         ) : null}
       </VideoWarpper>
       <Controls />

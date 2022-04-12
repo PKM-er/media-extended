@@ -1,5 +1,8 @@
 import type { request } from "https";
-import { MarkdownView, Platform } from "obsidian";
+import { FileSystemAdapter, MarkdownView, Platform } from "obsidian";
+import Url from "url-parse";
+
+import type MediaExtended from "./mx-main";
 
 export type mutationParam = {
   callback: MutationCallback;
@@ -94,7 +97,6 @@ export const parseSizeFromLinkTitle = (
   return [title, size];
 };
 
-import Url from "url-parse";
 /**
  * get links that is safe to use in obsidian
  */
@@ -105,5 +107,9 @@ export const getLink = (url: string): string => {
   } else return url;
 };
 
-export const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const getPluginFullDir = (plugin: MediaExtended) => {
+  const adapter = plugin.app.vault.adapter;
+  if (plugin.manifest.dir && adapter instanceof FileSystemAdapter) {
+    return adapter.getFullPath(plugin.manifest.dir);
+  } else return undefined;
+};

@@ -54,7 +54,7 @@ const patchMediaEmbed = (plugin: MediaExtended) => {
 
           const child = MediaView.displayInEl(
             setObsidianMedia(file, hash, info.linkTitle),
-            app,
+            plugin,
             containerEl,
           );
           (containerEl as ElementWithRenderChild).renderChild = child;

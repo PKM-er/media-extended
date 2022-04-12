@@ -13,6 +13,7 @@ type Props = PropsWithoutRef<HTMLProps<HTMLDivElement>>;
 
 const DefaultRatio = {
   video: "16/9",
+  unknown: "16/9",
   audio: null,
   youtube: "16/9",
   vimeo: "16/9",

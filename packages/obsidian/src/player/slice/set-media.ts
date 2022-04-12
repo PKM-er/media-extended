@@ -1,6 +1,5 @@
 import { parseLinktext, TFile } from "obsidian";
 
-import { parseSizeFromLinkTitle } from "../../misc";
 import { AppThunk } from "../store";
 import { setHash } from "./controls";
 import { setObsidianMediaSrc } from "./provider";

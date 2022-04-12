@@ -1,7 +1,6 @@
-import { wait } from "@misc";
 import { AppThunk } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { HashTool, parseTF } from "mx-lib";
+import { parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
 import { is } from "../utils/hash-tool";
@@ -332,3 +331,5 @@ const setVolumeTo = (newVolume: number, state: ControlsState) => {
     state.volume = newVolume;
   }
 };
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

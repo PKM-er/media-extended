@@ -5306,6 +5306,7 @@ __metadata:
     monkey-around: ^2.3.0
     mx-lib: ^2.11.1
     obsidian: ^0.14.4
+    path-browserify: ^1.0.1
     preact: ^10.6.6
     prettier: ^2.5.1
     query-string: ^7.1.0
@@ -5783,6 +5784,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 6a82d59d60496f4a8bba99daee37eda728adb403197b9c9a163dcc02e369758992bcc67f1618d4f1445f4b12e7651e001c2847e446b8376d4d706e1d571f570d
+  languageName: node
+  linkType: hard
+
+"path-browserify@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "path-browserify@npm:1.0.1"
+  checksum: c6d7fa376423fe35b95b2d67990060c3ee304fc815ff0a2dc1c6c3cfaff2bd0d572ee67e18f19d0ea3bbe32e8add2a05021132ac40509416459fffee35200699
   languageName: node
   linkType: hard
 

@@ -48,7 +48,7 @@ const useUpdateAspectRatio = (videoId: string) => {
       if (!res.ok) return;
       const data = await res.json();
       if (data.width && data.height && data.width > 0 && data.height > 0) {
-        dispatch(setRatio(`${data.width}/${data.height}`));
+        dispatch(setRatio([data.width, data.height]));
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -14,11 +14,14 @@
       "@misc": ["misc"],
       "@hook-utils": ["player/utils/hooks"],
       "@styles/*": ["player/component/styles/*"],
+      "@const": ["./const.mjs"],
+      "@browser-view": ["player/component/browser-view"],
+      "@browser-view/*": ["player/component/browser-view/*"],
     },
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",
-    "types": ["node"],
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowJs": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

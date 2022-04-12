@@ -36,6 +36,9 @@ const cmModules = [
 
 import { promises } from "fs";
 import { join } from "path";
+
+import inlineCodePlugin from "./scripts/inline-code.mjs";
+import { MAIN_PS, PRELOAD_BILIBILI } from "./src/const.mjs";
 /**
  * @type {import("esbuild").Plugin}
  */
@@ -73,7 +76,7 @@ const LessPathAlias = {
 };
 
 try {
-  const result = await build({
+  const main = await build({
     entryPoints: ["src/mx-main.ts"],
     bundle: true,
     watch: !isProd,
@@ -87,14 +90,67 @@ try {
     ],
     format: "cjs",
     mainFields: ["browser", "module", "main"],
-    banner: { js: banner },
     sourcemap: isProd ? false : "inline",
     minify: isProd,
     define: {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: "build/main.js",
-    plugins: [LessPathAlias, lessLoader(), obPlugin(), remoteRedux],
+    plugins: [LessPathAlias, lessLoader(), obPlugin()],
+    // metafile: true,
+  });
+  const preloadBili = await build({
+    entryPoints: ["src/player/component/bilibili/preload.ts"],
+    bundle: true,
+    watch: !isProd,
+    platform: "browser",
+    external: ["electron"],
+    target: "es2020",
+    format: "iife",
+    mainFields: ["browser", "module", "main"],
+    banner: { js: banner },
+    sourcemap: isProd ? false : "inline",
+    minify: isProd,
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+    },
+    outfile: join("build", PRELOAD_BILIBILI),
+    incremental: true,
+    plugins: [
+      inlineCodePlugin({
+        target: "es2020",
+        watch: !isProd
+          ? {
+              onRebuild: (error) => {
+                if (error) console.error("watch build failed:", error);
+                else preloadBili.rebuild();
+              },
+            }
+          : false,
+        define: {
+          "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+        },
+        sourcemap: isProd ? false : "inline",
+        minify: isProd,
+      }),
+    ],
+    // metafile: true,
+  });
+  const mainProcess = await build({
+    entryPoints: ["src/player/component/browser-view/main-ps/index.ts"],
+    bundle: true,
+    watch: !isProd,
+    platform: "browser",
+    external: ["electron"],
+    target: "es2020",
+    format: "cjs",
+    mainFields: ["browser", "module", "main"],
+    sourcemap: isProd ? false : "inline",
+    minify: isProd,
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+    },
+    outfile: join("build", MAIN_PS),
     // metafile: true,
   });
   // await promises.writeFile(

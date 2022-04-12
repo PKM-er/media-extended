@@ -2,9 +2,8 @@ import "@styles/volume-slider.less";
 
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { setVolume } from "@player/slice/controls";
 import React, { useCallback } from "react";
-
-import { setVolume } from "../../slice/controls";
 
 const VolumeSilder = () => {
   const volume = useAppSelector((state) => state.controls.volume);

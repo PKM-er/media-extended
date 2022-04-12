@@ -19,8 +19,16 @@ export const interfaceSlice = createSlice({
     // setControls: (state, action: PayloadAction<boolean>) => {
     //   state.controls = action.payload ? initialState.controls : "none";
     // },
-    setRatio: (state, action: PayloadAction<string>) => {
-      state.ratio = action.payload;
+    setRatio: (
+      state,
+      action: PayloadAction<string | [width: number, height: number]>,
+    ) => {
+      if (Array.isArray(action.payload)) {
+        const [width, height] = action.payload;
+        state.ratio = `${width}/${height}`;
+      } else {
+        state.ratio = action.payload;
+      }
     },
     resetRatio: (state) => {
       state.ratio = initialState.ratio;

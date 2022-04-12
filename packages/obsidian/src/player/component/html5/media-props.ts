@@ -1,4 +1,5 @@
 import { useAppDispatch } from "@player/hooks";
+import { getBuffered } from "@player/utils/get-buffered";
 import {
   handleError,
   handleProgress,
@@ -45,16 +46,6 @@ export const useUpdateSeekState = (ref: PlayerRef) => {
     },
     { immediate: true, ref },
   );
-};
-
-const getBuffered = (media: HTMLMediaElement) => {
-  const { buffered, currentTime } = media;
-  for (let i = buffered.length - 1; i >= 0; i--) {
-    if (buffered.start(i) <= currentTime) {
-      return buffered.end(i);
-    }
-  }
-  return null;
 };
 
 export const useProgress = () => {

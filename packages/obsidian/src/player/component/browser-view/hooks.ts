@@ -17,25 +17,6 @@ import {
   hideView,
 } from "./utils";
 
-export const useViewHidden = (
-  hideViewPropRef: React.MutableRefObject<boolean>,
-) => {
-  // set hidden to rect to use given rect directly instead of calling getBoundingRect
-
-  const stateSetState = useState<boolean | Electron.Rectangle>(
-      hideViewPropRef.current,
-    ),
-    [hidden, setHidden0] = stateSetState;
-
-  // override setHidden to avoid hidden prop being override
-  const setHidden = useCallback<typeof setHidden0>(
-    (val) => setHidden0(hideViewPropRef.current || val),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
-  return [hidden, setHidden] as typeof stateSetState;
-};
-
 export const useApplyRepositioning = (
   setHidden: React.Dispatch<React.SetStateAction<boolean | Electron.Rectangle>>,
 ) => {

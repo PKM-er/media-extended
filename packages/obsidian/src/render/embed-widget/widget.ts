@@ -136,12 +136,7 @@ export default class InternalPlayerWidget extends WidgetType {
     // );
     const action = this.getSetMediaAction();
     if (action) {
-      const child = MediaView.displayInEl(
-        action,
-        this.plugin.app,
-        container,
-        true,
-      );
+      const child = MediaView.displayInEl(action, this.plugin, container, true);
       child.load();
       this.hookClickHandler(view, container);
       this.setInfo(container, child);

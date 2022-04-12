@@ -1,26 +1,26 @@
 import "./style.less";
 
 import { BrowserView, getCurrentWindow } from "@electron/remote";
-import { createPlayer, destroyPlayer } from "@slice/browser-view";
-import { useLatest } from "ahooks";
+import { useAppSelector } from "@player/hooks";
+import { createPlayer, destroyPlayer, portReady } from "@slice/browser-view";
 import cls from "classnames";
-import { debounce } from "obsidian";
+import { ipcRenderer } from "electron";
 import React, { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
-import { IMessagePort, Message } from "./comms";
 import createChannel from "./create-channel";
+import { EventEmitter } from "./emitter";
 import {
   setDevTools,
-  useApplyRepositioning,
   useChangableProp,
   useEventListener,
   useHideView,
   useLoadSrc,
-  useViewHidden,
 } from "./hooks";
+import { DisableInput } from "./main-ps/channels";
+import { useUpdateOnResize } from "./use-update-bound";
 import {
   destroyView,
   DevToolsMode,
@@ -32,8 +32,8 @@ import {
 
 export type BrowserViewProps = {
   src: string;
-  portRef?: React.RefCallback<IMessagePort<any, any>> &
-    React.MutableRefObject<IMessagePort<any, any> | null>;
+  emitterRef?: React.RefCallback<EventEmitter<any, any>> &
+    React.MutableRefObject<EventEmitter<any, any> | null>;
 } & Partial<
   {
     hidden: boolean;
@@ -53,7 +53,7 @@ const BrowserViewComponent = (
   {
     hidden: hiddenProp = false,
     hideView = false,
-    portRef,
+    emitterRef,
     ...props
   }: BrowserViewProps,
   ref: React.ForwardedRef<Electron.BrowserView>,
@@ -63,16 +63,17 @@ const BrowserViewComponent = (
     winRef = useRef<Electron.BrowserWindow>(getCurrentWindow());
 
   /**
-   * using queue and send port to  on didNavigate
+   * using queue and send port to view on didNavigate
    * to avoid sending message before ipcRender is ready
    */
   const sendPortQueueRef = useRef<(() => void) | null>(null);
 
   const [viewReady, setViewReady] = useState(false);
 
-  const hideViewPropRef = useLatest(hiddenProp || hideView),
-    [viewHidden, setViewHidden] = useViewHidden(hideViewPropRef);
-  const [resizing, setResizing] = useState(false);
+  const [resizing, setResizing] = useState<boolean | Electron.Rectangle>(false);
+  const repositioning = useAppSelector(
+    (state) => state.browserView.repositioning,
+  );
 
   for (const k of Object.keys(WebContensEventsMap)) {
     const propName = k as keyof typeof WebContensEventsMap,
@@ -87,6 +88,7 @@ const BrowserViewComponent = (
   const containerRef = useRefEffect<HTMLDivElement>((container) => {
     const win = winRef.current;
     const view = new BrowserView({ webPreferences });
+    const viewId = view.webContents.id;
     win.addBrowserView(view);
 
     const rect = getElectronRect(container.getBoundingClientRect());
@@ -94,26 +96,32 @@ const BrowserViewComponent = (
     // apply props
     devtools !== undefined && setDevTools(devtools, view);
     muted !== undefined && view.webContents.setAudioMuted(muted);
+    ipcRenderer
+      .invoke(DisableInput, viewId)
+      .then((result) => console.log("disable input: ", result));
 
     setViewReady(true);
     console.log("browserview mounted");
-    dispatch(createPlayer(view.webContents.id));
+    dispatch(createPlayer(viewId));
     viewRef.current = view;
 
     //#region message channel setup
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     const unloadPort = (function initPort() {
-      if (!portRef) return () => {};
+      if (!emitterRef) return () => {};
       const handleWillNav = () => {
+          // cannot use will-prevernt-unload event
+          // since preventDefault will not work via remote
+          // https://github.com/electron/electron/issues/23521
           console.log("view reloaded");
-          const prevPort = portRef.current;
+          const prevPort = emitterRef.current;
           if (prevPort) {
-            portRef.current = null;
+            emitterRef.current = null;
             prevPort.close();
           }
           if (view) {
             sendPortQueueRef.current = createChannel(view);
-            initObsidianPort(view.webContents.id, portRef);
+            emitterRef.current = initObsidianPort(viewId);
           }
         },
         handleDidNav = () => {
@@ -126,30 +134,17 @@ const BrowserViewComponent = (
       view.webContents.on("will-navigate", handleWillNav);
       view.webContents.on("did-navigate", handleDidNav);
       sendPortQueueRef.current = createChannel(view);
-      initObsidianPort(view.webContents.id, portRef);
+      emitterRef.current = initObsidianPort(viewId);
+      dispatch(portReady(true));
       return () => {
         view.webContents.off("will-navigate", handleWillNav);
         view.webContents.off("did-navigate", handleDidNav);
-        portRef.current?.close();
+        emitterRef.current?.close();
+        dispatch(portReady(false));
       };
     })();
 
     //#endregion
-
-    let requestUpdate = debounce(
-      () => {
-        setViewHidden(false);
-        setResizing(false);
-      },
-      200,
-      true,
-    );
-    const resizeObserver = new ResizeObserver(() => {
-      setViewHidden(true);
-      setResizing(true);
-      requestUpdate();
-    });
-    resizeObserver.observe(container);
     // close view when obsidian is reloaded
     window.addEventListener(
       "beforeunload",
@@ -160,7 +155,6 @@ const BrowserViewComponent = (
     return () => {
       unloadPort();
       if (viewRef.current) destroyView(viewRef.current, winRef.current);
-      resizeObserver.disconnect();
       viewRef.current = null;
       // @ts-expect-error
       winRef.current = null;
@@ -168,7 +162,16 @@ const BrowserViewComponent = (
       dispatch(destroyPlayer());
     };
   }, []);
-  const repositioning = useApplyRepositioning(setViewHidden) || resizing;
+
+  useUpdateOnResize(
+    containerRef,
+    () => setResizing(true),
+    () => setResizing(false),
+  );
+
+  const viewHidden = hiddenProp || hideView || repositioning || resizing,
+    repositionState = repositioning || resizing;
+
   useHideView(viewHidden, containerRef, viewRef);
   useChangableProp(viewReady, props, viewRef);
   useLoadSrc(viewReady, props, viewRef);
@@ -178,9 +181,9 @@ const BrowserViewComponent = (
       hidden={hiddenProp}
       className={cls(props.className, {
         "browser-view-hidden": viewHidden,
-        "browser-view-repositioning": repositioning,
+        "browser-view-repositioning": repositionState,
       })}
-      style={{ width: "100%", height: "100%", minHeight: 10, ...props.style }}
+      style={{ width: "100%", height: "100%", minHeight: 50, ...props.style }}
     />
   );
 };

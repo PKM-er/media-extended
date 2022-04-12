@@ -118,7 +118,7 @@ export default class MediaExtended extends Plugin {
     const exts = getExts();
     this.app.viewRegistry.unregisterExtensions(exts);
     // this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
-    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf));
+    this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
     this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_TYPE);
   }
 

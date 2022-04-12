@@ -1,10 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { createPlayer, destroyPlayer } from "@slice/html5";
+import { setRatio } from "@slice/interface";
 import {
   captureScreenshotDone,
-  createPlayer,
-  destroyPlayer,
-} from "@slice/html5";
-import { setRatio } from "@slice/interface";
+  selectCaptureScreenshotRequested,
+} from "@slice/provider";
 import { useMemoizedFn } from "ahooks";
 import { captureScreenshot } from "mx-lib";
 import React, { RefCallback, useCallback, useRef } from "react";
@@ -46,15 +46,15 @@ const useCaptureScreenshot = (
   ref: React.MutableRefObject<HTMLMediaElement | null>,
 ) => {
   useSubscribe(
-    (state) => state.html5.captureScreenshot,
+    selectCaptureScreenshotRequested,
     async (capture, dispatch, media) => {
       if (!capture) return;
       if (!(media.instance instanceof HTMLVideoElement)) {
         console.error("trying to capture screenshot on non-video element");
       } else {
-        const result = await captureScreenshot(media.instance);
-        if (result) {
-          app.vault.trigger("mx-screenshot", result);
+        const blob = await captureScreenshot(media.instance);
+        if (blob) {
+          app.vault.trigger("mx-screenshot", await blob.arrayBuffer());
         }
       }
       dispatch(captureScreenshotDone());
@@ -69,7 +69,7 @@ const useUpdateRatio = () => {
     onLoadedMetadata: useMemoizedFn<EventHandler>((event) => {
       const { videoWidth, videoHeight } = event.instance as HTMLVideoElement;
       if (videoHeight && videoWidth) {
-        dispatch(setRatio(`${videoWidth}/${videoHeight}`));
+        dispatch(setRatio([videoWidth, videoHeight]));
       }
     }),
   };
@@ -165,7 +165,7 @@ const HTMLPlayer = () => {
         ))}
       </>
     );
-    if (source.playerType === "video") {
+    if (source.playerType === "video" || source.playerType === "unknown") {
       player = <video {...props}>{children}</video>;
     } else if (source.playerType === "audio") {
       player = <audio {...props}>{children}</audio>;

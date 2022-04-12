@@ -16,7 +16,7 @@ interface Caption {
   default: boolean;
 }
 
-type HTML5PlayerType = "audio" | "video";
+type HTML5PlayerType = "unknown" | "audio" | "video";
 type BrowserViewType = "browser-view";
 interface SourceBase {
   playerType: HTML5PlayerType | BrowserViewType | "youtube" | "vimeo" | null;
@@ -77,11 +77,14 @@ type Track = Caption | Subtitle;
 export interface ProviderState {
   source: Source | null;
   tracks: Track[];
+  /** null meaning feature not available */
+  captureScreenshot: boolean | null;
 }
 
 const initialState: ProviderState = {
   source: null,
   tracks: [],
+  captureScreenshot: null,
 };
 
 type SerializableTFile = Pick<
@@ -112,13 +115,14 @@ export const providerSlice = createSlice({
       const [file, type] = action.payload;
       const media: ObsidianMedia = {
         from: "obsidian",
-        playerType: type === "unknown" ? "video" : type,
+        playerType: type,
         path: file.path,
         filename: file.name,
         src: app.vault.getResourcePath(file as TFile),
         title: file.name,
       };
       state.source = media;
+      state.captureScreenshot = type === "video" ? false : null;
     },
     setDirectLink: (
       state,
@@ -129,11 +133,12 @@ export const providerSlice = createSlice({
         filename = decodeURI(pathname).split("/").pop();
       const media: DirectLinkMedia = {
         from: "direct",
-        playerType: type === "unknown" ? "video" : type,
+        playerType: type,
         src,
         title: filename ? filename : src,
       };
       state.source = media;
+      state.captureScreenshot = type === "video" ? false : null;
     },
     setHostMedia: (
       state,
@@ -157,23 +162,50 @@ export const providerSlice = createSlice({
           return;
       }
       state.source = media;
+      state.captureScreenshot = null;
     },
     resetProvider: (state) => {
       state.source = initialState.source;
       state.tracks = initialState.tracks;
+      state.captureScreenshot = null;
     },
     switchToAudio: (state) => {
-      if (
-        state.source?.from === "obsidian" ||
-        state.source?.from === "direct"
-      ) {
+      if (state.source?.playerType === "video") {
         state.source.playerType = "audio";
+        state.captureScreenshot = null;
       } else {
-        console.error("unable to switch to audio for hosted media");
+        console.error(
+          "unable to switch to audio for player type: " +
+            state.source?.playerType,
+        );
+      }
+    },
+    unknownTypeDetermined: (state) => {
+      if (state.source?.playerType) {
+        if (state.source?.playerType !== "unknown") {
+          return;
+        }
+        state.source.playerType = "video";
+        state.captureScreenshot = false;
+      } else {
+        console.error("player source not available ", state.source);
+      }
+    },
+    captureScreenshot: (state) => {
+      if (state.captureScreenshot !== null) {
+        state.captureScreenshot = true;
+      }
+    },
+    captureScreenshotDone: (state) => {
+      if (state.captureScreenshot !== null) {
+        state.captureScreenshot = false;
       }
     },
   },
 });
+
+export const selectCaptureScreenshotRequested = (state: RootState) =>
+  state.provider.captureScreenshot === true;
 
 export const { switchToAudio } = providerSlice.actions;
 const {
@@ -181,6 +213,11 @@ const {
   setDirectLink: _direct,
   setHostMedia: _host,
   resetProvider: _reset,
+} = providerSlice.actions;
+export const {
+  captureScreenshot,
+  captureScreenshotDone,
+  unknownTypeDetermined,
 } = providerSlice.actions;
 
 const resetNonProvider = (dispatch: AppDispatch) => {
