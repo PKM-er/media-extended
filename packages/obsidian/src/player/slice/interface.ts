@@ -4,7 +4,12 @@ type Controls = "native" | "custom" | "none";
 
 export interface InterfaceState {
   controls: Controls;
-  ratio: string | null;
+  /**
+   * string: "16/9"
+   * 0: no ratio (e.g. audio)
+   * null: ratio not available
+   */
+  ratio: string | 0 | null;
 }
 
 const initialState: InterfaceState = {

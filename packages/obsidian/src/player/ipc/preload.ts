@@ -1,4 +1,4 @@
-import { getBrowserViewPort } from "./comms";
+import { getBrowserViewPort } from "@ipc/comms";
 
 const PreloadSetup = (injectCode: string, origin: string): any => {
   console.log("running preload script");

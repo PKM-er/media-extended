@@ -106,10 +106,3 @@ export const getLink = (url: string): string => {
     return "app://local/" + url.substring("file:///".length);
   } else return url;
 };
-
-export const getPluginFullDir = (plugin: MediaExtended) => {
-  const adapter = plugin.app.vault.adapter;
-  if (plugin.manifest.dir && adapter instanceof FileSystemAdapter) {
-    return adapter.getFullPath(plugin.manifest.dir);
-  } else return undefined;
-};

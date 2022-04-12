@@ -1,5 +1,5 @@
-import type { EventEmitter } from "@browser-view/emitter";
-import type { MsgFromObsidian } from "@browser-view/msg-obs";
+import type { EventEmitter } from "@ipc/emitter";
+import type { MsgFromObsidian } from "@ipc/msg-obs";
 
 import type { MessageFromViewMap } from "./msg-view";
 
@@ -10,6 +10,6 @@ export type ObsidianEventEmitter = EventEmitter<
   MessageFromObsidianMap
 >;
 
-import useActions from "@browser-view/msg-obs/emit";
-import registerMsgHandler from "@browser-view/msg-obs/handle";
+import useActions from "@ipc/msg-obs/emit";
+import registerMsgHandler from "@ipc/msg-obs/handle";
 export { registerMsgHandler, useActions };

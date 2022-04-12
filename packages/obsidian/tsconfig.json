@@ -17,6 +17,7 @@
       "@const": ["./const.mjs"],
       "@browser-view": ["player/component/browser-view"],
       "@browser-view/*": ["player/component/browser-view/*"],
+      "@ipc/*": ["player/ipc/*"],
     },
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",

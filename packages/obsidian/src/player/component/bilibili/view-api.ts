@@ -1,4 +1,4 @@
-import type { IBrowserViewAPI } from "@browser-view/comms/view-api";
+import type { IBrowserViewAPI } from "@browser-view/view-api";
 
 import type { BrowserViewEventEmitter } from "./msg-view";
 

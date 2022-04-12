@@ -13,7 +13,6 @@ import {
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { getPluginFullDir } from "../misc";
 import type MediaExtended from "../mx-main";
 import { setHash } from "../player/slice/controls";
 import { setObsidianMediaSrc } from "../player/slice/provider";
@@ -80,7 +79,7 @@ export default class MediaView
     this.setFile(file);
     super.onLoadFile(file);
     ReactDOM.render(
-      <Player store={this.store} pluginDir={getPluginFullDir(this.plugin)} />,
+      <Player store={this.store} pluginDir={this.plugin.getFullPluginDir()} />,
       this.contentEl,
     );
   }
@@ -143,7 +142,7 @@ export class PlayerRenderChild
       <Player
         store={this.store}
         inEditor={this.inEditor}
-        pluginDir={getPluginFullDir(this.plugin)}
+        pluginDir={this.plugin.getFullPluginDir()}
       />,
       this.containerEl,
     );

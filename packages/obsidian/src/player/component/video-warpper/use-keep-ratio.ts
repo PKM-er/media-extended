@@ -3,18 +3,19 @@ import { useAppSelector } from "@player/hooks";
 
 const useKeepRatio = (
   container: React.RefObject<HTMLElement>,
-): "width" | "height" | undefined => {
+): "width" | "height" => {
   const size = useSize(container),
     videoRatio = useAppSelector((state) => {
       const ratio = state.interface.ratio;
-      if (!ratio) return null;
+      if (ratio === null) return 16 / 9;
+      if (ratio === 0) return Infinity;
       const [width, height] = ratio.split("/");
       return +width / +height;
     });
 
   const containerRatio = size ? size.width / size.height : null;
-  if (videoRatio && containerRatio) {
+  if (containerRatio) {
     return videoRatio >= containerRatio ? "width" : "height";
-  } else return undefined;
+  } else return "width";
 };
 export default useKeepRatio;

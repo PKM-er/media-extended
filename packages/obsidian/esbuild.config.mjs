@@ -137,7 +137,7 @@ try {
     // metafile: true,
   });
   const mainProcess = await build({
-    entryPoints: ["src/player/component/browser-view/main-ps/index.ts"],
+    entryPoints: ["src/player/ipc/main-ps/index.ts"],
     bundle: true,
     watch: !isProd,
     platform: "browser",

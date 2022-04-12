@@ -1,13 +1,12 @@
-import BrowserView from "@browser-view";
-import getMediaMessageHandler from "@browser-view/msg-view/handle";
 import { PRELOAD_BILIBILI } from "@const";
+import getMediaMessageHandler from "@ipc/msg-view/handle";
 import { PlayerContext } from "@player";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { useUpdateEffect } from "ahooks";
 import { join } from "path";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 
+import WebView from "../webview";
 import { ObsidianEventEmitter, useActions } from "./msg-obs";
 
 const BilibiliPlayer = () => {
@@ -44,16 +43,12 @@ const BilibiliPlayer = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const preload = useMemo(() => join(pluginDir, PRELOAD_BILIBILI), []);
 
-  const ref = useRefEffect<Electron.BrowserView>((view) => {}, []);
-
   return src ? (
-    <BrowserView
-      hideView={hideView}
+    <WebView
       emitterRef={emitterRef}
-      ref={ref}
+      hideView={hideView}
       src={src}
-      webPreferences={{ preload }}
-      devtools
+      preload={preload}
     />
   ) : null;
 };

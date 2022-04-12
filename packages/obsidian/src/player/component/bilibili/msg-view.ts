@@ -1,7 +1,7 @@
-import type { MsgFromView } from "@browser-view/msg-view";
-import HookMediaEvents from "@browser-view/msg-view/emit";
+import type { EventEmitter } from "@ipc/emitter";
+import type { MsgFromView } from "@ipc/msg-view";
+import HookMediaEvents from "@ipc/msg-view/emit";
 
-import type { EventEmitter } from "../browser-view/emitter";
 import type { MessageFromObsidianMap } from "./msg-obs";
 
 export type MessageFromViewMap = MsgFromView &

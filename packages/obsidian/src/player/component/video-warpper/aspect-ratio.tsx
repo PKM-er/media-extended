@@ -14,11 +14,11 @@ type Props = PropsWithoutRef<HTMLProps<HTMLDivElement>>;
 const DefaultRatio = {
   video: "16/9",
   unknown: "16/9",
-  audio: null,
+  audio: 0,
   youtube: "16/9",
   vimeo: "16/9",
   "browser-view": "16/9",
-};
+} as const;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export default React.forwardRef(function AspectRatio(
@@ -31,13 +31,13 @@ export default React.forwardRef(function AspectRatio(
     ratio = DefaultRatio[provider];
   }
   const newStyle =
-    ratio === null
-      ? style
-      : ({
+    typeof ratio === "string"
+      ? ({
           ...style,
           // https://github.com/roderickhsiao/react-aspect-ratio/commit/53ec15858ae186c41e70b8c14cc5a5b6e97cb6e3
           [CUSTOM_PROPERTY_NAME]: `(${ratio})`,
-        } as React.CSSProperties);
+        } as React.CSSProperties)
+      : style;
 
   return (
     <div

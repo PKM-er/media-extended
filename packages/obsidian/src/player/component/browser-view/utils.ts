@@ -1,5 +1,5 @@
-import { getObsidianPort } from "./comms";
-import { EventEmitter } from "./emitter";
+import { getObsidianPort } from "@ipc/comms";
+import { EventEmitter } from "@ipc/emitter";
 
 export type BrowserViewRef =
   React.MutableRefObject<Electron.BrowserView | null>;

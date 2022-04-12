@@ -2,11 +2,12 @@ import "./style/main.less";
 import "./style/ytb.less";
 import "./style/caption-fix.less";
 
-import { ExtensionAccepted, MediaType } from "@base/media-type";
+import { ExtensionAccepted } from "@base/media-type";
+import registerIPCMain from "@ipc/register-hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
 import assertNever from "assert-never";
-import { Plugin } from "obsidian";
+import { FileSystemAdapter, Plugin } from "obsidian";
 
 import { setupRec } from "./feature/audio-rec";
 import registerEmbedHandlers from "./render/embed";
@@ -70,6 +71,7 @@ export default class MediaExtended extends Plugin {
     console.log("loading media-extended");
 
     await this.loadSettings();
+    registerIPCMain(this);
 
     setupRec.call(this);
 
@@ -142,6 +144,12 @@ export default class MediaExtended extends Plugin {
   onunload() {
     console.log("unloading media-extended");
     this.unregisterExtensions();
+  }
+
+  getFullPluginDir() {
+    const adapter = this.app.vault.adapter;
+    if (!(adapter instanceof FileSystemAdapter) || !this.manifest.dir) return;
+    return adapter.getFullPath(this.manifest.dir);
   }
 }
 

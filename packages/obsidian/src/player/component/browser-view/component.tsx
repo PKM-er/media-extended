@@ -1,6 +1,9 @@
 import "./style.less";
 
 import { BrowserView, getCurrentWindow } from "@electron/remote";
+import createChannel from "@ipc/create-channel";
+import { EventEmitter } from "@ipc/emitter";
+import { DisableInput } from "@ipc/main-ps/channels";
 import { useAppSelector } from "@player/hooks";
 import { createPlayer, destroyPlayer, portReady } from "@slice/browser-view";
 import cls from "classnames";
@@ -10,8 +13,6 @@ import { useDispatch } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
-import createChannel from "./create-channel";
-import { EventEmitter } from "./emitter";
 import {
   setDevTools,
   useChangableProp,
@@ -19,7 +20,6 @@ import {
   useHideView,
   useLoadSrc,
 } from "./hooks";
-import { DisableInput } from "./main-ps/channels";
 import { useUpdateOnResize } from "./use-update-bound";
 import {
   destroyView,
@@ -102,7 +102,7 @@ const BrowserViewComponent = (
 
     setViewReady(true);
     console.log("browserview mounted");
-    dispatch(createPlayer(viewId));
+    dispatch(createPlayer());
     viewRef.current = view;
 
     //#region message channel setup

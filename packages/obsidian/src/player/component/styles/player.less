@@ -34,5 +34,13 @@
     margin: auto;
     overflow: hidden;
     position: relative;
+
+    webview {
+      transition: opacity 0.4s ease-in-out;
+      opacity: 1;
+    }
+    .mx__hide-view > webview {
+      opacity: 0;
+    }
   }
 }
