@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 
-import { HackWebviewPreload } from "./channels";
+import { HackWebviewPreload, MxPreloadScriptUA } from "./channels";
 
 let registered: Set<number> = new Set();
 export const RegisterHackWebviewPreload = () => {
@@ -11,8 +11,15 @@ export const RegisterHackWebviewPreload = () => {
   ) => {
     if (params.preload) {
       let preloadURL = params.preload;
-      (pref as any).preloadURL = preloadURL;
-      console.log("mx: preload script added", pref);
+      // simple gatekeeper to prevent malicious preload scripts
+      if (
+        typeof preloadURL === "string" &&
+        params.useragent?.startsWith(MxPreloadScriptUA)
+      ) {
+        (pref as any).preloadURL = preloadURL;
+        params.useragent = params.useragent.substring(MxPreloadScriptUA.length);
+        console.log("mx: preload script added", pref);
+      }
     }
   };
   ipcMain.on(HackWebviewPreload, ({ sender }) => {

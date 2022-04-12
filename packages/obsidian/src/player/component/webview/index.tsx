@@ -3,7 +3,7 @@ import { EventEmitter } from "@ipc/emitter";
 import {
   CreateChannel,
   DisableInput,
-  MxScriptRegistered,
+  MxPreloadScriptUA,
 } from "@ipc/main-ps/channels";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { createPlayer, destroyPlayer, portReady } from "@slice/browser-view";
@@ -31,6 +31,7 @@ type WebviewProps = {
     hideView: boolean;
     nodeintegration: boolean;
     plugins: boolean;
+    /** absolute path to preload script (without file://) */
     preload: string;
     httpreferrer: string;
     useragent: string;
@@ -67,7 +68,7 @@ const applyAttrs = (
 ) => {
   // changable
   webview.src = src;
-  useragent !== undefined && (webview.useragent = useragent);
+  webview.useragent = MxPreloadScriptUA + (useragent ?? "");
   // cannot be changed once loaded
   nodeintegration !== undefined && (webview.nodeintegration = nodeintegration);
   plugins !== undefined && (webview.plugins = plugins);
