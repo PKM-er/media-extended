@@ -1,4 +1,5 @@
 import { PRELOAD_BILIBILI } from "@const";
+import useActions from "@ipc/msg-obs/emit";
 import getMediaMessageHandler from "@ipc/msg-view/handle";
 import { PlayerContext } from "@player";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
@@ -7,7 +8,7 @@ import React, { useContext, useMemo, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 
 import WebView from "../webview";
-import { ObsidianEventEmitter, useActions } from "./msg-obs";
+import { ObsidianEventEmitter } from "./msg-obs";
 
 const BilibiliPlayer = () => {
   const src = useAppSelector((state) =>

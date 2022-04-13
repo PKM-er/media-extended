@@ -1,5 +1,6 @@
-import { registerMsgHandler } from "../msg-obs";
-import { HookMediaEvents } from "../msg-view";
+import registerMsgHandler from "@ipc/msg-obs/handle";
+import HookMediaEvents from "@ipc/msg-view/emit";
+
 import { BrowserViewAPIName } from "../view-api";
 import { PlyaerFoundEvent } from "./find-player";
 

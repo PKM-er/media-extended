@@ -9,7 +9,3 @@ export type ObsidianEventEmitter = EventEmitter<
   MessageFromViewMap,
   MessageFromObsidianMap
 >;
-
-import useActions from "@ipc/msg-obs/emit";
-import registerMsgHandler from "@ipc/msg-obs/handle";
-export { registerMsgHandler, useActions };
