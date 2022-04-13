@@ -10,7 +10,7 @@ import {
   MsgSent,
   MsgSentBase,
   SentMsgNames,
-} from "./comms/types";
+} from "./types";
 
 //#region on/off method
 type Listener<M extends MessageMap, E extends SentMsgNames<M>> = (

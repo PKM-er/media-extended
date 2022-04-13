@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 
-import { HackWebviewPreload, MxPreloadScriptUA } from "./channels";
+import { HackWebviewPreload, MxPreloadScriptUA } from "../const";
 
 let registered: Set<number> = new Set();
 export const RegisterHackWebviewPreload = () => {

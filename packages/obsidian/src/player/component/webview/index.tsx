@@ -1,11 +1,11 @@
-import { getObsidianPort, initObsidianPort } from "@ipc/comms";
+import { initObsidianPort } from "@ipc/comms";
 import { EventEmitter } from "@ipc/emitter";
-import { onHackReady } from "@ipc/hack-ready";
+import { onHackReady } from "@ipc/hack";
 import {
   CreateChannel,
   DisableInput,
   MxPreloadScriptUA,
-} from "@ipc/main-ps/channels";
+} from "@ipc/hack/const";
 import { useLatest } from "ahooks";
 import cls from "classnames";
 import { ipcRenderer } from "electron";
@@ -129,7 +129,6 @@ const WebView = React.forwardRef<
             .invoke(DisableInput, webviewId)
             .then((result) => console.log("disable input: ", result));
           ipcRenderer.send(CreateChannel, webviewId);
-          getObsidianPort(webviewId);
           const handleWillNav = () => {
             // cannot use will-prevernt-unload event
             // since preventDefault will not work via remote

@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from "electron";
 
-import { MxScriptRegistered } from "./channels";
+import { MxScriptRegistered } from "../const";
 import RegisterCreateChannel from "./create-channel";
 import { RegisterDisableViewInput } from "./disable-view-input";
 import { RegisterHackWebviewPreload } from "./hack-webview-preload";

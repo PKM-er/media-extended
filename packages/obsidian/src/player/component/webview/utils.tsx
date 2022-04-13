@@ -1,5 +1,3 @@
-import { getObsidianPort } from "@ipc/comms";
-import { EventEmitter } from "@ipc/emitter";
 import { useUnmount } from "ahooks";
 import equal from "fast-deep-equal/es6";
 import { DependencyList, EffectCallback, useEffect, useRef } from "react";

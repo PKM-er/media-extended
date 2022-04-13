@@ -16,7 +16,7 @@ import {
 } from "@slice/controls";
 import { setRatio } from "@slice/interface";
 
-import { MessageBasic, MsgSent } from "../comms/types";
+import { MessageBasic, MsgSent } from "../emitter/types";
 import { MsgFromView } from ".";
 
 const getMediaMessageHandler = (

@@ -1,10 +1,8 @@
 import { ipcRenderer } from "electron";
 
-import { EventEmitter } from "../emitter";
-import { getPortWithTimeout } from "./get-port-base";
-
-export const ChannelNameObsidian = "mx-provide-obsidian-channel";
-export const ChannelNameBrowserView = "mx-provide-view-channel";
+import { ChannelNameBrowserView, ChannelNameObsidian } from "./create-channel";
+import { EventEmitter } from "./emitter";
+import { getPortWithTimeout } from "./get-port";
 
 const getPort = (channel: string, viewId?: number) =>
   getPortWithTimeout(
@@ -19,9 +17,10 @@ const getPort = (channel: string, viewId?: number) =>
     (handler) => ipcRenderer.off(channel, handler),
   );
 
-export const getObsidianPort = async (viewId: number) =>
-    (await getPort(ChannelNameObsidian, viewId))[0],
-  getBrowserViewPort = async () => (await getPort(ChannelNameBrowserView))[0];
+const getObsidianPort = async (viewId: number) =>
+  (await getPort(ChannelNameObsidian, viewId))[0];
+export const getBrowserViewPort = async () =>
+  (await getPort(ChannelNameBrowserView))[0];
 
 export const initObsidianPort = (viewId: number) => {
   return new EventEmitter(

@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from "electron";
 
-import { DisableInput } from "./channels";
+import { DisableInput } from "../const";
 
 export const RegisterDisableViewInput = () => {
   ipcMain.handle(DisableInput, ({ sender }, viewId) => {

@@ -1,16 +1,17 @@
-import { getCurrentWebContents, MessageChannelMain } from "@electron/remote";
-
-import { ChannelNameBrowserView, ChannelNameObsidian } from "./comms";
+export const ChannelNameObsidian = "mx-provide-obsidian-channel";
+export const ChannelNameBrowserView = "mx-provide-view-channel";
 
 /**
  * @returns function to send port to browser view
  */
-const createChannel = (view: Electron.BrowserView): (() => void) => {
-  const webContents = getCurrentWebContents();
+const createChannel = (
+  win: Electron.WebContents,
+  view: Electron.WebContents,
+  MessageChannelMain: typeof Electron.MessageChannelMain,
+): (() => void) => {
   const { port1: portOb, port2: portView } = new MessageChannelMain();
-  webContents.postMessage(ChannelNameObsidian, view.webContents.id, [portOb]);
-  return () =>
-    view.webContents.postMessage(ChannelNameBrowserView, null, [portView]);
+  win.postMessage(ChannelNameObsidian, view.id, [portOb]);
+  return () => view.postMessage(ChannelNameBrowserView, null, [portView]);
 };
 
 export default createChannel;

@@ -1,8 +1,12 @@
-import { BrowserView, getCurrentWindow } from "@electron/remote";
+import {
+  BrowserView,
+  getCurrentWindow,
+  MessageChannelMain,
+} from "@electron/remote";
 import { initObsidianPort } from "@ipc/comms";
 import createChannel from "@ipc/create-channel";
 import { EventEmitter } from "@ipc/emitter";
-import { DisableInput } from "@ipc/main-ps/channels";
+import { DisableInput } from "@ipc/hack/const";
 import cls from "classnames";
 import { ipcRenderer } from "electron";
 import React, { useRef, useState } from "react";
@@ -95,6 +99,14 @@ const BrowserViewComponent = (
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     const unloadPort = (function initPort() {
       if (!emitterRef) return () => {};
+      const init = () => {
+        sendPortQueueRef.current = createChannel(
+          view.webContents,
+          win.webContents,
+          MessageChannelMain,
+        );
+        emitterRef.current = initObsidianPort(viewId);
+      };
       const handleWillNav = () => {
           // cannot use will-prevernt-unload event
           // since preventDefault will not work via remote
@@ -105,10 +117,7 @@ const BrowserViewComponent = (
             emitterRef.current = null;
             prevPort.close();
           }
-          if (view) {
-            sendPortQueueRef.current = createChannel(view);
-            emitterRef.current = initObsidianPort(viewId);
-          }
+          if (view) init();
         },
         handleDidNav = () => {
           console.log("view navigated");
@@ -119,8 +128,7 @@ const BrowserViewComponent = (
         };
       view.webContents.on("will-navigate", handleWillNav);
       view.webContents.on("did-navigate", handleDidNav);
-      sendPortQueueRef.current = createChannel(view);
-      emitterRef.current = initObsidianPort(viewId);
+      init();
       return () => {
         view.webContents.off("will-navigate", handleWillNav);
         view.webContents.off("did-navigate", handleDidNav);

@@ -4,7 +4,7 @@ import { ipcRenderer } from "electron";
 import { Platform } from "obsidian";
 import { join } from "path";
 
-import { HackWebviewPreload } from "./main-ps/channels";
+import { HackWebviewPreload } from "./const";
 
 const registerIPCMain = (plugin: MediaExtended) => {
   if (!Platform.isDesktopApp) return;

@@ -3,7 +3,7 @@ import "./style/ytb.less";
 import "./style/caption-fix.less";
 
 import { ExtensionAccepted } from "@base/media-type";
-import registerIPCMain from "@ipc/register-hack";
+import { registerIPCMain } from "@ipc/hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
 import assertNever from "assert-never";

@@ -1,5 +1,5 @@
-import { getPortWithTimeout } from "@ipc/comms/get-port-base";
 import { EventEmitter } from "@ipc/emitter";
+import { getPortWithTimeout } from "@ipc/get-port";
 
 import { BrowserViewAPIName } from "../view-api";
 import registerEvents from "./events";

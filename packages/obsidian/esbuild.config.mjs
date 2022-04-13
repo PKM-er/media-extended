@@ -76,7 +76,7 @@ const LessPathAlias = {
 };
 
 try {
-  const main = await build({
+  const main = build({
     entryPoints: ["src/mx-main.ts"],
     bundle: true,
     watch: !isProd,
@@ -99,7 +99,7 @@ try {
     plugins: [LessPathAlias, lessLoader(), obPlugin()],
     // metafile: true,
   });
-  const preloadBili = await build({
+  const preloadBili = build({
     entryPoints: ["src/player/component/bilibili/preload.ts"],
     bundle: true,
     watch: !isProd,
@@ -136,8 +136,8 @@ try {
     ],
     // metafile: true,
   });
-  const mainProcess = await build({
-    entryPoints: ["src/player/ipc/main-ps/index.ts"],
+  const mainProcess = build({
+    entryPoints: ["src/player/ipc/hack/main-ps/index.ts"],
     bundle: true,
     watch: !isProd,
     platform: "browser",

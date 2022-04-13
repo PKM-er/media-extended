@@ -1,6 +1,6 @@
 import { Platform } from "obsidian";
 
-import { MxScriptRegistered } from "./main-ps/channels";
+import { MxScriptRegistered } from "./const";
 
 export const checkIfHackReady = async (): Promise<boolean | null> => {
   if (!Platform.isDesktopApp) return null;
