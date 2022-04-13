@@ -16,10 +16,12 @@ const BilibiliPlayer = () => {
       : null,
   );
 
-  const [hideView, setHideView] = useState(true);
+  const [hideView, setHideView] = useState(true),
+    [emitterReady, setEmitterReady] = useState(false);
 
   const dispatch = useAppDispatch();
   const emitterRef = useRefEffect<ObsidianEventEmitter>((emitter) => {
+    setEmitterReady(true);
     emitter.addDirectListener(getMediaMessageHandler(dispatch));
     const showView = () => {
       window.clearTimeout(timeout);
@@ -32,10 +34,13 @@ const BilibiliPlayer = () => {
       showView();
     }, 10e3);
     emitter.on("enter-web-fullscreen", showView);
-    return () => console.log("port unmount");
+    return () => {
+      console.log("port unmount");
+      setEmitterReady(false);
+    };
   }, []);
 
-  useActions(emitterRef as any);
+  useActions(emitterReady, emitterRef as any);
 
   const { pluginDir } = useContext(PlayerContext);
   if (!pluginDir)

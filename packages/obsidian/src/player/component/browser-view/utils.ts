@@ -93,15 +93,3 @@ export const destroyView = (
 export const hideView = (view: Electron.BrowserView) => {
   view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
 };
-
-export const initObsidianPort = (viewId: number) => {
-  return new EventEmitter(
-    getObsidianPort(viewId).then((port) => {
-      console.log("obsidian port ready", port);
-      port.onmessageerror = (evt) => {
-        console.error("message error on browserview " + viewId, evt.data, evt);
-      };
-      return port;
-    }),
-  );
-};

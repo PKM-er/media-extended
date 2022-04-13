@@ -1,5 +1,4 @@
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
-import browserViewReducer from "@slice/browser-view";
 import controlsReducer from "@slice/controls";
 import html5Reducer from "@slice/html5";
 import interfaceReducer from "@slice/interface";
@@ -14,7 +13,6 @@ export const createStore = (name: string) =>
       provider: providerReducer,
       youtube: youtubeReducer,
       html5: html5Reducer,
-      browserView: browserViewReducer,
     },
     devTools: true,
     enhancers: [],

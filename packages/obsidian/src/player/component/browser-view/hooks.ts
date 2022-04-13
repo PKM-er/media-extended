@@ -17,25 +17,6 @@ import {
   hideView,
 } from "./utils";
 
-export const useApplyRepositioning = (
-  setHidden: React.Dispatch<React.SetStateAction<boolean | Electron.Rectangle>>,
-) => {
-  const repositioning = useAppSelector(
-    (state) => state.browserView.repositioning,
-  );
-  useEffect(() => {
-    if (repositioning) {
-      // hide view during the update
-      setHidden(true);
-    } else {
-      setHidden(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [repositioning]);
-
-  return repositioning;
-};
-
 export const useHideView = (
   hidden: boolean | Electron.Rectangle,
   containerRef: React.MutableRefObject<HTMLDivElement | null>,

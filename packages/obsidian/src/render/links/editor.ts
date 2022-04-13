@@ -49,5 +49,3 @@ export const patchEditorClick = (plugin: MediaExtended) => {
     }),
   );
 };
-
-const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));

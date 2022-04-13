@@ -1,12 +1,11 @@
-import { getObsidianPort } from "@ipc/comms";
+import { getObsidianPort, initObsidianPort } from "@ipc/comms";
 import { EventEmitter } from "@ipc/emitter";
+import { onHackReady } from "@ipc/hack-ready";
 import {
   CreateChannel,
   DisableInput,
   MxPreloadScriptUA,
 } from "@ipc/main-ps/channels";
-import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { createPlayer, destroyPlayer, portReady } from "@slice/browser-view";
 import { useLatest } from "ahooks";
 import cls from "classnames";
 import { ipcRenderer } from "electron";
@@ -14,9 +13,7 @@ import React, { useRef, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
-import { onHackReady } from "../../ipc/hack-ready";
 import {
-  initObsidianPort,
   useEffectWithTarget,
   WebviewEventProps,
   WebviewEventsMap,
@@ -24,8 +21,7 @@ import {
 
 type WebviewProps = {
   src: string;
-  emitterRef?: React.RefCallback<EventEmitter<any, any>> &
-    React.MutableRefObject<EventEmitter<any, any> | null>;
+  emitterRef?: React.ForwardedRef<EventEmitter<any, any>>;
 } & Partial<
   {
     hideView: boolean;
@@ -96,86 +92,92 @@ const WebView = React.forwardRef<
   Electron.WebviewTag,
   WebviewProps
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
->(function ElectronWebview(
-  { hideView, emitterRef, className, style, ...props },
-  ref,
-) {
-  const internalRef = useRef<Electron.WebviewTag>(null);
-  const webviewRef = useMergeRefs([internalRef, ref]);
-
-  const dispatch = useAppDispatch();
+>(function ElectronWebview({ hideView, className, style, ...props }, ref) {
+  const webviewRef = useMergeRefs([useRef<Electron.WebviewTag>(null), ref]);
+  const emitterRef = useMergeRefs([
+    useRef<EventEmitter<any, any> | null>(null),
+    props.emitterRef ?? null,
+  ]);
 
   const [internalHideView, setHideView] = useState(true);
+
+  const [viewAttached, setViewAttached] = useState(false);
 
   for (const k of Object.keys(WebviewEventsMap)) {
     const propName = k as keyof typeof WebviewEventsMap,
       eventName = WebviewEventsMap[propName];
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEventListener(eventName, props[propName], webviewRef);
+    useEventListener(viewAttached, eventName, props[propName], webviewRef);
   }
+  useChangableProp(viewAttached, props, webviewRef);
 
-  const containerRef = useRefEffect<HTMLDivElement>((container) => {
-    const webview = document.createElement("webview");
-    webview.style.height = "100%";
-    webview.style.width = "100%";
-    applyAttrs(props, webview);
+  const containerRef = useRefEffect<HTMLDivElement>(
+    (container) => {
+      const webview = document.createElement("webview");
+      webview.style.height = "100%";
+      webview.style.width = "100%";
+      applyAttrs(props, webview);
 
-    let unloadPort: (() => void) | undefined;
-    webview.addEventListener("did-attach", () => {
-      console.log("webview attached");
-      applyAttrsWithMethod(props, webview);
-      // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-      unloadPort = (function initPort() {
-        if (!emitterRef) return () => {};
-        const webviewId = webview.getWebContentsId();
-        ipcRenderer
-          .invoke(DisableInput, webviewId)
-          .then((result) => console.log("disable input: ", result));
-        ipcRenderer.send(CreateChannel, webviewId);
-        getObsidianPort(webviewId);
-        const handleWillNav = () => {
-          // cannot use will-prevernt-unload event
-          // since preventDefault will not work via remote
-          // https://github.com/electron/electron/issues/23521
-          console.log("view reloaded");
-          const prevPort = emitterRef.current;
-          if (prevPort) {
+      let unloadPort: (() => void) | undefined;
+      webview.addEventListener("did-attach", () => {
+        console.log("webview attached");
+        applyAttrsWithMethod(props, webview);
+        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+        unloadPort = (function initPort() {
+          const webviewId = webview.getWebContentsId();
+          ipcRenderer
+            .invoke(DisableInput, webviewId)
+            .then((result) => console.log("disable input: ", result));
+          ipcRenderer.send(CreateChannel, webviewId);
+          getObsidianPort(webviewId);
+          const handleWillNav = () => {
+            // cannot use will-prevernt-unload event
+            // since preventDefault will not work via remote
+            // https://github.com/electron/electron/issues/23521
+            console.log("view reloaded");
+            const prevPort = emitterRef.current;
+            if (prevPort) {
+              emitterRef.current = null;
+              prevPort.close();
+            }
+            emitterRef.current = initObsidianPort(webviewId);
+          };
+          webview.addEventListener("will-navigate", handleWillNav);
+
+          const emitter = initObsidianPort(webviewId);
+          emitterRef.current = emitter;
+          return () => {
+            webview.removeEventListener("will-navigate", handleWillNav);
+            emitter.close();
             emitterRef.current = null;
-            prevPort.close();
-          }
-          emitterRef.current = initObsidianPort(webviewId);
-        };
-        webview.addEventListener("will-navigate", handleWillNav);
+          };
+        })();
+        webviewRef.current = webview;
+        setViewAttached(true);
+      });
+      webview.addEventListener("destroyed", () => {
+        console.log("webview destroyed");
+        webviewRef.current = null;
+        setViewAttached(false);
+      });
+      webview.addEventListener("dom-ready", () => {
+        setHideView(false);
+      });
 
-        emitterRef.current = initObsidianPort(webviewId);
-        dispatch(portReady(true));
-        return () => {
-          webview.removeEventListener("will-navigate", handleWillNav);
-          emitterRef.current?.close();
-          dispatch(portReady(false));
-        };
-      })();
-      dispatch(createPlayer());
-      webviewRef.current = webview;
-    });
-    webview.addEventListener("destroyed", () => {
-      console.log("webview destroyed");
-      dispatch(destroyPlayer());
-    });
-    webview.addEventListener("dom-ready", () => {
-      setHideView(false);
-    });
+      onHackReady(() => container.replaceChildren(webview));
 
-    onHackReady(() => container.replaceChildren(webview));
+      return () => {
+        unloadPort?.();
+        webviewRef.current = null;
+        setViewAttached(false);
+        container.empty();
+        console.log("webview unmounted");
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
-    return () => {
-      unloadPort?.();
-      container.empty();
-      webviewRef.current = null;
-      console.log("webview unmounted");
-      dispatch(destroyPlayer());
-    };
-  }, []);
   return (
     <div
       ref={containerRef}
@@ -188,12 +190,12 @@ const WebView = React.forwardRef<
 });
 
 const useEventListener = (
+  viewReady: boolean,
   eventName: string,
   handler: ((...args: any[]) => void) | undefined,
   webview: React.MutableRefObject<Electron.WebviewTag | null>,
 ) => {
   const handlerRef = useLatest(handler);
-  const ready = useAppSelector((state) => state.browserView.viewReady);
   useEffectWithTarget(
     () => {
       const targetElement = webview.current;
@@ -208,7 +210,7 @@ const useEventListener = (
         targetElement.removeEventListener(eventName, eventListener);
       };
     },
-    [eventName, ready],
+    [eventName, viewReady],
     webview,
   );
 };
@@ -222,6 +224,7 @@ const setDevTools = (open: boolean, webview: Electron.WebviewTag) => {
 };
 
 const useChangableProp = (
+  viewReady: boolean,
   props: Pick<WebviewProps, "src" | "useragent" | "devtools" | "muted">,
   webview: React.MutableRefObject<Electron.WebviewTag | null>,
 ) => {
@@ -229,7 +232,7 @@ const useChangableProp = (
     () => {
       webview.current && (webview.current.src = props.src);
     },
-    [props.src],
+    [props.src, viewReady],
     webview,
   );
   useEffectWithTarget(
@@ -237,7 +240,7 @@ const useChangableProp = (
       if (webview.current && props.useragent !== undefined)
         webview.current.setUserAgent(props.useragent);
     },
-    [props.useragent],
+    [props.useragent, viewReady],
     webview,
   );
   useEffectWithTarget(
@@ -245,7 +248,7 @@ const useChangableProp = (
       if (webview.current && props.devtools !== undefined)
         setDevTools(props.devtools, webview.current);
     },
-    [props.devtools],
+    [props.devtools, viewReady],
     webview,
   );
   useEffectWithTarget(
@@ -253,7 +256,7 @@ const useChangableProp = (
       if (webview.current && props.muted !== undefined)
         webview.current.setAudioMuted(props.muted);
     },
-    [props.muted],
+    [props.muted, viewReady],
     webview,
   );
 };

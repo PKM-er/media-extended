@@ -82,18 +82,6 @@ export type WebviewEventProps = {
   [K in keyof WebviewEvents]: (event: WebviewEvents[K]) => void;
 };
 
-export const initObsidianPort = (viewId: number) => {
-  return new EventEmitter(
-    getObsidianPort(viewId).then((port) => {
-      console.log("obsidian port ready", port);
-      port.onmessageerror = (evt) => {
-        console.error("message error on browserview " + viewId, evt.data, evt);
-      };
-      return port;
-    }),
-  );
-};
-
 /**
  *
  * @param effect

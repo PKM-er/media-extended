@@ -295,7 +295,7 @@ export const seekTo =
   (targetTime: number): AppThunk =>
   async (dispatch) => {
     dispatch(userSeek([targetTime, true]));
-    await wait(0);
+    await sleep(0);
     dispatch(userSeekEnd());
   };
 export const seekByOffset =
@@ -310,7 +310,7 @@ export const seekByOffset =
       targetTime = duration;
     }
     dispatch(userSeek([targetTime, true]));
-    await wait(0);
+    await sleep(0);
     dispatch(userSeekEnd());
   };
 
@@ -332,4 +332,4 @@ const setVolumeTo = (newVolume: number, state: ControlsState) => {
   }
 };
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

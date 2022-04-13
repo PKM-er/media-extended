@@ -1,5 +1,5 @@
 // import { contextBridge } from "electron";
-import PreloadSetup from "@ipc/preload";
+import PreloadSetup from "@ipc/remote-view/preload";
 import InjectCode from "inline:./inject";
 // import { BrowserViewAPIName } from "./view-api";
 

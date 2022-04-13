@@ -158,4 +158,3 @@ export class PlayerRenderChild
     ReactDOM.unmountComponentAtNode(this.containerEl);
   }
 }
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
