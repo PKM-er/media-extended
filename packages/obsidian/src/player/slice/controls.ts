@@ -1,9 +1,9 @@
+import { is } from "@base/hash-tool";
 import { AppThunk } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
-import { is } from "../utils/hash-tool";
 import { selectPlayerType } from "./provider";
 import { setVolumeByOffest as setVolumeByOffestYtb } from "./youtube";
 
