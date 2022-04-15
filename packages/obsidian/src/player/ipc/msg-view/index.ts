@@ -14,29 +14,23 @@ type ManualUpdate = {
   "update-seeking": [seeking: boolean];
   "update-buffer": [buffered: number];
 };
-type MsgSentFromView_WithData = MediaEventBinding & ManualUpdate;
+type MsgSentWithData = MediaEventBinding & ManualUpdate;
 
-type MsgSentFromView_StateChangeNames =
-  | "play"
-  | "pause"
-  | "seeked"
-  | "seeking"
-  | "waiting"
-  | "ended";
+type MsgSent = "play" | "pause" | "seeked" | "seeking" | "waiting" | "ended";
 
-interface MsgInvokedFromView {
+interface MsgWithCallback {
   hello: [[msgFromView: string], [msgFromOb: string]];
 }
 
 export type MsgFromView = {
-  [K in keyof MsgSentFromView_WithData]: [MsgSentFromView_WithData[K]];
+  [K in keyof MsgSentWithData]: [MsgSentWithData[K]];
 } & {
-  [K in MsgSentFromView_StateChangeNames]: [[]];
+  [K in MsgSent]: [[]];
 } & {
-  [K in keyof MsgInvokedFromView as `cb:${K}`]: MsgInvokedFromView[K];
+  [K in keyof MsgWithCallback as `cb:${K}`]: MsgWithCallback[K];
 };
 
-export const MediaStateChanges = enumerate<MsgSentFromView_StateChangeNames>()(
+export const MediaStateChanges = enumerate<MsgSent>()(
   "play",
   "pause",
   "seeked",

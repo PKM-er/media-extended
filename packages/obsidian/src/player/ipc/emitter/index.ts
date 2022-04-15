@@ -1,5 +1,13 @@
 import assertNever from "assert-never";
 
+import type {
+  clearTimeout as ClearTimeoutType,
+  MessageEvent,
+  MessagePortEventMap,
+  setTimeout as SetTimeoutType,
+  StructuredSerializeOptions,
+  Transferable,
+} from "./lib";
 import {
   InvokeMsgNames,
   MessageMap,
@@ -12,6 +20,10 @@ import {
   SentMsgNames,
 } from "./types";
 
+// prevent typescript from cofuseling the node `setTimeout` and browser one
+const setTimeout: SetTimeoutType = (globalThis as any).setTimeout;
+const clearTimeout: ClearTimeoutType = (globalThis as any).clearTimeout;
+
 //#region on/off method
 type Listener<M extends MessageMap, E extends SentMsgNames<M>> = (
   ...data: M[E][0]
@@ -22,7 +34,7 @@ type Listener<M extends MessageMap, E extends SentMsgNames<M>> = (
 type CallbackHandler<
   M extends MessageMap,
   E extends InvokeMsgNames<M>,
-  R = [resData: M[E][1], transfer?: Transferable[]] | string,
+  R = [resData: M[E][1], transfer?: Transferable[]],
 > = (...data: M[E][0]) => Promise<R> | R;
 //#endregion
 
@@ -47,15 +59,35 @@ type InvokeQueue<M extends MessageMap> = Partial<{
 }>;
 type PromiseResolve<T> = (value: T | PromiseLike<T>) => void;
 
+interface Port {
+  close?: () => void;
+  terminate?: () => void;
+  postMessage(message: any, transfer: Transferable[]): void;
+  postMessage(message: any, options?: StructuredSerializeOptions): void;
+  addEventListener<K extends keyof MessagePortEventMap>(
+    type: K,
+    listener: (ev: MessagePortEventMap[K]) => any,
+  ): void;
+  removeEventListener<K extends keyof MessagePortEventMap>(
+    type: K,
+    listener: (ev: MessagePortEventMap[K]) => any,
+  ): void;
+}
+
 export class EventEmitter<
   MIn extends MessageMap = MessageMap,
   MOut extends MessageMap = MessageMap,
 > {
-  cbHandler: CallbackHandlerMap<MIn> = {};
-  evtHandlers: EventHandlersMap<MIn> = {};
-  invokeQueue: InvokeQueue<MOut> = {};
-  constructor(private port: Promise<MessagePort>) {
-    port.then((port) => (port.onmessage = this.onMessage.bind(this)));
+  private cbHandler: CallbackHandlerMap<MIn> = {};
+  private evtHandlers: EventHandlersMap<MIn> = {};
+  private invokeQueue: InvokeQueue<MOut> = {};
+
+  private inited = false;
+  constructor(private port: Promise<Port> | Port) {
+    (async () => {
+      (await port).addEventListener("message", this.onMessage);
+      this.inited = true;
+    })();
   }
 
   async addDirectListener(
@@ -67,9 +99,11 @@ export class EventEmitter<
   ) {
     (await this.port).addEventListener("message", handler);
   }
-  private async onMessage({
+  private onMessage = async ({
     data: msg,
-  }: MessageEvent<MsgSent<MIn> | MsgCallbackReq<MIn> | MsgCallbackRes<MOut>>) {
+  }: MessageEvent<
+    MsgSent<MIn> | MsgCallbackReq<MIn> | MsgCallbackRes<MOut>
+  >) => {
     switch (msg.type) {
       case "send":
         this.evtHandlers[msg.event]?.forEach((handler) => handler(...msg.data));
@@ -80,11 +114,16 @@ export class EventEmitter<
         let handler = this.cbHandler[event];
         let resData: typeof res["data"], transfer: Transferable[] | undefined;
         if (handler) {
-          const result = await handler(...data);
-          if (typeof result === "string") {
-            resData = `${id}: failed to exec ${event}, ${result}`;
-          } else {
+          try {
+            const result = await handler(...data);
             [resData, transfer] = result;
+          } catch (err) {
+            console.error(err);
+            resData = `${id}: failed to exec ${event}, ${
+              err instanceof Error
+                ? err.name + ":" + err.message
+                : (err as any)?.toString()
+            }`;
           }
         } else {
           resData = `${id}: no handler for ${event}`;
@@ -107,7 +146,7 @@ export class EventEmitter<
           return;
         }
         const [resolve, reject, timeoutId] = queue[id];
-        window.clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
         if (typeof data === "string") {
           reject(data);
         } else {
@@ -119,7 +158,7 @@ export class EventEmitter<
       default:
         assertNever(msg);
     }
-  }
+  };
 
   async send<E extends SentMsgNames<MOut>>(event: E, ...data: MOut[E][0]) {
     const msg: MsgSentBase<MOut, E> = { type: "send", event, data };
@@ -150,7 +189,7 @@ export class EventEmitter<
     };
     port.postMessage(req);
     return new Promise((resolve, reject) => {
-      const timeoutId = window.setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         reject(`invoke ${event} timeout: ` + req.id);
         let queue = this.invokeQueue[event];
         if (queue) {
@@ -201,6 +240,12 @@ export class EventEmitter<
   }
 
   async close() {
-    return (await this.port).close();
+    const port = await this.port;
+    if (this.inited) {
+      port.removeEventListener("message", this.onMessage);
+    }
+    if (port.terminate) {
+      port.terminate();
+    } else port.close?.();
   }
 }
