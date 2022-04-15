@@ -68,6 +68,7 @@
     "monkey-around": "^2.3.0",
     "mx-lib": "^2.11.1",
     "obsidian": "^0.14.4",
+    "open": "^8.4.0",
     "path-browserify": "^1.0.1",
     "preact": "^10.6.6",
     "prettier": "^2.5.1",
