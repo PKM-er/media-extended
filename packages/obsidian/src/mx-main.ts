@@ -7,9 +7,10 @@ import { registerIPCMain } from "@ipc/hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
 import assertNever from "assert-never";
-import { FileSystemAdapter, Plugin } from "obsidian";
+import { FileSystemAdapter, Platform, Plugin } from "obsidian";
 
 import { setupRec } from "./feature/audio-rec";
+import { SetAuth } from "./player/ipc/hack/const";
 import registerEmbedHandlers from "./render/embed";
 // import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./legacy/media-view";
 import registerLinkHandlers from "./render/links";
@@ -21,6 +22,8 @@ export default class MediaExtended extends Plugin {
 
   async loadSettings() {
     this.settings = { ...this.settings, ...(await this.loadData()) };
+    Platform.isDesktopApp &&
+      require("electron").ipcRenderer.send(SetAuth, this.settings.auths);
   }
 
   async saveSettings() {
@@ -69,9 +72,9 @@ export default class MediaExtended extends Plugin {
 
   async onload(): Promise<void> {
     console.log("loading media-extended");
+    this.register(registerIPCMain(this));
 
     await this.loadSettings();
-    registerIPCMain(this);
 
     setupRec.call(this);
 

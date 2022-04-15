@@ -1,5 +1,7 @@
 // import { PlyrControls } from "../legacy/plyr-controls";
 
+import type { Auth } from "@player/ipc/hack/const";
+
 export interface MxSettings {
   mediaFragmentsEmbed: boolean;
   timestampLink: boolean;
@@ -18,6 +20,7 @@ export interface MxSettings {
   timestampOffset: number;
   // hideEmbedControls: boolean;
   livePreview: boolean;
+  auths: Record<string, Auth>;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -66,4 +69,5 @@ export const DEFAULT_SETTINGS: MxSettings = {
   timestampOffset: 0,
   // hideEmbedControls: false,
   livePreview: true,
+  auths: {},
 };

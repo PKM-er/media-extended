@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from "electron";
 
 import { MxScriptRegistered } from "../const";
+import { RegisterAllowAuth } from "./allow-auth";
 import RegisterCreateChannel from "./create-channel";
 import { RegisterDisableViewInput } from "./disable-view-input";
 import { RegisterHackWebviewPreload } from "./hack-webview-preload";
@@ -16,6 +17,7 @@ const register = () => {
     RegisterDisableViewInput();
     RegisterCreateChannel();
     RegisterHackWebviewPreload();
+    RegisterAllowAuth();
 
     // method to check if registered
     ipcMain.handle(MxScriptRegistered, () => true);

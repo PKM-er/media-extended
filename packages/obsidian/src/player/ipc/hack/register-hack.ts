@@ -4,22 +4,34 @@ import { ipcRenderer } from "electron";
 import { Platform } from "obsidian";
 import { join } from "path";
 
-import { HackWebviewPreload } from "./const";
+import {
+  AllowAuth,
+  HackWebviewPreload,
+  RevertAllowAuth,
+  RevertHackWebviewPreload,
+} from "./const";
 
-const registerIPCMain = (plugin: MediaExtended) => {
-  if (!Platform.isDesktopApp) return;
+const noop = () => {};
+const registerIPCMain = (plugin: MediaExtended): (() => void) => {
+  if (!Platform.isDesktopApp) return noop;
   const pluginDir = plugin.getFullPluginDir();
   if (!pluginDir) {
     console.error("plugin dir not available");
-    return;
+    return noop;
   }
   const pathToInjectScript = join(pluginDir, MAIN_PS);
   try {
     require("@electron/remote").require(pathToInjectScript);
     console.log("main process script injected");
     ipcRenderer.send(HackWebviewPreload);
+    ipcRenderer.send(AllowAuth);
+    return () => {
+      ipcRenderer.send(RevertHackWebviewPreload);
+      ipcRenderer.send(RevertAllowAuth);
+    };
   } catch (error) {
     console.error("failed to inject main process script: ", error);
+    return noop;
   }
 };
 export default registerIPCMain;
