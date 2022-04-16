@@ -313,6 +313,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/dom@npm:^0.4.4":
+  version: 0.4.4
+  resolution: "@floating-ui/dom@npm:0.4.4"
+  dependencies:
+    "@floating-ui/core": ^0.6.1
+  checksum: 1031cf3b5c18a9fe1edafafac1920ce882e50767a7b16ffed35807ccb84f5ff72b8247d94c7c680f6e8d913a0efe2d8906e051dbfa49c2633d2fc809d77e69b6
+  languageName: node
+  linkType: hard
+
+"@floating-ui/react-dom-interactions@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@floating-ui/react-dom-interactions@npm:0.2.0"
+  dependencies:
+    "@floating-ui/react-dom": ^0.6.2
+    aria-hidden: ^1.1.3
+    point-in-polygon: ^1.1.0
+    use-isomorphic-layout-effect: ^1.1.1
+  checksum: 66b5a0a713b3a7257f0b9d53f8eaa7d2098a049ab2196a6b6d7e3e9693c0710064cb0f028acfbadbfb2424ba044b128654481891a9b73932cc76b348073cc5ea
+  languageName: node
+  linkType: hard
+
 "@floating-ui/react-dom@npm:^0.6.0":
   version: 0.6.0
   resolution: "@floating-ui/react-dom@npm:0.6.0"
@@ -323,6 +344,19 @@ __metadata:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
   checksum: f9cc86570675be2ea3250b22a8a3ed315bd21df71e1c9d9d5fe5110d24b3cc463b2917f7af01e5cfdf1565852529dbc95be832a1a2a21306fed93e940347ca0e
+  languageName: node
+  linkType: hard
+
+"@floating-ui/react-dom@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "@floating-ui/react-dom@npm:0.6.2"
+  dependencies:
+    "@floating-ui/dom": ^0.4.4
+    use-isomorphic-layout-effect: ^1.1.1
+  peerDependencies:
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: f35708b4ed67e84b4060c4a3b939f982c91a9277e79d44b88683639f91208075c41d68b23bb138464bfb1770adda1550f89e9d3630c8ae31a8b93c30d8cbdfd1
   languageName: node
   linkType: hard
 
@@ -1450,6 +1484,15 @@ __metadata:
   version: 2.0.1
   resolution: "argparse@npm:2.0.1"
   checksum: 83644b56493e89a254bae05702abf3a1101b4fa4d0ca31df1c9985275a5a5bd47b3c27b7fa0b71098d41114d8ca000e6ed90cad764b306f8a503665e4d517ced
+  languageName: node
+  linkType: hard
+
+"aria-hidden@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "aria-hidden@npm:1.1.3"
+  dependencies:
+    tslib: ^1.0.0
+  checksum: 2d40a328246baac7ae0b243ebe0cbef53c836c5f78c9212e9c1ff93f3aee185bd9aa51773e161e0025722d691c9d5f125070f6175a7074c4a57778ddc30d9e74
   languageName: node
   linkType: hard
 
@@ -5271,6 +5314,7 @@ __metadata:
     "@codemirror/stream-parser": "github:lishid/stream-parser"
     "@codemirror/view": ^0.19.47
     "@floating-ui/react-dom": ^0.6.0
+    "@floating-ui/react-dom-interactions": ^0.2.0
     "@lezer/common": ^0.15.11
     "@mui/base": ^5.0.0-alpha.75
     "@react-hook/resize-observer": ^1.2.5
@@ -5888,6 +5932,13 @@ __metadata:
     rangetouch: ^2.0.1
     url-polyfill: ^1.1.12
   checksum: b111124d72c6526a41177da462239434d5a814c9f9178d70b550430b44408bacf88e10ba89e2dbac9b950970c6d4d1147f1d4cb43ecbf4389cff61409081f792
+  languageName: node
+  linkType: hard
+
+"point-in-polygon@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "point-in-polygon@npm:1.1.0"
+  checksum: 67a6374f0b79bc872bde8e375d7d5ea011a1419c5f4320dfb7705801cd3a8fcaee8bff385465e075b2ce863bbc86ccd74c63345d9f326981cd0807642bc5199c
   languageName: node
   linkType: hard
 
@@ -7241,7 +7292,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.8.1, tslib@npm:^1.9.0":
+"tslib@npm:^1.0.0, tslib@npm:^1.8.1, tslib@npm:^1.9.0":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
