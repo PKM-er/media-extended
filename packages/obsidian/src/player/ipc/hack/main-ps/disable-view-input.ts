@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, ipcMain, webContents } from "electron";
 
 import { DisableInput } from "../const";
 
@@ -6,11 +6,9 @@ export const RegisterDisableViewInput = () => {
   ipcMain.handle(DisableInput, ({ sender }, viewId) => {
     const win = BrowserWindow.fromWebContents(sender);
     if (!win) return false;
-    const view = win
-      .getBrowserViews()
-      .find((view) => view.webContents.id === viewId);
+    const view = webContents.fromId(viewId);
     if (!view) return false;
-    view.webContents.on("before-input-event", (evt, input) => {
+    view.on("before-input-event", (evt, input) => {
       evt.preventDefault();
       win.webContents.focus();
       const inputevt = {
