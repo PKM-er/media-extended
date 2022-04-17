@@ -1,3 +1,5 @@
+@import "./var.less";
+
 .button-basic() {
   width: 32px;
   height: 32px;
@@ -6,12 +8,13 @@
   cursor: pointer;
 
   background-color: transparent;
-  opacity: 0.9;
-  color: white;
+  .controls-color();
   &:hover {
     background-color: var(--interactive-accent);
     opacity: 1;
-    color: white;
+    .theme-dark & {
+      color: var(--text-normal);
+    }
   }
   transition: all 0.3s ease-in-out;
 

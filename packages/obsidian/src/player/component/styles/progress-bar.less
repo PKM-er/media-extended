@@ -5,9 +5,12 @@ span.mx__media-progress.MuiSlider-root {
   display: block;
   margin-bottom: 0;
   padding: 0;
-  color: var(--mx-interactive-accent, var(--interactive-accent));
+  color: var(--interactive-accent);
   .MuiSlider-track {
-    color: var(--mx-background-accent, white);
+    color: var(--mx-interactive-accent-secondary, var(--text-accent));
+    .theme-dark & {
+      color: var(--mx-dark-interactive-accent-secondary, var(--text-accent));
+    }
   }
   .MuiSlider-rail {
     opacity: 1;
@@ -23,4 +26,7 @@ span.mx__media-progress.MuiSlider-root {
       background-color: rgba(255, 255, 255, 0.3);
     }
   }
+  // .MuiSlider-thumb {
+  //   border: solid 1px var(--background-modifier-border);
+  // }
 }

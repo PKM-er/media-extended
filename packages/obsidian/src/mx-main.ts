@@ -165,27 +165,21 @@ const getExts = () =>
 
 const updateAccentColor = () => {
   const div = createDiv();
+  div.addClass("theme-light");
   div.style.display = "none";
   div.style.color = "var(--interactive-accent)";
   document.body.append(div);
-  const color = Color(getComputedStyle(div).color);
+  const colorLight = Color(getComputedStyle(div).color);
+  div.removeClass("theme-light");
+  div.addClass("theme-dark");
+  const colorDark = Color(getComputedStyle(div).color);
   div.remove();
-  const interactiveAccent = color.lightness(60),
-    backgroundAccent = color.lightness(85),
-    interactiveAccentHsl = interactiveAccent
-      .hsl()
-      .array()
-      .map((val, i) => (i === 0 ? `${val}` : `${val}%`));
   document.body.style.setProperty(
-    "--mx-interactive-accent",
-    interactiveAccent.string(),
+    "--mx-interactive-accent-secondary",
+    colorLight.lighten(0.2).string(),
   );
   document.body.style.setProperty(
-    "--mx-interactive-accent-hsl",
-    interactiveAccentHsl.join(","),
-  );
-  document.body.style.setProperty(
-    "--mx-background-accent",
-    backgroundAccent.string(),
+    "--mx-dark-interactive-accent-secondary",
+    colorDark.lighten(0.3).string(),
   );
 };
