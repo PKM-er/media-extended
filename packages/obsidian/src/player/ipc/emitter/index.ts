@@ -72,6 +72,9 @@ interface Port {
     type: K,
     listener: (ev: MessagePortEventMap[K]) => any,
   ): void;
+  // required in message event of messageport, not in worker
+  /** Begins dispatching messages received on the port. */
+  start?: () => void;
 }
 
 export class EventEmitter<
@@ -85,7 +88,9 @@ export class EventEmitter<
   private inited = false;
   constructor(private port: Promise<Port> | Port) {
     (async () => {
-      (await port).addEventListener("message", this.onMessage);
+      const port_ = await port;
+      port_.addEventListener("message", this.onMessage);
+      port_.start?.();
       this.inited = true;
     })();
   }
