@@ -1,3 +1,4 @@
+import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { captureScreenshot } from "@player/slice/provider";
 import {
@@ -11,15 +12,20 @@ import React, { useCallback } from "react";
 import Button from "./basic/button";
 import Toggle from "./basic/toggle";
 
-export const PlayButton = React.forwardRef<HTMLButtonElement, {}>(
+export const PlayButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonUnstyledProps
+>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function PlayButton(_p, ref) {
+  function PlayButton(props, ref) {
     const paused = useAppSelector((state) => state.controls.paused);
     const dispatch = useAppDispatch();
 
     const handleClick = useCallback(() => dispatch(togglePlay()), [dispatch]);
     return (
       <Toggle
+        {...props}
+        ref={ref}
         aria-label={paused ? "Play" : "Pause"}
         selected={paused}
         onClick={handleClick}
@@ -30,15 +36,19 @@ export const PlayButton = React.forwardRef<HTMLButtonElement, {}>(
   },
 );
 
-export const MuteButton = React.forwardRef<HTMLButtonElement, {}>(
+export const MuteButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonUnstyledProps
+>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function MuteButton(_p, ref) {
+  function MuteButton(props, ref) {
     const muted = useAppSelector((state) => state.controls.muted);
     const dispatch = useAppDispatch();
 
     const handleClick = useCallback(() => dispatch(toggleMute()), [dispatch]);
     return (
       <Toggle
+        {...props}
         ref={ref}
         aria-label={muted ? "Unmute" : "Mute"}
         selected={muted}
@@ -50,9 +60,12 @@ export const MuteButton = React.forwardRef<HTMLButtonElement, {}>(
   },
 );
 
-export const FullscreenButton = React.forwardRef<HTMLButtonElement, {}>(
+export const FullscreenButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonUnstyledProps
+>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function FullscreenButton(_p, ref) {
+  function FullscreenButton(props, ref) {
     const fullscreen = useAppSelector((state) => state.controls.fullscreen);
     const dispatch = useAppDispatch();
 
@@ -62,6 +75,8 @@ export const FullscreenButton = React.forwardRef<HTMLButtonElement, {}>(
     );
     return (
       <Toggle
+        {...props}
+        ref={ref}
         aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         selected={fullscreen}
         onClick={handleClick}
@@ -72,9 +87,12 @@ export const FullscreenButton = React.forwardRef<HTMLButtonElement, {}>(
   },
 );
 
-export const ScreenshotButton = React.forwardRef<HTMLButtonElement, {}>(
+export const ScreenshotButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonUnstyledProps
+>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function ScreenshotButton(_p, ref) {
+  function ScreenshotButton(props, ref) {
     const dispatch = useAppDispatch();
     const handleClick = useCallback(
       () => dispatch(captureScreenshot()),
@@ -85,6 +103,8 @@ export const ScreenshotButton = React.forwardRef<HTMLButtonElement, {}>(
     );
     return isSupported ? (
       <Button
+        {...props}
+        ref={ref}
         icon="camera"
         onClick={handleClick}
         aria-label="Capture Screenshot"
@@ -95,10 +115,10 @@ export const ScreenshotButton = React.forwardRef<HTMLButtonElement, {}>(
 
 export const VolumeButton = React.forwardRef<
   HTMLButtonElement,
-  { offset: number }
+  ButtonUnstyledProps & { offset: number }
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function VolumeButton({ offset }, ref) {
+  function VolumeButton({ offset, ...props }, ref) {
     const dispatch = useAppDispatch();
     const handleClick = useCallback(
       () => dispatch(setVolumeByOffest(offset)),
@@ -109,6 +129,14 @@ export const VolumeButton = React.forwardRef<
         offset,
       )}%`,
       icon = offset > 0 ? "volume-2" : "volume-1";
-    return <Button icon={icon} onClick={handleClick} aria-label={label} />;
+    return (
+      <Button
+        {...props}
+        ref={ref}
+        icon={icon}
+        onClick={handleClick}
+        aria-label={label}
+      />
+    );
   },
 );

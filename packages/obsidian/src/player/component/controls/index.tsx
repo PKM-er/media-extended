@@ -105,7 +105,7 @@ const Buttons = () => {
 
 const Controls = () => {
   return (
-    <div className="mx__controls">
+    <div className="mx__controls" onKeyDownCapture={handleKeyDownCapture}>
       {/* <ProviderSelector /> */}
       <Buttons />
       <div>
@@ -116,3 +116,10 @@ const Controls = () => {
   );
 };
 export default Controls;
+
+const handleKeyDownCapture: React.KeyboardEventHandler<HTMLDivElement> = (
+  evt,
+) => {
+  // prevent conflict with toggle play/pause
+  if (evt.key === " ") evt.preventDefault();
+};

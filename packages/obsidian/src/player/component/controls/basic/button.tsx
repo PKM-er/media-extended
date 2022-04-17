@@ -7,14 +7,15 @@ import cls from "classnames";
 import React from "react";
 import { useMergeRefs } from "use-callback-ref";
 
-type ButtonProps = ButtonUnstyledProps & {
+export type ButtonProps = ButtonUnstyledProps & {
   icon: string;
+  id?: string;
 };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function Button(props, ref) {
-    const { children, icon } = props;
+    const { children, icon, id } = props;
 
     const setIconCallback = useIcon([icon]);
 
@@ -32,6 +33,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={useMergeRefs([buttonRef, setIconCallback])}
+        id={id}
         {...rootProps}
         className={cls("mx__button", classes)}
       >

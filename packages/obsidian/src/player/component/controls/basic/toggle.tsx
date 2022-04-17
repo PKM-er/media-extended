@@ -7,10 +7,11 @@ import cls from "classnames";
 import React from "react";
 import { useMergeRefs } from "use-callback-ref";
 
-type ToggleButtonProps = ButtonUnstyledProps & {
+export type ToggleButtonProps = ButtonUnstyledProps & {
   selected: boolean;
   selectedIcon: string;
   unselectedIcon: string;
+  id?: string;
 };
 
 const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
@@ -23,6 +24,7 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
       unselectedIcon,
       onClick,
       onChange,
+      id,
     } = props;
 
     const setIconCallback = useIcon([selectedIcon, unselectedIcon]);
@@ -55,6 +57,7 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
       <button
         ref={useMergeRefs([buttonRef, setIconCallback])}
         {...rootProps}
+        id={id}
         className={cls("mx__toggle-button", classes)}
         onClick={handleChange}
         onChange={onChange}
