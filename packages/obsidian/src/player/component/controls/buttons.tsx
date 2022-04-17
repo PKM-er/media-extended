@@ -1,6 +1,10 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { captureScreenshot } from "@player/slice/provider";
+import {
+  requestTimestamp,
+  requsetScreenshot,
+  selectScreenshotSupported,
+} from "@slice/action";
 import {
   setVolumeByOffest,
   toggleFullscreen,
@@ -104,12 +108,10 @@ export const ScreenshotButton = React.forwardRef<
   function ScreenshotButton(props, ref) {
     const dispatch = useAppDispatch();
     const handleClick = useCallback(
-      () => dispatch(captureScreenshot()),
+      () => dispatch(requsetScreenshot()),
       [dispatch],
     );
-    const isSupported = useAppSelector(
-      (state) => state.provider.captureScreenshot !== null,
-    );
+    const isSupported = useAppSelector(selectScreenshotSupported);
     return isSupported ? (
       <Button
         {...props}
@@ -145,6 +147,29 @@ export const VolumeButton = React.forwardRef<
         icon={icon}
         onClick={handleClick}
         aria-label={label}
+      />
+    );
+  },
+);
+
+export const TimestampButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonUnstyledProps
+>(
+  // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+  function TimestampButton(props, ref) {
+    const dispatch = useAppDispatch();
+    const handleClick = useCallback(
+      () => dispatch(requestTimestamp()),
+      [dispatch],
+    );
+    return (
+      <Button
+        {...props}
+        ref={ref}
+        icon="flag"
+        onClick={handleClick}
+        aria-label="Take timestamp"
       />
     );
   },

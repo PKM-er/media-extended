@@ -34,7 +34,7 @@ export const youtubeSlice = createSlice({
       state.playerStatus = "none";
       state.availableSpeeds = initialState.availableSpeeds;
     },
-    setVolumeByOffest: (state, action: PayloadAction<number>) => {
+    requsetSetVolumeByOffest: (state, action: PayloadAction<number>) => {
       state.volumeOffest = action.payload;
     },
     setVolumeByOffestDone: (state) => {
@@ -135,8 +135,11 @@ export const resetPlayer =
     dispatch(destroyPlayer(playerRef));
     dispatch(initializePlayer([playerRef, playerEl, videoId]));
   };
-export const { handlePlayerReady, setVolumeByOffest, setVolumeByOffestDone } =
-  youtubeSlice.actions;
+export const {
+  handlePlayerReady,
+  requsetSetVolumeByOffest,
+  setVolumeByOffestDone,
+} = youtubeSlice.actions;
 
 export { loadYoutubeAPI as loadAPI };
 

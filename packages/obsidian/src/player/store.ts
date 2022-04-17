@@ -1,4 +1,5 @@
 import { Action, configureStore, ThunkAction } from "@reduxjs/toolkit";
+import actionReducer from "@slice/action";
 import controlsReducer from "@slice/controls";
 import html5Reducer from "@slice/html5";
 import interfaceReducer from "@slice/interface";
@@ -13,6 +14,7 @@ export const createStore = (name: string) =>
       provider: providerReducer,
       youtube: youtubeReducer,
       html5: html5Reducer,
+      action: actionReducer,
     },
     devTools: true,
     enhancers: [],

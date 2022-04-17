@@ -5,6 +5,7 @@ import { useRef } from "react";
 import React from "react";
 
 import { useApplyTimeFragment, useTimeFragmentEvents } from "../hooks/fragment";
+import useGetTimestamp from "../hooks/get-timestamp";
 import {
   useApplyPlaybackRate,
   useApplyVolume,
@@ -75,6 +76,7 @@ const YoutubePlayer = () => {
     ...useEvents(),
   };
   useActions(ref);
+  useGetTimestamp(ref, useSubscribe);
 
   return videoId ? <YoutubeBase videoId={videoId} {...props} /> : null;
 };

@@ -16,7 +16,6 @@ import { useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
 
-import VideoWarpper from "../video-warpper";
 import { useEvent, YoutubePlayerEvents } from "./event";
 import { PlayerRef, useSubscribe } from "./utils";
 

@@ -15,6 +15,7 @@ type MsgSentFromOb_StateChangeNames =
 
 interface MsgInvokedFromOb {
   screenshot: [[], [data: ArrayBuffer]];
+  timestamp: [[], [currentTime: number]];
 }
 
 export type MsgFromObsidian = {

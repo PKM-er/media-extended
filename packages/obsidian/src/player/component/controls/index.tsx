@@ -5,7 +5,12 @@ import { setFragment } from "@slice/controls";
 import { resetProvider, setMediaUrlSrc } from "@slice/provider";
 import React from "react";
 
-import { FullscreenButton, PlayButton, ScreenshotButton } from "./buttons";
+import {
+  FullscreenButton,
+  PlayButton,
+  ScreenshotButton,
+  TimestampButton,
+} from "./buttons";
 import ProgressBar from "./progress-bar";
 import ProgressLabel from "./progress-label";
 import SpeedControl from "./speed";
@@ -107,6 +112,7 @@ const Controls = () => {
           </div>
           <div className="mx__controls-bottom-right">
             <ScreenshotButton />
+            <TimestampButton />
             <SpeedControl />
             <VolumeControl />
             <FullscreenButton />

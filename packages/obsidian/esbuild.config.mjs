@@ -122,9 +122,9 @@ try {
         target: "es2020",
         watch: !isProd
           ? {
-              onRebuild: (error) => {
+              onRebuild: async (error) => {
                 if (error) console.error("watch build failed:", error);
-                else preloadBili.rebuild();
+                else (await preloadBili).rebuild();
               },
             }
           : false,

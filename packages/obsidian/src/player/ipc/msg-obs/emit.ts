@@ -1,8 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import {
-  captureScreenshotDone,
-  selectCaptureScreenshotRequested,
-} from "@slice/provider";
+  gotScreenshot,
+  gotTimestamp,
+  selectScreenshotRequested,
+  selectTimestampRequested,
+} from "@slice/action";
 import { useUpdateEffect } from "ahooks";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -72,26 +74,38 @@ const useActions = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userSeek]);
 
-  const screenshot = useAppSelector(selectCaptureScreenshotRequested);
+  const screenshot = useAppSelector(selectScreenshotRequested);
   const dispatch = useAppDispatch();
   useEffect(() => {
     if (screenshot) {
-      getEmitter(emitterRef)
-        .then((emitter) => {
-          emitter && capture(emitter);
-        })
-        .then(() => dispatch(captureScreenshotDone()));
+      getEmitter(emitterRef).then(async (emitter) => {
+        let buffer: ArrayBuffer | undefined;
+        if (emitter) {
+          [buffer] = await emitter?.invoke("cb:screenshot");
+        }
+        dispatch(gotScreenshot(buffer));
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screenshot]);
+
+  const timestamp = useAppSelector(selectTimestampRequested);
+  useEffect(() => {
+    if (timestamp) {
+      getEmitter(emitterRef).then(async (emitter) => {
+        let time: number | undefined;
+        if (emitter) {
+          [time] = await emitter?.invoke("cb:timestamp");
+        }
+        dispatch(gotTimestamp(time));
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timestamp]);
 };
 export default useActions;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const capture = async (emitter: Emitter) => {
-  const [ab] = await emitter.invoke("cb:screenshot");
-  app.vault.trigger("mx-screenshot", ab);
-};
 
 const getEmitter = async (
   emitterRef: React.MutableRefObject<Emitter | null>,

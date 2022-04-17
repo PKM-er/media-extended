@@ -5,7 +5,7 @@ import { parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
 import { selectPlayerType } from "./provider";
-import { setVolumeByOffest as setVolumeByOffestYtb } from "./youtube";
+import { requsetSetVolumeByOffest as reqSetVolumeByOffestYtb } from "./youtube";
 
 export const LARGE_CURRENT_TIME = 1e101;
 
@@ -274,7 +274,7 @@ export const setVolumeByOffest =
   (dispatch, getState) => {
     const type = selectPlayerType(getState());
     if (type === "youtube") {
-      dispatch(setVolumeByOffestYtb(percent));
+      dispatch(reqSetVolumeByOffestYtb(percent));
     } else dispatch(controlsSlice.actions.setVolumeByOffest(percent));
   };
 

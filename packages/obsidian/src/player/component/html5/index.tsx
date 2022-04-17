@@ -1,15 +1,13 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { gotScreenshot, selectScreenshotRequested } from "@slice/action";
 import { createPlayer, destroyPlayer } from "@slice/html5";
 import { setRatio } from "@slice/interface";
-import {
-  captureScreenshotDone,
-  selectCaptureScreenshotRequested,
-} from "@slice/provider";
 import { useMemoizedFn } from "ahooks";
 import { captureScreenshot } from "mx-lib";
 import React, { RefCallback, useCallback, useRef } from "react";
 
 import { useApplyTimeFragment, useTimeFragmentEvents } from "../hooks/fragment";
+import useGetTimestamp from "../hooks/get-timestamp";
 import {
   useApplyPlaybackRate,
   useApplyVolume,
@@ -46,23 +44,21 @@ const useCaptureScreenshot = (
   ref: React.MutableRefObject<HTMLMediaElement | null>,
 ) => {
   useSubscribe(
-    selectCaptureScreenshotRequested,
-    async (capture, dispatch, media) => {
-      if (!capture) return;
-      if (!(media.instance instanceof HTMLVideoElement)) {
-        console.error("trying to capture screenshot on non-video element");
-      } else {
+    selectScreenshotRequested,
+    async ([req], dispatch, media) => {
+      if (!req) return;
+      let buffer: ArrayBuffer | undefined;
+      if (media.instance instanceof HTMLVideoElement) {
         const blob = await captureScreenshot(media.instance);
-        if (blob) {
-          app.vault.trigger("mx-screenshot", await blob.arrayBuffer());
-        }
+        buffer = await blob?.arrayBuffer();
+      } else {
+        console.error("trying to capture screenshot on non-video element");
       }
-      dispatch(captureScreenshotDone());
+      dispatch(gotScreenshot(buffer));
     },
     { immediate: true, ref },
   );
 };
-
 const useUpdateRatio = () => {
   const dispatch = useAppDispatch();
   return {
@@ -146,6 +142,7 @@ const HTMLPlayer = () => {
 
   useActions(refObj);
   useCaptureScreenshot(refObj);
+  useGetTimestamp(refObj, useSubscribe);
 
   const props = {
     ref,

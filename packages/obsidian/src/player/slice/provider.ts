@@ -7,102 +7,31 @@ import urlParser from "js-video-url-parser/lib/base";
 import { TFile } from "obsidian";
 import Url from "url-parse";
 
+import { canScreenshot, resetCanScreenshot } from "./action";
 import { reset as resetControls } from "./controls";
 import { resetRatio } from "./interface";
-
-interface Caption {
-  src: string;
-  kind: "captions";
-  default: boolean;
-}
-
-type HTML5PlayerType = "unknown" | "audio" | "video";
-type BrowserViewType = "browser-view";
-interface SourceBase {
-  playerType: HTML5PlayerType | BrowserViewType | "youtube" | "vimeo" | null;
-  src: string;
-  title: string;
-  linkTitle?: string;
-}
-
-interface ObsidianMedia extends SourceBase {
-  from: "obsidian";
-  playerType: HTML5PlayerType;
-  /** in-vault relative path for media file */
-  path: string;
-  filename: string;
-}
-interface DirectLinkMedia extends SourceBase {
-  from: "direct";
-  playerType: HTML5PlayerType;
-}
-
-interface VideoHostMediaBase extends SourceBase {
-  from: "youtube" | "bilibili" | "vimeo" | "general";
-  playerType: "youtube" | "vimeo" | BrowserViewType;
-  id: string;
-  title: string;
-}
-
-interface BilibiliMedia extends VideoHostMediaBase {
-  from: "bilibili";
-  playerType: BrowserViewType;
-}
-interface GeneralHostMedia extends VideoHostMediaBase {
-  from: "bilibili";
-  playerType: BrowserViewType;
-}
-interface YouTubeMedia extends VideoHostMediaBase {
-  from: "youtube";
-  playerType: "youtube";
-}
-interface VimeoMedia extends VideoHostMediaBase {
-  from: "vimeo";
-  playerType: "vimeo";
-}
-
-type Source = ObsidianMedia | DirectLinkMedia | BilibiliMedia | YouTubeMedia;
-
-interface Subtitle {
-  src: string;
-  kind: "subtitles";
-  // must be a valid BCP 47 language tag
-  srcLang: string;
-  label: string;
-  default: boolean;
-}
-
-type Track = Caption | Subtitle;
+import {
+  DirectLinkMedia,
+  ObsidianMedia,
+  Source,
+  Track,
+  YouTubeMedia,
+} from "./provider-types";
 
 export interface ProviderState {
   source: Source | null;
   tracks: Track[];
-  /** null meaning feature not available */
-  captureScreenshot: boolean | null;
 }
 
 const initialState: ProviderState = {
   source: null,
   tracks: [],
-  captureScreenshot: null,
 };
 
 type SerializableTFile = Pick<
   TFile,
   "path" | "name" | "basename" | "extension"
 >;
-
-const serializeTFile = (file: TFile): SerializableTFile => {
-  return {
-    path: file.path,
-    name: file.name,
-    extension: file.extension,
-    basename: file.basename,
-  };
-};
-
-export const selectPlayerType = (state: RootState) =>
-  state.provider.source?.playerType ?? null;
 
 export const providerSlice = createSlice({
   name: "provider",
@@ -122,7 +51,6 @@ export const providerSlice = createSlice({
         title: file.name,
       };
       state.source = media;
-      state.captureScreenshot = type === "video" ? false : null;
     },
     setDirectLink: (
       state,
@@ -138,7 +66,6 @@ export const providerSlice = createSlice({
         title: filename ? filename : src,
       };
       state.source = media;
-      state.captureScreenshot = type === "video" ? false : null;
     },
     setHostMedia: (
       state,
@@ -162,17 +89,14 @@ export const providerSlice = createSlice({
           return;
       }
       state.source = media;
-      state.captureScreenshot = null;
     },
     resetProvider: (state) => {
       state.source = initialState.source;
       state.tracks = initialState.tracks;
-      state.captureScreenshot = null;
     },
     switchToAudio: (state) => {
       if (state.source?.playerType === "video") {
         state.source.playerType = "audio";
-        state.captureScreenshot = null;
       } else {
         console.error(
           "unable to switch to audio for player type: " +
@@ -186,44 +110,40 @@ export const providerSlice = createSlice({
           return;
         }
         state.source.playerType = "video";
-        state.captureScreenshot = false;
       } else {
         console.error("player source not available ", state.source);
-      }
-    },
-    captureScreenshot: (state) => {
-      if (state.captureScreenshot !== null) {
-        state.captureScreenshot = true;
-      }
-    },
-    captureScreenshotDone: (state) => {
-      if (state.captureScreenshot !== null) {
-        state.captureScreenshot = false;
       }
     },
   },
 });
 
-export const selectCaptureScreenshotRequested = (state: RootState) =>
-  state.provider.captureScreenshot === true;
+export const selectPlayerType = (state: RootState) =>
+  state.provider.source?.playerType ?? null;
 
-export const { switchToAudio } = providerSlice.actions;
 const {
   setObsidianMedia: _ob,
   setDirectLink: _direct,
   setHostMedia: _host,
   resetProvider: _reset,
+  switchToAudio: _switchToAudio,
+  unknownTypeDetermined: _unknownTypeDetermined,
 } = providerSlice.actions;
-export const {
-  captureScreenshot,
-  captureScreenshotDone,
-  unknownTypeDetermined,
-} = providerSlice.actions;
+
+export const switchToAudio = (): AppThunk => (dispatch) => {
+    dispatch(canScreenshot(false));
+    dispatch(_switchToAudio);
+  },
+  unknownTypeDetermined = (): AppThunk => (dispatch) => {
+    dispatch(canScreenshot(true));
+    dispatch(_unknownTypeDetermined);
+  };
 
 const resetNonProvider = (dispatch: AppDispatch) => {
   dispatch(resetControls());
   dispatch(resetRatio());
+  dispatch(resetCanScreenshot());
 };
+
 export const setObsidianMediaSrc =
   (file: TFile): AppThunk =>
   async (dispatch, getState) => {
@@ -237,6 +157,7 @@ export const setObsidianMediaSrc =
       return; // if file is the same, skip
     }
     resetNonProvider(dispatch);
+    dispatch(canScreenshot(mediaType === "video"));
     dispatch(_ob([serializeTFile(file), mediaType]));
   };
 export const setMediaUrlSrc =
@@ -248,6 +169,7 @@ export const setMediaUrlSrc =
     const mediaType = getMediaType(url);
     if (mediaType) {
       resetNonProvider(dispatch);
+      dispatch(canScreenshot(mediaType === "video"));
       dispatch(_direct([src, mediaType]));
     } else {
       const info = urlParser.parse(url);
@@ -256,6 +178,7 @@ export const setMediaUrlSrc =
         return;
       }
       resetNonProvider(dispatch);
+      dispatch(canScreenshot(false));
       dispatch(_host([src, "youtube", info.id]));
     }
   };
@@ -269,4 +192,13 @@ export default providerSlice.reducer;
 const stripHash = (url: string) => {
   const { hash } = Url(url);
   return hash.length > 0 ? url.slice(0, -hash.length) : url;
+};
+
+const serializeTFile = (file: TFile): SerializableTFile => {
+  return {
+    path: file.path,
+    name: file.name,
+    extension: file.extension,
+    basename: file.basename,
+  };
 };

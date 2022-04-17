@@ -1,5 +1,7 @@
 import "obsidian";
 
+import { Source } from "@slice/provider-types";
+
 declare module "obsidian" {
   interface App {
     isMobile: boolean;
@@ -21,7 +23,18 @@ declare module "obsidian" {
 
   interface Vault {
     exists: DataAdapter["exists"];
-    on(name: "mx-screenshot", callback: (ab: ArrayBuffer) => any): EventRef;
+  }
+  interface Workspace {
+    on(
+      name: "mx:screenshot",
+      callback: (ab: ArrayBuffer, source: Source) => any,
+    ): EventRef;
+    on(
+      name: "mx:timestamp",
+      callback: (time: number, source: Source) => any,
+    ): EventRef;
+    trigger(name: "mx:screenshot", ab: ArrayBuffer, source: Source): void;
+    trigger(name: "mx:timestamp", time: number, source: Source): void;
   }
 
   interface ViewRegistry {
