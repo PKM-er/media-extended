@@ -25,6 +25,7 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
       onClick,
       onChange,
       id,
+      ...other
     } = props;
 
     const setIconCallback = useIcon([selectedIcon, unselectedIcon]);
@@ -56,6 +57,7 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
     return (
       <button
         ref={useMergeRefs([buttonRef, setIconCallback])}
+        {...other}
         {...rootProps}
         id={id}
         className={cls("mx__toggle-button", classes)}

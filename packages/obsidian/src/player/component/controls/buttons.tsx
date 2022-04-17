@@ -7,6 +7,7 @@ import {
   toggleMute,
   togglePlay,
 } from "@slice/controls";
+import { useLatest } from "ahooks";
 import React, { useCallback } from "react";
 
 import Button from "./basic/button";
@@ -43,18 +44,26 @@ export const MuteButton = React.forwardRef<
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function MuteButton(props, ref) {
     const muted = useAppSelector((state) => state.controls.muted);
+    const volume = useAppSelector((state) => state.controls.volume);
     const dispatch = useAppDispatch();
 
-    const handleClick = useCallback(() => dispatch(toggleMute()), [dispatch]);
+    const volumeRef = useLatest(volume);
+
+    const handleClick = useCallback(() => {
+      if (volumeRef.current !== 0) {
+        dispatch(toggleMute());
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dispatch]);
     return (
       <Toggle
         {...props}
         ref={ref}
         aria-label={muted ? "Unmute" : "Mute"}
-        selected={muted}
+        selected={muted || volume === 0}
         onClick={handleClick}
-        selectedIcon="volume"
-        unselectedIcon="volume-x"
+        selectedIcon="volume-x"
+        unselectedIcon="volume-2"
       />
     );
   },

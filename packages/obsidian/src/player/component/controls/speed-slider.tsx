@@ -1,5 +1,3 @@
-import "@styles/speed-slider.less";
-
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { setPlaybackRate } from "@slice/controls";
@@ -8,16 +6,10 @@ import React, { useCallback } from "react";
 const valuetext = (speed: number) => `${speed}×`,
   valueLabelFormat = (speed: number) => `${speed}×`,
   mark = (speed: number) => {
-    if (speed % 1 === 0) {
+    if (speed % 0.5 === 0) {
       return <span className="primary-speed-mark">{speed}</span>;
-    } else if (speed % 0.5 === 0) {
-      return speed;
     } else {
-      return (
-        <span className="secondary-speed-mark">
-          {speed.toFixed(2).substring(1)}
-        </span>
-      );
+      return null;
     }
   };
 
@@ -50,49 +42,57 @@ const SpeedSlider = () => {
   const value = speedToVal(speed);
 
   const handleSilderChange = useCallback(
-      (_e: any, newValue: number | number[]) => {
-        dispatch(setPlaybackRate(valToSpeed(newValue as number)));
-      },
-      [dispatch],
-    ),
-    handleInputChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
-      (event) => {
-        const input = event.target as HTMLInputElement;
-        if (input.validity.valid && input.value) {
-          dispatch(setPlaybackRate(+input.value));
-        }
-      },
-      [dispatch],
-    );
+    (_e: any, newValue: number | number[]) => {
+      dispatch(setPlaybackRate(valToSpeed(newValue as number)));
+    },
+    [dispatch],
+  );
 
   return (
-    <div className="speed-slider">
-      <SliderUnstyled
-        track={false}
-        value={typeof value === "number" ? value : 0}
-        onChange={handleSilderChange}
-        scale={valToSpeed}
-        marks={marks}
-        getAriaValueText={valuetext}
-        valueLabelDisplay="auto"
-        valueLabelFormat={valueLabelFormat}
-        step={1}
-        min={speedToVal(min)}
-        max={speedToVal(max)}
-        aria-label="Speed Slider"
-        aria-valuemin={min}
-        aria-valuemax={max}
-      />
-      <input
-        type="number"
-        step="0.05"
-        min={0.1}
-        max={max}
-        value={speed}
-        aria-label="Speed Input"
-        onChange={handleInputChange}
-      />
-    </div>
+    <SliderUnstyled
+      classes={{ root: "mx__speed-slider" }}
+      value={typeof value === "number" ? value : 0}
+      onChange={handleSilderChange}
+      scale={valToSpeed}
+      marks={marks}
+      getAriaValueText={valuetext}
+      valueLabelDisplay="auto"
+      valueLabelFormat={valueLabelFormat}
+      step={1}
+      min={speedToVal(min)}
+      max={speedToVal(max)}
+      aria-label="Speed Slider"
+      aria-valuemin={min}
+      aria-valuemax={max}
+    />
   );
 };
 export default SpeedSlider;
+
+export const SpeedInput = () => {
+  const speed = useAppSelector((state) => state.controls.playbackRate);
+  const dispatch = useAppDispatch();
+
+  const handleInputChange = useCallback<
+    React.ChangeEventHandler<HTMLInputElement>
+  >(
+    (event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.validity.valid && input.value) {
+        dispatch(setPlaybackRate(+input.value));
+      }
+    },
+    [dispatch],
+  );
+  return (
+    <input
+      type="number"
+      step="0.05"
+      min={0.1}
+      max={max}
+      value={speed}
+      aria-label="Speed Input"
+      onChange={handleInputChange}
+    />
+  );
+};

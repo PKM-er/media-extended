@@ -15,7 +15,7 @@ export type ButtonProps = ButtonUnstyledProps & {
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function Button(props, ref) {
-    const { children, icon, id } = props;
+    const { children, icon, id, ...other } = props;
 
     const setIconCallback = useIcon([icon]);
 
@@ -34,6 +34,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={useMergeRefs([buttonRef, setIconCallback])}
         id={id}
+        {...other}
         {...rootProps}
         className={cls("mx__button", classes)}
       >

@@ -7,6 +7,7 @@ import { registerIPCMain } from "@ipc/hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
 import assertNever from "assert-never";
+import Color from "color";
 import { FileSystemAdapter, Platform, Plugin } from "obsidian";
 
 import { setupRec } from "./feature/audio-rec";
@@ -75,6 +76,9 @@ export default class MediaExtended extends Plugin {
     this.register(registerIPCMain(this));
 
     await this.loadSettings();
+
+    updateAccentColor();
+    this.registerEvent(this.app.workspace.on("css-change", updateAccentColor));
 
     setupRec.call(this);
 
@@ -158,3 +162,30 @@ export default class MediaExtended extends Plugin {
 
 const getExts = () =>
   [...ExtensionAccepted.values()].reduce((acc, val) => acc.concat(val), []);
+
+const updateAccentColor = () => {
+  const div = createDiv();
+  div.style.display = "none";
+  div.style.color = "var(--interactive-accent)";
+  document.body.append(div);
+  const color = Color(getComputedStyle(div).color);
+  div.remove();
+  const interactiveAccent = color.lightness(60),
+    backgroundAccent = color.lightness(85),
+    interactiveAccentHsl = interactiveAccent
+      .hsl()
+      .array()
+      .map((val, i) => (i === 0 ? `${val}` : `${val}%`));
+  document.body.style.setProperty(
+    "--mx-interactive-accent",
+    interactiveAccent.string(),
+  );
+  document.body.style.setProperty(
+    "--mx-interactive-accent-hsl",
+    interactiveAccentHsl.join(","),
+  );
+  document.body.style.setProperty(
+    "--mx-background-accent",
+    backgroundAccent.string(),
+  );
+};

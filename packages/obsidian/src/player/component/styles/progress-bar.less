@@ -1,1 +1,26 @@
 @import "./slider.less";
+
+span.mx__media-progress.MuiSlider-root {
+  flex-grow: 1;
+  display: block;
+  margin-bottom: 0;
+  padding: 0;
+  color: var(--mx-interactive-accent, var(--interactive-accent));
+  .MuiSlider-track {
+    color: var(--mx-background-accent, white);
+  }
+  .MuiSlider-rail {
+    opacity: 1;
+    color: rgba(34, 34, 34, 0);
+    width: 100%;
+    height: inherit;
+    max-width: 100%;
+    border-radius: 5px;
+    &::-webkit-progress-bar {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    &::-webkit-progress-value {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}

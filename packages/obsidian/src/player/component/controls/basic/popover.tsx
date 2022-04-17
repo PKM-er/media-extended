@@ -1,3 +1,5 @@
+import "@styles/popover.less";
+
 import {
   autoUpdate,
   flip,
@@ -25,16 +27,23 @@ interface Props {
   children: JSX.Element;
   /** class name for tooltip container */
   className?: string;
+  useSafePolygon?: boolean;
 }
 
-const Popover = ({ children, render, placement, className }: Props) => {
+const Popover = ({
+  children,
+  render,
+  placement,
+  className,
+  useSafePolygon = true,
+}: Props) => {
   const [open, setOpen] = useState(false);
 
   const { x, y, reference, floating, strategy, refs, update, context } =
     useFloating({
       open,
       onOpenChange: setOpen,
-      middleware: [offset(5), flip(), shift()],
+      middleware: [offset(5), flip(), shift({ padding: 5 })],
       placement,
     });
 
@@ -43,7 +52,9 @@ const Popover = ({ children, render, placement, className }: Props) => {
   // const descriptionId = `${id}-description`;
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
-    useHover(context, { handleClose: safePolygon({ restMs: 200 }) }),
+    useHover(context, {
+      handleClose: useSafePolygon ? safePolygon({ restMs: 200 }) : undefined,
+    }),
     useRole(context),
     useDismiss(context),
     // useFocusTrap(context),
@@ -65,7 +76,7 @@ const Popover = ({ children, render, placement, className }: Props) => {
         {open && (
           <div
             {...getFloatingProps({
-              className: cls("mx-popover", className),
+              className: cls("mx__popover", className),
               ref: floating,
               style: {
                 position: strategy,

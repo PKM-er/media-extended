@@ -131,6 +131,10 @@ export const controlsSlice = createSlice({
     setVolume: (state, action: PayloadAction<number>) => {
       setVolumeTo(action.payload, state);
     },
+    setVolumeUnmute: (state, action: PayloadAction<number>) => {
+      setVolumeTo(action.payload, state);
+      state.muted = false;
+    },
     setVolumeByOffest: (state, action: PayloadAction<number>) => {
       setVolumeTo(state.volume + action.payload / 100, state);
     },
@@ -241,6 +245,7 @@ export const {
   setMute,
   toggleMute,
   setVolume,
+  setVolumeUnmute,
   userSeek,
   userSeekEnd,
   updateSeeking,

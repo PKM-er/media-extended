@@ -1,0 +1,35 @@
+@import "./slider.less";
+
+@space: 10px;
+
+.mx__popover.mx__speed-control-container {
+  background-color: var(--background-primary);
+  border: 2px solid var(--background-modifier-border);
+  padding: 0 @space;
+  border-radius: 5px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  column-gap: @space;
+
+  input[type="number"] {
+    &:invalid {
+      color: var(--text-error);
+    }
+  }
+
+  .mx__speed-slider {
+    min-width: 200px;
+    .MuiSlider-track {
+      display: none;
+    }
+    .secondary-speed-mark {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+    }
+    .primary-speed-mark::after {
+      content: "×";
+      font-size: 0.7rem;
+    }
+  }
+}

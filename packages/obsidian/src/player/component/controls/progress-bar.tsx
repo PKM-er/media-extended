@@ -1,7 +1,9 @@
+import "@styles/progress-bar.less";
+
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { userSeek, userSeekEnd } from "@slice/controls";
-import React from "react";
+import React, { useEffect } from "react";
 
 const valuetext = (value: number) => {
   return `${value}s`;
@@ -27,14 +29,14 @@ const ProgressBar = () => {
   const dispatch = useAppDispatch();
 
   const currentTime = useAppSelector((state) => state.controls.currentTime),
-    seekTime = useAppSelector((state) => state.controls.userSeek?.currentTime),
-    duration = useAppSelector((state) => state.controls.duration);
+    seekTime = useAppSelector((state) => state.controls.userSeek?.currentTime);
 
   const range = useTimeRange();
 
   return (
-    <div className="progress">
+    <>
       <SliderUnstyled
+        className="mx__media-progress"
         components={{ Rail: BufferProgress }}
         value={seekTime ?? currentTime}
         {...range}
@@ -48,7 +50,7 @@ const ProgressBar = () => {
           dispatch(userSeekEnd());
         }}
       />
-    </div>
+    </>
   );
 };
 

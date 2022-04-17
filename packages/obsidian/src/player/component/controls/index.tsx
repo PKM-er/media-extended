@@ -90,27 +90,28 @@ const ProviderSelector = () => {
   );
 };
 
-const Buttons = () => {
-  return (
-    <div>
-      <PlayButton />
-      <FullscreenButton />
-      <ScreenshotButton />
-      <SpeedControl />
-      <VolumeControl />
-      <SetFragmentButton />
-    </div>
-  );
-};
-
 const Controls = () => {
   return (
-    <div className="mx__controls" onKeyDownCapture={handleKeyDownCapture}>
-      {/* <ProviderSelector /> */}
-      <Buttons />
-      <div>
-        <ProgressBar />
-        <ProgressLabel />
+    <div className="mx__controls-warp" onKeyDownCapture={handleKeyDownCapture}>
+      <div className="mx__controls">
+        <div className="mx__controls-top">
+          <ProgressBar />
+        </div>
+        <div className="mx__controls-bottom">
+          <div className="mx__controls-bottom-left">
+            <PlayButton />
+            <ProgressLabel />
+          </div>
+          <div className="mx__controls-bottom-center">
+            <SetFragmentButton />
+          </div>
+          <div className="mx__controls-bottom-right">
+            <ScreenshotButton />
+            <SpeedControl />
+            <VolumeControl />
+            <FullscreenButton />
+          </div>
+        </div>
       </div>
     </div>
   );
