@@ -62,7 +62,13 @@ const useActions = (ref: PlayerRef) => {
   useApplyPlaybackRate(useSubscribe, ref);
 };
 
-const YoutubePlayer = () => {
+const YoutubePlayer = ({
+  style,
+  className,
+}: {
+  style?: React.CSSProperties;
+  className?: string;
+}) => {
   const videoId = useAppSelector((state) => {
     const source = state.provider.source;
     if (source?.playerType !== "youtube") return null;
@@ -73,6 +79,8 @@ const YoutubePlayer = () => {
 
   const props = {
     ref,
+    style,
+    className,
     ...useEvents(),
   };
   useActions(ref);

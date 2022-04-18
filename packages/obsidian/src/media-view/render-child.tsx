@@ -41,6 +41,8 @@ export default class PlayerRenderChild
         store={this.store}
         inEditor={this.inEditor}
         pluginDir={this.plugin.getFullPluginDir()}
+        onFocus={this.pushScope.bind(this)}
+        onBlur={this.popScope.bind(this)}
       />,
       this.containerEl,
     );
@@ -52,6 +54,7 @@ export default class PlayerRenderChild
     this.app.keymap.popScope(this.scope);
   }
   onunload(): void {
+    this.popScope();
     unloadKeymap(this.scope, this.keymap);
     ReactDOM.unmountComponentAtNode(this.containerEl);
   }

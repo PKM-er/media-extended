@@ -97,7 +97,7 @@ const ProviderSelector = () => {
 
 const Controls = () => {
   return (
-    <div className="mx__controls-warp" onKeyDownCapture={handleKeyDownCapture}>
+    <div className="mx__controls-warp">
       <div className="mx__controls">
         <div className="mx__controls-top">
           <ProgressBar />
@@ -123,10 +123,3 @@ const Controls = () => {
   );
 };
 export default Controls;
-
-const handleKeyDownCapture: React.KeyboardEventHandler<HTMLDivElement> = (
-  evt,
-) => {
-  // prevent conflict with toggle play/pause
-  if (evt.key === " ") evt.preventDefault();
-};

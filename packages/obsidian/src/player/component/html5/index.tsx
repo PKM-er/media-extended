@@ -143,7 +143,13 @@ const useRefCallback = (
   );
 };
 
-const HTMLPlayer = () => {
+const HTMLPlayer = ({
+  style,
+  className,
+}: {
+  style?: React.CSSProperties;
+  className?: string;
+}) => {
   const source = useAppSelector((state) => state.provider.source),
     tracks = useAppSelector((state) => state.provider.tracks);
 
@@ -159,6 +165,8 @@ const HTMLPlayer = () => {
   useGetTimestamp(refObj, useSubscribe);
 
   const props = {
+    style,
+    className,
     ref,
     loop,
     // preload: "auto",

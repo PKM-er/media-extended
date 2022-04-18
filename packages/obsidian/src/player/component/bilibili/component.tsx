@@ -10,7 +10,13 @@ import { useRefEffect } from "react-use-ref-effect";
 import WebView from "../webview";
 import { ObsidianEventEmitter } from "./msg-obs";
 
-const BilibiliPlayer = () => {
+const BilibiliPlayer = ({
+  style,
+  className,
+}: {
+  style?: React.CSSProperties;
+  className?: string;
+}) => {
   const src = useAppSelector((state) =>
     state.provider.source?.from === "bilibili"
       ? state.provider.source.src
@@ -55,6 +61,8 @@ const BilibiliPlayer = () => {
       hideView={hideView}
       src={src}
       preload={preload}
+      style={style}
+      className={className}
     />
   ) : null;
 };

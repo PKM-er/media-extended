@@ -7,17 +7,21 @@ import Player from "./player";
 const PlayerWarpper = ({
   store,
   inEditor = false,
+  onFocus,
+  onBlur,
   ...context
 }: {
   store: ReturnType<typeof createStore>;
   inEditor?: boolean;
   pluginDir?: string;
+  onFocus?: React.FocusEventHandler<HTMLDivElement>;
+  onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }) => {
   return (
     <React.StrictMode>
       <PlayerContext.Provider value={{ inEditor, ...context }}>
         <Provider store={store}>
-          <Player />
+          <Player onFocus={onFocus} onBlur={onBlur} />
         </Provider>
       </PlayerContext.Provider>
     </React.StrictMode>

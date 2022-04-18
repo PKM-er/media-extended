@@ -123,7 +123,7 @@ export default class InternalPlayerWidget extends WidgetType {
     } else return null;
   }
   toDOM(view: EditorView) {
-    const container = createDiv("internal-embed cm-embed-block");
+    const container = createDiv("internal-embed cm-embed-block mx-media-embed");
     container.tabIndex = -1;
     container.setAttr("src", this.linktext);
     this.applyTitle(container);

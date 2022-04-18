@@ -13,7 +13,7 @@ export interface InterfaceState {
 }
 
 const initialState: InterfaceState = {
-  controls: "native",
+  controls: "custom",
   ratio: null,
 };
 
