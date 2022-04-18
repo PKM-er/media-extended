@@ -82,12 +82,20 @@ export const providerSlice = createSlice({
       state,
       action: PayloadAction<[src: string, type: MediaType]>,
     ) => {
-      const [src, type] = action.payload;
+      let [src, playerType] = action.payload;
       const { pathname } = Url(src),
         filename = decodeURI(pathname).split("/").pop();
+
+      let isFileUrl = false;
+      src = src.replace(/^file:\/\//, () => {
+        isFileUrl = true;
+        return "app://local";
+      });
+      isFileUrl && (src += `?${Date.now()}`);
+
       const media: DirectLinkMedia = {
         from: "direct",
-        playerType: type,
+        playerType,
         src,
         title: filename ? filename : src,
       };
