@@ -1,6 +1,7 @@
 import "js-video-url-parser/lib/provider/youtube";
 
 import { getMediaType, MediaType } from "@base/media-type";
+import { stripHash } from "@misc";
 import { AppDispatch, AppThunk, RootState } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import urlParser from "js-video-url-parser/lib/base";
@@ -188,11 +189,6 @@ export const resetProvider = (): AppThunk => async (dispatch) => {
 };
 
 export default providerSlice.reducer;
-
-const stripHash = (url: string) => {
-  const { hash } = Url(url);
-  return hash.length > 0 ? url.slice(0, -hash.length) : url;
-};
 
 const serializeTFile = (file: TFile): SerializableTFile => {
   return {

@@ -31,10 +31,15 @@ declare module "obsidian" {
     ): EventRef;
     on(
       name: "mx:timestamp",
-      callback: (time: number, source: Source) => any,
+      callback: (time: number, duration: number, source: Source) => any,
     ): EventRef;
     trigger(name: "mx:screenshot", ab: ArrayBuffer, source: Source): void;
-    trigger(name: "mx:timestamp", time: number, source: Source): void;
+    trigger(
+      name: "mx:timestamp",
+      time: number,
+      duration: number,
+      source: Source,
+    ): void;
   }
 
   interface ViewRegistry {

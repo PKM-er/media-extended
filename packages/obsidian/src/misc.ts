@@ -31,8 +31,10 @@ export const getUrl = (src: string): URL | null => {
   }
 };
 
-export const mainpart = (url: URL) =>
-  url.hash ? url.href.slice(0, -url.hash.length) : url.href;
+export const stripHash = (url: string) => {
+  const { hash } = Url(url);
+  return hash.length > 0 ? url.slice(0, -hash.length) : url;
+};
 
 export const setRatioWidth = (
   el: HTMLElement,
@@ -42,14 +44,22 @@ export const setRatioWidth = (
   el.style.setProperty("--max-ratio-width", `calc(${maxHeight} * ${ratio})`);
 };
 
-export const insertToCursor = (str: string, view: MarkdownView) => {
-  const { editor, app } = view;
+export const insertToCursor = async (str: string, view: MarkdownView) => {
+  const { editor } = view;
   const cursor = editor.getCursor("to");
-  editor.replaceRange(str, cursor, cursor);
-  if (app.isMobile)
+  if (view.getMode() === "source") {
+    editor.replaceRange(str, cursor, cursor);
     editor.setCursor(
       editor.offsetToPos(editor.posToOffset(cursor) + str.length),
     );
+  } else {
+    const pos = editor.posToOffset(cursor),
+      doc = editor.getValue();
+    return app.vault.modify(
+      view.file,
+      doc.slice(0, pos) + str + doc.slice(pos),
+    );
+  }
 };
 
 export const getBiliRedirectUrl = (id: string): Promise<string> =>
@@ -105,4 +115,26 @@ export const getLink = (url: string): string => {
   if (protocol === "file:") {
     return "app://local/" + url.substring("file:///".length);
   } else return url;
+};
+
+import { App, Constructor, View, WorkspaceLeaf } from "obsidian";
+
+export const getMostRecentViewOfType = <T extends View>(
+  ctor: Constructor<T>,
+  app: App,
+): T | null => {
+  let activeView = app.workspace.getActiveViewOfType(ctor);
+  if (activeView) return activeView;
+
+  let recent: WorkspaceLeaf | undefined;
+  app.workspace.iterateRootLeaves((leaf) => {
+    if (
+      leaf.view instanceof ctor &&
+      (!recent || recent.activeTime < leaf.activeTime)
+    ) {
+      recent = leaf;
+    }
+  });
+  if (recent) return recent.view as T;
+  return null;
 };

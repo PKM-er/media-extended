@@ -93,11 +93,11 @@ const useActions = (
   useEffect(() => {
     if (timestamp) {
       getEmitter(emitterRef).then(async (emitter) => {
-        let time: number | undefined;
+        let time: number | undefined, duration: number | undefined;
         if (emitter) {
-          [time] = await emitter?.invoke("cb:timestamp");
+          [time, duration] = await emitter?.invoke("cb:timestamp");
         }
-        dispatch(gotTimestamp(time));
+        dispatch(gotTimestamp(time, duration));
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

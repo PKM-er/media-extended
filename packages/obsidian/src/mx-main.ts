@@ -8,10 +8,13 @@ import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
-import { FileSystemAdapter, Platform, Plugin } from "obsidian";
+import { App, FileSystemAdapter, Platform, Plugin } from "obsidian";
 
 import { setupRec } from "./feature/audio-rec";
+import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
+import { getMostRecentViewOfType } from "./misc";
 import { SetAuth } from "./player/ipc/hack/const";
+import { requestTimestamp } from "./player/slice/action";
 import registerEmbedHandlers from "./render/embed";
 // import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./legacy/media-view";
 import registerLinkHandlers from "./render/links";
@@ -89,31 +92,21 @@ export default class MediaExtended extends Plugin {
 
     registerLinkHandlers(this);
     registerEmbedHandlers(this);
+    registerInsetTimestampHandler(this);
 
     this.registerExtensions();
 
-    // this.addCommand({
-    //   id: "get-timestamp",
-    //   name: "Get timestamp from player",
-    //   editorCheckCallback: (checking, _editor, view) => {
-    //     const getMediaView = (group: string) =>
-    //       this.app.workspace
-    //         .getGroupLeaves(group)
-    //         .find((leaf) => (leaf.view as MediaView).getTimeStamp !== undefined)
-    //         ?.view as MediaView | undefined;
-    //     const group: null | string = view.leaf.group;
-    //     if (checking) {
-    //       if (group) {
-    //         const mediaView = getMediaView(group);
-    //         if (mediaView && (mediaView as MediaView).getTimeStamp())
-    //           return true;
-    //       }
-    //       return false;
-    //     } else if (group) {
-    //       getMediaView(group)?.addTimeStampToMDView(view);
-    //     }
-    //   },
-    // });
+    this.addCommand({
+      id: "get-timestamp",
+      name: "Get timestamp from player",
+      editorCheckCallback: (checking) => {
+        if (checking) {
+          return !!getMediaView(this.app);
+        } else {
+          getMediaView(this.app)?.store.dispatch(requestTimestamp());
+        }
+      },
+    });
     // this.addCommand({
     //   id: "open-media-link",
     //   name: "Open Media from Link",
@@ -183,3 +176,5 @@ const updateAccentColor = () => {
     colorDark.lighten(0.3).string(),
   );
 };
+
+const getMediaView = (app: App) => getMostRecentViewOfType(MediaView, app);

@@ -100,19 +100,24 @@ export const requestTimestamp = (): AppThunk => (dispatch, getState) => {
     }, reqTimeout);
   },
   gotTimestamp =
-    (currentTime?: number): AppThunk =>
+    (currentTime: number | undefined, duration: number | undefined): AppThunk =>
     (dispatch, getState) => {
       const state = getState();
       if (!selectTimestampRequested(state)) return;
       if (!currentTime) {
         currentTime = state.controls.currentTime;
       }
+      if (!duration && state.controls.duration) {
+        duration = state.controls.duration;
+      }
       const { source } = state.provider;
       if (!source) {
         console.error("no source available", state);
+      } else if (!duration) {
+        console.error("failed to get timestamp: no duration available", state);
       } else {
-        console.info("got timestamp: ", currentTime, source);
-        app.workspace.trigger("mx:timestamp", currentTime, source);
+        console.info("got timestamp: ", currentTime, duration, source);
+        app.workspace.trigger("mx:timestamp", currentTime, duration, source);
       }
       dispatch(_gotTimestamp());
     };

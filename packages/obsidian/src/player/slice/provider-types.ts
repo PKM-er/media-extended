@@ -14,7 +14,7 @@ interface SourceBase {
 export interface ObsidianMedia extends SourceBase {
   from: "obsidian";
   playerType: HTML5PlayerType;
-  /** in-vault relative path for media file */
+  /** in-vault absolute path for media file */
   path: string;
   filename: string;
 }

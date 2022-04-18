@@ -76,7 +76,7 @@ const registerMsgHandler = <E extends Emitter>(
   });
   emitter.handle("cb:timestamp", () => {
     if (player instanceof HTMLVideoElement) {
-      return [[player.currentTime]];
+      return [[player.currentTime, player.duration]];
     } else throw new Error("media element is not a video");
   });
 };

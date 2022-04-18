@@ -10,7 +10,7 @@ const useGetTimestamp = <R, M extends Media>(
     selectTimestampRequested,
     ([req], dispatch, media) => {
       if (!req) return;
-      dispatch(gotTimestamp(media.currentTime));
+      dispatch(gotTimestamp(media.currentTime, media.duration));
     },
     { immediate: true, ref },
   );
