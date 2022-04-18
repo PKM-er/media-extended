@@ -17,7 +17,7 @@ const DefaultRatio = {
   audio: 0,
   youtube: "16/9",
   vimeo: "16/9",
-  "browser-view": "16/9",
+  webview: "16/9",
 } as const;
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
