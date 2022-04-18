@@ -171,6 +171,7 @@ export const controlsSlice = createSlice({
       if (state.userSeek) {
         state.userSeek.pausedBeforeSeek !== null &&
           (state.paused = state.userSeek.pausedBeforeSeek);
+        state.currentTime = state.userSeek.currentTime;
         state.userSeek = null;
       }
     },
