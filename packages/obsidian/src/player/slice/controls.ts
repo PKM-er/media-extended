@@ -86,9 +86,16 @@ export const controlsSlice = createSlice({
     },
     setFragment: (
       state,
-      action: PayloadAction<null | Partial<Record<"start" | "end", number>>>,
+      action: PayloadAction<
+        ControlsState["fragment"] | Partial<Record<"start" | "end", number>>
+      >,
     ) => {
-      if (!action.payload || (!action.payload.start && !action.payload.end)) {
+      if (Array.isArray(action.payload)) {
+        state.fragment = action.payload;
+      } else if (
+        !action.payload ||
+        (!action.payload.start && !action.payload.end)
+      ) {
         state.fragment = null;
       } else {
         const { start, end } = action.payload;

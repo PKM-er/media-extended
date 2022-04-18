@@ -5,18 +5,18 @@ import "./style/caption-fix.less";
 import { ExtensionAccepted } from "@base/media-type";
 import { registerIPCMain } from "@ipc/hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
-import { MediaView, VIEW_TYPE as MEDIA_VIEW_TYPE } from "@view";
+import { MEDIA_VIEW_TYPE, MediaView } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
 import { App, FileSystemAdapter, Platform, Plugin } from "obsidian";
 
 import { setupRec } from "./feature/audio-rec";
 import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
+import registerOpenMediaLink from "./feature/open-link";
 import { getMostRecentViewOfType } from "./misc";
 import { SetAuth } from "./player/ipc/hack/const";
 import { requestTimestamp } from "./player/slice/action";
 import registerEmbedHandlers from "./render/embed";
-// import { MEDIA_VIEW_TYPE, MediaView, PromptModal } from "./legacy/media-view";
 import registerLinkHandlers from "./render/links";
 
 export default class MediaExtended extends Plugin {
@@ -93,6 +93,7 @@ export default class MediaExtended extends Plugin {
     registerLinkHandlers(this);
     registerEmbedHandlers(this);
     registerInsetTimestampHandler(this);
+    registerOpenMediaLink(this);
 
     this.registerExtensions();
 
@@ -101,25 +102,17 @@ export default class MediaExtended extends Plugin {
       name: "Get timestamp from player",
       editorCheckCallback: (checking) => {
         if (checking) {
-          return !!getMediaView(this.app);
+          return !!getObMediaView(this.app);
         } else {
-          getMediaView(this.app)?.store.dispatch(requestTimestamp());
+          getObMediaView(this.app)?.store.dispatch(requestTimestamp());
         }
       },
     });
-    // this.addCommand({
-    //   id: "open-media-link",
-    //   name: "Open Media from Link",
-    //   callback: () => {
-    //     new PromptModal(this).open();
-    //   },
-    // });
   }
 
   registerExtensions() {
     const exts = getExts();
     this.app.viewRegistry.unregisterExtensions(exts);
-    // this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
     this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_TYPE);
   }
@@ -177,4 +170,4 @@ const updateAccentColor = () => {
   );
 };
 
-const getMediaView = (app: App) => getMostRecentViewOfType(MediaView, app);
+const getObMediaView = (app: App) => getMostRecentViewOfType(MediaView, app);

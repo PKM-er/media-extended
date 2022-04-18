@@ -10,6 +10,7 @@ import HTMLPlayer from "./component/html5";
 import VideoWarpper, { useKeepRatio } from "./component/video-warpper";
 import YoutubePlayer from "./component/youtube";
 import { selectPlayerType } from "./slice/provider";
+import { HTML5PlayerTypes } from "./slice/provider-types";
 
 const Player = () => {
   const containerRef = useFullScreen();
@@ -21,7 +22,7 @@ const Player = () => {
   return (
     <div className="mx-player" ref={containerRef}>
       <VideoWarpper keepRatio={keepRatio}>
-        {playerType === "audio" || playerType === "video" ? (
+        {HTML5PlayerTypes.includes(playerType as any) ? (
           <HTMLPlayer />
         ) : playerType === "youtube" ? (
           <YoutubePlayer />

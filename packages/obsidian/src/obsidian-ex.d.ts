@@ -40,6 +40,24 @@ declare module "obsidian" {
       duration: number,
       source: Source,
     ): void;
+
+    trigger(
+      name: "media-url-menu",
+      menu: Menu,
+      url: string,
+      source: string,
+      leaf?: WorkspaceLeaf,
+    ): void;
+    on(
+      name: "media-url-menu",
+      callback: (
+        menu: Menu,
+        url: string,
+        source: string,
+        leaf?: WorkspaceLeaf,
+      ) => any,
+      ctx?: any,
+    ): EventRef;
   }
 
   interface ViewRegistry {

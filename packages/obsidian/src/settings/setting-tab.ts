@@ -4,7 +4,7 @@ import type MediaExtended from "@plugin";
 import { MxSettings } from "@settings";
 import { App, debounce, PluginSettingTab, Setting } from "obsidian";
 
-import { getPortSetting, isAvailable } from "../feature/bili-bridge";
+// import { getPortSetting, isAvailable } from "../feature/bili-bridge";
 import { hideYtbRecommClass } from "./misc";
 
 // export type SizeSettings = {
@@ -57,7 +57,7 @@ export default class MESettingTab extends PluginSettingTab {
     this.noteTaking();
     this.player();
     this.ytb();
-    this.bili();
+    // this.bili();
   }
 
   general(): void {
@@ -289,41 +289,41 @@ export default class MESettingTab extends PluginSettingTab {
     //   );
     // }
   }
-  bili(): void {
-    let { containerEl } = this;
+  // bili(): void {
+  //   let { containerEl } = this;
 
-    containerEl.createEl("h2", { text: "bilibili" });
+  //   containerEl.createEl("h2", { text: "bilibili" });
 
-    const internalBili = new Setting(containerEl)
-      .setName("高级bilibili支持")
-      .setDesc(
-        createFragment((desc) => {
-          desc.appendText(
-            "替代嵌入式iframe播放器，支持时间戳、播放1080p视频等",
-          );
-          desc.createEl("br");
-          if (this.app.isMobile) desc.appendText("移动版尚不支持");
-          else if (!isAvailable(this.app)) {
-            desc.appendText("BiliBili Plugin尚未启用，");
-            desc.createEl("a", {
-              href: "https://github.com/aidenlx/mx-bili-plugin",
-              text: "点此下载",
-            });
-          }
-        }),
-      );
-    if (!this.app.isMobile && isAvailable(this.app)) {
-      // internalBili.addToggle((toggle) => {
-      //   let { settings } = this.plugin;
-      //   toggle
-      //     .setValue(settings.interalBiliPlayback)
-      //     .onChange(async (value) => {
-      //       settings.interalBiliPlayback = value;
-      //       this.plugin.saveData(settings);
-      //       this.display();
-      //     });
-      // });
-      getPortSetting(this.app)(containerEl);
-    }
-  }
+  //   const internalBili = new Setting(containerEl)
+  //     .setName("高级bilibili支持")
+  //     .setDesc(
+  //       createFragment((desc) => {
+  //         desc.appendText(
+  //           "替代嵌入式iframe播放器，支持时间戳、播放1080p视频等",
+  //         );
+  //         desc.createEl("br");
+  //         if (this.app.isMobile) desc.appendText("移动版尚不支持");
+  //         else if (!isAvailable(this.app)) {
+  //           desc.appendText("BiliBili Plugin尚未启用，");
+  //           desc.createEl("a", {
+  //             href: "https://github.com/aidenlx/mx-bili-plugin",
+  //             text: "点此下载",
+  //           });
+  //         }
+  //       }),
+  //     );
+  //   if (!this.app.isMobile && isAvailable(this.app)) {
+  //     // internalBili.addToggle((toggle) => {
+  //     //   let { settings } = this.plugin;
+  //     //   toggle
+  //     //     .setValue(settings.interalBiliPlayback)
+  //     //     .onChange(async (value) => {
+  //     //       settings.interalBiliPlayback = value;
+  //     //       this.plugin.saveData(settings);
+  //     //       this.display();
+  //     //     });
+  //     // });
+  //     getPortSetting(this.app)(containerEl);
+  //   }
+  // }
 }

@@ -1,7 +1,7 @@
 import { seekByOffset, setVolumeByOffest, togglePlay } from "@slice/controls";
-import { KeymapEventHandler, KeymapEventListener, Scope } from "obsidian";
+import { KeymapEventHandler, KeymapEventListener } from "obsidian";
 
-import { PlayerComponent } from "./view";
+import { PlayerComponent } from "./common";
 
 const getPlayerKeymaps = (component: PlayerComponent): KeymapEventHandler[] => {
   const toRegister: [key: string | null, func: KeymapEventListener][] = [

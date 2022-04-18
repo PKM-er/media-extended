@@ -6,7 +6,7 @@ import {
   getInfoFromWarpper,
   setObsidianMedia,
 } from "@slice/set-media";
-import { CONTROLS_ENABLED_CLASS, MediaView } from "@view";
+import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
 import { around } from "monkey-around";
 import type { AudioView, displayInElFunc, VideoView } from "obsidian";
 
@@ -52,10 +52,11 @@ const patchMediaEmbed = (plugin: MediaExtended) => {
             file,
           )!;
 
-          const child = MediaView.displayInEl(
+          const child = new PlayerRenderChild(
             setObsidianMedia(file, hash, info.linkTitle),
             plugin,
             containerEl,
+            false,
           );
           (containerEl as ElementWithRenderChild).renderChild = child;
           child.load();

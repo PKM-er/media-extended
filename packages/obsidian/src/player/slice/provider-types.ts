@@ -1,12 +1,23 @@
+import { enumerate } from "@ipc/must-include";
+
 interface Caption {
   src: string;
   kind: "captions";
   default: boolean;
 }
+
 type HTML5PlayerType = "unknown" | "audio" | "video";
-type BrowserViewType = "browser-view";
+export const HTML5PlayerTypes = enumerate<HTML5PlayerType>()(
+  "unknown",
+  "audio",
+  "video",
+);
+
+export type Providers = "youtube" | "bilibili" | "vimeo";
+
+type WebViewType = "webview";
 interface SourceBase {
-  playerType: HTML5PlayerType | BrowserViewType | "youtube" | "vimeo" | null;
+  playerType: HTML5PlayerType | WebViewType | "youtube" | "vimeo" | null;
   src: string;
   title: string;
   linkTitle?: string;
@@ -23,18 +34,18 @@ export interface DirectLinkMedia extends SourceBase {
   playerType: HTML5PlayerType;
 }
 interface VideoHostMediaBase extends SourceBase {
-  from: "youtube" | "bilibili" | "vimeo" | "general";
-  playerType: "youtube" | "vimeo" | BrowserViewType;
+  from: Providers | "general";
+  playerType: "youtube" | "vimeo" | WebViewType;
   id: string;
   title: string;
 }
-interface BilibiliMedia extends VideoHostMediaBase {
+export interface BilibiliMedia extends VideoHostMediaBase {
   from: "bilibili";
-  playerType: BrowserViewType;
+  playerType: WebViewType;
 }
 interface GeneralHostMedia extends VideoHostMediaBase {
   from: "bilibili";
-  playerType: BrowserViewType;
+  playerType: WebViewType;
 }
 export interface YouTubeMedia extends VideoHostMediaBase {
   from: "youtube";

@@ -1,56 +1,85 @@
 import { ExtensionAccepted } from "@base/media-type";
-import { createStore, Player, PlayerStore } from "@player";
+import { handleOpenMediaLink } from "@feature/open-link";
+import { createStore, Player } from "@player";
+import { PlayerStore, RootState } from "@player/store";
+import type MediaExtended from "@plugin";
+import { seekTo, setFragment, setHash } from "@slice/controls";
 import {
-  Component,
-  debounce,
+  renameObsidianMedia,
+  setMediaUrlSrc,
+  setObsidianMediaSrc,
+} from "@slice/provider";
+import {
   EditableFileView,
-  KeymapEventHandler,
-  MarkdownRenderChild,
+  ItemView,
+  Menu,
   Scope,
   TFile,
+  ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import type MediaExtended from "../mx-main";
-import { setHash } from "../player/slice/controls";
-import { setObsidianMediaSrc } from "../player/slice/provider";
-import { AppThunk } from "../player/store";
+import {
+  MEDIA_VIEW_TYPE,
+  MediaState,
+  PlayerComponent,
+  unloadKeymap,
+} from "./common";
 import getPlayerKeymaps from "./keymap";
 
-export const VIEW_TYPE = "media-view-v2";
-
-export interface PlayerComponent extends Component {
-  store: PlayerStore;
-  scope: Scope;
-  keymap: KeymapEventHandler[];
+declare module "obsidian" {
+  interface FileView {
+    loadFile(file: TFile | null): Promise<void>;
+    titleEl: HTMLElement;
+    saveTitle(): Promise<void>;
+    onTitleChange(): void;
+  }
 }
 
-const unloadKeymap = (scope: Scope, keymap: KeymapEventHandler[]) => {
-  keymap.forEach((k) => scope.unregister(k));
+const observeStore = <T,>(
+  store: PlayerStore,
+  select: (state: RootState) => T,
+  onChange: (state: T) => any,
+) => {
+  let currentState: T | undefined;
+  const handleChange = () => {
+    let nextState = select(store.getState());
+    if (nextState !== currentState) {
+      currentState = nextState;
+      onChange(currentState);
+    }
+  };
+  let unsubscribe = store.subscribe(handleChange);
+  handleChange();
+  return unsubscribe;
 };
 
-export default class MediaView
+export default class ObMediaView
   extends EditableFileView
   implements PlayerComponent
 {
+  allowNoFile = true;
   // no need to manage this manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
   scope;
   keymap;
   store;
 
-  setHash = debounce(
-    (hash: string) => this.store.dispatch(setHash(hash)),
-    200,
-    true,
-  );
-  setFile = debounce(
-    (file: TFile) => this.store.dispatch(setObsidianMediaSrc(file)),
-    200,
-    true,
-  );
+  setHash(hash: string) {
+    this.store.dispatch(setHash(hash));
+  }
+  setFile(file: TFile) {
+    this.store.dispatch(setObsidianMediaSrc(file));
+  }
+  setUrl(url: string) {
+    this.store.dispatch(setMediaUrlSrc(url));
+  }
+  getUrl(): string | null {
+    const { source } = this.store.getState().provider;
+    return source && source.from !== "obsidian" ? source.src : null;
+  }
 
   canAcceptExtension(ext: string): boolean {
     for (const exts of ExtensionAccepted.values()) {
@@ -63,6 +92,20 @@ export default class MediaView
     this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
     this.keymap = getPlayerKeymaps(this);
+    this.register(
+      observeStore(
+        this.store,
+        (state) => state.provider.source?.title,
+        (title) => {
+          this.titleEl.setText(title ?? "No Media");
+        },
+      ),
+    );
+    this.addAction(
+      "open-elsewhere-glyph",
+      "Open Media Link",
+      handleOpenMediaLink,
+    );
   }
 
   setEphemeralState(state: any): void {
@@ -72,12 +115,60 @@ export default class MediaView
   }
 
   getViewType(): string {
-    return VIEW_TYPE;
+    return MEDIA_VIEW_TYPE;
+  }
+  getDisplayText(): string {
+    return this.store.getState().provider.source?.title ?? "No Media";
   }
 
+  getState(): MediaState {
+    let viewState = super.getState() as MediaState;
+    const { controls, provider } = this.store.getState();
+    const controlsState = {
+      fragment: controls.fragment,
+      currentTime: controls.currentTime,
+    };
+
+    let url;
+    if (this.file) {
+      return { ...viewState, ...controlsState };
+    } else if ((url = this.getUrl())) {
+      return { ...viewState, file: null, url, ...controlsState };
+    } else {
+      console.error("unexpected state", viewState, provider.source);
+      throw new Error("Failed to get state for media view: unexpected state");
+    }
+  }
+
+  async setState(state: MediaState, result: ViewStateResult): Promise<void> {
+    if (state.file === state.url) {
+      console.error("unexpected state", state, result);
+      throw new Error("Failed to set state for media view: unexpected state");
+    }
+    // wait until onLoadFile is done;
+    // setstate => loadFile => onLoadFile
+    await super.setState(state, result);
+    if (state.url) {
+      this.setUrl(state.url);
+    }
+    const { fragment, currentTime } = state as MediaState;
+    if (
+      fragment !== undefined &&
+      (fragment === null || Array.isArray(fragment))
+    ) {
+      this.store.dispatch(setFragment(fragment));
+    }
+    if (typeof currentTime === "number" && currentTime >= 0) {
+      this.store.dispatch(seekTo(currentTime));
+    }
+  }
   async onLoadFile(file: TFile): Promise<void> {
     this.setFile(file);
-    super.onLoadFile(file);
+    return super.onLoadFile(file);
+  }
+
+  protected async onOpen(): Promise<void> {
+    await super.onOpen();
     ReactDOM.render(
       <Player store={this.store} pluginDir={this.plugin.getFullPluginDir()} />,
       this.contentEl,
@@ -86,75 +177,60 @@ export default class MediaView
   async onClose() {
     unloadKeymap(this.scope, this.keymap);
     ReactDOM.unmountComponentAtNode(this.contentEl);
-    super.onClose();
+    return super.onClose();
+  }
+
+  //#region patch to better handle the case when no file
+
+  // disable rename when no file
+  loadFile(file: TFile | null): Promise<void> {
+    if (file === null) {
+      this.titleEl.contentEditable = "false";
+    } else {
+      this.titleEl.contentEditable = "true";
+    }
+    return super.loadFile(file);
+  }
+  saveTitle(): Promise<void> {
+    if (this.file === null) return Promise.resolve();
+    return super.saveTitle();
+  }
+  onTitleChange(): void {
+    if (this.file === null) return;
+    return super.onTitleChange();
   }
 
   async onRename(file: TFile) {
-    // this.events.trigger(
-    //   "file-loaded",
-    //   (await getMediaInfo(
-    //     { type: "internal", file, hash: "" },
-    //     this.app,
-    //   )) as InternalMediaInfo,
-    // );
+    if (file === this.file) {
+      this.store.dispatch(renameObsidianMedia(file));
+    }
     return super.onRename(file);
   }
-
-  static displayInEl(
-    initAction: AppThunk,
-    plugin: MediaExtended,
-    containerEl: HTMLElement,
-    inEditor = false,
-  ): PlayerRenderChild {
-    return new PlayerRenderChild(initAction, plugin, containerEl, inEditor);
-  }
-}
-
-export class PlayerRenderChild
-  extends MarkdownRenderChild
-  implements PlayerComponent
-{
-  scope;
-  keymap;
-  store;
-
-  get app() {
-    return this.plugin.app;
+  async onDelete(file: TFile): Promise<void> {
+    // override default allowNoFile behavior to close the view when delete
+    if (file === this.file) {
+      this.allowNoFile = false;
+    }
+    return super.onDelete(file);
   }
 
-  constructor(
-    initAction: AppThunk,
-    private plugin: MediaExtended,
-    containerEl: HTMLElement,
-    private inEditor: boolean,
-  ) {
-    super(containerEl);
-    this.store = createStore(
-      `media embed (${inEditor ? "live" : "read"}) ` + Date.now(),
-    );
-    this.store.dispatch(initAction);
-    this.scope = new Scope(this.app.scope);
-    this.keymap = getPlayerKeymaps(this);
+  onMoreOptionsMenu(menu: Menu): void {
+    let url;
+    if (this.file) {
+      super.onMoreOptionsMenu(menu);
+    } else if ((url = this.getUrl())) {
+      ItemView.prototype.onMoreOptionsMenu.call(this, menu);
+      menu.addSeparator();
+      this.app.workspace.trigger(
+        "media-url-menu",
+        menu,
+        url,
+        "pane-more-options",
+        this.leaf,
+      );
+    } else {
+      throw new Error("no file or url set for media view");
+    }
   }
-
-  async onload() {
-    ReactDOM.render(
-      <Player
-        store={this.store}
-        inEditor={this.inEditor}
-        pluginDir={this.plugin.getFullPluginDir()}
-      />,
-      this.containerEl,
-    );
-  }
-  pushScope() {
-    this.app.keymap.pushScope(this.scope);
-  }
-  popScope() {
-    this.app.keymap.popScope(this.scope);
-  }
-  onunload(): void {
-    unloadKeymap(this.scope, this.keymap);
-    ReactDOM.unmountComponentAtNode(this.containerEl);
-  }
+  //#endregion
 }

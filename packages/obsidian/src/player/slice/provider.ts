@@ -1,10 +1,8 @@
-import "js-video-url-parser/lib/provider/youtube";
-
 import { getMediaType, MediaType } from "@base/media-type";
+import parseURL from "@base/url-parse";
 import { stripHash } from "@misc";
 import { AppDispatch, AppThunk, RootState } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import urlParser from "js-video-url-parser/lib/base";
 import { TFile } from "obsidian";
 import Url from "url-parse";
 
@@ -12,6 +10,7 @@ import { canScreenshot, resetCanScreenshot } from "./action";
 import { reset as resetControls } from "./controls";
 import { resetRatio } from "./interface";
 import {
+  BilibiliMedia,
   DirectLinkMedia,
   ObsidianMedia,
   Source,
@@ -22,11 +21,13 @@ import {
 export interface ProviderState {
   source: Source | null;
   tracks: Track[];
+  renamed: { time: number } | null;
 }
 
 const initialState: ProviderState = {
   source: null,
   tracks: [],
+  renamed: null,
 };
 
 type SerializableTFile = Pick<
@@ -52,6 +53,30 @@ export const providerSlice = createSlice({
         title: file.name,
       };
       state.source = media;
+    },
+    renameObsidianMedia: (
+      state,
+      action: PayloadAction<{ file: SerializableTFile; currentTime: number }>,
+    ) => {
+      if (!state.source) {
+        throw new Error(
+          "Failed to rename obsidian media source: no source set",
+        );
+      }
+      if (state.source.from !== "obsidian") {
+        throw new Error(
+          "Failed to rename obsidian media source: current source not from obsidian",
+        );
+      }
+      const { file, currentTime } = action.payload;
+      state.source.src = app.vault.getResourcePath(file as TFile);
+      state.source.path = file.path;
+      state.source.filename = file.name;
+      state.source.title = file.name;
+      state.renamed = { time: currentTime };
+    },
+    renameStateReverted: (state) => {
+      state.renamed = null;
     },
     setDirectLink: (
       state,
@@ -85,8 +110,17 @@ export const providerSlice = createSlice({
             src,
           } as YouTubeMedia;
           break;
+        case "bilibili":
+          media = {
+            from: provider,
+            playerType: "webview",
+            id,
+            title: id,
+            src,
+          } as BilibiliMedia;
+          break;
         default:
-          console.error("given url not supported: ", src);
+          console.error("given url not supported: ", src, action.payload);
           return;
       }
       state.source = media;
@@ -96,23 +130,18 @@ export const providerSlice = createSlice({
       state.tracks = initialState.tracks;
     },
     switchToAudio: (state) => {
-      if (state.source?.playerType === "video") {
+      if (state.source) {
         state.source.playerType = "audio";
-      } else {
-        console.error(
-          "unable to switch to audio for player type: " +
-            state.source?.playerType,
-        );
       }
     },
     unknownTypeDetermined: (state) => {
-      if (state.source?.playerType) {
-        if (state.source?.playerType !== "unknown") {
-          return;
-        }
+      if (state.source && state.source.playerType === "unknown") {
         state.source.playerType = "video";
       } else {
-        console.error("player source not available ", state.source);
+        console.error(
+          "player source invaild to call unknownTypeDetermined: ",
+          state.source,
+        );
       }
     },
   },
@@ -121,8 +150,10 @@ export const providerSlice = createSlice({
 export const selectPlayerType = (state: RootState) =>
   state.provider.source?.playerType ?? null;
 
+export const { renameStateReverted } = providerSlice.actions;
 const {
   setObsidianMedia: _ob,
+  renameObsidianMedia: _renameOb,
   setDirectLink: _direct,
   setHostMedia: _host,
   resetProvider: _reset,
@@ -130,13 +161,33 @@ const {
   unknownTypeDetermined: _unknownTypeDetermined,
 } = providerSlice.actions;
 
-export const switchToAudio = (): AppThunk => (dispatch) => {
-    dispatch(canScreenshot(false));
-    dispatch(_switchToAudio);
+export const renameObsidianMedia =
+  (file: TFile): AppThunk =>
+  (dispatch, getState) => {
+    const { currentTime } = getState().controls;
+    dispatch(_renameOb({ file: serializeTFile(file), currentTime }));
+  };
+
+export const switchToAudio = (): AppThunk => (dispatch, getState) => {
+    const { provider } = getState();
+    if (
+      provider.source?.playerType === "unknown" ||
+      provider.source?.playerType === "video"
+    ) {
+      dispatch(canScreenshot(false));
+      dispatch(_switchToAudio());
+    } else {
+      console.error(
+        "unable to switch to audio for player type: " +
+          provider.source?.playerType,
+      );
+    }
   },
-  unknownTypeDetermined = (): AppThunk => (dispatch) => {
-    dispatch(canScreenshot(true));
-    dispatch(_unknownTypeDetermined);
+  unknownTypeDetermined = (): AppThunk => (dispatch, getState) => {
+    if (getState().provider.source?.playerType === "unknown") {
+      dispatch(canScreenshot(true));
+      dispatch(_unknownTypeDetermined());
+    }
   };
 
 const resetNonProvider = (dispatch: AppDispatch) => {
@@ -173,14 +224,18 @@ export const setMediaUrlSrc =
       dispatch(canScreenshot(mediaType === "video"));
       dispatch(_direct([src, mediaType]));
     } else {
-      const info = urlParser.parse(url);
-      if (info?.provider !== "youtube") {
+      let screenshotSupported = false;
+      const result = parseURL(url);
+      if (!result) {
         console.error("given url not supported: ", url);
         return;
       }
+      if (result.provider === "bilibili") {
+        screenshotSupported = true;
+      }
       resetNonProvider(dispatch);
-      dispatch(canScreenshot(false));
-      dispatch(_host([src, "youtube", info.id]));
+      dispatch(canScreenshot(screenshotSupported));
+      dispatch(_host([src, result.provider, result.id]));
     }
   };
 export const resetProvider = (): AppThunk => async (dispatch) => {

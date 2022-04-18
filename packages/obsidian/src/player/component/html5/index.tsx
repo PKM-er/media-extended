@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { gotScreenshot, selectScreenshotRequested } from "@slice/action";
 import { createPlayer, destroyPlayer } from "@slice/html5";
 import { setRatio } from "@slice/interface";
+import { renameStateReverted } from "@slice/provider";
 import { useMemoizedFn } from "ahooks";
 import { captureScreenshot } from "mx-lib";
 import React, { RefCallback, useCallback, useRef } from "react";
@@ -70,6 +71,18 @@ const useUpdateRatio = () => {
     }),
   };
 };
+const useRevertTimeOnRename = () => {
+  const dispatch = useAppDispatch();
+  const renamed = useAppSelector((state) => state.provider.renamed);
+  return {
+    onLoadedMetadata: useMemoizedFn<EventHandler>((event) => {
+      if (renamed) {
+        event.instance.currentTime = renamed.time;
+        dispatch(renameStateReverted());
+      }
+    }),
+  };
+};
 
 const useEvents = (): EventHandlers<HTMLVideoElement | HTMLAudioElement> => {
   const { onPlay: restrictTimeOnPlay, onTimeUpdate: restrictTimeOnTimeUpdate } =
@@ -89,7 +102,8 @@ const useEvents = (): EventHandlers<HTMLVideoElement | HTMLAudioElement> => {
       onWaiting,
     } = useStateEventHanlders();
 
-  const { onLoadedMetadata: setRatio } = useUpdateRatio();
+  const { onLoadedMetadata: setRatio } = useUpdateRatio(),
+    { onLoadedMetadata: revertTimeOnRename } = useRevertTimeOnRename();
 
   return {
     onRateChange: useEventHandler(onRateChange),
@@ -102,7 +116,7 @@ const useEvents = (): EventHandlers<HTMLVideoElement | HTMLAudioElement> => {
     onCanPlay: useEventHandler(onCanPlay),
     onVolumeChange: useEventHandler(onVolumeChange),
     onDurationChange: useEventHandler(onDurationChange),
-    onLoadedMetadata: useEventHandler(webmFix, setRatio),
+    onLoadedMetadata: useEventHandler(webmFix, setRatio, revertTimeOnRename),
     onSeeked: useEventHandler(onSeeked),
     onSeeking: useEventHandler(onSeeking),
     onWaiting: useEventHandler(onWaiting),

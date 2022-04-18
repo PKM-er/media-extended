@@ -3,11 +3,8 @@ import { WidgetType } from "@codemirror/view";
 import { parseSizeSyntax } from "@misc";
 import type MediaExtended from "@plugin";
 import { getFileHashFromLinktext, setObsidianMedia } from "@slice/set-media";
-import { MediaView, PlayerRenderChild } from "@view";
-import cls from "classnames";
+import { PlayerRenderChild } from "@view";
 import { Platform, setIcon } from "obsidian";
-import ReactDOM from "react-dom";
-abstract class LPWidget extends WidgetType {}
 
 type ElWithInfo = HTMLElement & {
   playerInfo?: {
@@ -136,7 +133,7 @@ export default class InternalPlayerWidget extends WidgetType {
     // );
     const action = this.getSetMediaAction();
     if (action) {
-      const child = MediaView.displayInEl(action, this.plugin, container, true);
+      const child = new PlayerRenderChild(action, this.plugin, container, true);
       child.load();
       this.hookClickHandler(view, container);
       this.setInfo(container, child);
