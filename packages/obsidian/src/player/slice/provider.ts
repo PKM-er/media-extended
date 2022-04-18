@@ -216,7 +216,7 @@ export const setMediaUrlSrc =
   (url: string): AppThunk =>
   async (dispatch, getState) => {
     const { source } = getState().provider;
-    const src = stripHash(url);
+    const [src] = stripHash(url);
     if (source?.src === src) return;
     const mediaType = getMediaType(url);
     if (mediaType) {

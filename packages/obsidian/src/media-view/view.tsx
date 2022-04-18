@@ -67,6 +67,7 @@ export default class ObMediaView
   keymap;
   store;
 
+  // TODO: seems not working on webview on startup
   setHash(hash: string) {
     this.store.dispatch(setHash(hash));
   }

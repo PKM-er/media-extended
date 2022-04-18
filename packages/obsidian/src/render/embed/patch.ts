@@ -27,6 +27,7 @@ declare module "obsidian" {
 }
 
 const patchMediaEmbed = (plugin: MediaExtended) => {
+  // Will break page-preview on media files, using hover editor can solve this
   let VideoViewCtor = getViewCtorOfType<typeof VideoView>("video", plugin.app),
     AudioViewCtor = getViewCtorOfType<typeof AudioView>("audio", plugin.app);
   if (!VideoViewCtor || !AudioViewCtor) return;

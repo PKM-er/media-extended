@@ -1,4 +1,6 @@
+import { getMediaType } from "@base/media-type";
 import parseURL from "@base/url-parse";
+import { stripHash } from "@misc";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
 import {
@@ -114,6 +116,30 @@ const registerOpenMediaLink = (plugin: MediaExtended) => {
 };
 export default registerOpenMediaLink;
 
+const open = (url: string, hash: string) => {
+  const state: MediaUrlState = { url, file: null, fragment: null };
+  const leaf = app.workspace.getLeaf();
+  console.log("openMediaLink", url, hash);
+  leaf.setViewState(
+    { type: MEDIA_VIEW_TYPE, active: true, state },
+    { subpath: hash },
+  );
+};
+/**
+ * @param url can be url contains hash
+ */
+export const openMediaLink = (_url: string): boolean => {
+  let result;
+  if (getMediaType(_url)) {
+    const [url, hash] = stripHash(_url);
+    open(url, hash);
+  } else if ((result = parseURL(_url))) {
+    open(result.url, result.hash);
+  } else return false;
+
+  return true;
+};
+
 class PromptModal extends Modal {
   plugin: MediaExtended;
   constructor(plugin: MediaExtended) {
@@ -132,22 +158,11 @@ class PromptModal extends Modal {
     modalEl.createDiv({ cls: "modal-button-container" }, (div) => {
       div.createEl("button", { cls: "mod-cta", text: "Open" }, (el) =>
         el.addEventListener("click", async () => {
-          const result = parseURL(input.value);
-          if (!result) {
+          if (openMediaLink(input.value)) {
+            this.close();
+          } else {
             new Notice("Link not supported");
-            return;
           }
-          const state: MediaUrlState = {
-            url: input.value,
-            file: null,
-            fragment: null,
-          };
-          this.app.workspace.getLeaf().setViewState({
-            type: MEDIA_VIEW_TYPE,
-            active: true,
-            state,
-          });
-          this.close();
         }),
       );
       div.createEl("button", { text: "Cancel" }, (el) =>

@@ -55,7 +55,7 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
     } else {
       return (
         `[${display.replace(/\.\d+$/, "")}]` +
-        `(${stripHash(source.src)}#t=${offsetCurrentTime})`
+        `(${stripHash(source.src)[0]}#t=${offsetCurrentTime})`
       );
     }
   };

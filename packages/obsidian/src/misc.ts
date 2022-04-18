@@ -31,9 +31,10 @@ export const getUrl = (src: string): URL | null => {
   }
 };
 
-export const stripHash = (url: string) => {
+export const stripHash = (url: string): [url: string, hash: string] => {
   const { hash } = Url(url);
-  return hash.length > 0 ? url.slice(0, -hash.length) : url;
+  url = hash.length > 0 ? url.slice(0, -hash.length) : url;
+  return [url, hash];
 };
 
 export const setRatioWidth = (

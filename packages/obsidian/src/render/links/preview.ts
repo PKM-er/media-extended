@@ -1,9 +1,10 @@
 import "obsidian";
 
-// import OpenLink from "../legacy/open-link";
+import parseURL from "@base/url-parse";
+import { openMediaLink } from "@feature/open-link";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
-import { EventHelper, Keymap } from "obsidian";
+import { EventHelper } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
 
 type MarkedCtor = typeof EventHelper & { __MX_PATCHED__?: true };
@@ -12,38 +13,17 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
   if (EventHelper.__MX_PATCHED__) return;
 
   const unloadPatches = around(EventHelper.prototype, {
-    // onExternalLinkClick: (next) =>
-    //   function (this: EventHelper, evt, target, link, ...args) {
-    //     evt.preventDefault();
-    //     const fallback = () => next.call(this, evt, target, link, ...args);
-    //     try {
-    //       getMediaInfo({ type: "external", link }, this.app).then((info) => {
-    //         if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
-    //         else fallback();
-    //       });
-    //     } catch (error) {
-    //       console.error(error);
-    //       fallback();
-    //     }
-    //   },
-    // onInternalLinkClick: (next) =>
-    //   function (this: EventHelper, evt, target, linktext, ...args) {
-    //     evt.preventDefault();
-    //     const fallback = () => next.call(this, evt, target, linktext, ...args);
-    //     if (!plugin.settings.timestampLink) fallback();
-    //     try {
-    //       getInternalMediaInfo(
-    //         { linktext, sourcePath: this.getFile().path },
-    //         this.app,
-    //       ).then((info) => {
-    //         if (info) OpenLink(info, Keymap.isModEvent(evt), plugin);
-    //         else fallback();
-    //       });
-    //     } catch (error) {
-    //       console.error(error);
-    //       fallback();
-    //     }
-    //   },
+    onExternalLinkClick: (next) =>
+      function (this: EventHelper, evt, target, link, ...args) {
+        evt.preventDefault();
+        const fallback = () => next.call(this, evt, target, link, ...args);
+        try {
+          if (!openMediaLink(link)) fallback();
+        } catch (error) {
+          console.error(error);
+          fallback();
+        }
+      },
   });
   plugin.register(() => {
     delete EventHelper.__MX_PATCHED__;
