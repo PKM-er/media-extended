@@ -9,7 +9,7 @@ const getPlayerKeymaps = (component: PlayerComponent): KeymapEventHandler[] => {
     ["ArrowLeft", () => component.store.dispatch(seekByOffset(-5))],
     ["ArrowUp", () => component.store.dispatch(setVolumeByOffest(5))],
     ["ArrowDown", () => component.store.dispatch(setVolumeByOffest(-5))],
-    [" ", () => component.store.dispatch(togglePlay)],
+    [" ", () => component.store.dispatch(togglePlay())],
   ];
   return toRegister.map(([key, func]) =>
     component.scope.register([], key, (evt, ctx) => func(evt, ctx) ?? false),
