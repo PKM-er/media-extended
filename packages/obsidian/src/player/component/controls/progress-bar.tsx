@@ -3,7 +3,7 @@ import "@styles/progress-bar.less";
 import { secondToDuration } from "@misc";
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { userSeek, userSeekEnd } from "@slice/controls";
+import { progressBarSeek, progressBarSeekEnd } from "@slice/controls";
 import React from "react";
 
 const valuetext = (seconds: number) => secondToDuration(seconds);
@@ -43,12 +43,10 @@ const ProgressBar = () => {
         getAriaValueText={valuetext}
         valueLabelDisplay="auto"
         valueLabelFormat={valuetext}
-        onChange={(e, newValue) => {
-          dispatch(userSeek(newValue as number));
-        }}
-        onChangeCommitted={(e, newValue) => {
-          dispatch(userSeekEnd());
-        }}
+        onChange={(_e, newValue) =>
+          dispatch(progressBarSeek(newValue as number))
+        }
+        onChangeCommitted={() => dispatch(progressBarSeekEnd())}
       />
     </>
   );

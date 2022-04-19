@@ -1,8 +1,9 @@
 import "@styles/player.less";
 
-import { useAppSelector } from "@player/hooks";
+import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { useMemoizedFn } from "ahooks";
 import cls from "classnames";
-import React from "react";
+import React, { useCallback, useRef } from "react";
 
 import BilibiliPlayer from "./component/bilibili";
 import Controls from "./component/controls";
@@ -11,8 +12,36 @@ import useAspectRatio from "./component/hooks/use-aspect-ratio";
 import useKeepRatio from "./component/hooks/use-keep-ratio";
 import HTMLPlayer from "./component/html5";
 import YoutubePlayer from "./component/youtube";
+import { dragSeek, dragSeekEnd } from "./slice/controls";
 import { selectPlayerType } from "./slice/provider";
 import { HTML5PlayerTypes } from "./slice/provider-types";
+import { useSizeRef } from "./utils/hooks/use-size";
+
+const useDragForward = (target: React.RefObject<HTMLElement>) => {
+  const dispatch = useAppDispatch();
+  const sizeRef = useSizeRef(target);
+
+  const startXRef = useRef<number>(-1);
+  return {
+    onTouchStart: useCallback((e: React.TouchEvent<HTMLElement>) => {
+      e.stopPropagation();
+      startXRef.current = e.touches[0].clientX;
+    }, []),
+    onTouchMove: useMemoizedFn((e: React.TouchEvent<HTMLElement>) => {
+      const size = sizeRef.current;
+      if (!size?.width) return;
+      const offsetX = e.touches[0].clientX - startXRef.current;
+      const forwardSeconds = (offsetX / size.width) * 60;
+      dispatch(dragSeek(forwardSeconds));
+    }),
+    onTouchEnd: useCallback((e: React.TouchEvent<HTMLElement>) => {
+      e.stopPropagation();
+      startXRef.current = -1;
+      dispatch(dragSeekEnd());
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  };
+};
 
 const Player = ({
   onBlur,
@@ -39,6 +68,7 @@ const Player = ({
       onBlur={onBlur}
       tabIndex={-1}
       onKeyDownCapture={handleKeyDownCapture}
+      {...useDragForward(containerRef)}
     >
       {playerType === "youtube" ? (
         <YoutubePlayer {...ratioProps} />
