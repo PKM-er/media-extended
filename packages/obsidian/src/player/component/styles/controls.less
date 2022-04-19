@@ -1,6 +1,46 @@
 .mx-player {
+  &:hover,
+  &.mx__paused {
+    .mx__controls-warp {
+      &:before {
+        opacity: 1;
+      }
+      transform: none;
+      .mx__media-progress {
+        .MuiSlider-thumb {
+          opacity: 1;
+        }
+      }
+    }
+  }
+  &:not(:hover):not(.mx__paused) {
+    .mx__controls-warp {
+      transform: translateY(62%);
+      .mx__media-progress {
+        .MuiSlider-thumb {
+          transition: opacity 0.4s ease-in-out;
+          opacity: 0;
+        }
+        .MuiSlider-track {
+          color: var(--mx-interactive-accent);
+        }
+      }
+    }
+  }
   .mx__controls-warp {
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+    &:before {
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+      content: "";
+      display: block;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: -100;
+      opacity: 0;
+      transition: opacity 0.4s ease-in-out;
+    }
     border-bottom-left-radius: inherit;
     border-bottom-right-radius: inherit;
     bottom: 0;

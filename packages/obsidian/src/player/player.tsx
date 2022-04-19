@@ -1,6 +1,7 @@
 import "@styles/player.less";
 
 import { useAppSelector } from "@player/hooks";
+import cls from "classnames";
 import React from "react";
 
 import BilibiliPlayer from "./component/bilibili";
@@ -28,9 +29,11 @@ const Player = ({
 
   const ratioProps = useAspectRatio(keepRatio, "mx__video-wrapper");
 
+  const paused = useAppSelector((state) => state.controls.paused);
+
   return (
     <div
-      className="mx-player"
+      className={cls("mx-player", { mx__paused: paused })}
       ref={containerRef}
       onFocus={onFocus}
       onBlur={onBlur}

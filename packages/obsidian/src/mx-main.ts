@@ -161,6 +161,10 @@ const updateAccentColor = () => {
   const colorDark = Color(getComputedStyle(div).color);
   div.remove();
   document.body.style.setProperty(
+    "--mx-interactive-accent",
+    colorLight.saturate(10).string(),
+  );
+  document.body.style.setProperty(
     "--mx-interactive-accent-secondary",
     colorLight.lighten(0.2).string(),
   );

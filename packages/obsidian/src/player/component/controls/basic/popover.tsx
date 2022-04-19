@@ -53,6 +53,7 @@ const Popover = ({
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     useHover(context, {
+      delay: 200,
       handleClose: useSafePolygon ? safePolygon({ restMs: 200 }) : undefined,
     }),
     useRole(context),
