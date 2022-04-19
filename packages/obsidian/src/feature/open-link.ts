@@ -6,6 +6,7 @@ import { around } from "monkey-around";
 import {
   App,
   Component,
+  Menu,
   Modal,
   Notice,
   ViewStateResult,
@@ -100,19 +101,29 @@ const registerOpenMediaLink = (plugin: MediaExtended) => {
         },
     }),
   );
+
+  // command to open in external browser
+
+  const openExternal = (menu: Menu, url: string) => {
+    vaildateMediaURL(url, (url, hash) => {
+      menu.addItem((item) =>
+        item
+          .setIcon("open-elsewhere-glyph")
+          .setTitle("Open in External Browser")
+          .onClick(() => window.open(url, "_blank")),
+      );
+    });
+  };
+  plugin.registerEvent(plugin.app.workspace.on("url-menu", openExternal));
+
   // add default media link menu items
-  // plugin.registerEvent(
-  //   plugin.app.workspace.on("media-url-menu", (menu, url, source, leaf) => {
-  //     if (source === "pane-more-options") {
-  //       menu.addItem((item) =>
-  //         item
-  //           .setIcon("link")
-  //           .setTitle("Open Media Link")
-  //           .onClick(handleOpenMediaLink),
-  //       );
-  //     }
-  //   }),
-  // );
+  plugin.registerEvent(
+    plugin.app.workspace.on("media-url-menu", (menu, url, source) => {
+      if (source === "pane-more-options") {
+        openExternal(menu, url);
+      }
+    }),
+  );
 };
 export default registerOpenMediaLink;
 
@@ -128,13 +139,19 @@ const open = (url: string, hash: string) => {
 /**
  * @param url can be url contains hash
  */
-export const openMediaLink = (_url: string): boolean => {
+export const openMediaLink = (url: string): boolean =>
+  vaildateMediaURL(url, open);
+
+const vaildateMediaURL = (
+  _url: string,
+  onVaild?: (url: string, hash: string) => any,
+): boolean => {
   let result;
   if (getMediaType(_url)) {
     const [url, hash] = stripHash(_url);
-    open(url, hash);
+    onVaild?.(url, hash);
   } else if ((result = parseURL(_url))) {
-    open(result.url, result.hash);
+    onVaild?.(result.url, result.hash);
   } else return false;
 
   return true;

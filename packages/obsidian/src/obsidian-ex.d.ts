@@ -58,6 +58,11 @@ declare module "obsidian" {
       ) => any,
       ctx?: any,
     ): EventRef;
+    on(
+      name: "url-menu",
+      callback: (menu: Menu, url: string) => any,
+      ctx?: any,
+    ): EventRef;
   }
 
   interface ViewRegistry {
