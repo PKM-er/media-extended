@@ -3,6 +3,7 @@ import parseURL from "@base/url-parse";
 import { stripHash } from "@misc";
 import { AppDispatch, AppThunk, RootState } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import assertNever from "assert-never";
 import { TFile } from "obsidian";
 import Url from "url-parse";
 
@@ -17,6 +18,8 @@ import {
   Track,
   YouTubeMedia,
 } from "./provider-types";
+import { fetchBiliMeta } from "./thunks/bilibili";
+import fetchYoutubeMeta from "./thunks/fetch-ytb-meta";
 
 export interface ProviderState {
   source: Source | null;
@@ -114,7 +117,7 @@ export const providerSlice = createSlice({
             from: provider,
             playerType: "youtube",
             id,
-            title: id,
+            title: null,
             src,
           } as YouTubeMedia;
           break;
@@ -123,7 +126,7 @@ export const providerSlice = createSlice({
             from: provider,
             playerType: "webview",
             id,
-            title: id,
+            title: null,
             src,
           } as BilibiliMedia;
           break;
@@ -152,6 +155,63 @@ export const providerSlice = createSlice({
         );
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchYoutubeMeta.pending, (state) => {
+        if (state.source?.from === "youtube") state.source.title = null;
+        else
+          console.error(
+            "failed to apply youtube meta: current source not youtube",
+            state.source,
+          );
+      })
+      .addCase(fetchYoutubeMeta.fulfilled, (state, action) => {
+        const { title } = action.payload;
+        if (state.source?.from === "youtube") state.source.title = title;
+        else
+          console.error(
+            "failed to apply youtube meta: current source not youtube",
+            state.source,
+          );
+      })
+      .addCase(fetchYoutubeMeta.rejected, (state, action) => {
+        if (state.source?.from === "youtube")
+          state.source.title = state.source.id;
+        else
+          console.error(
+            "failed to apply youtube meta: current source not youtube",
+            state.source,
+          );
+        console.error("Failed to fetch youtube metadata: ", action.payload);
+      })
+      .addCase(fetchBiliMeta.pending, (state) => {
+        if (state.source?.from === "bilibili") state.source.title = null;
+        else
+          console.error(
+            "failed to apply bilibili meta: current source not bilibili",
+            state.source,
+          );
+      })
+      .addCase(fetchBiliMeta.fulfilled, (state, action) => {
+        const { title } = action.payload;
+        if (state.source?.from === "bilibili") state.source.title = title;
+        else
+          console.error(
+            "failed to apply bilibili meta: current source not bilibili",
+            state.source,
+          );
+      })
+      .addCase(fetchBiliMeta.rejected, (state, action) => {
+        if (state.source?.from === "bilibili")
+          state.source.title = state.source.id;
+        else
+          console.error(
+            "failed to apply youtube meta: current source not bilibili",
+            state.source,
+          );
+        console.error("Failed to fetch bilibili metadata: ", action.payload);
+      });
   },
 });
 
@@ -244,6 +304,18 @@ export const setMediaUrlSrc =
       resetNonProvider(dispatch);
       dispatch(canScreenshot(screenshotSupported));
       dispatch(_host([src, result.provider, result.id]));
+      switch (result.provider) {
+        case "youtube":
+          dispatch(fetchYoutubeMeta(result.id));
+          break;
+        case "bilibili":
+          dispatch(fetchBiliMeta(result.id));
+          break;
+        case "vimeo":
+          throw new Error("Not implemented");
+        default:
+          assertNever(result.provider);
+      }
     }
   };
 export const resetProvider = (): AppThunk => async (dispatch) => {

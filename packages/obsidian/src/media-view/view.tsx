@@ -98,7 +98,15 @@ export default class ObMediaView
         this.store,
         (state) => state.provider.source?.title,
         (title) => {
-          this.titleEl.setText(title ?? "No Media");
+          let titleText: string;
+          if (title === null) {
+            titleText = ""; // loading title
+          } else if (title === undefined) {
+            titleText = "No Media";
+          } else {
+            titleText = title;
+          }
+          this.titleEl.setText(titleText);
         },
       ),
     );

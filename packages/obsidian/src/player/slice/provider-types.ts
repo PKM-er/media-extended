@@ -19,7 +19,7 @@ type WebViewType = "webview";
 interface SourceBase {
   playerType: HTML5PlayerType | WebViewType | "youtube" | "vimeo" | null;
   src: string;
-  title: string;
+  title: string | null;
   linkTitle?: string;
 }
 export interface ObsidianMedia extends SourceBase {
@@ -37,7 +37,7 @@ interface VideoHostMediaBase extends SourceBase {
   from: Providers | "general";
   playerType: "youtube" | "vimeo" | WebViewType;
   id: string;
-  title: string;
+  title: string | null;
 }
 export interface BilibiliMedia extends VideoHostMediaBase {
   from: "bilibili";

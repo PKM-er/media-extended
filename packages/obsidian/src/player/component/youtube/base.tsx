@@ -40,19 +40,6 @@ const useUpdateVideoId = (
   }, [newId]);
 };
 
-const useUpdateAspectRatio = (videoId: string) => {
-  const dispatch = useAppDispatch();
-  useEffect(() => {
-    fetch(config.urls.youtube.meta_api + videoId).then(async (res) => {
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.width && data.height && data.width > 0 && data.height > 0) {
-        dispatch(setRatio([data.width, data.height]));
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId]);
-};
 /**
  * reset player when props that cannot be set on-the-fly changes
  */
@@ -116,7 +103,6 @@ const YoutubePlayer = React.forwardRef<YT.Player | null, YoutubePlayerProps>(
     useResetToApplyProps(containerRef, playerRef, videoId);
     useUpdateVideoId(videoId, playerRef);
     useSetVolumeByOffset(playerRef);
-    useUpdateAspectRatio(videoId);
 
     useEvent("onStateChange", onStateChange, playerRef);
     useEvent("onPlaybackQualityChange", onPlaybackQualityChange, playerRef);
