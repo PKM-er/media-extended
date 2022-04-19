@@ -1,12 +1,12 @@
 import "@styles/progress-bar.less";
 
+import { secondToDuration } from "@misc";
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { userSeek, userSeekEnd } from "@slice/controls";
-import format from "format-duration";
 import React from "react";
 
-const valuetext = (value: number) => format(value * 1e3);
+const valuetext = (seconds: number) => secondToDuration(seconds);
 
 const useTimeRange = () => {
   const duration = useAppSelector((state) => state.controls.duration);

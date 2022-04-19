@@ -1,9 +1,7 @@
+import { insertToCursor, secondToFragFormat } from "@misc";
 import type MediaExtended from "@plugin";
-import TimeFormat from "hh-mm-ss";
 import { around } from "monkey-around";
 import { MarkdownView, TAbstractFile, TFile } from "obsidian";
-
-import { insertToCursor } from "../misc";
 
 export function setupRec(this: MediaExtended) {
   const { vault, fileManager, workspace } = this.app;
@@ -21,10 +19,7 @@ export function setupRec(this: MediaExtended) {
         content.replace(
           new RegExp(`%%REC_${startTime}#t=([\\d.]+?)%%`, "g"),
           (_s, sec) => {
-            const display = TimeFormat.fromS(+sec, "hh:mm:ss").replace(
-              /^00:/g,
-              "",
-            );
+            const display = secondToFragFormat(+sec);
             const link = fileManager
               .generateMarkdownLink(recFile, mdFile.path, "#t=" + sec, display)
               .substring(1);
