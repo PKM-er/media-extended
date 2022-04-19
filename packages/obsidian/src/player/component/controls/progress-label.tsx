@@ -1,16 +1,21 @@
 import "@styles/progress-label.less";
 
 import { useAppSelector } from "@player/hooks";
+import format from "format-duration";
 import React from "react";
 
 const ProgressLabel = () => {
-  const seeking = useAppSelector((state) => state.controls.seeking),
-    currentTime = useAppSelector((state) => state.controls.currentTime),
-    duration = useAppSelector((state) => state.controls.duration);
+  const currentTime = useAppSelector((state) =>
+      format(state.controls.currentTime * 1e3),
+    ),
+    duration = useAppSelector((state) => {
+      const { duration } = state.controls;
+      return duration !== null && format(duration * 1e3);
+    });
 
   return (
     <span className="mx__progress-label">
-      {currentTime.toFixed(3)} / {duration} {seeking && "(seeking)"}
+      {currentTime} / {duration}
     </span>
   );
 };

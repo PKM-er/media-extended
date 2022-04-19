@@ -3,11 +3,10 @@ import "@styles/progress-bar.less";
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { userSeek, userSeekEnd } from "@slice/controls";
-import React, { useEffect } from "react";
+import format from "format-duration";
+import React from "react";
 
-const valuetext = (value: number) => {
-  return `${value}s`;
-};
+const valuetext = (value: number) => format(value * 1e3);
 
 const useTimeRange = () => {
   const duration = useAppSelector((state) => state.controls.duration);
@@ -43,6 +42,7 @@ const ProgressBar = () => {
         step={0.01}
         getAriaValueText={valuetext}
         valueLabelDisplay="auto"
+        valueLabelFormat={valuetext}
         onChange={(e, newValue) => {
           dispatch(userSeek(newValue as number));
         }}
