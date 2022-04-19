@@ -37,15 +37,18 @@ const Player = ({
       tabIndex={-1}
       onKeyDownCapture={handleKeyDownCapture}
     >
-      <div {...ratioProps}>
-        {HTML5PlayerTypes.includes(playerType as any) ? (
-          <HTMLPlayer />
-        ) : playerType === "youtube" ? (
-          <YoutubePlayer />
-        ) : provider === "bilibili" ? (
-          <BilibiliPlayer />
-        ) : null}
-      </div>
+      {playerType === "youtube" ? (
+        // use youtube's div warpper directly
+        <YoutubePlayer {...ratioProps} />
+      ) : (
+        <div {...ratioProps}>
+          {HTML5PlayerTypes.includes(playerType as any) ? (
+            <HTMLPlayer />
+          ) : provider === "bilibili" ? (
+            <BilibiliPlayer />
+          ) : null}
+        </div>
+      )}
       <Controls />
     </div>
   );
