@@ -1,3 +1,8 @@
+import {
+  onFragUpdate,
+  onPlay as _onplay,
+  onTimeUpdate as _ontu,
+} from "@base/fragment";
 import { useAppSelector } from "@player/hooks";
 import { CoreEventHandler } from "@player/utils";
 import { useMemoizedFn } from "ahooks";
@@ -5,36 +10,17 @@ import { useMemoizedFn } from "ahooks";
 import { ApplyHookType } from "./utils";
 
 export const useTimeFragmentEvents = () => {
-  const frag = useAppSelector((state) => state.controls.fragment),
+  const fragment = useAppSelector((state) => state.controls.fragment),
     loop = useAppSelector((state) => state.controls.loop);
 
-  const onPlay = useMemoizedFn<CoreEventHandler>((media) => {
-    if (!frag) return undefined;
-    const [start, end] = frag;
-    if (media.duration < start) return;
-    if (media.currentTime > end || media.currentTime < start) {
-      media.seekTo(start);
-    }
-  });
-  const onTimeUpdate = useMemoizedFn<CoreEventHandler>(async (media) => {
-    if (!frag) return undefined;
-    const [start, end] = frag;
-    if (media.duration < start) return;
-    if (media.currentTime > end) {
-      if (!loop) {
-        media.pause();
-      } else {
-        media.seekTo(start);
-        // continue to play in loop
-        // if temporal fragment (#t=,2 at the end of src) paused the media
-        if (media.paused) await media.play();
-      }
-    } else if (media.currentTime < start) {
-      media.seekTo(start);
-    }
-  });
-
-  return { onPlay, onTimeUpdate };
+  return {
+    onPlay: useMemoizedFn<CoreEventHandler>((media) =>
+      _onplay(fragment, media),
+    ),
+    onTimeUpdate: useMemoizedFn<CoreEventHandler>((media) =>
+      _ontu(fragment, media, loop),
+    ),
+  };
 };
 
 export const useApplyTimeFragment: ApplyHookType = (useSubscribe, ref) => {
@@ -42,14 +28,7 @@ export const useApplyTimeFragment: ApplyHookType = (useSubscribe, ref) => {
   // only handle it when paused, otherwise it will be handled by onTimeUpdate
   useSubscribe(
     (state) => state.controls.fragment,
-    ([frag, prevFrag], _dispatch, media) => {
-      if (
-        media &&
-        frag &&
-        (media.currentTime < frag[0] || media.currentTime > frag[1])
-      )
-        media.seekTo(frag[0]);
-    },
+    ([frag], _dispatch, media) => onFragUpdate(frag, media),
     { immediate: true, ref },
   );
 };

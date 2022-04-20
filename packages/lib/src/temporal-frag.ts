@@ -29,7 +29,9 @@ export const parseTF = (hash: string | undefined): TimeSpan | null => {
   return null;
 };
 export interface TimeSpan {
+  /** -1 if not explicitly specified */
   end: number;
+  /** -1 if not explicitly specified */
   start: number;
   /**
    * raw value of key "t" in #t={value}
@@ -48,12 +50,15 @@ const getTimeSpan = (
   let startTime, endTime;
   if (startRaw && endRaw) {
     startTime = convertTime(startRaw);
-    endTime = convertTime(endRaw);
+    // use t=1,e to specify time range from 1->end
+    endTime = endRaw === "e" ? Infinity : convertTime(endRaw);
   } else if (startRaw) {
+    // use t=1 to specify timestamp
     startTime = convertTime(startRaw);
-    endTime = Infinity;
+    endTime = -1;
   } else if (endRaw) {
-    startTime = 0;
+    // use t=,1 to specify time range from 0->1
+    startTime = -1;
     endTime = convertTime(endRaw);
   } else {
     console.error(start, end);

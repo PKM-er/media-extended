@@ -16,10 +16,12 @@ export interface ControlsState {
    * the currentTime of the provider
    * one-way binded to the currentTime of the provider
    * (provider -> store, updated via onTimeUpdate)
-   * setting this value won't applied to provider */
+   * setting this value won't applied to provider
+   */
   currentTime: number;
   paused: boolean;
   fullscreen: boolean;
+  /** -1 if not explicitly specified */
   fragment: null | [number, number];
   playbackRate: number;
   volume: number;

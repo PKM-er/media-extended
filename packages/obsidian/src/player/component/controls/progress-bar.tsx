@@ -15,8 +15,13 @@ const useTimeRange = () => {
   let min = 0,
     max = duration;
   if (frag) {
-    [min, max] = frag;
-    if (max === Infinity) max = duration;
+    const [start, end] = frag;
+    if (start > 0 && end < 0) {
+      // timestamp, do nothing
+    } else {
+      start && (min = start);
+      end && end !== Infinity && (max = end);
+    }
   }
   if (max === null) {
     max = 100;

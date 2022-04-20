@@ -1,3 +1,5 @@
+import { onFragUpdate, onPlay, onTimeUpdate } from "@base/fragment";
+import { HTMLMedia } from "@player/utils/media";
 import { captureScreenshot } from "mx-lib";
 
 import { EventEmitter } from "../emitter";
@@ -17,44 +19,19 @@ const registerMsgHandler = <E extends Emitter>(
 ) => {
   const player_ = player as PlayerWithFrag;
   player_.frag = defaultFrag;
-  player_.addEventListener("timeupdate", async () => {
-    const [start, end] = player_.frag,
-      { currentTime } = player_;
-    if (currentTime > end) {
-      if (!player_.loop) {
-        player_.pause();
-      } else {
-        player_.currentTime = start;
-        // continue to play in loop
-        // if temporal fragment (#t=,2 at the end of src) paused the video
-        if (player_.paused) await player_.play();
-      }
-    } else if (currentTime < start) {
-      player_.currentTime = start;
-    }
-  });
-  player_.addEventListener("play", () => {
-    const [start, end] = player_.frag,
-      { currentTime } = player_;
-    if (currentTime > end || currentTime < start) {
-      player_.currentTime = start;
-    }
-  });
+  const media = new HTMLMedia(player_);
+  player_.addEventListener("timeupdate", () =>
+    onTimeUpdate(player_.frag, media, player_.loop),
+  );
+  player_.addEventListener("play", () => onPlay(player_.frag, media));
   emitter.on("timefrag", (frag) => {
+    player_.frag = frag ?? defaultFrag;
     if (frag) {
-      player_.frag = frag;
-      if (player_.currentTime < frag[0] || player_.currentTime > frag[1]) {
-        player_.currentTime = frag[0];
-      }
-    } else {
-      player_.frag = defaultFrag;
+      onFragUpdate(frag, media);
     }
   });
   emitter.on("play", () => player.play());
   emitter.on("pause", () => player.pause());
-  emitter.on("timefrag", (frag) => {
-    console.log("timefrag", frag);
-  });
   emitter.on("changerate", (playbackRate) => {
     player.playbackRate = playbackRate;
   });
@@ -74,9 +51,7 @@ const registerMsgHandler = <E extends Emitter>(
     } else throw new Error("media element is not a video");
   });
   emitter.handle("cb:timestamp", () => {
-    if (player instanceof HTMLVideoElement) {
-      return [[player.currentTime, player.duration]];
-    } else throw new Error("media element is not a video");
+    return [[player.currentTime, player.duration]];
   });
 };
 export default registerMsgHandler;
