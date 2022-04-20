@@ -23,17 +23,33 @@ declare module "obsidian" {
 
   interface Vault {
     exists: DataAdapter["exists"];
+    getAvailablePathForAttachments(
+      path: string,
+      extension: string,
+      activeFile: TFile | null,
+    ): Promise<string>;
   }
   interface Workspace {
     on(
       name: "mx:screenshot",
-      callback: (ab: ArrayBuffer, source: Source) => any,
+      callback: (
+        ab: ArrayBuffer,
+        time: number,
+        ext: "jpg" | "webp",
+        source: Source,
+      ) => any,
     ): EventRef;
     on(
       name: "mx:timestamp",
       callback: (time: number, duration: number, source: Source) => any,
     ): EventRef;
-    trigger(name: "mx:screenshot", ab: ArrayBuffer, source: Source): void;
+    trigger(
+      name: "mx:screenshot",
+      ab: ArrayBuffer,
+      time: number,
+      ext: "jpg" | "webp",
+      source: Source,
+    ): void;
     trigger(
       name: "mx:timestamp",
       time: number,

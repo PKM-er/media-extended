@@ -51,7 +51,8 @@ export const providerSlice = createSlice({
         from: "obsidian",
         playerType: type,
         path: file.path,
-        filename: file.name,
+        basename: file.basename,
+        extension: file.extension,
         src: app.vault.getResourcePath(file as TFile),
         title: file.basename,
       };
@@ -74,7 +75,8 @@ export const providerSlice = createSlice({
       const { file, currentTime } = action.payload;
       state.source.src = app.vault.getResourcePath(file as TFile);
       state.source.path = file.path;
-      state.source.filename = file.name;
+      state.source.basename = file.basename;
+      state.source.extension = file.extension;
       state.source.title = file.name;
       state.renamed = { time: currentTime };
     },

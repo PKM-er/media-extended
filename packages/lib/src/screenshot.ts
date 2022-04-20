@@ -1,4 +1,7 @@
-const captureScreenshot = (video: HTMLVideoElement): Promise<Blob | null> => {
+const captureScreenshot = (
+  video: HTMLVideoElement,
+  type?: "image/jpeg" | "image/webp",
+): Promise<{ time: number; blob: Blob | null }> => {
   let canvas = document.createElement("canvas");
 
   // set canvas size to fit video's
@@ -11,7 +14,10 @@ const captureScreenshot = (video: HTMLVideoElement): Promise<Blob | null> => {
   // Not working for MediaSource Extensions in Safari, eg. YouTube, bilibili
   // https://bugs.webkit.org/show_bug.cgi?id=206812
   ctx.drawImage(video, 0, 0, width, height);
-  return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  let time = video.currentTime;
+  return new Promise((resolve) =>
+    canvas.toBlob((blob) => resolve({ time, blob }), type),
+  );
 };
 export default captureScreenshot;
 

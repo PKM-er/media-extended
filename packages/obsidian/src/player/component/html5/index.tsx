@@ -1,10 +1,16 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { gotScreenshot, selectScreenshotRequested } from "@slice/action";
+import { AppThunk } from "@player/store";
+import {
+  cancelScreenshot,
+  gotScreenshot,
+  selectScreenshotRequested,
+} from "@slice/action";
 import { createPlayer, destroyPlayer } from "@slice/html5";
 import { setRatio } from "@slice/interface";
 import { renameStateReverted } from "@slice/provider";
 import { useMemoizedFn } from "ahooks";
 import { captureScreenshot } from "mx-lib";
+import { Platform } from "obsidian";
 import React, { RefCallback, useCallback, useRef } from "react";
 
 import { useApplyTimeFragment, useTimeFragmentEvents } from "../hooks/fragment";
@@ -48,14 +54,21 @@ const useCaptureScreenshot = (
     selectScreenshotRequested,
     async ([req], dispatch, media) => {
       if (!req) return;
-      let buffer: ArrayBuffer | undefined;
+      let action: AppThunk<void, undefined> | undefined;
       if (media.instance instanceof HTMLVideoElement) {
-        const blob = await captureScreenshot(media.instance);
-        buffer = await blob?.arrayBuffer();
+        const type = !Platform.isIosApp ? "image/webp" : "image/jpeg";
+        const { blob, time } = await captureScreenshot(media.instance, type),
+          buffer = await blob?.arrayBuffer();
+        if (buffer)
+          action = gotScreenshot(
+            buffer,
+            time,
+            !Platform.isIosApp ? "webp" : "jpg",
+          );
       } else {
         console.error("trying to capture screenshot on non-video element");
       }
-      dispatch(gotScreenshot(buffer));
+      dispatch(action ?? cancelScreenshot());
     },
     { immediate: true, ref },
   );

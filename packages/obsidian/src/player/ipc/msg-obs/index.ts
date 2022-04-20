@@ -14,7 +14,10 @@ type MsgSentFromOb_StateChangeNames =
   | "exit-fullscreen";
 
 interface MsgInvokedFromOb {
-  screenshot: [[], [data: ArrayBuffer]];
+  screenshot: [
+    [type: "image/jpeg" | "image/webp"],
+    [data: ArrayBuffer, time: number],
+  ];
   timestamp: [[], [currentTime: number, duration: number]];
 }
 

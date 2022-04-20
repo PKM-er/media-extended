@@ -13,6 +13,7 @@ import { App, FileSystemAdapter, Platform, Plugin } from "obsidian";
 import { setupRec } from "./feature/audio-rec";
 import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
 import registerOpenMediaLink from "./feature/open-link";
+import { registerSaveScreenshotHandler } from "./feature/save-screenshot";
 import { getMostRecentViewOfType } from "./misc";
 import { SetAuth } from "./player/ipc/hack/const";
 import { requestTimestamp } from "./player/slice/action";
@@ -93,6 +94,7 @@ export default class MediaExtended extends Plugin {
     registerLinkHandlers(this);
     registerEmbedHandlers(this);
     registerInsetTimestampHandler(this);
+    registerSaveScreenshotHandler(this);
     registerOpenMediaLink(this);
 
     this.registerExtensions();

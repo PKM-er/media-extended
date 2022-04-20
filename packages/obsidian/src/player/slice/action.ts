@@ -70,25 +70,25 @@ export const requsetScreenshot = (): AppThunk => (dispatch, getState) => {
     }, reqTimeout);
   },
   gotScreenshot =
-    (buffer: ArrayBuffer | undefined): AppThunk =>
+    (buffer: ArrayBuffer, time: number, ext: "jpg" | "webp"): AppThunk =>
     (dispatch, getState) => {
       const state = getState();
       if (!selectScreenshotRequested(state)) return;
 
       const { source } = state.provider;
 
-      if (buffer) {
-        if (!source) {
-          console.error("failed to get screenshot: no source available", state);
-        } else {
-          console.info("screenshot captured", buffer.byteLength, source);
-          app.workspace.trigger("mx:screenshot", buffer, source);
-        }
+      if (!source) {
+        console.error("failed to get screenshot: no source available", state);
       } else {
-        console.info("screenshot cancelled");
+        console.info("screenshot captured", buffer.byteLength, source);
+        app.workspace.trigger("mx:screenshot", buffer, time, ext, source);
       }
       dispatch(_gotScreenshot());
-    };
+    },
+  cancelScreenshot = (): AppThunk => (dispatch) => {
+    console.info("screenshot cancelled");
+    dispatch(_gotScreenshot());
+  };
 
 export const requestTimestamp = (): AppThunk => (dispatch, getState) => {
     dispatch(_reqTimestamp());

@@ -28,7 +28,8 @@ export interface ObsidianMedia extends SourceBase {
   /** in-vault absolute path for media file */
   title: string;
   path: string;
-  filename: string;
+  basename: string;
+  extension: string;
 }
 export interface DirectLinkMedia extends SourceBase {
   from: "direct";

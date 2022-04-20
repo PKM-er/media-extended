@@ -1,11 +1,14 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { AppThunk } from "@player/store";
 import {
+  cancelScreenshot,
   gotScreenshot,
   gotTimestamp,
   selectScreenshotRequested,
   selectTimestampRequested,
 } from "@slice/action";
 import { useUpdateEffect } from "ahooks";
+import { Platform } from "obsidian";
 import { useCallback, useEffect, useRef } from "react";
 
 import { EventEmitter } from "../emitter";
@@ -79,11 +82,19 @@ const useActions = (
   useEffect(() => {
     if (screenshot) {
       getEmitter(emitterRef).then(async (emitter) => {
-        let buffer: ArrayBuffer | undefined;
+        let action: AppThunk<void, undefined> | undefined;
         if (emitter) {
-          [buffer] = await emitter?.invoke("cb:screenshot");
+          let [buffer, time] = await emitter?.invoke(
+            "cb:screenshot",
+            Platform.isIosApp ? "image/jpeg" : "image/webp",
+          );
+          action = gotScreenshot(
+            buffer,
+            time,
+            Platform.isIosApp ? "jpg" : "webp",
+          );
         }
-        dispatch(gotScreenshot(buffer));
+        dispatch(action ?? cancelScreenshot());
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -120,6 +120,12 @@ export const getLink = (url: string): string => {
 
 import { App, Constructor, View, WorkspaceLeaf } from "obsidian";
 
+declare module "obsidian" {
+  interface WorkspaceLeaf {
+    activeTime: number;
+  }
+}
+
 export const getMostRecentViewOfType = <T extends View>(
   ctor: Constructor<T>,
   app: App,

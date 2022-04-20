@@ -10,12 +10,6 @@ import type MediaExtended from "@plugin";
 import { Source } from "@slice/provider-types";
 import { MarkdownView, Notice, TFile } from "obsidian";
 
-declare module "obsidian" {
-  interface WorkspaceLeaf {
-    activeTime: number;
-  }
-}
-
 export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
   plugin.registerEvent(
     plugin.app.workspace.on("mx:timestamp", (time, duration, source) => {

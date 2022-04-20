@@ -9,7 +9,15 @@
     "react/prop-types": "off",
     "import/no-unresolved": [
       2,
-      { "ignore": ["\\.less$", "@electron/remote", "electron", "inline:"] }
+      {
+        "ignore": [
+          "\\.less$",
+          "@electron/remote",
+          "electron",
+          "inline:",
+          "filenamify/browser"
+        ]
+      }
     ]
   },
   "settings": {

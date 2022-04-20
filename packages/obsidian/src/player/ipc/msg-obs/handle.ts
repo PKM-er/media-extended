@@ -65,13 +65,12 @@ const registerMsgHandler = <E extends Emitter>(
   emitter.on("updatetime", (currentTime) => {
     player.currentTime = currentTime;
   });
-  emitter.handle("cb:screenshot", async () => {
+  emitter.handle("cb:screenshot", async (type) => {
     if (player instanceof HTMLVideoElement) {
-      const blob = await captureScreenshot(player);
+      const { blob, time } = await captureScreenshot(player, type);
       if (!blob) throw new Error("failed to capture screenshot");
       const ab = await blob.arrayBuffer();
-      console.log(ab, ab.byteLength);
-      return [[ab], [ab]];
+      return [[ab, time], [ab]];
     } else throw new Error("media element is not a video");
   });
   emitter.handle("cb:timestamp", () => {
