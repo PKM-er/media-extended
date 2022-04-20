@@ -101,18 +101,6 @@ export default class MediaExtended extends Plugin {
     registerOpenMediaLink(this);
 
     this.registerExtensions();
-
-    this.addCommand({
-      id: "get-timestamp",
-      name: "Get timestamp from player",
-      editorCheckCallback: (checking) => {
-        if (checking) {
-          return !!getObMediaView();
-        } else {
-          getObMediaView()?.store.dispatch(requestTimestamp());
-        }
-      },
-    });
   }
 
   registerExtensions() {

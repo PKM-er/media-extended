@@ -11,6 +11,7 @@ import { Hotkey, KeymapEventHandler } from "obsidian";
 
 import { MediaView } from "../media-view";
 import { PlayerComponent } from "../media-view/common";
+import { requestTimestamp, requsetScreenshot } from "../player/slice/action";
 
 interface ControlAction {
   id: string;
@@ -57,6 +58,20 @@ const actions: ControlAction[] = [
     name: "Mute/Unmute",
     action: toggleMute(),
     localHotkeys: [{ key: "m", modifiers: [] }],
+  },
+  {
+    id: "get-timestamp",
+    name: "Get timestamp from active player",
+    action: requestTimestamp(),
+    // https://github.com/aidenlx/media-extended/issues/33
+    globalHotkeys: [{ key: ";", modifiers: ["Mod"] }],
+    localHotkeys: [{ key: ";", modifiers: [] }],
+  },
+  {
+    id: "take-screenshot",
+    name: "Take screenshot from active player",
+    action: requsetScreenshot(),
+    localHotkeys: [{ key: "s", modifiers: [] }],
   },
 ];
 
