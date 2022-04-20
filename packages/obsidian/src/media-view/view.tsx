@@ -1,4 +1,5 @@
 import { ExtensionAccepted } from "@base/media-type";
+import { getPlayerKeymaps } from "@feature/keyboard-control";
 import { handleOpenMediaLink } from "@feature/open-link";
 import { createStore, Player } from "@player";
 import { PlayerStore, RootState } from "@player/store";
@@ -27,7 +28,6 @@ import {
   PlayerComponent,
   unloadKeymap,
 } from "./common";
-import getPlayerKeymaps from "./keymap";
 
 declare module "obsidian" {
   interface FileView {

@@ -398,7 +398,7 @@ export const seekByOffset =
   (second: number): AppThunk =>
   async (dispatch) => {
     if (second === 0) return;
-    requestManualOffsetSeek(second);
+    dispatch(requestManualOffsetSeek(second));
     await sleep(0);
     dispatch(manualSeekDone());
   };

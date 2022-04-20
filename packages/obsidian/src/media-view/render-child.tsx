@@ -1,3 +1,4 @@
+import { getPlayerKeymaps } from "@feature/keyboard-control";
 import { createStore, Player } from "@player";
 import { AppThunk } from "@player/store";
 import MediaExtended from "@plugin";
@@ -6,7 +7,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { PlayerComponent, unloadKeymap } from "./common";
-import getPlayerKeymaps from "./keymap";
 
 export default class PlayerRenderChild
   extends MarkdownRenderChild
