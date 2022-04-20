@@ -4,6 +4,7 @@ import { secondToDuration } from "@misc";
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { progressBarSeek, progressBarSeekEnd } from "@slice/controls";
+import { isTimestamp } from "mx-lib";
 import React from "react";
 
 const valuetext = (seconds: number) => secondToDuration(seconds);
@@ -16,9 +17,7 @@ const useTimeRange = () => {
     max = duration;
   if (frag) {
     const [start, end] = frag;
-    if (start > 0 && end < 0) {
-      // timestamp, do nothing
-    } else {
+    if (!isTimestamp(frag)) {
       start && (min = start);
       end && end !== Infinity && (max = end);
     }

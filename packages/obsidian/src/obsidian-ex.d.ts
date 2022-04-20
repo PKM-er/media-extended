@@ -84,6 +84,8 @@ declare module "obsidian" {
   interface ViewRegistry {
     typeByExtension: Record<string, string>;
     viewByType: Record<string, ViewCreator>;
+    getTypeByExtension(ext: string): string | undefined;
+    getViewCreatorByType(type: string): ViewCreator | undefined;
     isExtensionRegistered(ext: string): boolean;
     registerExtensions(exts: string[], type: string): void;
     registerViewWithExtensions(

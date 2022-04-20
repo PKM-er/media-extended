@@ -92,6 +92,7 @@ export const providerSlice = createSlice({
         filename = decodeURI(pathname).split("/").pop();
 
       let isFileUrl = false;
+      let url = src;
       src = src.replace(/^file:\/\//, () => {
         isFileUrl = true;
         return "app://local";
@@ -102,6 +103,7 @@ export const providerSlice = createSlice({
         from: "direct",
         playerType,
         src,
+        url,
         title: filename ? filename : src,
       };
       state.source = media;

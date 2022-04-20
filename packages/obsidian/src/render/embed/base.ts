@@ -8,25 +8,6 @@ import "obsidian";
 
 import { App, View, WorkspaceLeaf } from "obsidian";
 
-declare module "obsidian" {
-  interface ViewRegistry {
-    typeByExtension: Record<string, string>;
-    viewByType: Record<string, ViewCreator>;
-    getViewCreatorByType(type: string): ViewCreator | undefined;
-    isExtensionRegistered(ext: string): boolean;
-    registerExtensions(exts: string[], type: string): void;
-    registerViewWithExtensions(
-      exts: string[],
-      type: string,
-      viewCreator: ViewCreator,
-    ): void;
-    unregisterExtensions(exts: string[]): void;
-  }
-  interface App {
-    viewRegistry: ViewRegistry;
-  }
-}
-
 const getViewOfType = <V extends View = View>(
   type: string,
   app: App,

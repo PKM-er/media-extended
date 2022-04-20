@@ -13,7 +13,7 @@ import { App, FileSystemAdapter, Platform, Plugin } from "obsidian";
 import { setupRec } from "./feature/audio-rec";
 import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
 import { registerGlobalControlCmd } from "./feature/keyboard-control";
-import registerOpenMediaLink from "./feature/open-link";
+import registerOpenMediaLink from "./feature/open-media";
 import { registerSaveScreenshotHandler } from "./feature/save-screenshot";
 import { getMostRecentViewOfType } from "./misc";
 import { SetAuth } from "./player/ipc/hack/const";
@@ -107,9 +107,9 @@ export default class MediaExtended extends Plugin {
       name: "Get timestamp from player",
       editorCheckCallback: (checking) => {
         if (checking) {
-          return !!getObMediaView(this.app);
+          return !!getObMediaView();
         } else {
-          getObMediaView(this.app)?.store.dispatch(requestTimestamp());
+          getObMediaView()?.store.dispatch(requestTimestamp());
         }
       },
     });
@@ -179,4 +179,4 @@ const updateAccentColor = () => {
   );
 };
 
-const getObMediaView = (app: App) => getMostRecentViewOfType(MediaView, app);
+const getObMediaView = () => getMostRecentViewOfType(MediaView);

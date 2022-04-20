@@ -1,6 +1,6 @@
 import { ExtensionAccepted } from "@base/media-type";
 import { getPlayerKeymaps } from "@feature/keyboard-control";
-import { handleOpenMediaLink } from "@feature/open-link";
+import { handleOpenMediaLink } from "@feature/open-media";
 import { createStore, Player } from "@player";
 import { PlayerStore, RootState } from "@player/store";
 import type MediaExtended from "@plugin";
@@ -77,9 +77,13 @@ export default class ObMediaView
   setUrl(url: string) {
     this.store.dispatch(setMediaUrlSrc(url));
   }
-  getUrl(): string | null {
+  getUrl(src = false): string | null {
     const { source } = this.store.getState().provider;
-    return source && source.from !== "obsidian" ? source.src : null;
+    if (!source || source.from === "obsidian") {
+      return null;
+    } else if (source.from === "direct") {
+      return src ? source.src : source.url;
+    } else return source.src;
   }
 
   canAcceptExtension(ext: string): boolean {
@@ -152,7 +156,7 @@ export default class ObMediaView
   }
 
   async setState(state: MediaState, result: ViewStateResult): Promise<void> {
-    if (state.file === state.url) {
+    if (state.file === state.url || (state.file && state.url)) {
       console.error("unexpected state", state, result);
       throw new Error("Failed to set state for media view: unexpected state");
     }

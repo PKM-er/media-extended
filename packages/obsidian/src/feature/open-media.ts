@@ -1,6 +1,4 @@
-import { getMediaType } from "@base/media-type";
-import parseURL from "@base/url-parse";
-import { stripHash } from "@misc";
+import { vaildateMediaURL } from "@base/url-parse";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
 import {
@@ -9,11 +7,23 @@ import {
   Menu,
   Modal,
   Notice,
+  TFile,
   ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
 
-import { MEDIA_VIEW_TYPE, MediaUrlState } from "../media-view";
+import {
+  MEDIA_VIEW_TYPE,
+  MediaFileState,
+  MediaUrlState,
+  MediaView,
+} from "../media-view";
+import { getMostRecentViewOfType } from "../misc";
+import {
+  createLeafBySplit,
+  findMediaViewByFile,
+  findMediaViewByUrl,
+} from "./smart-view-open";
 
 interface EmptyView extends Component {
   /**
@@ -127,34 +137,55 @@ const registerOpenMediaLink = (plugin: MediaExtended) => {
 };
 export default registerOpenMediaLink;
 
-const open = (url: string, hash: string) => {
-  const state: MediaUrlState = { url, file: null, fragment: null };
-  const leaf = app.workspace.getLeaf();
-  console.log("openMediaLink", url, hash);
-  leaf.setViewState(
-    { type: MEDIA_VIEW_TYPE, active: true, state },
-    { subpath: hash },
-  );
-};
-/**
- * @param url can be url contains hash
- */
-export const openMediaLink = (url: string): boolean =>
-  vaildateMediaURL(url, open);
+export const openMediaLink = (url: string, newLeaf = false) =>
+  vaildateMediaURL(url, (url, hash) => {
+    const setViewState = (leaf: WorkspaceLeaf) => {
+        const state: MediaUrlState = { url, file: null, fragment: null };
+        leaf.setViewState(
+          { type: MEDIA_VIEW_TYPE, active: true, state },
+          { subpath: hash },
+        );
+      },
+      findMediaView = () => findMediaViewByUrl(url);
+    openMediaView(setViewState, findMediaView, newLeaf, hash);
+  });
 
-const vaildateMediaURL = (
-  _url: string,
-  onVaild?: (url: string, hash: string) => any,
-): boolean => {
-  let result;
-  if (getMediaType(_url)) {
-    const [url, hash] = stripHash(_url);
-    onVaild?.(url, hash);
-  } else if ((result = parseURL(_url))) {
-    onVaild?.(result.url, result.hash);
-  } else return false;
-
+const openMediaView = (
+  setViewState: (leaf: WorkspaceLeaf) => void,
+  findMediaView: () => MediaView | null,
+  newLeaf: boolean,
+  hash: string,
+) => {
+  let view: MediaView | null;
+  if (newLeaf) {
+    const leaf = createLeafBySplit(app.workspace.getLeaf());
+    setViewState(leaf);
+  } else if ((view = findMediaView())) {
+    view.setHash(hash);
+  } else if ((view = getMostRecentViewOfType(MediaView))) {
+    setViewState(view.leaf);
+  } else {
+    setViewState(app.workspace.getLeaf());
+  }
   return true;
+};
+
+export const openMediaFile = (
+  file: TFile,
+  hash: string,
+  newLeaf = false,
+): boolean => {
+  if (app.viewRegistry.getTypeByExtension(file.extension) !== MEDIA_VIEW_TYPE)
+    return false;
+  const setViewState = (leaf: WorkspaceLeaf) => {
+      const state: MediaFileState = { file: file.path, fragment: null };
+      leaf.setViewState(
+        { type: MEDIA_VIEW_TYPE, active: true, state },
+        { subpath: hash },
+      );
+    },
+    findMediaView = () => findMediaViewByFile(file);
+  return openMediaView(setViewState, findMediaView, newLeaf, hash);
 };
 
 class PromptModal extends Modal {

@@ -1,10 +1,10 @@
 import "obsidian";
 
 import parseURL from "@base/url-parse";
-import { openMediaLink } from "@feature/open-link";
+import { openMediaFile, openMediaLink } from "@feature/open-media";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
-import { EventHelper } from "obsidian";
+import { EventHelper, Keymap, parseLinktext } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
 
 type MarkedCtor = typeof EventHelper & { __MX_PATCHED__?: true };
@@ -18,7 +18,26 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
         evt.preventDefault();
         const fallback = () => next.call(this, evt, target, link, ...args);
         try {
-          if (!openMediaLink(link)) fallback();
+          if (!openMediaLink(link, Keymap.isModEvent(evt))) fallback();
+        } catch (error) {
+          console.error(error);
+          fallback();
+        }
+      },
+    onInternalLinkClick: (next) =>
+      function (this: EventHelper, evt, target, linktext, ...args) {
+        evt.preventDefault();
+        const fallback = () => next.call(this, evt, target, linktext, ...args);
+        if (!plugin.settings.timestampLink) return fallback();
+        try {
+          const { metadataCache } = this.app,
+            { path, subpath: hash } = parseLinktext(linktext),
+            file = metadataCache.getFirstLinkpathDest(
+              path,
+              this.getFile().path,
+            );
+          if (!file || !openMediaFile(file, hash, Keymap.isModEvent(evt)))
+            fallback();
         } catch (error) {
           console.error(error);
           fallback();

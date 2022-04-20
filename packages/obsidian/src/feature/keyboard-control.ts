@@ -66,7 +66,7 @@ export const registerGlobalControlCmd = (plugin: MediaExtended) => {
       id,
       name,
       checkCallback: (checking) => {
-        let view = getMostRecentViewOfType(MediaView, plugin.app);
+        let view = getMostRecentViewOfType(MediaView);
         if (checking) {
           return !!view;
         } else if (view) {

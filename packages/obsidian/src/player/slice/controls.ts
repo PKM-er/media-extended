@@ -1,7 +1,7 @@
 import { is } from "@base/hash-tool";
 import { AppThunk } from "@player/store";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { parseTF } from "mx-lib";
+import { isTimestamp, parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
 import { selectPlayerType } from "./provider";
@@ -84,32 +84,25 @@ export const controlsSlice = createSlice({
   reducers: {
     setHash: (state, action: PayloadAction<string>) => {
       const timeSpan = parseTF(action.payload),
-        query = parseQS(action.payload);
-      if (timeSpan) {
-        state.fragment = [timeSpan.start, timeSpan.end];
-      }
+        query = parseQS(action.payload),
+        frag: ControlsState["fragment"] = timeSpan
+          ? [timeSpan.start, timeSpan.end]
+          : null;
+      state.fragment = frag;
       state.loop = is(query, "loop");
       state.autoplay = is(query, "autoplay");
       state.muted = is(query, "muted");
       // state.controls = is("controls");
+
+      // start playing when timestamp is seeked to
+      if (frag && isTimestamp(frag)) state.paused = false;
     },
-    setFragment: (
-      state,
-      action: PayloadAction<
-        ControlsState["fragment"] | Partial<Record<"start" | "end", number>>
-      >,
-    ) => {
-      if (Array.isArray(action.payload)) {
-        state.fragment = action.payload;
-      } else if (
-        !action.payload ||
-        (!action.payload.start && !action.payload.end)
-      ) {
-        state.fragment = null;
-      } else {
-        const { start, end } = action.payload;
-        state.fragment = [start ?? 0, end ? end : Infinity];
-      }
+    setFragment: (state, action: PayloadAction<ControlsState["fragment"]>) => {
+      const frag = action.payload;
+      state.fragment = frag;
+
+      // start playing when timestamp is seeked to
+      if (frag && isTimestamp(frag)) state.paused = false;
     },
     reset: (state) => {
       Object.assign(state, initialState);

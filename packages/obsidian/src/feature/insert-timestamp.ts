@@ -3,6 +3,7 @@ import "obsidian";
 import {
   getMostRecentViewOfType,
   insertToCursor,
+  secondToDuration,
   secondToFragFormat,
   stripHash,
 } from "@misc";
@@ -13,7 +14,7 @@ import { MarkdownView, Notice, TFile } from "obsidian";
 export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
   plugin.registerEvent(
     plugin.app.workspace.on("mx:timestamp", (time, duration, source) => {
-      const mdView = getMostRecentViewOfType(MarkdownView, plugin.app);
+      const mdView = getMostRecentViewOfType(MarkdownView);
       if (!mdView) {
         new Notice("No opened markdown note available to insert timestamp");
         return;
@@ -33,7 +34,6 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
     let offsetCurrentTime = currentTime - offset;
     if (currentTime - offset < 0) offsetCurrentTime = 0;
     else if (currentTime - offset > duration) offsetCurrentTime = duration;
-    const display = secondToFragFormat(offsetCurrentTime);
 
     if (source.from === "obsidian") {
       const file = plugin.app.vault.getAbstractFileByPath(source.path);
@@ -42,16 +42,16 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
         file instanceof TFile &&
         (linktext = plugin.app.metadataCache.fileToLinktext(file, "", true))
       ) {
-        return `[[${linktext}#t=${display}]]`;
+        const frag = secondToFragFormat(offsetCurrentTime);
+        return `[[${linktext}#t=${frag}]]`;
       } else {
         new Notice("Could not find source file of timestamp: " + source.path);
         return null;
       }
     } else {
-      return (
-        `[${display.replace(/\.\d+$/, "")}]` +
-        `(${stripHash(source.src)[0]}#t=${offsetCurrentTime})`
-      );
+      const link = source.from === "direct" ? source.url : source.src;
+      const linktext = secondToDuration(offsetCurrentTime);
+      return `[${linktext}](${link}#t=${offsetCurrentTime})`;
     }
   };
 };

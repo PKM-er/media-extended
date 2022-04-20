@@ -4,6 +4,7 @@ import { stripHash } from "@misc";
 import { Providers } from "@slice/provider-types";
 import urlParser from "js-video-url-parser/lib/base";
 
+import { getMediaType } from "../media-type";
 import { parseBilibiliURL } from "./bilibili";
 
 type ParsedResult = {
@@ -29,3 +30,17 @@ const parseURL = (_url: string): ParsedResult | null => {
   return info;
 };
 export default parseURL;
+
+export const vaildateMediaURL = (
+  url: string,
+  onVaild?: (url: string, hash: string) => any,
+): boolean => {
+  let result;
+  if (getMediaType(url)) {
+    onVaild?.(...stripHash(url));
+  } else if ((result = parseURL(url))) {
+    onVaild?.(result.url, result.hash);
+  } else return false;
+
+  return true;
+};

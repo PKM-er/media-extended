@@ -39,7 +39,7 @@ export const registerSaveScreenshotHandler = (plugin: MediaExtended) => {
       const file = await app.vault.createBinary(path, ab);
       new Notice(`Saved screenshot to ${path}`);
 
-      const mdView = getMostRecentViewOfType(MarkdownView, plugin.app);
+      const mdView = getMostRecentViewOfType(MarkdownView);
       if (!mdView) return;
 
       const linktext = plugin.app.fileManager.generateMarkdownLink(

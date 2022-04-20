@@ -20,7 +20,7 @@ interface MediaStateBase {
 
 export interface MediaFileState extends MediaStateBase {
   file: string;
-  url: undefined;
+  url?: undefined;
 }
 export interface MediaUrlState extends MediaStateBase {
   file: null;

@@ -128,7 +128,6 @@ declare module "obsidian" {
 
 export const getMostRecentViewOfType = <T extends View>(
   ctor: Constructor<T>,
-  app: App,
 ): T | null => {
   let activeView = app.workspace.getActiveViewOfType(ctor);
   if (activeView) return activeView;

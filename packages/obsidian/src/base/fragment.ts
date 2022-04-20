@@ -1,3 +1,5 @@
+import { isTimestamp } from "mx-lib";
+
 type Frag = readonly [number, number] | null;
 
 const handleTimeFrag = (frag: Frag, duration: number | null): Frag => {
@@ -6,7 +8,7 @@ const handleTimeFrag = (frag: Frag, duration: number | null): Frag => {
 
   // if only start is set, treat it as timestamp
   // don't restrict play range
-  if (start > 0 && end < 0) return null;
+  if (isTimestamp(frag)) return null;
 
   if (start < 0) start = 0;
   else if (duration && duration < start) return null;
@@ -22,12 +24,7 @@ type Media = Pick<
 export const onFragUpdate = (frag: Frag, media: Media) => {
   if (!media || !frag) return;
   const [start, end] = frag;
-  if (
-    // timestamp
-    (start > 0 && end < 0) ||
-    media.currentTime < start ||
-    media.currentTime > end
-  )
+  if (isTimestamp(frag) || media.currentTime < start || media.currentTime > end)
     media.seekTo(start);
 };
 

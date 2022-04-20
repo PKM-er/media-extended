@@ -9,6 +9,11 @@ const TFDef = {
   npt_time: /^(?:npt:)?([\d\.:]+)$/,
 };
 
+export const isTimestamp = ([start, end]: readonly [
+  start: number,
+  end: number,
+]) => start >= 0 && end < 0;
+
 /** parse temporal fragment from hash */
 export const parseTF = (hash: string | undefined): TimeSpan | null => {
   if (hash) {
