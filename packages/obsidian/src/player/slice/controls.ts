@@ -231,7 +231,7 @@ export const controlsSlice = createSlice({
           initialTime: time,
           currentTime: time,
           source,
-          ...noPause(state, false),
+          ...noPause(state, true),
         };
       }
     },
