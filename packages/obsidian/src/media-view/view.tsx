@@ -96,8 +96,10 @@ export default class ObMediaView
     this.register(
       observeStore(
         this.store,
-        (state) => state.provider.source?.title,
-        (title) => {
+        (state) => state.provider.source,
+        (source) => {
+          if (source?.from === "obsidian") return;
+          const title = source?.title;
           let titleText: string;
           if (title === null) {
             titleText = ""; // loading title

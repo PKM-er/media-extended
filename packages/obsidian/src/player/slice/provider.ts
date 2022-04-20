@@ -53,7 +53,7 @@ export const providerSlice = createSlice({
         path: file.path,
         filename: file.name,
         src: app.vault.getResourcePath(file as TFile),
-        title: file.name,
+        title: file.basename,
       };
       state.source = media;
     },
