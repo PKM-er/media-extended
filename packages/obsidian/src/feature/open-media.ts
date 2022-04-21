@@ -8,6 +8,7 @@ import {
   Modal,
   Notice,
   TFile,
+  ViewState,
   ViewStateResult,
   WorkspaceLeaf,
 } from "obsidian";
@@ -137,28 +138,56 @@ const registerOpenMediaLink = (plugin: MediaExtended) => {
 };
 export default registerOpenMediaLink;
 
+const getViewState = (type: "url" | "file", link: string) => {
+  let state: MediaUrlState | MediaFileState;
+  if (type === "url") {
+    state = { url: link, file: null, fragment: null };
+  } else {
+    state = { file: link, fragment: null };
+  }
+  return { type: MEDIA_VIEW_TYPE, active: true, state };
+};
+const getEphemeralState = (hash: string) => ({ subpath: hash });
+
 export const openMediaLink = (url: string, newLeaf = false) =>
   vaildateMediaURL(url, (url, hash) => {
-    const setViewState = (leaf: WorkspaceLeaf) => {
-        const state: MediaUrlState = { url, file: null, fragment: null };
-        leaf.setViewState(
-          { type: MEDIA_VIEW_TYPE, active: true, state },
-          { subpath: hash },
-        );
-      },
+    const viewState = getViewState("url", url),
       findMediaView = () => findMediaViewByUrl(url);
-    openMediaView(setViewState, findMediaView, newLeaf, hash);
+    openMediaView(viewState, hash, findMediaView, newLeaf);
   });
 
+export const openMediaLinkInHoverEditor = (
+  url: string,
+  initiatingEl: HTMLElement,
+  event: MouseEvent,
+) => {
+  let hoverEditor = app.plugins.plugins["obsidian-hover-editor"];
+  if (!hoverEditor) return false;
+  return vaildateMediaURL(url, (url, hash) => {
+    const viewState = getViewState("url", url),
+      eState = getEphemeralState(hash);
+    app.workspace.trigger("hover-link", { event } as any);
+    const leaf = hoverEditor.spawnPopover(
+      initiatingEl,
+      undefined,
+      false,
+    ) as WorkspaceLeaf;
+    leaf.setViewState(viewState, eState);
+  });
+};
+
 const openMediaView = (
-  setViewState: (leaf: WorkspaceLeaf) => void,
+  viewState: ViewState,
+  hash: string,
   findMediaView: () => MediaView | null,
   newLeaf: boolean,
-  hash: string,
 ) => {
   let view: MediaView | null;
+  const setViewState = (leaf: WorkspaceLeaf) =>
+    leaf.setViewState(viewState, getEphemeralState(hash));
   if (newLeaf) {
     const leaf = createLeafBySplit(app.workspace.getLeaf());
+    leaf.setViewState(viewState);
     setViewState(leaf);
   } else if ((view = findMediaView())) {
     view.setHash(hash);
@@ -177,15 +206,9 @@ export const openMediaFile = (
 ): boolean => {
   if (app.viewRegistry.getTypeByExtension(file.extension) !== MEDIA_VIEW_TYPE)
     return false;
-  const setViewState = (leaf: WorkspaceLeaf) => {
-      const state: MediaFileState = { file: file.path, fragment: null };
-      leaf.setViewState(
-        { type: MEDIA_VIEW_TYPE, active: true, state },
-        { subpath: hash },
-      );
-    },
+  const viewState = getViewState("file", file.path),
     findMediaView = () => findMediaViewByFile(file);
-  return openMediaView(setViewState, findMediaView, newLeaf, hash);
+  return openMediaView(viewState, hash, findMediaView, newLeaf);
 };
 
 class PromptModal extends Modal {

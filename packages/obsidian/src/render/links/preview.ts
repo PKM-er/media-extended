@@ -1,7 +1,11 @@
 import "obsidian";
 
-import parseURL from "@base/url-parse";
-import { openMediaFile, openMediaLink } from "@feature/open-media";
+import parseURL, { vaildateMediaURL } from "@base/url-parse";
+import {
+  openMediaFile,
+  openMediaLink,
+  openMediaLinkInHoverEditor,
+} from "@feature/open-media";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
 import { EventHelper, Keymap, parseLinktext } from "obsidian";
@@ -43,6 +47,18 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
           fallback();
         }
       },
+    mx_onExternalLinkMouseover: (next) =>
+      // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+      function (this: EventHelper, evt, target, url, ...args) {
+        console.log(evt, target, url);
+        evt.preventDefault();
+        if (!plugin.settings.extendedImageEmbedSyntax) return;
+        try {
+          openMediaLinkInHoverEditor(url, target, evt);
+        } catch (error) {
+          console.error(error);
+        }
+      },
   });
   plugin.register(() => {
     delete EventHelper.__MX_PATCHED__;
@@ -56,9 +72,32 @@ const patchPreviewLinks = (plugin: MediaExtended) => {
   plugin.register(
     around(MarkdownPreviewRenderer as MDPreviewRendererCtor, {
       registerDomEvents: (next) =>
-        function (this: MarkdownPreviewRenderer, el, helper, isBelongTo) {
+        function (
+          this: MarkdownPreviewRenderer,
+          el,
+          helper,
+          isBelongTo,
+          ...args
+        ) {
           patchHelper(plugin, helper);
-          return next.call(this, el, helper, isBelongTo);
+          const result = next.call(this, el, helper, isBelongTo, ...args);
+
+          const getLinktext = (target: HTMLElement) => {
+            const href = target.getAttr("data-href") || target.getAttr("href");
+            return href &&
+              (MarkdownPreviewRenderer as MDPreviewRendererCtor).belongsToMe(
+                target,
+                el,
+                isBelongTo,
+              )
+              ? href
+              : null;
+          };
+          el.on("mouseover", "a.external-link", (e, t) => {
+            const linktext = getLinktext(t);
+            linktext && helper.mx_onExternalLinkMouseover(e, t, linktext);
+          });
+          return result;
         },
     }),
   );
@@ -71,11 +110,17 @@ type MDPreviewRendererCtor = typeof MarkdownPreviewRenderer & {
     helper: EventHelper,
     isBelongTo: (el: HTMLElement) => boolean,
   ): void;
+  belongsToMe(
+    target: HTMLElement,
+    el: HTMLElement,
+    isBelongTo: (el: HTMLElement) => boolean,
+  ): boolean;
 };
 
 declare module "obsidian" {
   class EventHelper {
     app: App;
+    hoverParent: HTMLElement;
     getFile(): TFile;
     onInternalLinkDrag(
       evt: MouseEvent,
@@ -98,6 +143,11 @@ declare module "obsidian" {
       href: string,
     ): void;
     onInternalLinkMouseover(
+      evt: MouseEvent,
+      delegateTarget: HTMLElement,
+      href: string,
+    ): void;
+    mx_onExternalLinkMouseover(
       evt: MouseEvent,
       delegateTarget: HTMLElement,
       href: string,

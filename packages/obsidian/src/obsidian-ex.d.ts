@@ -51,6 +51,17 @@ declare module "obsidian" {
       source: Source,
     ): void;
     trigger(
+      name: "hover-link",
+      info: {
+        event: Event;
+        source: string;
+        hoverParent: HTMLElement;
+        targetEl: HTMLElement;
+        linktext: string;
+        sourcePath: string;
+      },
+    );
+    trigger(
       name: "mx:timestamp",
       time: number,
       duration: number,
