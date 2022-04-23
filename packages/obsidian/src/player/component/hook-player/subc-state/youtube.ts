@@ -5,6 +5,7 @@ import {
   handleSeeking,
   handleTimeUpdate,
   handleVolumeChange,
+  unlockPlayPauseEvent,
 } from "@slice/controls";
 import { setVolumeByOffestDone } from "@slice/youtube";
 
@@ -52,6 +53,9 @@ export const hookYoutubeState = (media: YoutubeMedia, store: PlayerStore) => {
         ) {
           media.play();
         }
+        setTimeout(() => {
+          store.dispatch(unlockPlayPauseEvent());
+        }, 50);
       },
     ),
     // useUpdateSeekState

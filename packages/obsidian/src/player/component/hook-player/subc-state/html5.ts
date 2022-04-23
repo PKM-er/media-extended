@@ -1,5 +1,6 @@
 import { getSubscribeFunc, PlayerStore } from "@player/store";
 import { HTMLMedia } from "@player/utils/media";
+import { unlockPlayPauseEvent } from "@slice/controls";
 
 import { selectShouldLoadResource } from "../common";
 import hookState from "./general";
@@ -28,9 +29,12 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
     // useApplyPaused
     subscribe(
       (state) => state.controls.paused,
-      (paused) => {
+      async (paused) => {
         if (media.paused === paused) return;
-        media[paused ? "pause" : "play"]();
+        await media[paused ? "pause" : "play"]();
+        setTimeout(() => {
+          store.dispatch(unlockPlayPauseEvent());
+        }, 50);
       },
     ),
     // pause when seeking

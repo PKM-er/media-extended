@@ -52,6 +52,9 @@ export interface ControlsState {
   hasStarted: boolean;
   activeTextTrack: null;
   error: string | null;
+  ignoreEvent: {
+    playpause: boolean;
+  };
 }
 const initialState: ControlsState = {
   currentTime: 0,
@@ -72,6 +75,9 @@ const initialState: ControlsState = {
   hasStarted: false,
   activeTextTrack: null,
   error: null,
+  ignoreEvent: {
+    playpause: false,
+  },
 };
 
 export const controlsSlice = createSlice({
@@ -117,14 +123,19 @@ export const controlsSlice = createSlice({
     },
     play: (state) => {
       state.paused = false;
+      state.ignoreEvent.playpause = true;
     },
     pause: (state) => {
       state.paused = true;
+      state.ignoreEvent.playpause = true;
     },
     togglePlay: (state) => {
       state.paused = !state.paused;
+      state.ignoreEvent.playpause = true;
     },
-
+    unlockPlayPauseEvent: (state) => {
+      state.ignoreEvent.playpause = false;
+    },
     setFullscreen: (state, action: PayloadAction<boolean>) => {
       state.fullscreen = action.payload;
     },
@@ -208,12 +219,14 @@ export const controlsSlice = createSlice({
       state.seeking = false;
     },
     handlePlaying: (state) => {
+      if (state.ignoreEvent.playpause) return;
       state.paused = false;
       state.ended = false;
       state.waiting = false;
       state.hasStarted = true;
     },
     handlePause: (state) => {
+      if (state.ignoreEvent.playpause) return;
       state.paused = true;
     },
     handleRateChange: (state, action: PayloadAction<number>) => {

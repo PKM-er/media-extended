@@ -8,6 +8,7 @@ export const {
   play,
   pause,
   togglePlay,
+  unlockPlayPauseEvent,
   setFullscreen,
   toggleFullscreen,
   setMute,
