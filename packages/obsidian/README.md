@@ -39,7 +39,7 @@ Note: for bilibili users, [bilibili plugin](https://github.com/aidenlx/mx-bili-p
 
 ## Compatibility
 
-The required API feature is only available for Obsidian v0.12.2+.
+The required API feature is only available for Obsidian v0.14.4+.
 
 ## Installation
 
