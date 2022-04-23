@@ -9,7 +9,7 @@ export const createStoreWithMsgHandler = <S, A extends Action>(
   const msgHandler = new MessageHandler(false, allowed);
   const store = configureStore({
     reducer: reducer,
-    devTools: true,
+    devTools: process.env.NODE_ENV !== "production",
     enhancers: [],
     middleware: (getDefault) =>
       getDefault().concat(createStateSyncMiddleware(msgHandler, allowed)),
