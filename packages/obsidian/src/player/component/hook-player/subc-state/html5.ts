@@ -33,6 +33,17 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
         media[paused ? "pause" : "play"]();
       },
     ),
+    // pause when seeking
+    subscribe(
+      (state) => state.controls.userSeek,
+      (seek, prevSeek) => {
+        if (seek && !prevSeek) {
+          media.pause();
+        } else if (prevSeek && !seek && !prevSeek.pausedBeforeSeek) {
+          media.play();
+        }
+      },
+    ),
   ];
 
   return () => toUnload.forEach((unload) => unload());

@@ -14,7 +14,7 @@ const hookState = (media: Media, store: PlayerStore) => {
     subscribe(
       (state) => state.controls.playbackRate,
       (rate) => {
-        media.playbackRate === rate && (media.playbackRate = rate);
+        media.playbackRate !== rate && (media.playbackRate = rate);
       },
     ),
     // useApplyVolume

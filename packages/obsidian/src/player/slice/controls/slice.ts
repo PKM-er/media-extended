@@ -39,7 +39,7 @@ export interface ControlsState {
   userSeek: {
     initialTime: number;
     currentTime: number;
-    pausedBeforeSeek: boolean | null;
+    pausedBeforeSeek: boolean;
     source: UserSeekSource;
   } | null;
   loop: boolean;
@@ -260,8 +260,9 @@ export const controlsSlice = createSlice({
           initialTime: time,
           currentTime: time,
           source,
-          ...noPause(state, true),
+          pausedBeforeSeek: state.paused,
         };
+        // state.paused = true;
       }
     },
     progressBarSeekEnd: (state) => {
@@ -277,8 +278,9 @@ export const controlsSlice = createSlice({
           initialTime: time,
           currentTime: time,
           source,
-          ...noPause(state, false),
+          pausedBeforeSeek: state.paused,
         };
+        // state.paused = true;
       } else if (state.userSeek.source === "drag") {
         const forwardSeconds = action.payload;
         const { initialTime } = state.userSeek,
@@ -305,8 +307,9 @@ export const controlsSlice = createSlice({
         initialTime: time,
         currentTime: time,
         source,
-        ...noPause(state, true),
+        pausedBeforeSeek: state.paused,
       };
+      // state.paused = true;
     },
     requestManualOffsetSeek: (state, action: PayloadAction<number>) => {
       const source: UserSeekSource = "manual";
@@ -315,8 +318,9 @@ export const controlsSlice = createSlice({
         initialTime: state.currentTime,
         currentTime: clampTime(offset + state.currentTime, state.duration),
         source,
-        ...noPause(state, true),
+        pausedBeforeSeek: state.paused,
       };
+      // state.paused = true;
     },
     manualSeekDone: (state) => {
       // highest priority, no check for source
@@ -332,13 +336,6 @@ const clampTime = (time: number, duration: number | null) => {
     time = 0;
   }
   return time;
-};
-
-const noPause = (state: ControlsState, noPause: boolean) => {
-  if (!noPause) {
-    state.paused = true;
-  }
-  return { pausedBeforeSeek: noPause ? null : state.paused };
 };
 
 const handleUserSeekEnd = (state: ControlsState) => {
