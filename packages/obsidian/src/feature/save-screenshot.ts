@@ -1,8 +1,8 @@
 import "obsidian";
 
 import { getMostRecentViewOfType, insertToCursor } from "@misc";
+import { Source } from "@player/slice/provider/types";
 import type MediaExtended from "@plugin";
-import { Source } from "@slice/provider-types";
 import filenamify from "filenamify/browser";
 import { MarkdownView, moment, Notice } from "obsidian";
 import URLParse from "url-parse";

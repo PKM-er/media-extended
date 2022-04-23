@@ -1,7 +1,7 @@
 import "js-video-url-parser/lib/provider/youtube";
 
 import { stripHash } from "@misc";
-import { Providers } from "@slice/provider-types";
+import { Providers } from "@player/slice/provider/types";
 import urlParser from "js-video-url-parser/lib/base";
 
 import { getMediaType } from "../media-type";

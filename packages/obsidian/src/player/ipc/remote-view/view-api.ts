@@ -1,5 +1,5 @@
-import { EventEmitter } from "@ipc/emitter";
+import type { PlayerStore } from "@player/store";
 
-export interface IBrowserViewAPI<Emitter extends EventEmitter<any, any>> {
-  emitter: Emitter;
+export interface IBrowserViewAPI {
+  store: PlayerStore;
 }

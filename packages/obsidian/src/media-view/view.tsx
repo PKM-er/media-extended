@@ -1,15 +1,17 @@
 import { ExtensionAccepted } from "@base/media-type";
 import { getPlayerKeymaps } from "@feature/keyboard-control";
 import { handleOpenMediaLink } from "@feature/open-media";
-import { createStore, Player } from "@player";
-import { PlayerStore, RootState } from "@player/store";
+import { Player } from "@player";
+import { MessageHandler } from "@player/ipc/redux-sync";
+import { observeStore } from "@player/store";
 import type MediaExtended from "@plugin";
-import { seekTo, setFragment, setHash } from "@slice/controls";
+import { revertDuration, setFragment } from "@slice/controls";
+import { seekTo, setHash } from "@slice/controls/thunk";
 import {
   renameObsidianMedia,
   setMediaUrlSrc,
   setObsidianMediaSrc,
-} from "@slice/provider";
+} from "@slice/provider/thunk";
 import {
   EditableFileView,
   ItemView,
@@ -23,6 +25,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import {
+  createStore,
   MEDIA_VIEW_TYPE,
   MediaState,
   PlayerComponent,
@@ -38,24 +41,6 @@ declare module "obsidian" {
   }
 }
 
-const observeStore = <T,>(
-  store: PlayerStore,
-  select: (state: RootState) => T,
-  onChange: (state: T) => any,
-) => {
-  let currentState: T | undefined;
-  const handleChange = () => {
-    let nextState = select(store.getState());
-    if (nextState !== currentState) {
-      currentState = nextState;
-      onChange(currentState);
-    }
-  };
-  let unsubscribe = store.subscribe(handleChange);
-  handleChange();
-  return unsubscribe;
-};
-
 export default class ObMediaView
   extends EditableFileView
   implements PlayerComponent
@@ -66,6 +51,12 @@ export default class ObMediaView
   scope;
   keymap;
   store;
+  set port(port: MessagePort | null) {
+    this.store.msgHandler.port = port;
+  }
+  get port() {
+    return this.store.msgHandler.port;
+  }
 
   // TODO: seems not working on webview on startup
   setHash(hash: string) {
@@ -92,6 +83,7 @@ export default class ObMediaView
     }
     return false;
   }
+
   constructor(leaf: WorkspaceLeaf, private plugin: MediaExtended) {
     super(leaf);
     this.store = createStore("media-view " + (leaf as any).id);
@@ -142,6 +134,7 @@ export default class ObMediaView
     const controlsState = {
       fragment: controls.fragment,
       currentTime: controls.currentTime,
+      duration: controls.duration,
     };
 
     let url;
@@ -166,7 +159,7 @@ export default class ObMediaView
     if (state.url) {
       this.setUrl(state.url);
     }
-    const { fragment, currentTime } = state as MediaState;
+    const { fragment, currentTime, duration } = state as MediaState;
     if (
       fragment !== undefined &&
       (fragment === null || Array.isArray(fragment))
@@ -175,6 +168,9 @@ export default class ObMediaView
     }
     if (typeof currentTime === "number" && currentTime >= 0) {
       this.store.dispatch(seekTo(currentTime));
+    }
+    if (typeof duration === "number" && duration > 0) {
+      this.store.dispatch(revertDuration(duration));
     }
   }
   async onLoadFile(file: TFile): Promise<void> {

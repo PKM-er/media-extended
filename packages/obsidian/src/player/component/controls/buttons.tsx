@@ -4,13 +4,9 @@ import {
   requestTimestamp,
   requsetScreenshot,
   selectScreenshotSupported,
-} from "@slice/action";
-import {
-  setVolumeByOffest,
-  toggleFullscreen,
-  toggleMute,
-  togglePlay,
-} from "@slice/controls";
+} from "@slice/action/thunk";
+import { toggleFullscreen, toggleMute, togglePlay } from "@slice/controls";
+import { setVolumeByOffest } from "@slice/controls/thunk";
 import { useLatest } from "ahooks";
 import React, { useCallback } from "react";
 

@@ -7,8 +7,8 @@ import {
   secondToFragFormat,
   stripHash,
 } from "@misc";
+import { Source } from "@player/slice/provider/types";
 import type MediaExtended from "@plugin";
-import { Source } from "@slice/provider-types";
 import { MarkdownView, Notice, TFile } from "obsidian";
 
 export const registerInsetTimestampHandler = (plugin: MediaExtended) => {

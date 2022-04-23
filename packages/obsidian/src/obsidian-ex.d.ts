@@ -1,6 +1,6 @@
 import "obsidian";
 
-import { Source } from "@slice/provider-types";
+import { Source } from "@player/slice/provider/types";
 
 declare module "obsidian" {
   interface App {

@@ -1,5 +1,4 @@
 import { initObsidianPort } from "@ipc/comms";
-import { EventEmitter } from "@ipc/emitter";
 import { onHackReady } from "@ipc/hack";
 import {
   CreateChannel,
@@ -21,7 +20,7 @@ import {
 
 type WebviewProps = {
   src: string;
-  emitterRef?: React.ForwardedRef<EventEmitter<any, any>>;
+  portRef?: React.ForwardedRef<MessagePort>;
 } & Partial<
   {
     hideView: boolean;
@@ -94,9 +93,9 @@ const WebView = React.forwardRef<
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 >(function ElectronWebview({ hideView, className, style, ...props }, ref) {
   const webviewRef = useMergeRefs([useRef<Electron.WebviewTag>(null), ref]);
-  const emitterRef = useMergeRefs([
-    useRef<EventEmitter<any, any> | null>(null),
-    props.emitterRef ?? null,
+  const portRef = useMergeRefs([
+    useRef<MessagePort | null>(null),
+    props.portRef ?? null,
   ]);
 
   const [internalHideView, setHideView] = useState(true);
@@ -134,21 +133,22 @@ const WebView = React.forwardRef<
             // since preventDefault will not work via remote
             // https://github.com/electron/electron/issues/23521
             console.log("view reloaded");
-            const prevPort = emitterRef.current;
+            const prevPort = portRef.current;
             if (prevPort) {
-              emitterRef.current = null;
+              portRef.current = null;
               prevPort.close();
             }
-            emitterRef.current = initObsidianPort(webviewId);
+            initObsidianPort(webviewId).then(
+              (port) => (portRef.current = port),
+            );
           };
           webview.addEventListener("will-navigate", handleWillNav);
 
-          const emitter = initObsidianPort(webviewId);
-          emitterRef.current = emitter;
+          initObsidianPort(webviewId).then((port) => (portRef.current = port));
           return () => {
             webview.removeEventListener("will-navigate", handleWillNav);
-            emitter.close();
-            emitterRef.current = null;
+            portRef.current?.close();
+            portRef.current = null;
           };
         })();
         webviewRef.current = webview;
@@ -156,6 +156,7 @@ const WebView = React.forwardRef<
       });
       webview.addEventListener("destroyed", () => {
         console.log("webview destroyed");
+        setDevTools(false, webview);
         webviewRef.current = null;
         setViewAttached(false);
       });

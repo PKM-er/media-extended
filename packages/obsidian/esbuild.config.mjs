@@ -47,16 +47,19 @@ const remoteRedux = {
   name: "enable-remote-redux-devtools",
   setup: (build) => {
     if (isProd) return;
-    build.onLoad({ filter: /src\/player\/store\.ts$/ }, async (args) => ({
-      contents: (
-        `import devToolsEnhancer from "remote-redux-devtools";` +
-        (await promises.readFile(args.path, "utf8"))
-      ).replace(
-        `enhancers: []`,
-        `enhancers: [devToolsEnhancer({ realtime: true, hostname: "localhost", port: 8000, name })]`,
-      ),
-      loader: "ts",
-    }));
+    build.onLoad(
+      { filter: /src\/player\/store\/create-store\.ts$/ },
+      async (args) => ({
+        contents: (
+          `import devToolsEnhancer from "remote-redux-devtools";` +
+          (await promises.readFile(args.path, "utf8"))
+        ).replace(
+          `enhancers: []`,
+          `enhancers: [devToolsEnhancer({ realtime: true, hostname: "localhost", port: 8000, name })]`,
+        ),
+        loader: "ts",
+      }),
+    );
   },
 };
 

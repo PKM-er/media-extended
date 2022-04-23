@@ -1,25 +1,61 @@
-import { PlayerContainerID, PlayerPlaceholderID } from "../view-api";
+import { BrowserViewAPIName } from "../view-api";
+import {
+  PlayerContainerID,
+  PlayerControlSelector,
+  PlayerPlaceholderID,
+  SettingBtnSelector,
+  SettingMenuWarpSelector,
+} from "./const";
+import hookStoreToHTMLPlayer from "./hook-player";
 
-const findPlayer = () => {
+const addRef = <K extends keyof typeof window.__PLAYER_REF__>(
+  name: K,
+  el: Required<typeof window.__PLAYER_REF__>[K],
+) => {
+  window.__PLAYER_REF__[name] = el;
+};
+// export const PlyaerFoundEvent = "player-found";
+
+const findPlayer = (
+  onFound?: (ref: Required<typeof window.__PLAYER_REF__>) => any,
+) => {
   const warpper = document.getElementById(PlayerPlaceholderID);
   if (!warpper) {
     console.error("missing main player in HTML");
     return;
   }
-  window.__PLAYER_REF__.playerPlaceholder = warpper as HTMLDivElement;
+  addRef("playerPlaceholder", warpper);
   const obs = new MutationObserver(() => {
     let player = warpper.querySelector<HTMLVideoElement>("video, bwp-video");
-    if (player) {
-      obs.disconnect();
-      console.log("player found");
-      window.__PLAYER_REF__.video = player;
-      window.__PLAYER_REF__.playerContainer =
-        document.getElementById(PlayerContainerID)!;
-      window.dispatchEvent(new Event(PlyaerFoundEvent));
-    }
+    if (!player) return;
+    obs.disconnect();
+    hookStoreToHTMLPlayer(player, window[BrowserViewAPIName].store);
+    console.log("player found");
+
+    addRef("video", player);
+    addRef("playerContainer", document.getElementById(PlayerContainerID)!);
+    const controls = document.querySelector<HTMLElement>(
+      PlayerControlSelector,
+    )!;
+    addRef("controls", controls);
+    getMenuItems(controls);
+    // window.dispatchEvent(new Event(PlyaerFoundEvent));
+    onFound?.(window.__PLAYER_REF__ as any);
   });
   obs.observe(warpper, { childList: true, subtree: true });
 };
 export default findPlayer;
 
-export const PlyaerFoundEvent = "player-found";
+export const HideMenuClass = "mx__hide-menu";
+
+const getMenuItems = (warpper: HTMLElement) => {
+  const settingBtn = warpper.querySelector<HTMLElement>(SettingBtnSelector)!;
+  settingBtn.classList.add(HideMenuClass);
+  settingBtn.dispatchEvent(new MouseEvent("mouseover"));
+  settingBtn.dispatchEvent(new MouseEvent("mouseout"));
+  settingBtn.classList.remove(HideMenuClass);
+  addRef(
+    "settingsMenuWarp",
+    settingBtn.querySelector<HTMLInputElement>(SettingMenuWarpSelector)!,
+  );
+};

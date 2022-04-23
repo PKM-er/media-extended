@@ -121,7 +121,7 @@ const dispatchBuffer = (
   duration = duration || player.getDuration();
   typeof fraction === "number" &&
     duration &&
-    dispatch(handleProgress(fraction * duration));
+    dispatch(handleProgress({ buffered: fraction * duration, duration }));
 };
 
 export const useProgress = () => {

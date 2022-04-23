@@ -17,7 +17,6 @@ import registerOpenMediaLink from "./feature/open-media";
 import { registerSaveScreenshotHandler } from "./feature/save-screenshot";
 import { getMostRecentViewOfType } from "./misc";
 import { SetAuth } from "./player/ipc/hack/const";
-import { requestTimestamp } from "./player/slice/action";
 import registerEmbedHandlers from "./render/embed";
 import registerLinkHandlers from "./render/links";
 

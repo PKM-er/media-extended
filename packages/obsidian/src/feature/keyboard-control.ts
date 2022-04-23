@@ -1,17 +1,13 @@
 import { getMostRecentViewOfType } from "@misc";
 import { AppDispatch } from "@player/store";
 import type MediaExtended from "@plugin";
-import {
-  seekByOffset,
-  setVolumeByOffest,
-  toggleMute,
-  togglePlay,
-} from "@slice/controls";
+import { requestTimestamp, requsetScreenshot } from "@slice/action/thunk";
+import { toggleMute, togglePlay } from "@slice/controls";
+import { seekByOffset, setVolumeByOffest } from "@slice/controls/thunk";
 import { Hotkey, KeymapEventHandler } from "obsidian";
 
 import { MediaView } from "../media-view";
 import { PlayerComponent } from "../media-view/common";
-import { requestTimestamp, requsetScreenshot } from "../player/slice/action";
 
 interface ControlAction {
   id: string;

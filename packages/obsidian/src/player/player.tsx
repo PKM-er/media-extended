@@ -14,7 +14,7 @@ import HTMLPlayer from "./component/html5";
 import YoutubePlayer from "./component/youtube";
 import { dragSeek, dragSeekEnd } from "./slice/controls";
 import { selectPlayerType } from "./slice/provider";
-import { HTML5PlayerTypes } from "./slice/provider-types";
+import { HTML5PlayerTypes } from "./slice/provider/types";
 import { useSizeRef } from "./utils/hooks/use-size";
 
 const useDragForward = (target: React.RefObject<HTMLElement>) => {

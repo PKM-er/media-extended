@@ -1,8 +1,8 @@
 import { parseLinktext, TFile } from "obsidian";
 
 import { AppThunk } from "../store";
-import { setHash } from "./controls";
-import { setObsidianMediaSrc } from "./provider";
+import { setHash } from "./controls/thunk";
+import { setObsidianMediaSrc } from "./provider/thunk";
 
 export const getFileHashFromLinktext = (
   linktext: string,

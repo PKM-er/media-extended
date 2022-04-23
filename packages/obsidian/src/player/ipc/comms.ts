@@ -1,7 +1,6 @@
 import { ipcRenderer } from "electron";
 
 import { ChannelNameBrowserView, ChannelNameObsidian } from "./create-channel";
-import { EventEmitter } from "./emitter";
 import { getPortWithTimeout } from "./get-port";
 
 const getPort = (channel: string, viewId?: number) =>
@@ -22,14 +21,11 @@ const getObsidianPort = async (viewId: number) =>
 export const getBrowserViewPort = async () =>
   (await getPort(ChannelNameBrowserView))[0];
 
-export const initObsidianPort = (viewId: number) => {
-  return new EventEmitter(
-    getObsidianPort(viewId).then((port) => {
-      console.log("obsidian port ready", port);
-      port.onmessageerror = (evt) => {
-        console.error("message error on browserview " + viewId, evt.data, evt);
-      };
-      return port;
-    }),
-  );
-};
+export const initObsidianPort = (viewId: number) =>
+  getObsidianPort(viewId).then((port) => {
+    console.log("obsidian port ready", port);
+    port.onmessageerror = (evt) => {
+      console.error("message error on browserview " + viewId, evt.data, evt);
+    };
+    return port;
+  });

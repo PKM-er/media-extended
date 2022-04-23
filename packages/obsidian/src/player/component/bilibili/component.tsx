@@ -1,14 +1,16 @@
 import { PRELOAD_BILIBILI } from "@const";
-import useActions from "@ipc/msg-obs/emit";
-import getMediaMessageHandler from "@ipc/msg-view/handle";
 import { PlayerContext } from "@player";
-import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { useAppSelector } from "@player/hooks";
+import { observeStore, PlayerStore } from "@player/store";
+import { gotScreenshot, gotTimestamp } from "@slice/action/thunk";
 import { join } from "path";
 import React, { useContext, useMemo, useState } from "react";
+import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
+import { moniterScreenshotMsg } from "../hook-player/screenshot";
+import { moniterTimestampMsg } from "../hook-player/timestamp";
 import WebView from "../webview";
-import { ObsidianEventEmitter } from "./msg-obs";
 
 const BilibiliPlayer = ({
   style,
@@ -23,31 +25,40 @@ const BilibiliPlayer = ({
       : null,
   );
 
-  const [hideView, setHideView] = useState(true),
-    [emitterReady, setEmitterReady] = useState(false);
+  const [hideView, setHideView] = useState(true);
 
-  const dispatch = useAppDispatch();
-  const emitterRef = useRefEffect<ObsidianEventEmitter>((emitter) => {
-    setEmitterReady(true);
-    emitter.addDirectListener(getMediaMessageHandler(dispatch));
+  const store = useStore() as PlayerStore;
+
+  const portRef = useRefEffect<MessagePort>((port) => {
+    store.msgHandler.port = port;
     const showView = () => {
       window.clearTimeout(timeout);
       console.log("enter web fscreen");
       setHideView(false);
     };
     const timeout = setTimeout(() => {
-      emitter.off("enter-web-fullscreen", showView);
+      unsub();
       console.log("web fullscreen timeout");
       showView();
     }, 10e3);
-    emitter.on("enter-web-fullscreen", showView);
+    const unsub = observeStore(
+      store,
+      (state) => state.bilibili.webFscreen,
+      (fullscreen) => {
+        if (fullscreen) showView();
+      },
+    );
+    moniterTimestampMsg(port, (...args) =>
+      store.dispatch(gotTimestamp(...args)),
+    );
+    moniterScreenshotMsg(port, (...args) =>
+      store.dispatch(gotScreenshot(...args)),
+    );
     return () => {
       console.log("port unmount");
-      setEmitterReady(false);
+      store.msgHandler.port = null;
     };
   }, []);
-
-  useActions(emitterReady, emitterRef as any);
 
   const { pluginDir } = useContext(PlayerContext);
   if (!pluginDir)
@@ -57,7 +68,7 @@ const BilibiliPlayer = ({
 
   return src ? (
     <WebView
-      emitterRef={emitterRef}
+      portRef={portRef}
       hideView={hideView}
       src={src}
       preload={preload}

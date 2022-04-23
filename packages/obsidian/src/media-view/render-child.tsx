@@ -1,12 +1,13 @@
 import { getPlayerKeymaps } from "@feature/keyboard-control";
-import { createStore, Player } from "@player";
+import { Player } from "@player";
+import { MessageHandler } from "@player/ipc/redux-sync";
 import { AppThunk } from "@player/store";
 import MediaExtended from "@plugin";
 import { MarkdownRenderChild, Scope } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { PlayerComponent, unloadKeymap } from "./common";
+import { createStore, PlayerComponent, unloadKeymap } from "./common";
 
 export default class PlayerRenderChild
   extends MarkdownRenderChild
@@ -15,6 +16,12 @@ export default class PlayerRenderChild
   scope;
   keymap;
   store;
+  set port(port: MessagePort | null) {
+    this.store.msgHandler.port = port;
+  }
+  get port() {
+    return this.store.msgHandler.port;
+  }
 
   get app() {
     return this.plugin.app;
@@ -27,10 +34,11 @@ export default class PlayerRenderChild
     private inEditor: boolean,
   ) {
     super(containerEl);
-    this.store = createStore(
+    const store = createStore(
       `media embed (${inEditor ? "live" : "read"}) ` + Date.now(),
     );
-    this.store.dispatch(initAction);
+    store.dispatch(initAction);
+    this.store = store;
     this.scope = new Scope(this.app.scope);
     this.keymap = getPlayerKeymaps(this);
   }

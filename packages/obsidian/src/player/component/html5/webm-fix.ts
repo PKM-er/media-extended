@@ -1,38 +1,34 @@
-import { useAppDispatch } from "@player/hooks";
+import { PlayerStore } from "@player/store";
 import { LARGE_CURRENT_TIME } from "@slice/controls";
-import { switchToAudio, unknownTypeDetermined } from "@slice/provider";
-import { useCallback, useState } from "react";
+import { switchToAudio, unknownTypeDetermined } from "@slice/provider/thunk";
 
-import { EventHandler } from "./event";
-
-export const useWebmFixes = () => {
-  const dispatch = useAppDispatch();
-  const [height, setHeight] = useState<0 | undefined>(0);
-  const onLoadedMetadata = useCallback<EventHandler>(
-    (media) => {
-      // if webm audio-only, switch to audio
-      const { instance } = media;
-      if (
-        instance instanceof HTMLVideoElement &&
-        (instance.videoHeight === 0 || instance.videoWidth === 0)
-      ) {
-        dispatch(switchToAudio());
-      } else {
-        dispatch(unknownTypeDetermined());
-        setHeight(undefined);
-      }
-
-      // https://www.bugs.cc/p/webm-progress-bar-problem-and-solution/
-      if (!instance.duration || instance.duration === Infinity) {
-        instance.addEventListener(
-          "timeupdate",
-          () => (instance.currentTime = 0),
-          { once: true },
-        );
-        instance.currentTime = LARGE_CURRENT_TIME;
-      }
-    },
-    [dispatch],
-  );
-  return { onLoadedMetadata, height };
+const hookStoreToHTMLPlayer = (
+  player: HTMLMediaElement,
+  store: PlayerStore,
+) => {
+  const handler = () => {
+    // useWebmFixes
+    // if webm audio-only, switch to audio
+    if (
+      player instanceof HTMLVideoElement &&
+      (player.videoHeight === 0 || player.videoWidth === 0)
+    ) {
+      store.dispatch(switchToAudio());
+    } else {
+      store.dispatch(unknownTypeDetermined());
+    }
+    // https://www.bugs.cc/p/webm-progress-bar-problem-and-solution/
+    if (!player.duration || player.duration === Infinity) {
+      player.addEventListener("timeupdate", () => (player.currentTime = 0), {
+        once: true,
+      });
+      player.currentTime = LARGE_CURRENT_TIME;
+    }
+  };
+  player.addEventListener("loadedmetadata", handler);
+  return () => {
+    player.removeEventListener("loadedmetadata", handler);
+  };
 };
+
+export default hookStoreToHTMLPlayer;

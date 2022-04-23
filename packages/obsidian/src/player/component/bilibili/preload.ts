@@ -1,14 +1,28 @@
 // import { contextBridge } from "electron";
 import PreloadSetup from "@ipc/remote-view/preload";
 import InjectCode from "inline:./inject";
+
+import {
+  EndingPanelClass,
+  SettingButtonCls,
+  SettingMenuWarpSelector,
+} from "./inject/const";
+import { HideMenuClass } from "./inject/find-player";
 // import { BrowserViewAPIName } from "./view-api";
+
+const toSelector = (cls: string) => `.${cls}`;
 
 const api = PreloadSetup(InjectCode, "https://www.bilibili.com");
 window.addEventListener("DOMContentLoaded", () => {
   const styleEl = document.createElement("style");
+  const { fullscreen, widescreen } = SettingButtonCls;
   styleEl.textContent = `
-  .bilibili-player-video-btn.bilibili-player-video-btn-fullscreen, 
-  .bilibili-player-video-btn.bilibili-player-video-btn-widescreen {
+  ${[
+    toSelector(fullscreen),
+    toSelector(widescreen),
+    toSelector(HideMenuClass) + SettingMenuWarpSelector,
+    toSelector(EndingPanelClass),
+  ].join(",")} {
     display: none !important;
   }
   `;

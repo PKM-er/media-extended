@@ -1,10 +1,13 @@
 import type { PlayerStore } from "@player";
-import type { Component, KeymapEventHandler, Scope } from "obsidian";
+import { createStore as _createStore } from "@player/store/ob-store";
+import { setPlatform } from "@slice/action";
+import { Component, KeymapEventHandler, Platform, Scope } from "obsidian";
 
 export const MEDIA_VIEW_TYPE = "media-view-v2";
 
 export interface PlayerComponent extends Component {
   store: PlayerStore;
+  port: MessagePort | null;
   scope: Scope;
   keymap: KeymapEventHandler[];
 }
@@ -13,9 +16,16 @@ export const unloadKeymap = (scope: Scope, keymap: KeymapEventHandler[]) => {
   keymap.forEach((k) => scope.unregister(k));
 };
 
+export const createStore = (name: string) => {
+  const store = _createStore(name);
+  store.dispatch(setPlatform(Platform.isSafari ? "ios" : "other"));
+  return store;
+};
+
 interface MediaStateBase {
   fragment?: [number, number] | null;
   currentTime?: number;
+  duration?: number | null;
 }
 
 export interface MediaFileState extends MediaStateBase {

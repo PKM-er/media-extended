@@ -1,6 +1,6 @@
 import type { Media } from "@player/utils/media";
 import type { SubscribeHookType } from "@player/utils/subscribe";
-import { gotTimestamp, selectTimestampRequested } from "@slice/action";
+import { gotTimestamp, selectTimestampRequested } from "@slice/action/thunk";
 
 const useGetTimestamp = <R, M extends Media>(
   ref: React.MutableRefObject<R | null>,

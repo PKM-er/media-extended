@@ -3,15 +3,14 @@ import { useAppDispatch } from "@player/hooks";
 import { useAppSelector } from "@player/hooks";
 import { useWillUnmount } from "@player/utils/hooks";
 import { handleVolumeChange } from "@slice/controls";
-import { setRatio } from "@slice/interface";
+import { setVolumeByOffestDone } from "@slice/youtube";
 import {
   destroyPlayer,
   initializePlayer,
   resetPlayer,
-  setVolumeByOffestDone,
-} from "@slice/youtube";
+} from "@slice/youtube/thunk";
 import { useInterval, useUpdateEffect } from "ahooks";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";

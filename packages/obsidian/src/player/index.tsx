@@ -1,4 +1,4 @@
-import { createStore } from "@player/store";
+import { PlayerStore } from "@player/store";
 import React from "react";
 import { Provider } from "react-redux";
 
@@ -11,7 +11,7 @@ const PlayerWarpper = ({
   onBlur,
   ...context
 }: {
-  store: ReturnType<typeof createStore>;
+  store: PlayerStore;
   inEditor?: boolean;
   pluginDir?: string;
   onFocus?: React.FocusEventHandler<HTMLDivElement>;
@@ -38,5 +38,5 @@ export const PlayerContext = React.createContext<IPlayerContext>({
   inEditor: false,
 });
 
-export { createStore, PlayerWarpper as Player };
+export { PlayerWarpper as Player };
 export type { PlayerStore } from "@player/store";
