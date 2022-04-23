@@ -26,6 +26,7 @@
     "@codemirror/stream-parser": "github:lishid/stream-parser",
     "@codemirror/view": "^0.19.47",
     "@lezer/common": "^0.15.11",
+    "@release-it/conventional-changelog": "^4.3.0",
     "@types/color": "^3.0.3",
     "@types/dom-mediacapture-record": "^1.0.11",
     "@types/fscreen": "^1.0.1",
