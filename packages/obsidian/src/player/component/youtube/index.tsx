@@ -1,65 +1,59 @@
+import { getYoutubeEventHandlers } from "@hook-player/events";
+import { hookYoutubeState } from "@hook-player/subc-state";
+import { useWillUnmount } from "@hook-utils";
 import { useAppSelector } from "@player/hooks";
+import { PlayerStore } from "@player/store";
+import { CoreEventHandler } from "@player/utils";
 import { YoutubeMedia } from "@player/utils/media";
-import { handleSeeking, handleTimeUpdate } from "@slice/controls";
-import { useRef } from "react";
+import { useUpdateEffect } from "ahooks";
+import { useMemo, useRef } from "react";
 import React from "react";
+import { useCallback } from "react";
+import { useStore } from "react-redux";
 
-import { useApplyTimeFragment, useTimeFragmentEvents } from "../hooks/fragment";
-import useGetTimestamp from "../hooks/get-timestamp";
-import {
-  useApplyPlaybackRate,
-  useApplyVolume,
-  useStateEventHanlders,
-} from "../hooks/media-props";
-import { useApplyUserSeek } from "../hooks/user-seek";
+import { onStartYtb } from "../hook-player/on-start";
 import YoutubeBase from "./base";
-import { useEventHandler, YoutubePlayerEvents } from "./event";
-import {
-  useApplyPaused,
-  useError,
-  useProgress,
-  useStateChangeHandler,
-  useUpdateSeekState,
-} from "./media-props";
-import { PlayerRef, useSubscribe } from "./utils";
+import { YoutubePlayerEvents } from "./event";
+import { PlayerRef } from "./utils";
+
+const useEventHandler = (handler: CoreEventHandler<YoutubeMedia>) =>
+  useCallback(
+    ({ target }: YT.PlayerEvent) => handler(new YoutubeMedia(target)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
 const useEvents = (): YoutubePlayerEvents => {
-  const { onPlay: restrictTimeOnPlay, onTimeUpdate: restrictTimeOnTimeUpdate } =
-      useTimeFragmentEvents(),
-    { onProgress } = useProgress(),
-    { onStateChange } = useStateChangeHandler(),
-    { onRateChange, onTimeUpdate: setCurrentTimeState } =
-      useStateEventHanlders(),
-    { onError } = useError();
+  const store = useStore() as PlayerStore;
+  const {
+    handlers: { ratechange, timeupdate, progress, error, onStateChange },
+    unload,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  } = useMemo(() => getYoutubeEventHandlers(store), []);
+
+  useWillUnmount(unload);
 
   return {
-    onError,
-    onPlaybackRateChange: useEventHandler(onRateChange),
-    onProgress,
-    onStateChange: (evt) => {
-      const media = new YoutubeMedia(evt.target);
-      onStateChange(evt);
-      if (evt.data === YT.PlayerState.PLAYING) {
-        restrictTimeOnPlay(media);
-      }
-    },
-    onTimeUpdate: useEventHandler(
-      setCurrentTimeState,
-      restrictTimeOnTimeUpdate,
-    ),
+    onError: error,
+    onPlaybackRateChange: useEventHandler(ratechange),
+    onProgress: useEventHandler(progress),
+    onStateChange,
+    onTimeUpdate: useEventHandler(timeupdate),
   };
 };
 
 const useActions = (ref: PlayerRef) => {
-  useApplyTimeFragment(useSubscribe, ref);
-  useApplyUserSeek(useSubscribe, ref, (dispatch, curr) => {
-    dispatch(handleSeeking());
-    dispatch(handleTimeUpdate(curr));
-  });
-  useApplyVolume(useSubscribe, ref);
-  useUpdateSeekState(ref);
-  useApplyPaused(ref);
-  useApplyPlaybackRate(useSubscribe, ref);
+  const store = useStore() as PlayerStore;
+
+  const ready = useAppSelector(
+    (state) => state.youtube.playerStatus === "ready",
+  );
+  useUpdateEffect(() => {
+    if (!ready) return;
+    const media = new YoutubeMedia(ref.current!);
+    onStartYtb(media, store);
+    return hookYoutubeState(media, store);
+  }, [ready]);
 };
 
 const YoutubePlayer = ({
@@ -84,7 +78,6 @@ const YoutubePlayer = ({
     ...useEvents(),
   };
   useActions(ref);
-  useGetTimestamp(ref, useSubscribe);
 
   return videoId ? <YoutubeBase videoId={videoId} {...props} /> : null;
 };

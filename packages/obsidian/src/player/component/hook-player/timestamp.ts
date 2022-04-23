@@ -1,23 +1,20 @@
 import { PlayerStore, subscribe } from "@player/store";
+import { Media } from "@player/utils/media";
 import { selectTimestampRequested } from "@slice/action/thunk";
 
 type onTimestamp = (timestamp: number, duration: number) => void;
 
 export const respondTimestampReq = (
-  player: HTMLMediaElement,
+  media: Media,
   store: PlayerStore,
   action: onTimestamp,
+  getDuration?: () => number | null,
 ) =>
-  subscribe(
-    store,
-    selectTimestampRequested,
-    (req) => {
-      if (req) {
-        action(player.currentTime, player.duration);
-      }
-    },
-    true,
-  );
+  subscribe(store, selectTimestampRequested, (req) => {
+    if (req) {
+      action(media.currentTime, getDuration?.() ?? media.duration);
+    }
+  });
 
 const ID = "mx-timestamp";
 export const sendTimestamp = (

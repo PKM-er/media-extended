@@ -7,7 +7,7 @@ const config = {
     },
   },
   youtube: {
-    timeupdate_freq: 50,
+    timeupdate_freq: 100,
     progress_freq: 200,
   },
   origin: "app://obsidian.md/index.html",

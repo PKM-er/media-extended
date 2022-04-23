@@ -16,18 +16,35 @@ export const updateRatio = (
   }
 };
 
-export const updateBuffer = (
+export const updateBufferH5 = (
   player: HTMLMediaElement,
   dispatch: (action: Parameters<AppDispatch>[0]) => unknown,
 ) => {
   const buffered = getBuffered(player);
   buffered && dispatch(handleProgress({ buffered, duration: player.duration }));
 };
+export const updateBufferYtb = (
+  player: YT.Player,
+  dispatch: AppDispatch,
+  duration: number | null,
+) => {
+  const fraction = player.getVideoLoadedFraction();
+  duration = duration || player.getDuration();
+  typeof fraction === "number" &&
+    duration &&
+    dispatch(handleProgress({ buffered: fraction * duration, duration }));
+};
 
 export const selectFrag = (state: RootState) => state.controls.fragment,
+  selectLoop = (state: RootState) => state.controls.loop,
+  selectDuration = (state: RootState) => state.controls.duration,
   selectVolumeMute = (state: RootState): [muted: boolean, volume: number] => [
     state.controls.muted,
     state.controls.volume,
+  ],
+  selectYtbResetProp = (state: RootState) => [
+    state.controls.autoplay,
+    state.interface.controls === "native",
   ],
   selectShouldLoadResource = (
     state: RootState,

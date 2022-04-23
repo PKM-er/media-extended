@@ -1,19 +1,7 @@
 import { useAppSelector } from "@player/hooks";
-import {
-  CoreEventHandler,
-  useEventHandler as useEventHandler0,
-} from "@player/utils";
-import { YoutubeMedia } from "@player/utils/media";
-import { useLatest } from "ahooks";
-import { useLayoutEffect } from "react";
+import { useLatest, useUpdateLayoutEffect } from "ahooks";
 
 import { PlayerRef } from "./utils";
-
-type EventHandler = CoreEventHandler<YoutubeMedia>;
-type NativeEvent = YT.PlayerEvent;
-const toYoutubeMedia = ({ target }: NativeEvent) => new YoutubeMedia(target);
-export const useEventHandler = (...handler: EventHandler[]) =>
-  useEventHandler0(handler, toYoutubeMedia);
 
 export const useEvent = <E extends keyof YT.Events>(
   eventName: E,
@@ -26,7 +14,7 @@ export const useEvent = <E extends keyof YT.Events>(
     (state) => state.youtube.playerStatus === "ready",
   );
   // use layout effect to ensure that the remove listener is called before unmount
-  useLayoutEffect(() => {
+  useUpdateLayoutEffect(() => {
     let player: YT.Player | null = null;
     const [eventName, listener] = listenerRef.current;
     if (playerReady) {
@@ -41,7 +29,8 @@ export const useEvent = <E extends keyof YT.Events>(
       }
       player = null;
     };
-  }, [playerReady, listenerRef, playerRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerReady]);
 };
 
 export type YoutubePlayerEvents = YT.Events & {

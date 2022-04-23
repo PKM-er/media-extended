@@ -1,10 +1,14 @@
 import { PlayerStore } from "@player/store";
 import { getBuffered } from "@player/utils/get-buffered";
+import { HTMLMedia } from "@player/utils/media";
 import { updateBasicInfo } from "@slice/controls";
 
-import { updateRatio } from "./common";
+import { updateRatio } from "../common";
+import onStart from "./general";
 
-const onStart = (player: HTMLMediaElement, store: PlayerStore) => {
+export const onStartH5 = (media: HTMLMedia, store: PlayerStore) => {
+  onStart(media, store);
+  const player = media.instance;
   store.dispatch(
     updateBasicInfo({
       seeking: player.seeking,
@@ -13,10 +17,4 @@ const onStart = (player: HTMLMediaElement, store: PlayerStore) => {
     }),
   );
   updateRatio(player, store.dispatch);
-  const { currentTime } = store.getState().controls;
-  if (currentTime > 0) {
-    player.currentTime = currentTime;
-  }
 };
-
-export default onStart;

@@ -144,7 +144,8 @@ export default class ObMediaView
       return { ...viewState, file: null, url, ...controlsState };
     } else {
       console.error("unexpected state", viewState, provider.source);
-      throw new Error("Failed to get state for media view: unexpected state");
+      return viewState;
+      // throw new Error("Failed to get state for media view: unexpected state");
     }
   }
 

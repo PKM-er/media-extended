@@ -16,22 +16,17 @@ export const observeStore = <T>(
   select: (state: RootState) => T,
   onChange: (state: T, prevState: T | undefined) => any,
 ) => {
-  let currentState: { val: T } | undefined;
+  let currentState = select(store.getState());
   const handleChange = () => {
     let nextState = select(store.getState());
-    if (!equal(nextState, currentState?.val)) {
+    if (!equal(nextState, currentState)) {
       // only trigger on change, not initial
-      if (!currentState) {
-        currentState = { val: nextState };
-      } else {
-        onChange(nextState, currentState.val);
-        currentState.val = nextState;
-      }
+      const args: [now: T, prev: T] = [nextState, currentState];
+      currentState = nextState;
+      onChange(...args);
     }
   };
-  let unsubscribe = store.subscribe(handleChange);
-  handleChange();
-  return unsubscribe;
+  return store.subscribe(handleChange);
 };
 
 export const getSubscribeFunc =
@@ -39,7 +34,7 @@ export const getSubscribeFunc =
   <T>(
     selector: (state: RootState) => T,
     onChange: (state: T, prevState: T | undefined) => any,
-    immediate = false,
+    immediate = true,
   ) =>
     subscribe<T>(store, selector, onChange, immediate);
 
@@ -47,7 +42,7 @@ export const subscribe = <T>(
   store: PlayerStore,
   selector: (state: RootState) => T,
   onChange: (state: T, prevState: T | undefined) => any,
-  immediate = false,
+  immediate = true,
 ) => {
   if (immediate) {
     onChange(selector(store.getState()), undefined);

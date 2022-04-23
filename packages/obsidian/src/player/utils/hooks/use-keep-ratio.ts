@@ -1,5 +1,6 @@
-import { useSize } from "@hook-utils";
 import { useAppSelector } from "@player/hooks";
+
+import { useSize } from ".";
 
 const useKeepRatio = (
   container: React.RefObject<HTMLElement>,

@@ -1,9 +1,7 @@
+import { selectYtbResetProp } from "@hook-player/common";
+import { useWillUnmount } from "@hook-utils";
 import config from "@player/config";
-import { useAppDispatch } from "@player/hooks";
-import { useAppSelector } from "@player/hooks";
-import { useWillUnmount } from "@player/utils/hooks";
-import { handleVolumeChange } from "@slice/controls";
-import { setVolumeByOffestDone } from "@slice/youtube";
+import { useAppDispatch, useAppSelector } from "@player/hooks";
 import {
   destroyPlayer,
   initializePlayer,
@@ -49,30 +47,13 @@ const useResetToApplyProps = (
   videoId: string,
 ) => {
   useSubscribe(
-    (state) => [state.controls.autoplay, state.interface.controls === "native"],
+    selectYtbResetProp,
     ([, prev], dispatch) => {
       if (prev && containerRef.current) {
         dispatch(resetPlayer(playerRef, containerRef.current, videoId));
       }
     },
     { immediate: false, ref: playerRef },
-  );
-};
-const useSetVolumeByOffset = (
-  ref: React.MutableRefObject<YT.Player | null>,
-) => {
-  useSubscribe(
-    (state) => state.youtube.volumeOffest,
-    ([now, prev], dispatch) => {
-      if (!(prev == null && now !== null) || !ref.current) return;
-      const payload = {
-        volume: (ref.current.getVolume() + now) / 100,
-        muted: ref.current.isMuted(),
-      };
-      dispatch(handleVolumeChange(payload));
-      dispatch(setVolumeByOffestDone());
-    },
-    { immediate: false, ref },
   );
 };
 
@@ -101,7 +82,6 @@ const YoutubePlayer = React.forwardRef<YT.Player | null, YoutubePlayerProps>(
 
     useResetToApplyProps(containerRef, playerRef, videoId);
     useUpdateVideoId(videoId, playerRef);
-    useSetVolumeByOffset(playerRef);
 
     useEvent("onStateChange", onStateChange, playerRef);
     useEvent("onPlaybackQualityChange", onPlaybackQualityChange, playerRef);
@@ -130,10 +110,12 @@ const useTimeUpdateEvent = (
   const playerReady = useAppSelector(
     (state) => state.youtube.playerStatus === "ready",
   );
+
+  const seeking = useAppSelector((state) => !!state.controls.userSeek);
   const [playing, setPlaying] = useState(false);
 
   const interval =
-    onTimeUpdate && playerReady && playing
+    onTimeUpdate && playerReady && !seeking && playing
       ? config.youtube.timeupdate_freq
       : undefined;
   useInterval(() => {

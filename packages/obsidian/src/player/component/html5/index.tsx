@@ -1,11 +1,12 @@
+import hookStoreToHTMLPlayer from "@hook-player";
 import { useAppSelector } from "@player/hooks";
 import { PlayerStore } from "@player/store";
+import { HTMLMedia } from "@player/utils/media";
 import { gotScreenshot, gotTimestamp } from "@slice/action/thunk";
 import React from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
-import hookStoreToHTMLPlayer from "../hook-player";
 import { respondScreenshotReq } from "../hook-player/screenshot";
 import { respondTimestampReq } from "../hook-player/timestamp";
 import webmFix from "./webm-fix";
@@ -29,7 +30,7 @@ const HTMLPlayer = ({
     const toUnload = [
       hookStoreToHTMLPlayer(player, store),
       webmFix(player, store),
-      respondTimestampReq(player, store, (...args) =>
+      respondTimestampReq(new HTMLMedia(player), store, (...args) =>
         store.dispatch(gotTimestamp(...args)),
       ),
       respondScreenshotReq(player, store, (...args) =>

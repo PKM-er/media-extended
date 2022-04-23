@@ -1,5 +1,6 @@
 import "@styles/player.less";
 
+import { useAspectRatio, useKeepRatio } from "@hook-utils";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { useMemoizedFn } from "ahooks";
 import cls from "classnames";
@@ -8,8 +9,6 @@ import React, { useCallback, useRef } from "react";
 import BilibiliPlayer from "./component/bilibili";
 import Controls from "./component/controls";
 import useFullScreen from "./component/fullscreen";
-import useAspectRatio from "./component/hooks/use-aspect-ratio";
-import useKeepRatio from "./component/hooks/use-keep-ratio";
 import HTMLPlayer from "./component/html5";
 import YoutubePlayer from "./component/youtube";
 import { dragSeek, dragSeekEnd } from "./slice/controls";

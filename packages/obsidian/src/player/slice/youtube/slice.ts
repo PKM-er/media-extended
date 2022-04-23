@@ -9,12 +9,14 @@ export interface YoutubeState {
   availableSpeeds: number[];
   /* changing this value will trigger volume update */
   volumeOffest: number | null;
+  playerState: YT.PlayerState | null;
 }
 
 const initialState: YoutubeState = {
   playerStatus: "none",
   availableSpeeds: [1],
   volumeOffest: null,
+  playerState: null,
 };
 
 export const getYoutubeSlice = (
@@ -34,12 +36,16 @@ export const getYoutubeSlice = (
       destroyPlayer: (state) => {
         state.playerStatus = "none";
         state.availableSpeeds = initialState.availableSpeeds;
+        state.playerState = initialState.playerState;
       },
       requsetSetVolumeByOffest: (state, action: PayloadAction<number>) => {
         state.volumeOffest = action.payload;
       },
       setVolumeByOffestDone: (state) => {
         state.volumeOffest = null;
+      },
+      handleStateChange: (state, action: PayloadAction<YT.PlayerState>) => {
+        state.playerState = action.payload;
       },
     },
     extraReducers,

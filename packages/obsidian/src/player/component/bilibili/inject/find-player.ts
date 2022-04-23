@@ -1,3 +1,5 @@
+import hookStoreToHTMLPlayer from "@hook-player";
+
 import { BrowserViewAPIName } from "../view-api";
 import {
   PlayerContainerID,
@@ -6,7 +8,6 @@ import {
   SettingBtnSelector,
   SettingMenuWarpSelector,
 } from "./const";
-import hookStoreToHTMLPlayer from "./hook-player";
 
 const addRef = <K extends keyof typeof window.__PLAYER_REF__>(
   name: K,

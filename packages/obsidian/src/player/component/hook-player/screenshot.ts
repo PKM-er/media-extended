@@ -17,33 +17,28 @@ export const respondScreenshotReq = (
   store: PlayerStore,
   action: onScreenshot,
 ) =>
-  subscribe(
-    store,
-    selectScreenshotRequested,
-    async (req) => {
-      if (req) {
-        let captured = false;
-        if (media instanceof HTMLVideoElement) {
-          const isIOS = selectIsIOS(store.getState());
-          if (isIOS === null) throw new Error("platform not determined");
+  subscribe(store, selectScreenshotRequested, async (req) => {
+    if (req) {
+      let captured = false;
+      if (media instanceof HTMLVideoElement) {
+        const isIOS = selectIsIOS(store.getState());
+        if (isIOS === null) throw new Error("platform not determined");
 
-          const type = !isIOS ? "image/webp" : "image/jpeg";
-          const { blob, time } = await captureScreenshot(media, type),
-            buffer = await blob?.arrayBuffer();
-          if (buffer) {
-            captured = true;
-            action(buffer, time, !isIOS ? "webp" : "jpg");
-          }
-        } else {
-          console.error("trying to capture screenshot on non-video element");
+        const type = !isIOS ? "image/webp" : "image/jpeg";
+        const { blob, time } = await captureScreenshot(media, type),
+          buffer = await blob?.arrayBuffer();
+        if (buffer) {
+          captured = true;
+          action(buffer, time, !isIOS ? "webp" : "jpg");
         }
-        if (!captured) {
-          store.dispatch(cancelScreenshot());
-        }
+      } else {
+        console.error("trying to capture screenshot on non-video element");
       }
-    },
-    true,
-  );
+      if (!captured) {
+        store.dispatch(cancelScreenshot());
+      }
+    }
+  });
 
 const ID = "mx-screenshot";
 export const sendScreenshot = (

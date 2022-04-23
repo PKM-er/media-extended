@@ -34,16 +34,12 @@ const hookInputButton = (
         store.dispatch(action(checkbox.checked));
       }
     });
-    subscribe(
-      selector,
-      (toggle) => {
-        if (checkbox.checked !== toggle) {
-          checkbox.checked = toggle;
-          checkbox.dispatchEvent(inputChangeEvent);
-        }
-      },
-      true,
-    );
+    subscribe(selector, (toggle) => {
+      if (checkbox.checked !== toggle) {
+        checkbox.checked = toggle;
+        checkbox.dispatchEvent(inputChangeEvent);
+      }
+    });
   }
 };
 
@@ -88,7 +84,6 @@ const hookWebFscreenState = () => {
         button.click();
       }
     },
-    true,
   );
 
   // applyParentFullscreen
@@ -97,7 +92,6 @@ const hookWebFscreenState = () => {
     (fullscreen) => {
       fullscreen && store.dispatch(applyParentFullscreen());
     },
-    true,
   );
 
   // enter web fullscreen on start
@@ -156,6 +150,5 @@ const hookDanmakuButton = () => {
         }
       }, 200);
     },
-    true,
   );
 };

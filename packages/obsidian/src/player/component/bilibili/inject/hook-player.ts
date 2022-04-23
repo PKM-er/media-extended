@@ -1,4 +1,4 @@
-import _hookStoreToHTMLPlayer from "@player/component/hook-player";
+import _hookStoreToHTMLPlayer from "@hook-player";
 import {
   respondScreenshotReq,
   sendScreenshot,
@@ -8,6 +8,7 @@ import {
   sendTimestamp,
 } from "@player/component/hook-player/timestamp";
 import { PlayerStore } from "@player/store";
+import { HTMLMedia } from "@player/utils/media";
 
 const hookStoreToHTMLPlayer = (
   player: HTMLMediaElement,
@@ -15,7 +16,7 @@ const hookStoreToHTMLPlayer = (
 ) => {
   const unloads = [
     _hookStoreToHTMLPlayer(player, store),
-    respondTimestampReq(player, store, (...args) =>
+    respondTimestampReq(new HTMLMedia(player), store, (...args) =>
       sendTimestamp(store.msgHandler.port!, ...args),
     ),
     respondScreenshotReq(player, store, (...args) =>
