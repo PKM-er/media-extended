@@ -15,11 +15,14 @@ const toSelector = (cls: string) => `.${cls}`;
 const api = PreloadSetup(InjectCode, "https://www.bilibili.com");
 window.addEventListener("DOMContentLoaded", () => {
   const styleEl = document.createElement("style");
-  const { fullscreen, widescreen } = SettingButtonCls;
+  const { fullscreen, widescreen, speed, volume, start } = SettingButtonCls;
   styleEl.textContent = `
   ${[
     toSelector(fullscreen),
     toSelector(widescreen),
+    toSelector(speed),
+    toSelector(volume),
+    toSelector(start),
     toSelector(HideMenuClass) + SettingMenuWarpSelector,
     toSelector(EndingPanelClass),
   ].join(",")} {

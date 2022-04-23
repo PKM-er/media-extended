@@ -170,3 +170,5 @@ export const TimestampButton = React.forwardRef<
     );
   },
 );
+
+export { DanmakuButton } from "./danmaku-button";

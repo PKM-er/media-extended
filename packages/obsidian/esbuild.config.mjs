@@ -92,6 +92,9 @@ try {
       "electron",
       ...cmModules,
     ],
+    loader: {
+      ".svg": "text",
+    },
     format: "cjs",
     mainFields: ["browser", "module", "main"],
     sourcemap: isProd ? false : "inline",
