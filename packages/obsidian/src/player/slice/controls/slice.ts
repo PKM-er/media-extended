@@ -78,9 +78,13 @@ export const controlsSlice = createSlice({
   name: "controls",
   initialState,
   reducers: {
-    setHash: (state, action: PayloadAction<string>) => {
-      const timeSpan = parseTF(action.payload),
-        query = parseQS(action.payload),
+    setHash: (
+      state,
+      action: PayloadAction<{ hash: string; fromLink: boolean }>,
+    ) => {
+      const { hash, fromLink } = action.payload;
+      const timeSpan = parseTF(hash),
+        query = parseQS(hash),
         frag: ControlsState["fragment"] = timeSpan
           ? [timeSpan.start, timeSpan.end]
           : null;
@@ -88,10 +92,12 @@ export const controlsSlice = createSlice({
       state.loop = is(query, "loop");
       state.autoplay = is(query, "autoplay");
       state.muted = is(query, "muted");
-      // state.controls = is("controls");
 
       // start playing when timestamp is seeked to
-      if (frag && isTimestamp(frag)) state.paused = false;
+      if (frag && isTimestamp(frag)) {
+        if (fromLink) state.paused = false;
+        state.currentTime = frag[0];
+      }
     },
     handleLoopChange: (state, action: PayloadAction<boolean>) => {
       state.loop = action.payload;

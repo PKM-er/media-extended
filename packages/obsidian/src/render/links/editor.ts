@@ -28,9 +28,10 @@ export const patchEditorClick = (plugin: MediaExtended) => {
               const { metadataCache } = this.app,
                 { path, subpath: hash } = parseLinktext(token.text),
                 file = metadataCache.getFirstLinkpathDest(path, this.file.path);
-              if (!file || !openMediaFile(file, hash, newLeaf)) fallback();
+              if (!file || !openMediaFile(file, hash, true, newLeaf))
+                fallback();
             } else if ("external-link" === token.type) {
-              if (!openMediaLink(token.text, newLeaf)) fallback();
+              if (!openMediaLink(token.text, true, newLeaf)) fallback();
             }
           } catch (error) {
             console.error(error);

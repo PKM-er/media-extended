@@ -1,6 +1,5 @@
 import "obsidian";
 
-import parseURL, { vaildateMediaURL } from "@base/url-parse";
 import {
   openMediaFile,
   openMediaLink,
@@ -22,7 +21,7 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
         evt.preventDefault();
         const fallback = () => next.call(this, evt, target, link, ...args);
         try {
-          if (!openMediaLink(link, Keymap.isModEvent(evt))) fallback();
+          if (!openMediaLink(link, true, Keymap.isModEvent(evt))) fallback();
         } catch (error) {
           console.error(error);
           fallback();
@@ -40,7 +39,7 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
               path,
               this.getFile().path,
             );
-          if (!file || !openMediaFile(file, hash, Keymap.isModEvent(evt)))
+          if (!file || !openMediaFile(file, hash, true, Keymap.isModEvent(evt)))
             fallback();
         } catch (error) {
           console.error(error);

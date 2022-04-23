@@ -57,9 +57,9 @@ export const seekByOffset =
   };
 
 export const setHash =
-  (hash: string): AppThunk =>
+  (hash: string, fromLink = false): AppThunk =>
   async (dispatch) => {
     // const { is } = new HashTool(hash);
-    dispatch(_setHash(hash));
+    dispatch(_setHash({ hash, fromLink }));
     // dispatch(setControls(is("controls")));
   };

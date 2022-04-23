@@ -58,9 +58,8 @@ export default class ObMediaView
     return this.store.msgHandler.port;
   }
 
-  // TODO: seems not working on webview on startup
-  setHash(hash: string) {
-    this.store.dispatch(setHash(hash));
+  public setHash(hash: string, fromLink: boolean) {
+    this.store.dispatch(setHash(hash, fromLink));
   }
   setFile(file: TFile) {
     this.store.dispatch(setObsidianMediaSrc(file));
@@ -116,8 +115,8 @@ export default class ObMediaView
   }
 
   setEphemeralState(state: any): void {
-    const { subpath } = state;
-    this.setHash(subpath);
+    const { subpath, fromLink = false } = state;
+    this.setHash(subpath, fromLink);
     super.setEphemeralState(state);
   }
 
