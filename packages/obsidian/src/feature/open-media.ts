@@ -7,6 +7,7 @@ import {
   Menu,
   Modal,
   Notice,
+  Platform,
   TFile,
   ViewState,
   ViewStateResult,
@@ -147,13 +148,20 @@ const getViewState = (type: "url" | "file", link: string) => {
   }
   return { type: MEDIA_VIEW_TYPE, active: true, state };
 };
-const getEphemeralState = (hash: string) => ({ subpath: hash });
+const getEphemeralState = (hash: string, fromLink: boolean) => ({
+  subpath: hash,
+  fromLink,
+});
 
-export const openMediaLink = (url: string, newLeaf = false) =>
+export const openMediaLink = (
+  url: string,
+  fromLink: boolean,
+  newLeaf = false,
+) =>
   vaildateMediaURL(url, (url, hash) => {
     const viewState = getViewState("url", url),
       findMediaView = () => findMediaViewByUrl(url);
-    openMediaView(viewState, hash, findMediaView, newLeaf);
+    openMediaView(viewState, hash, fromLink, findMediaView, newLeaf);
   });
 
 export const openMediaLinkInHoverEditor = (
@@ -165,7 +173,7 @@ export const openMediaLinkInHoverEditor = (
   if (!hoverEditor) return false;
   return vaildateMediaURL(url, (url, hash) => {
     const viewState = getViewState("url", url),
-      eState = getEphemeralState(hash);
+      eState = getEphemeralState(hash, true);
     app.workspace.trigger("hover-link", { event } as any);
     const leaf = hoverEditor.spawnPopover(
       initiatingEl,
@@ -179,18 +187,19 @@ export const openMediaLinkInHoverEditor = (
 const openMediaView = (
   viewState: ViewState,
   hash: string,
+  fromLink: boolean,
   findMediaView: () => MediaView | null,
   newLeaf: boolean,
 ) => {
   let view: MediaView | null;
   const setViewState = (leaf: WorkspaceLeaf) =>
-    leaf.setViewState(viewState, getEphemeralState(hash));
+    leaf.setViewState(viewState, getEphemeralState(hash, fromLink));
   if (newLeaf) {
     const leaf = createLeafBySplit(app.workspace.getLeaf());
     leaf.setViewState(viewState);
     setViewState(leaf);
   } else if ((view = findMediaView())) {
-    view.setHash(hash);
+    view.setHash(hash, fromLink);
   } else if ((view = getMostRecentViewOfType(MediaView))) {
     setViewState(view.leaf);
   } else {
@@ -202,13 +211,14 @@ const openMediaView = (
 export const openMediaFile = (
   file: TFile,
   hash: string,
+  fromLink: boolean,
   newLeaf = false,
 ): boolean => {
   if (app.viewRegistry.getTypeByExtension(file.extension) !== MEDIA_VIEW_TYPE)
     return false;
   const viewState = getViewState("file", file.path),
     findMediaView = () => findMediaViewByFile(file);
-  return openMediaView(viewState, hash, findMediaView, newLeaf);
+  return openMediaView(viewState, hash, fromLink, findMediaView, newLeaf);
 };
 
 class PromptModal extends Modal {
@@ -217,29 +227,53 @@ class PromptModal extends Modal {
     super(plugin.app);
     this.plugin = plugin;
   }
+  inputEl: HTMLInputElement | null = null;
+
+  confirm() {
+    if (!this.inputEl) {
+      throw new Error("inputEl is null");
+    } else if (openMediaLink(this.inputEl.value, true)) {
+      this.close();
+    } else {
+      new Notice("Link not supported");
+    }
+  }
 
   onOpen() {
+    super.onOpen();
+    this.scope.register([], "Enter", (e) => {
+      if (!e.isComposing) {
+        this.confirm();
+        return false;
+      }
+    });
     let { contentEl, titleEl, modalEl } = this;
 
     titleEl.setText("Enter Link to Media");
     const input = contentEl.createEl("input", { type: "text" }, (el) => {
       el.style.width = "100%";
-      el.focus();
     });
+    this.inputEl = input;
     modalEl.createDiv({ cls: "modal-button-container" }, (div) => {
       div.createEl("button", { cls: "mod-cta", text: "Open" }, (el) =>
-        el.addEventListener("click", async () => {
-          if (openMediaLink(input.value)) {
-            this.close();
-          } else {
-            new Notice("Link not supported");
-          }
-        }),
+        el.addEventListener("click", this.confirm.bind(this)),
       );
       div.createEl("button", { text: "Cancel" }, (el) =>
         el.onClickEvent(() => this.close()),
       );
     });
+    if (Platform.isSafari) {
+      const temp = document.body.createEl("input", { type: "text" });
+      temp.style.position = "absolute";
+      temp.style.top = "0";
+      temp.style.opacity = "0";
+      temp.style.zIndex = "-9999";
+      temp.focus();
+      setTimeout(() => {
+        temp.detach();
+        input.focus();
+      }, 300);
+    } else input.focus();
   }
 
   onClose() {
