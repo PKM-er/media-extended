@@ -94,7 +94,8 @@ export const getPlayerKeymaps = (component: PlayerComponent) =>
     if (!localHotkeys) return handlers;
     for (const { modifiers, key } of localHotkeys) {
       handlers.push(
-        component.scope.register(modifiers, key, () => {
+        component.scope.register(modifiers, key, (evt) => {
+          evt.preventDefault();
           component.store.dispatch(action);
         }),
       );
