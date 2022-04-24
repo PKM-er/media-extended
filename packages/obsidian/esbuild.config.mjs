@@ -122,7 +122,7 @@ try {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: join("build", PRELOAD_BILIBILI),
-    incremental: true,
+    incremental: !isProd,
     plugins: [
       inlineCodePlugin({
         target: "es2020",
