@@ -1,6 +1,5 @@
+import { MEDIA_VIEW_TYPE, MediaView } from "@view";
 import { SplitDirection, TFile, WorkspaceLeaf } from "obsidian";
-
-import { MEDIA_VIEW_TYPE, MediaView } from "../media-view";
 
 /**
  * smart createLeafBySplit that respect screen ratio

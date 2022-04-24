@@ -1,9 +1,7 @@
 import { ExtensionAccepted } from "@base/media-type";
 import { getPlayerKeymaps } from "@feature/keyboard-control";
-import { handleOpenMediaLink } from "@feature/open-media";
 import { Player } from "@player";
-import { MessageHandler } from "@player/ipc/redux-sync";
-import { observeStore } from "@player/store";
+import { observeStore, subscribe } from "@player/store";
 import type MediaExtended from "@plugin";
 import { revertDuration, setFragment } from "@slice/controls";
 import { seekTo, setHash } from "@slice/controls/thunk";
@@ -16,6 +14,8 @@ import {
   EditableFileView,
   ItemView,
   Menu,
+  Notice,
+  Platform,
   Scope,
   TFile,
   ViewStateResult,
@@ -38,6 +38,9 @@ declare module "obsidian" {
     titleEl: HTMLElement;
     saveTitle(): Promise<void>;
     onTitleChange(): void;
+  }
+  interface App {
+    openWithDefaultApp(path: string): Promise<void>;
   }
 }
 
@@ -83,11 +86,29 @@ export default class ObMediaView
     return false;
   }
 
+  openExternalAction: HTMLElement;
+
   constructor(leaf: WorkspaceLeaf, private plugin: MediaExtended) {
     super(leaf);
     this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
     this.keymap = getPlayerKeymaps(this);
+
+    this.openExternalAction = this.addAction(
+      "open-elsewhere-glyph",
+      "Open In External Player/Browser",
+      () => {
+        let url;
+        if (this.file && Platform.isDesktopApp) {
+          app.openWithDefaultApp(this.file.path);
+        } else if ((url = this.getUrl(true))) {
+          window.open(url, "_blank");
+        } else {
+          new Notice("Failed to open media");
+        }
+      },
+    );
+
     this.register(
       observeStore(
         this.store,
@@ -107,10 +128,26 @@ export default class ObMediaView
         },
       ),
     );
-    this.addAction(
-      "open-elsewhere-glyph",
-      "Open Media Link",
-      handleOpenMediaLink,
+    this.register(
+      subscribe(
+        this.store,
+        (state) => state.provider.source?.from,
+        (from) => {
+          if (from === "obsidian" && Platform.isDesktopApp) {
+            this.openExternalAction.style.removeProperty("display");
+            this.openExternalAction.setAttr(
+              "aria-label",
+              "Open In External Player",
+            );
+          } else if (from && from !== "obsidian") {
+            this.openExternalAction.style.removeProperty("display");
+            this.openExternalAction.setAttr("aria-label", "Open In Browser");
+          } else {
+            this.openExternalAction.style.display = "none";
+          }
+        },
+        true,
+      ),
     );
   }
 
