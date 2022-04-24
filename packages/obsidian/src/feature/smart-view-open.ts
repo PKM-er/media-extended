@@ -1,14 +1,6 @@
-import { vaildateMediaURL } from "@base/url-parse";
-import type MediaExtended from "@plugin";
-import {
-  MarkdownView,
-  Notice,
-  SplitDirection,
-  TFile,
-  WorkspaceLeaf,
-} from "obsidian";
+import { SplitDirection, TFile, WorkspaceLeaf } from "obsidian";
 
-import { MEDIA_VIEW_TYPE, MediaUrlState, MediaView } from "../media-view";
+import { MEDIA_VIEW_TYPE, MediaView } from "../media-view";
 
 /**
  * smart createLeafBySplit that respect screen ratio

@@ -1,6 +1,6 @@
 export const LARGE_CURRENT_TIME = 1e101;
 
-import { is } from "@base/hash-tool";
+import { Fragment, getFragFromHash, is } from "@base/hash-tool";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { isTimestamp, parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
@@ -18,7 +18,7 @@ export interface ControlsState {
   paused: boolean;
   fullscreen: boolean;
   /** -1 if not explicitly specified */
-  fragment: null | [number, number];
+  fragment: null | Fragment;
   playbackRate: number;
   volume: number;
   muted: boolean;
@@ -89,11 +89,8 @@ export const controlsSlice = createSlice({
       action: PayloadAction<{ hash: string; fromLink: boolean }>,
     ) => {
       const { hash, fromLink } = action.payload;
-      const timeSpan = parseTF(hash),
-        query = parseQS(hash),
-        frag: ControlsState["fragment"] = timeSpan
-          ? [timeSpan.start, timeSpan.end]
-          : null;
+      const query = parseQS(hash),
+        frag = getFragFromHash(hash);
       state.fragment = frag;
       state.loop = is(query, "loop");
       state.autoplay = is(query, "autoplay");

@@ -1,3 +1,4 @@
+import { parseTF } from "mx-lib";
 import type { ParsedQuery } from "query-string";
 
 /** Player Properties that can be controlled by hash */
@@ -18,4 +19,10 @@ export const is = (
     if (prop === playerProp && hashQuery[queryKey] === null) return true;
   }
   return false;
+};
+
+export type Fragment = [start: number, end: number];
+export const getFragFromHash = (hash: string): Fragment | null => {
+  const timeSpan = parseTF(hash);
+  return timeSpan ? [timeSpan.start, timeSpan.end] : null;
 };

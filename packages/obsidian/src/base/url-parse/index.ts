@@ -31,16 +31,23 @@ const parseURL = (_url: string): ParsedResult | null => {
 };
 export default parseURL;
 
-export const vaildateMediaURL = (
+export const vaildateMediaURL = async (
   url: string,
-  onVaild?: (url: string, hash: string) => any,
-): boolean => {
-  let result;
+  onVaild?: (
+    url: string,
+    hash: string,
+  ) => boolean | Promise<boolean> | void | Promise<void>,
+): Promise<boolean> => {
+  let result, args: [url: string, hash: string];
   if (getMediaType(url)) {
-    onVaild?.(...stripHash(url));
+    args = stripHash(url);
   } else if ((result = parseURL(url))) {
-    onVaild?.(result.url, result.hash);
+    args = [result.url, result.hash];
   } else return false;
 
+  if (onVaild) {
+    const result = await onVaild(...args);
+    if (typeof result === "boolean") return result;
+  }
   return true;
 };
