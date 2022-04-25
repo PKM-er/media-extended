@@ -9,10 +9,10 @@ import {
   ScreenshotButton,
   TimestampButton,
 } from "./buttons";
-import CaptionControl from "./caption";
 import ProgressBar from "./progress-bar";
 import ProgressLabel from "./progress-label";
 import SpeedControl from "./speed";
+import TrackControl from "./tracks-control";
 import VolumeControl from "./volume";
 
 const Controls = () => {
@@ -32,7 +32,7 @@ const Controls = () => {
             <DanmakuButton />
             <ScreenshotButton />
             <TimestampButton />
-            <CaptionControl />
+            <TrackControl />
             <SpeedControl />
             <VolumeControl />
             <FullscreenButton />

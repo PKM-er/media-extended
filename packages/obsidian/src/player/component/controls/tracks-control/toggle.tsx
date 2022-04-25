@@ -1,6 +1,6 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { toggleCaption } from "@slice/interface";
+import { toggleTracks } from "@slice/interface";
 import { addIcon } from "obsidian";
 import React, { useCallback } from "react";
 
@@ -14,20 +14,19 @@ addIcon(onIconId, onIcon);
 addIcon(offIconId, offIcon);
 
 import Toggle from "../basic/toggle";
-export const CaptionButton = React.forwardRef<
+export const TracksToggle = React.forwardRef<
   HTMLButtonElement,
   ButtonUnstyledProps
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function CaptionButton(props, ref) {
-    const enabled = useAppSelector((state) => state.interface.captions.enabled);
+  function TracksToggle(props, ref) {
+    const enabled = useAppSelector(
+      (state) => state.interface.textTracks.enabled,
+    );
 
     const dispatch = useAppDispatch();
 
-    const handleClick = useCallback(
-      () => dispatch(toggleCaption()),
-      [dispatch],
-    );
+    const handleClick = useCallback(() => dispatch(toggleTracks()), [dispatch]);
 
     return (
       <Toggle

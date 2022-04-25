@@ -7,10 +7,10 @@ import cls from "classnames";
 import React, { useCallback, useRef } from "react";
 
 import BilibiliPlayer from "./component/bilibili";
-import Captions from "./component/caption";
 import Controls from "./component/controls";
 import useFullScreen from "./component/fullscreen";
 import HTMLPlayer from "./component/html5";
+import TextTracks from "./component/text-tracks";
 import YoutubePlayer from "./component/youtube";
 import { dragSeek, dragSeekEnd } from "./slice/controls";
 import { selectPlayerType } from "./slice/provider";
@@ -78,7 +78,7 @@ const Player = ({
         <BilibiliPlayer {...ratioProps} />
       ) : null}
       <Controls />
-      <Captions />
+      <TextTracks />
     </div>
   );
 };

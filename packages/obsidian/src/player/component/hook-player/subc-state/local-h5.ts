@@ -1,8 +1,8 @@
 import { PlayerStore, subscribe } from "@player/store";
 import type { HTMLMedia } from "@player/utils/media";
 import {
-  lockCaptionUpdateEvent,
-  unlockCaptionUpdateEvent,
+  lockTracksUpdateEvent,
+  unlockTracksUpdateEvent,
 } from "@slice/interface";
 
 import _hookHTMLState from "./html5";
@@ -13,12 +13,12 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
     subscribe(
       store,
       (state) => {
-        const { active, enabled } = state.interface.captions,
+        const { active, enabled } = state.interface.textTracks,
           controls = state.interface.controls;
         return [active, enabled, controls] as const;
       },
       ([active, enabled, controls]) => {
-        store.dispatch(lockCaptionUpdateEvent());
+        store.dispatch(lockTracksUpdateEvent());
         for (let i = 0; i < media.instance.textTracks.length; i++) {
           const track = media.instance.textTracks[i];
           if (enabled && i === active) {
@@ -28,7 +28,7 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
           }
         }
         setTimeout(() => {
-          store.dispatch(unlockCaptionUpdateEvent());
+          store.dispatch(unlockTracksUpdateEvent());
         }, 50);
       },
       false,

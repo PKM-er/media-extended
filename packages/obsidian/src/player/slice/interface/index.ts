@@ -13,13 +13,13 @@ export interface InterfaceState {
    */
   ratio: string | 0 | null;
   activeCues: string | null;
-  captions: {
+  textTracks: {
     list: Track[];
     active: number;
     enabled: boolean;
   };
   ignoreEvent: {
-    caption: boolean;
+    tracks: boolean;
   };
 }
 
@@ -27,8 +27,8 @@ const initialState: InterfaceState = {
   controls: "custom",
   ratio: null,
   activeCues: null,
-  captions: { list: [], active: -1, enabled: true },
-  ignoreEvent: { caption: false },
+  textTracks: { list: [], active: -1, enabled: true },
+  ignoreEvent: { tracks: false },
 };
 
 export const interfaceSlice = createSlice({
@@ -63,32 +63,32 @@ export const interfaceSlice = createSlice({
           .join("\n");
       }
     },
-    toggleCaption: (state) => {
-      const enable = !state.captions.enabled;
-      state.captions.enabled = enable;
+    toggleTracks: (state) => {
+      const enable = !state.textTracks.enabled;
+      state.textTracks.enabled = enable;
       if (!enable) state.activeCues = null;
     },
-    setActiveCaption: (state, action: PayloadAction<number>) => {
-      const { list } = state.captions,
+    setActiveTrack: (state, action: PayloadAction<number>) => {
+      const { list } = state.textTracks,
         newActive = action.payload;
       if (newActive >= 0 && newActive < list.length) {
-        state.captions.active = newActive;
-        state.captions.enabled = true;
+        state.textTracks.active = newActive;
+        state.textTracks.enabled = true;
       } else {
         console.error("caption index out of range", list.length);
       }
     },
-    lockCaptionUpdateEvent: (state) => {
-      state.ignoreEvent.caption = true;
+    lockTracksUpdateEvent: (state) => {
+      state.ignoreEvent.tracks = true;
     },
-    unlockCaptionUpdateEvent: (state) => {
-      state.ignoreEvent.caption = false;
+    unlockTracksUpdateEvent: (state) => {
+      state.ignoreEvent.tracks = false;
     },
     handleTrackListChange: (
       state,
-      action: PayloadAction<InterfaceState["captions"]>,
+      action: PayloadAction<InterfaceState["textTracks"]>,
     ) => {
-      if (!state.ignoreEvent.caption) state.captions = action.payload;
+      if (!state.ignoreEvent.tracks) state.textTracks = action.payload;
     },
   },
 });
@@ -98,10 +98,10 @@ export const {
   resetInterface,
   updateCues,
   handleTrackListChange,
-  lockCaptionUpdateEvent,
-  setActiveCaption,
-  toggleCaption,
-  unlockCaptionUpdateEvent,
+  lockTracksUpdateEvent,
+  setActiveTrack,
+  toggleTracks,
+  unlockTracksUpdateEvent,
 } = interfaceSlice.actions;
 
 export default interfaceSlice.reducer;

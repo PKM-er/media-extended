@@ -1,25 +1,25 @@
-import "@styles/caption.less";
+import "@styles/text-tracks.less";
 
 import { useAppSelector } from "@player/hooks";
 import React from "react";
 
 import Popover from "../basic/popover";
-import { CaptionSelection } from "./menu";
-import { CaptionButton } from "./toggle";
+import { TracksMenu } from "./menu";
+import { TracksToggle } from "./toggle";
 
-const CaptionControl = () => {
+const TrackControl = () => {
   const hasCaption = useAppSelector(
-    (state) => state.interface.captions.list.length > 0,
+    (state) => state.interface.textTracks.list.length > 0,
   );
 
   return hasCaption ? (
     <Popover
       placement="top"
       className="mx__caption-control-container"
-      render={() => <CaptionSelection />}
+      render={() => <TracksMenu />}
     >
-      <CaptionButton />
+      <TracksToggle />
     </Popover>
   ) : null;
 };
-export default CaptionControl;
+export default TrackControl;

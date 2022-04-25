@@ -54,7 +54,6 @@ export interface ControlsState {
   error: string | null;
   ignoreEvent: {
     playpause: boolean;
-    caption: boolean;
   };
 }
 const initialState: ControlsState = {
@@ -78,7 +77,6 @@ const initialState: ControlsState = {
   error: null,
   ignoreEvent: {
     playpause: false,
-    caption: false,
   },
 };
 

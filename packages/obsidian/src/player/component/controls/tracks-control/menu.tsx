@@ -5,28 +5,28 @@ import {
 } from "@mui/base";
 import MenuItem from "@mui/base/MenuItemUnstyled";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setActiveCaption, toggleCaption } from "@slice/interface";
+import { setActiveTrack, toggleTracks } from "@slice/interface";
 import React from "react";
 
 import Icon from "../basic/icon";
 
-export const CaptionSelection = () => {
-  const captions = useAppSelector((state) => state.interface.captions.list);
-  const active = useAppSelector((state) => state.interface.captions.active);
-  const enabled = useAppSelector((state) => state.interface.captions.enabled);
+export const TracksMenu = () => {
+  const tracks = useAppSelector((state) => state.interface.textTracks.list);
+  const active = useAppSelector((state) => state.interface.textTracks.active);
+  const enabled = useAppSelector((state) => state.interface.textTracks.enabled);
   const dispatch = useAppDispatch();
   return (
     <Menu className="menu">
-      {captions.map((caption, i) => {
+      {tracks.map((track, i) => {
         return (
           <MenuItem
             className="menu-item"
-            key={[caption.kind, caption.label, caption.language].join(";")}
-            label={caption.label}
+            key={[track.kind, track.label, track.language].join(";")}
+            label={track.label}
             component="div"
             onClick={() => {
-              if (i === active) dispatch(toggleCaption());
-              else dispatch(setActiveCaption(i));
+              if (i === active) dispatch(toggleTracks());
+              else dispatch(setActiveTrack(i));
             }}
           >
             {enabled && active === i ? (
@@ -35,11 +35,11 @@ export const CaptionSelection = () => {
               <div className="menu-item-icon"></div>
             )}
             <span className="menu-item-title">
-              {caption.label ? caption.label : "Default"}
+              {track.label ? track.label : "Default"}
             </span>
-            {caption.language && (
+            {track.language && (
               <span className="mx__menu-value">
-                <span className="mx__caption-badge">{caption.language}</span>
+                <span className="mx__caption-badge">{track.language}</span>
               </span>
             )}
           </MenuItem>

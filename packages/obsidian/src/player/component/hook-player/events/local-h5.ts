@@ -11,18 +11,18 @@ export const hookHTMLEvents = (
   store: PlayerStore,
 ) => {
   const toUnload = [
-    hookCaptionUpdate(player, store),
+    hookTracksUpdate(player, store),
     hookCueUpdate(player, store),
     _hookHTMLEvents(player, store),
   ];
   return () => toUnload.forEach((unload) => unload());
 };
 
-const hookCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
+const hookTracksUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   const trackList = player.textTracks;
   let handleTrackUpdate = () => {
-    const prevActive = store.getState().interface.captions.active;
-    let tracks: InterfaceState["captions"] = {
+    const prevActive = store.getState().interface.textTracks.active;
+    let tracks: InterfaceState["textTracks"] = {
       list: [],
       active: -1,
       enabled: false,
