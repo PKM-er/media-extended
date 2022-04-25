@@ -110,22 +110,10 @@ export default class ObMediaView
     );
 
     this.register(
-      observeStore(
+      subscribe(
         this.store,
-        (state) => state.provider.source,
-        (source) => {
-          if (source?.from === "obsidian") return;
-          const title = source?.title;
-          let titleText: string;
-          if (title === null) {
-            titleText = ""; // loading title
-          } else if (title === undefined) {
-            titleText = "No Media";
-          } else {
-            titleText = title;
-          }
-          this.titleEl.setText(titleText);
-        },
+        (state) => state.provider.source?.title,
+        () => this.titleEl.setText(this.getDisplayText()),
       ),
     );
     this.register(
@@ -161,7 +149,23 @@ export default class ObMediaView
     return MEDIA_VIEW_TYPE;
   }
   getDisplayText(): string {
-    return this.store.getState().provider.source?.title ?? "No Media";
+    const { source } = this.store.getState().provider;
+    if (source?.from === "obsidian") {
+      if (!this.file) {
+        console.error("no file for media view");
+        return "No Media";
+      } else return this.file.basename;
+    }
+    const title = source?.title;
+    let titleText: string;
+    if (title === null) {
+      titleText = ""; // loading title
+    } else if (title === undefined) {
+      titleText = "No Media";
+    } else {
+      titleText = title;
+    }
+    return titleText;
   }
 
   getState(): MediaState {
