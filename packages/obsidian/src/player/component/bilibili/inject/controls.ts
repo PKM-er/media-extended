@@ -7,13 +7,13 @@ import {
 } from "@slice/bilibili";
 import { handleAutoplayChange, handleLoopChange } from "@slice/controls";
 
-import { BrowserViewAPIName } from "../view-api";
-import { subscribe } from ".";
 import {
+  dispatch,
   SettingButtonCls,
   SettingMenuToggleCls,
+  subscribe,
   WebFscreenClass,
-} from "./const";
+} from "./common";
 
 const inputChangeEvent = new Event("change");
 
@@ -23,15 +23,13 @@ const hookInputButton = (
   selector: (state: RootState) => boolean,
   action: (payload: boolean) => PayloadAction<boolean>,
 ) => {
-  const store = window[BrowserViewAPIName].store;
-
   const checkbox = findIn.querySelector<HTMLInputElement>(
     `.${classname} input[type="checkbox"]`,
   );
   if (checkbox) {
     checkbox.addEventListener("change", (evt) => {
       if (evt !== inputChangeEvent) {
-        store.dispatch(action(checkbox.checked));
+        dispatch(action(checkbox.checked));
       }
     });
     subscribe(selector, (toggle) => {
@@ -62,13 +60,11 @@ const observeClass = (
 };
 
 const hookWebFscreenState = () => {
-  const ref = window.__PLAYER_REF__,
-    store = window[BrowserViewAPIName].store;
-
+  const ref = window.__PLAYER_REF__;
   // on web fscreen change
   observeClass(document.body, WebFscreenClass, (fullscreen) => {
     setTimeout(() => {
-      store.dispatch(handleWebFscreenChange(fullscreen));
+      dispatch(handleWebFscreenChange(fullscreen));
     }, 200);
   });
 
@@ -90,7 +86,7 @@ const hookWebFscreenState = () => {
   subscribe(
     (state) => state.controls.fullscreen,
     (fullscreen) => {
-      fullscreen && store.dispatch(applyParentFullscreen());
+      fullscreen && dispatch(applyParentFullscreen());
     },
   );
 

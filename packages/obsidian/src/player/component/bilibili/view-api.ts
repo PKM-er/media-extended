@@ -1,11 +1,11 @@
-import type { IBrowserViewAPI } from "@ipc/remote-view/view-api";
+// import type { IWebViewAPI } from "@ipc/remote-view/view-api";
 
-export const BrowserViewAPIName = "MediaExtendedAPI";
+export const WebViewAPIName = "MediaExtendedAPI";
 
 declare global {
   interface Window {
     __ENABLE_WASM_PLAYER__?: boolean;
-    [BrowserViewAPIName]: IBrowserViewAPI;
+    // [WebViewAPIName]: IWebViewAPI;
     __PLAYER_REF__: Partial<{
       /** exists in source html, player will be injected into this */
       playerPlaceholder: HTMLElement;

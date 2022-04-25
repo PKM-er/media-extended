@@ -16,16 +16,18 @@ export const respondTimestampReq = (
     }
   });
 
-const ID = "mx-timestamp";
+export const TimestampMsgID = "mx-timestamp";
+export type TimestampMsg = [typeof TimestampMsgID, ...Parameters<onTimestamp>];
+
 export const sendTimestamp = (
   port: MessagePort,
   ...args: Parameters<onTimestamp>
 ) => {
-  port.postMessage([ID, ...args]);
+  port.postMessage([TimestampMsgID, ...args]);
 };
 export const moniterTimestampMsg = (port: MessagePort, action: onTimestamp) => {
   port.addEventListener("message", ({ data: [id, timestamp, duration] }) => {
-    if (id !== ID) return;
+    if (id !== TimestampMsgID) return;
     action(timestamp, duration);
   });
 };

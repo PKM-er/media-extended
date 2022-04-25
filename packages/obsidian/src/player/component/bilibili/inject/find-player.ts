@@ -1,13 +1,13 @@
 import hookStoreToHTMLPlayer from "@hook-player";
 
-import { BrowserViewAPIName } from "../view-api";
 import {
   PlayerContainerID,
   PlayerControlSelector,
   PlayerPlaceholderID,
   SettingBtnSelector,
   SettingMenuWarpSelector,
-} from "./const";
+  store,
+} from "./common";
 
 const addRef = <K extends keyof typeof window.__PLAYER_REF__>(
   name: K,
@@ -30,7 +30,7 @@ const findPlayer = (
     let player = warpper.querySelector<HTMLVideoElement>("video, bwp-video");
     if (!player) return;
     obs.disconnect();
-    hookStoreToHTMLPlayer(player, window[BrowserViewAPIName].store);
+    hookStoreToHTMLPlayer(player, store);
     console.log("player found");
 
     addRef("video", player);

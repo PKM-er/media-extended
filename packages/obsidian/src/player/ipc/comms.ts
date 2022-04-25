@@ -18,7 +18,7 @@ const getPort = (channel: string, viewId?: number) =>
 
 const getObsidianPort = async (viewId: number) =>
   (await getPort(ChannelNameObsidian, viewId))[0];
-export const getBrowserViewPort = async () =>
+export const getWebViewPort = async () =>
   (await getPort(ChannelNameBrowserView))[0];
 
 export const initObsidianPort = (viewId: number) =>

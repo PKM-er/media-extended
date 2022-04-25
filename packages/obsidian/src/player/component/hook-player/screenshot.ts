@@ -40,20 +40,25 @@ export const respondScreenshotReq = (
     }
   });
 
-const ID = "mx-screenshot";
+export const ScreenshotMsgID = "mx-screenshot";
+export type ScreenshotMsg = [
+  typeof ScreenshotMsgID,
+  ...Parameters<onScreenshot>,
+];
+
 export const sendScreenshot = (
   port: MessagePort,
   ...args: Parameters<onScreenshot>
 ) => {
   const ab = args[0];
-  port.postMessage([ID, ...args], [ab]);
+  port.postMessage([ScreenshotMsgID, ...args], [ab]);
 };
 export const moniterScreenshotMsg = (
   port: MessagePort,
   action: onScreenshot,
 ) => {
   port.addEventListener("message", ({ data: [id, ab, time, ext] }) => {
-    if (id !== ID) return;
+    if (id !== ScreenshotMsgID) return;
     action(ab, time, ext);
   });
 };

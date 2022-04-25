@@ -1,8 +1,8 @@
-import { getBrowserViewPort } from "@ipc/comms";
+import { getWebViewPort } from "@ipc/comms";
 
 const PreloadSetup = (injectCode: string, origin: string): any => {
   console.log("running preload script");
-  const port = getBrowserViewPort().then((port) => {
+  const port = getWebViewPort().then((port) => {
     console.log(
       "browser view port ready, sending from isolated world to main world",
     );

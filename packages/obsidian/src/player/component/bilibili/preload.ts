@@ -6,7 +6,7 @@ import {
   EndingPanelClass,
   SettingButtonCls,
   SettingMenuWarpSelector,
-} from "./inject/const";
+} from "./inject/common";
 import { HideMenuClass } from "./inject/find-player";
 // import { BrowserViewAPIName } from "./view-api";
 

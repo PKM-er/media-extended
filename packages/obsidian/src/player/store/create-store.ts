@@ -15,7 +15,7 @@ export const createStoreWithMsgHandler = <S, A extends Action>(
       getDefault().concat(createStateSyncMiddleware(msgHandler, allowed)),
   });
   msgHandler.store = store;
-  return Object.assign(store, { msgHandler }) as typeof store & {
-    msgHandler: typeof msgHandler;
-  };
+  const storeWithMsg: typeof store & { msgHandler: typeof msgHandler } =
+    Object.assign(store, { msgHandler });
+  return storeWithMsg;
 };

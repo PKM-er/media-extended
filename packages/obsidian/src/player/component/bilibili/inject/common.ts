@@ -1,3 +1,6 @@
+import { getSubscribeFunc } from "@player/store";
+import { createStore } from "@player/store/remote-store";
+
 export const WebFscreenClass = "player-mode-webfullscreen",
   EndingPanelClass = "bilibili-player-ending-panel";
 
@@ -26,3 +29,7 @@ export const SettingBtnSelector = ".bilibili-player-video-btn-setting",
 
 export const PlayerContainerID = "bilibiliPlayer",
   PlayerPlaceholderID = "bilibili-player";
+
+export const store = createStore(window.location.href),
+  dispatch = store.dispatch,
+  subscribe = getSubscribeFunc(store);

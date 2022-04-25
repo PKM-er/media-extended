@@ -30,7 +30,7 @@ export const observeStore = <T>(
 };
 
 export const getSubscribeFunc =
-  <S extends PlayerStore>(store: S) =>
+  <S extends PlayerStore = PlayerStore>(store: S) =>
   <T>(
     selector: (state: RootState) => T,
     onChange: (state: T, prevState: T | undefined) => any,
