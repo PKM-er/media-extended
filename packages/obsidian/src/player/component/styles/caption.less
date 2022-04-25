@@ -26,3 +26,12 @@
     text-transform: uppercase;
   }
 }
+
+video::-webkit-media-text-track-container {
+  transition: transform 0.4s ease-in-out;
+  .mx-player:hover &,
+  .mx-player.mx__paused & {
+    transform: translateY(-50px);
+  }
+  transform: translateY(-10px);
+}
