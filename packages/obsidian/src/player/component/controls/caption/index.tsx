@@ -9,7 +9,7 @@ import { CaptionButton } from "./toggle";
 
 const CaptionControl = () => {
   const hasCaption = useAppSelector(
-    (state) => state.controls.captions.list.length > 0,
+    (state) => state.interface.captions.list.length > 0,
   );
 
   return hasCaption ? (

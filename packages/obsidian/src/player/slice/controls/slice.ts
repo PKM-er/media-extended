@@ -7,7 +7,6 @@ import { parse as parseQS } from "query-string";
 
 export type UserSeekSource = "progress-bar" | "drag" | "manual";
 
-type Track = Pick<TextTrack, "kind" | "label" | "language">;
 export interface ControlsState {
   /**
    * the currentTime of the provider
@@ -57,11 +56,6 @@ export interface ControlsState {
     playpause: boolean;
     caption: boolean;
   };
-  captions: {
-    list: Track[];
-    active: number;
-    enabled: boolean;
-  };
 }
 const initialState: ControlsState = {
   currentTime: 0,
@@ -86,7 +80,6 @@ const initialState: ControlsState = {
     playpause: false,
     caption: false,
   },
-  captions: { list: [], active: -1, enabled: true },
 };
 
 export const controlsSlice = createSlice({
@@ -114,31 +107,6 @@ export const controlsSlice = createSlice({
     handleLoopChange: (state, action: PayloadAction<boolean>) => {
       state.loop = action.payload;
     },
-    toggleCaption: (state) => {
-      state.captions.enabled = !state.captions.enabled;
-    },
-    setActiveCaption: (state, action: PayloadAction<number>) => {
-      const { list } = state.captions,
-        newActive = action.payload;
-      if (newActive >= 0 && newActive < list.length) {
-        state.captions.active = newActive;
-        state.captions.enabled = true;
-      } else {
-        console.error("caption index out of range", list.length);
-      }
-    },
-    lockCaptionUpdateEvent: (state) => {
-      state.ignoreEvent.caption = true;
-    },
-    unlockCaptionUpdateEvent: (state) => {
-      state.ignoreEvent.caption = false;
-    },
-    handleTrackListChange: (
-      state,
-      action: PayloadAction<ControlsState["captions"]>,
-    ) => {
-      if (!state.ignoreEvent.caption) state.captions = action.payload;
-    },
     handleAutoplayChange: (state, action: PayloadAction<boolean>) => {
       state.autoplay = action.payload;
     },
@@ -150,7 +118,7 @@ export const controlsSlice = createSlice({
       if (frag && isTimestamp(frag)) state.paused = false;
     },
     reset: (state) => {
-      Object.assign(state, initialState);
+      return initialState;
     },
     play: (state) => {
       state.paused = false;

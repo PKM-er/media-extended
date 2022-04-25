@@ -35,3 +35,39 @@ video::-webkit-media-text-track-container {
   }
   transform: translateY(-10px);
 }
+
+.mx-player {
+  &:hover .mx__captions,
+  &.mx__paused .mx__captions {
+    bottom: 60px;
+  }
+  .mx__captions {
+    bottom: 10px;
+    font-size: medium;
+    left: 0;
+    // padding: $mx-control-spacing;
+    position: absolute;
+    text-align: center;
+    transition: bottom 0.4s ease-in-out, transform 0.4s ease-in-out;
+
+    width: 100%;
+    z-index: var(--layer-tooltip);
+
+    span:empty {
+      display: none;
+    }
+    display: block;
+  }
+
+  .mx__caption {
+    background-color: rgba(black, 0.5);
+    border-radius: 4px;
+    color: white;
+    line-height: 185%;
+    padding: 0.2em 0.5em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    white-space: pre-wrap;
+    user-select: text;
+  }
+}

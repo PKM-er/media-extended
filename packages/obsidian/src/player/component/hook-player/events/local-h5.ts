@@ -1,7 +1,7 @@
 import { isDefaultLang } from "@feature/subtitle";
-import type { PlayerStore } from "@player/store";
-import { handleTrackListChange } from "@slice/controls";
-import type { ControlsState } from "@slice/controls/slice";
+import { PlayerStore, subscribe } from "@player/store";
+import { handleTrackListChange, InterfaceState } from "@slice/interface";
+import { updateCues } from "@slice/interface";
 import { debounce } from "obsidian";
 
 import _hookHTMLEvents from "./html5";
@@ -10,15 +10,19 @@ export const hookHTMLEvents = (
   player: HTMLMediaElement,
   store: PlayerStore,
 ) => {
-  applyCaptionUpdate(player, store);
-  return _hookHTMLEvents(player, store);
+  const toUnload = [
+    hookCaptionUpdate(player, store),
+    hookCueUpdate(player, store),
+    _hookHTMLEvents(player, store),
+  ];
+  return () => toUnload.forEach((unload) => unload());
 };
 
-const applyCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
+const hookCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   const trackList = player.textTracks;
-  let handleTrackUpdate = (name: string) => {
-    const prevActive = store.getState().controls.captions.active;
-    let tracks: ControlsState["captions"] = {
+  let handleTrackUpdate = () => {
+    const prevActive = store.getState().interface.captions.active;
+    let tracks: InterfaceState["captions"] = {
       list: [],
       active: -1,
       enabled: false,
@@ -33,7 +37,10 @@ const applyCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
         label: track.label,
         language: track.language,
       });
-      if (tracks.active === -1 && track.mode === "showing") {
+      if (
+        tracks.active === -1 &&
+        (track.mode === "showing" || track.mode === "hidden")
+      ) {
         tracks.active = i;
         tracks.enabled = true;
       }
@@ -52,11 +59,77 @@ const applyCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
     store.dispatch(handleTrackListChange(tracks));
   };
 
+  const hideTracks = () => {
+    const shouldHide = store.getState().interface.controls === "custom";
+    for (let i = 0; i < trackList.length; i++) {
+      const track = trackList[i];
+      if (shouldHide && track.mode === "showing") {
+        track.mode = "hidden";
+      } else if (!shouldHide && track.mode === "hidden") {
+        track.mode = "showing";
+      }
+    }
+  };
+
   handleTrackUpdate = debounce(handleTrackUpdate, 50, true);
-  trackList.onaddtrack = () => handleTrackUpdate("add");
-  trackList.onremovetrack = () => handleTrackUpdate("remove");
-  trackList.onchange = () => handleTrackUpdate("change");
-  handleTrackUpdate("init");
+  trackList.addEventListener("addtrack", handleTrackUpdate);
+  trackList.addEventListener("removetrack", handleTrackUpdate);
+  trackList.addEventListener("change", handleTrackUpdate);
+  handleTrackUpdate();
+  trackList.addEventListener("addtrack", hideTracks);
+  trackList.addEventListener("change", hideTracks);
+  return () => {
+    trackList.removeEventListener("addtrack", handleTrackUpdate);
+    trackList.removeEventListener("removetrack", handleTrackUpdate);
+    trackList.removeEventListener("change", handleTrackUpdate);
+    trackList.removeEventListener("addtrack", hideTracks);
+    trackList.removeEventListener("change", hideTracks);
+  };
+};
+
+const toHTML = (frag: DocumentFragment) =>
+  createDiv({}, (div) => div.append(frag)).innerHTML;
+const hookCueUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
+  const trackList = player.textTracks;
+
+  let active: TextTrack | null = null;
+  const updateCue = () => {
+    const activeCues = Array.from(active?.activeCues ?? []).map((cue) =>
+      toHTML((cue as VTTCue).getCueAsHTML()),
+    );
+    store.dispatch(updateCues(activeCues));
+  };
+  const registerCueUpdate = (track: TextTrack) => {
+      if (active) unregisterCueUpdate();
+      active = track;
+      track.addEventListener("cuechange", updateCue);
+    },
+    unregisterCueUpdate = () => {
+      if (!active) return;
+      active.removeEventListener("cuechange", updateCue);
+      active = null;
+    };
+
+  const handleTrackUpdate = () => {
+    for (let i = 0; i < trackList.length; i++) {
+      const track = trackList[i];
+      if (track.mode === "hidden" || track.mode === "showing") {
+        registerCueUpdate(track);
+        return;
+      }
+    }
+    unregisterCueUpdate();
+  };
+  trackList.addEventListener("addtrack", handleTrackUpdate);
+  trackList.addEventListener("removetrack", handleTrackUpdate);
+  trackList.addEventListener("change", handleTrackUpdate);
+
+  return () => {
+    trackList.removeEventListener("addtrack", handleTrackUpdate);
+    trackList.removeEventListener("removetrack", handleTrackUpdate);
+    trackList.removeEventListener("change", handleTrackUpdate);
+    unregisterCueUpdate();
+  };
 };
 
 const coalescing = (...args: number[]) => {

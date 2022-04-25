@@ -138,8 +138,7 @@ export const getProviderSlice = (
         state.source = media;
       },
       resetProvider: (state) => {
-        state.source = initialState.source;
-        state.tracks = initialState.tracks;
+        return initialState;
       },
       switchToAudio: (state) => {
         if (state.source) {

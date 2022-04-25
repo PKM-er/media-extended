@@ -5,15 +5,15 @@ import {
 } from "@mui/base";
 import MenuItem from "@mui/base/MenuItemUnstyled";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setActiveCaption, toggleCaption } from "@slice/controls";
+import { setActiveCaption, toggleCaption } from "@slice/interface";
 import React from "react";
 
 import Icon from "../basic/icon";
 
 export const CaptionSelection = () => {
-  const captions = useAppSelector((state) => state.controls.captions.list);
-  const active = useAppSelector((state) => state.controls.captions.active);
-  const enabled = useAppSelector((state) => state.controls.captions.enabled);
+  const captions = useAppSelector((state) => state.interface.captions.list);
+  const active = useAppSelector((state) => state.interface.captions.active);
+  const enabled = useAppSelector((state) => state.interface.captions.enabled);
   const dispatch = useAppDispatch();
   return (
     <Menu className="menu">

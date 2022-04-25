@@ -1,6 +1,6 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { toggleCaption } from "@slice/controls";
+import { toggleCaption } from "@slice/interface";
 import { addIcon } from "obsidian";
 import React, { useCallback } from "react";
 
@@ -20,7 +20,7 @@ export const CaptionButton = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function CaptionButton(props, ref) {
-    const enabled = useAppSelector((state) => state.controls.captions.enabled);
+    const enabled = useAppSelector((state) => state.interface.captions.enabled);
 
     const dispatch = useAppDispatch();
 

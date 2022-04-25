@@ -34,9 +34,7 @@ export const getYoutubeSlice = (
         state.availableSpeeds = action.payload.availableSpeeds;
       },
       destroyPlayer: (state) => {
-        state.playerStatus = "none";
-        state.availableSpeeds = initialState.availableSpeeds;
-        state.playerState = initialState.playerState;
+        return initialState;
       },
       requsetSetVolumeByOffest: (state, action: PayloadAction<number>) => {
         state.volumeOffest = action.payload;

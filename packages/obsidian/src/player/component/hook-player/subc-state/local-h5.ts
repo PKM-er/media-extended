@@ -3,7 +3,7 @@ import type { HTMLMedia } from "@player/utils/media";
 import {
   lockCaptionUpdateEvent,
   unlockCaptionUpdateEvent,
-} from "@slice/controls";
+} from "@slice/interface";
 
 import _hookHTMLState from "./html5";
 
@@ -13,15 +13,16 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
     subscribe(
       store,
       (state) => {
-        const { active, enabled } = state.controls.captions;
-        return [active, enabled];
+        const { active, enabled } = state.interface.captions,
+          controls = state.interface.controls;
+        return [active, enabled, controls] as const;
       },
-      ([active, enabled]) => {
+      ([active, enabled, controls]) => {
         store.dispatch(lockCaptionUpdateEvent());
         for (let i = 0; i < media.instance.textTracks.length; i++) {
           const track = media.instance.textTracks[i];
           if (enabled && i === active) {
-            track.mode = "showing";
+            track.mode = controls === "custom" ? "hidden" : "showing";
           } else {
             track.mode = "disabled";
           }
@@ -30,6 +31,7 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
           store.dispatch(unlockCaptionUpdateEvent());
         }, 50);
       },
+      false,
     ),
   ];
   return () => toUnload.forEach((unload) => unload());

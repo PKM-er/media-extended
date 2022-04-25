@@ -7,6 +7,7 @@ import cls from "classnames";
 import React, { useCallback, useRef } from "react";
 
 import BilibiliPlayer from "./component/bilibili";
+import Captions from "./component/caption";
 import Controls from "./component/controls";
 import useFullScreen from "./component/fullscreen";
 import HTMLPlayer from "./component/html5";
@@ -77,6 +78,7 @@ const Player = ({
         <BilibiliPlayer {...ratioProps} />
       ) : null}
       <Controls />
+      <Captions />
     </div>
   );
 };

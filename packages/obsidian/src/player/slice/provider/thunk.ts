@@ -10,7 +10,7 @@ import { canScreenshot, resetCanScreenshot } from "../action";
 import { fetchBiliMeta } from "../async-thunk/bilibili";
 import fetchYoutubeMeta from "../async-thunk/fetch-ytb-meta";
 import { reset as resetControls } from "../controls";
-import { resetRatio } from "../interface";
+import { resetInterface } from "../interface";
 import { getProviderSlice } from "./slice";
 import { SerializableTFile } from "./types";
 
@@ -55,7 +55,7 @@ export const switchToAudio = (): AppThunk => (dispatch, getState) => {
 
 const resetNonProvider = (dispatch: AppDispatch) => {
   dispatch(resetControls());
-  dispatch(resetRatio());
+  dispatch(resetInterface());
   dispatch(resetCanScreenshot());
 };
 
