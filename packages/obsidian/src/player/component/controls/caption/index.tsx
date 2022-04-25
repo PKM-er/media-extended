@@ -1,48 +1,25 @@
-import { ButtonUnstyledProps } from "@mui/base";
-import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { toggleCaption } from "@slice/controls";
-import { addIcon } from "obsidian";
-import React, { useCallback } from "react";
+import "@styles/caption.less";
 
-import offIcon from "./off.svg";
-import onIcon from "./on.svg";
+import { useAppSelector } from "@player/hooks";
+import React from "react";
 
-const onIconId = "caption-on",
-  offIconId = "caption-off";
+import Popover from "../basic/popover";
+import { CaptionSelection } from "./menu";
+import { CaptionButton } from "./toggle";
 
-addIcon(onIconId, onIcon);
-addIcon(offIconId, offIcon);
+const CaptionControl = () => {
+  const hasCaption = useAppSelector(
+    (state) => state.controls.captions.list.length > 0,
+  );
 
-import Toggle from "../basic/toggle";
-export const CaptionButton = React.forwardRef<
-  HTMLButtonElement,
-  ButtonUnstyledProps
->(
-  // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function CaptionButton(props, ref) {
-    const captionOn = useAppSelector(
-      (state) => state.controls.captions.active !== -1,
-    );
-    const captionAvailable = useAppSelector(
-      (state) => state.controls.captions.list.length > 0,
-    );
-    const dispatch = useAppDispatch();
-
-    const handleClick = useCallback(
-      () => dispatch(toggleCaption()),
-      [dispatch],
-    );
-
-    return captionAvailable ? (
-      <Toggle
-        {...props}
-        ref={ref}
-        aria-label={captionOn ? "Disable Caption" : "Enable Caption"}
-        selected={captionOn}
-        onClick={handleClick}
-        selectedIcon={onIconId}
-        unselectedIcon={offIconId}
-      />
-    ) : null;
-  },
-);
+  return hasCaption ? (
+    <Popover
+      placement="top"
+      className="mx__caption-control-container"
+      render={() => <CaptionSelection />}
+    >
+      <CaptionButton />
+    </Popover>
+  ) : null;
+};
+export default CaptionControl;

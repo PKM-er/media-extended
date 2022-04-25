@@ -7,7 +7,7 @@ import { parse as parseQS } from "query-string";
 
 export type UserSeekSource = "progress-bar" | "drag" | "manual";
 
-type Track = Pick<TextTrack, "kind" | "label" | "language" | "mode">;
+type Track = Pick<TextTrack, "kind" | "label" | "language">;
 export interface ControlsState {
   /**
    * the currentTime of the provider
@@ -59,8 +59,8 @@ export interface ControlsState {
   };
   captions: {
     list: Track[];
-    default: number;
     active: number;
+    enabled: boolean;
   };
 }
 const initialState: ControlsState = {
@@ -86,7 +86,7 @@ const initialState: ControlsState = {
     playpause: false,
     caption: false,
   },
-  captions: { list: [], active: -1, default: -1 },
+  captions: { list: [], active: -1, enabled: true },
 };
 
 export const controlsSlice = createSlice({
@@ -115,19 +115,16 @@ export const controlsSlice = createSlice({
       state.loop = action.payload;
     },
     toggleCaption: (state) => {
-      const { active, default: _default, list } = state.captions;
-      if (active < 0) {
-        if (list.length < 0) {
-          state.captions.active = -1;
-        } else if (_default < 0) {
-          state.captions.active = 0;
-        } else if (_default >= list.length) {
-          console.error("default caption index out of range");
-        } else {
-          state.captions.active = _default;
-        }
+      state.captions.enabled = !state.captions.enabled;
+    },
+    setActiveCaption: (state, action: PayloadAction<number>) => {
+      const { list } = state.captions,
+        newActive = action.payload;
+      if (newActive >= 0 && newActive < list.length) {
+        state.captions.active = newActive;
+        state.captions.enabled = true;
       } else {
-        state.captions.active = -1;
+        console.error("caption index out of range", list.length);
       }
     },
     lockCaptionUpdateEvent: (state) => {

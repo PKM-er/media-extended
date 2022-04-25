@@ -12,12 +12,15 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
     _hookHTMLState(media, store),
     subscribe(
       store,
-      (state) => state.controls.captions.active,
-      (index) => {
+      (state) => {
+        const { active, enabled } = state.controls.captions;
+        return [active, enabled];
+      },
+      ([active, enabled]) => {
         store.dispatch(lockCaptionUpdateEvent());
         for (let i = 0; i < media.instance.textTracks.length; i++) {
           const track = media.instance.textTracks[i];
-          if (i === index) {
+          if (enabled && i === active) {
             track.mode = "showing";
           } else {
             track.mode = "disabled";

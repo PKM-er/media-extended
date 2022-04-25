@@ -17,11 +17,13 @@ export const hookHTMLEvents = (
 const applyCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   const trackList = player.textTracks;
   let handleTrackUpdate = (name: string) => {
-    const tracks: ControlsState["captions"] = {
+    const prevActive = store.getState().controls.captions.active;
+    let tracks: ControlsState["captions"] = {
       list: [],
       active: -1,
-      default: -1,
+      enabled: false,
     };
+    let defaultTrack = -1;
     // console.group("track list " + name);
     for (let i = 0; i < trackList.length; i++) {
       const track = trackList[i];
@@ -30,11 +32,21 @@ const applyCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
         kind: track.kind,
         label: track.label,
         language: track.language,
-        mode: track.mode,
       });
-      if (tracks.default === -1 && isDefaultLang(track.language))
-        tracks.default = i;
-      if (tracks.active === -1 && track.mode === "showing") tracks.active = i;
+      if (tracks.active === -1 && track.mode === "showing") {
+        tracks.active = i;
+        tracks.enabled = true;
+      }
+      if (defaultTrack === -1 && isDefaultLang(track.language)) {
+        defaultTrack = i;
+      }
+    }
+    if (tracks.active === -1) {
+      tracks.active = coalescing(
+        prevActive,
+        defaultTrack,
+        tracks.list.length > 0 ? 0 : -1,
+      );
     }
     // console.groupEnd();
     store.dispatch(handleTrackListChange(tracks));
@@ -45,4 +57,11 @@ const applyCaptionUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   trackList.onremovetrack = () => handleTrackUpdate("remove");
   trackList.onchange = () => handleTrackUpdate("change");
   handleTrackUpdate("init");
+};
+
+const coalescing = (...args: number[]) => {
+  for (const num of args) {
+    if (num >= 0) return num;
+  }
+  return -1;
 };

@@ -3,13 +3,13 @@ import "@styles/controls.less";
 import React from "react";
 
 import {
-  CaptionButton,
   DanmakuButton,
   FullscreenButton,
   PlayButton,
   ScreenshotButton,
   TimestampButton,
 } from "./buttons";
+import CaptionControl from "./caption";
 import ProgressBar from "./progress-bar";
 import ProgressLabel from "./progress-label";
 import SpeedControl from "./speed";
@@ -30,9 +30,9 @@ const Controls = () => {
           <div className="mx__controls-bottom-center"></div>
           <div className="mx__controls-bottom-right">
             <DanmakuButton />
-            <CaptionButton />
             <ScreenshotButton />
             <TimestampButton />
+            <CaptionControl />
             <SpeedControl />
             <VolumeControl />
             <FullscreenButton />

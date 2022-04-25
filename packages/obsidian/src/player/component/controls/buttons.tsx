@@ -171,5 +171,4 @@ export const TimestampButton = React.forwardRef<
   },
 );
 
-export { CaptionButton } from "./caption";
 export { DanmakuButton } from "./danmaku-button";

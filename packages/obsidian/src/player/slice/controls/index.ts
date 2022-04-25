@@ -20,6 +20,7 @@ export const {
   setVolumeUnmute,
   updateBasicInfo,
   toggleCaption,
+  setActiveCaption,
   handleTrackListChange,
   lockCaptionUpdateEvent,
   unlockCaptionUpdateEvent,
