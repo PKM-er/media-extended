@@ -38,7 +38,9 @@ export const getProviderSlice = (
     reducers: {
       setObsidianMedia: (
         state,
-        action: PayloadAction<[file: SerializableTFile, type: MediaType]>,
+        action: PayloadAction<
+          [file: SerializableTFile, type: MediaType, tracks?: Track[]]
+        >,
       ) => {
         const [file, type] = action.payload;
         const media: ObsidianMedia = {
