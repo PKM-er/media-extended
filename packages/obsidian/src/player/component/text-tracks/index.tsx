@@ -1,6 +1,7 @@
 import "@styles/text-tracks.less";
 
 import { useAppSelector } from "@player/hooks";
+import cls from "classnames";
 import React from "react";
 
 const TextTracks = () => {
@@ -9,8 +10,12 @@ const TextTracks = () => {
     <div className="mx__text-track-container">
       {/* mostly used for positioning */}
       <div className="mx__text-track-display">
-        <div className="mx__text-track-display-backdrop">
-          <div className="mx__cue">{content}</div>
+        <div
+          className={cls("mx__text-track-display-backdrop", {
+            "mx__text-track-empty": !content,
+          })}
+        >
+          <span className="mx__cue">{content}</span>
         </div>
       </div>
     </div>
