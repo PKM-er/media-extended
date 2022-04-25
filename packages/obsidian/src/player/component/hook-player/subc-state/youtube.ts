@@ -11,7 +11,7 @@ import { setVolumeByOffestDone } from "@slice/youtube";
 
 import { selectDuration, updateBufferYtb } from "../common";
 import { respondTimestampReq } from "../timestamp";
-import hookState from "./general";
+import hookState, { getApplyPauseHandler } from "./general";
 
 export const hookYoutubeState = (media: YoutubeMedia, store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store),
@@ -39,25 +39,19 @@ export const hookYoutubeState = (media: YoutubeMedia, store: PlayerStore) => {
       },
     ),
     // useApplyPaused
-    subscribe(
-      (state) => state.controls.paused,
-      (paused) => {
-        const state = media.instance.getPlayerState();
-        if (paused && state === YT.PlayerState.PLAYING) {
-          media.pause();
-        } else if (
-          !paused &&
-          (state === YT.PlayerState.PAUSED ||
-            state === YT.PlayerState.CUED ||
-            state === YT.PlayerState.UNSTARTED)
-        ) {
-          media.play();
-        }
-        setTimeout(() => {
-          store.dispatch(unlockPlayPauseEvent());
-        }, 50);
-      },
-    ),
+    getApplyPauseHandler(store, (paused) => {
+      const state = media.instance.getPlayerState();
+      if (paused && state === YT.PlayerState.PLAYING)
+        return () => media.pause();
+      else if (
+        !paused &&
+        (state === YT.PlayerState.PAUSED ||
+          state === YT.PlayerState.CUED ||
+          state === YT.PlayerState.UNSTARTED)
+      )
+        return () => media.play();
+      else return null;
+    }),
     // useUpdateSeekState
     subscribe(
       (state) => state.provider,

@@ -1,6 +1,7 @@
 import { onFragUpdate } from "@base/fragment";
-import { getSubscribeFunc, PlayerStore } from "@player/store";
+import { getSubscribeFunc, PlayerStore, subscribe } from "@player/store";
 import { Media } from "@player/utils/media";
+import { lockPlayPauseEvent, unlockPlayPauseEvent } from "@slice/controls";
 
 import { selectFrag, selectVolumeMute } from "../common";
 
@@ -46,3 +47,25 @@ const hookState = (media: Media, store: PlayerStore) => {
   return () => toUnload.forEach((unload) => unload());
 };
 export default hookState;
+
+/**
+ * @param tryApplyPause return function if need to apply pause
+ */
+export const getApplyPauseHandler = (
+  store: PlayerStore,
+  tryApplyPause: (paused: boolean) => (() => void | Promise<void>) | null,
+) =>
+  subscribe(
+    store,
+    (state) => state.controls.paused,
+    async (paused) => {
+      const apply = tryApplyPause(paused);
+      if (apply) {
+        store.dispatch(lockPlayPauseEvent());
+        await apply();
+        setTimeout(() => {
+          store.dispatch(unlockPlayPauseEvent());
+        }, 50);
+      }
+    },
+  );

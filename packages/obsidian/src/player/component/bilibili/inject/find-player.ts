@@ -1,5 +1,3 @@
-import hookStoreToHTMLPlayer from "@hook-player";
-
 import {
   PlayerContainerID,
   PlayerControlSelector,
@@ -8,6 +6,7 @@ import {
   SettingMenuWarpSelector,
   store,
 } from "./common";
+import hookStoreToHTMLPlayer from "./hook-player";
 
 const addRef = <K extends keyof typeof window.__PLAYER_REF__>(
   name: K,

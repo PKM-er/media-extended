@@ -5885,6 +5885,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"moment@npm:2.29.2":
+  version: 2.29.2
+  resolution: "moment@npm:2.29.2"
+  checksum: ee850b5776485e2af0775ceb3cfebaa7d7638f0a750fe0678fcae24c310749f96c1938808384bd422a55e5703834a71fcb09c8a1d36d9cf847f6ed0205d7a3e5
+  languageName: node
+  linkType: hard
+
 "monkey-around@npm:^2.3.0":
   version: 2.3.0
   resolution: "monkey-around@npm:2.3.0"
@@ -6072,7 +6079,7 @@ __metadata:
     lodash-es: ^4.17.21
     monkey-around: ^2.3.0
     mx-lib: ^2.11.1
-    obsidian: ^0.14.4
+    obsidian: ^0.14.6
     open: ^8.4.0
     path-browserify: ^1.0.1
     preact: ^10.6.6
@@ -6344,15 +6351,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"obsidian@npm:^0.14.4":
-  version: 0.14.4
-  resolution: "obsidian@npm:0.14.4"
+"obsidian@npm:^0.14.6":
+  version: 0.14.6
+  resolution: "obsidian@npm:0.14.6"
   dependencies:
     "@codemirror/state": ^0.19.6
     "@codemirror/view": ^0.19.31
     "@types/codemirror": 0.0.108
-    moment: 2.29.1
-  checksum: b0ee32972aacd2b26a4fd134abc01b437c3d193a3f6c4efeb9a4d262f2230cbf83d9633525d76240017460fba44983156afc8784489a379e3ca7863427a70d3f
+    moment: 2.29.2
+  checksum: 1f1a73acc75941ac15ef781533ecf96406ec1fa963171b0d57bac40c461c413c59a86ddec06dfb4020d464e3d36a96af767e925bc0ecbe8eb5520508958a89f8
   languageName: node
   linkType: hard
 

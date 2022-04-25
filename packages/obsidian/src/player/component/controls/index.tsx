@@ -3,6 +3,7 @@ import "@styles/controls.less";
 import React from "react";
 
 import {
+  CaptionButton,
   DanmakuButton,
   FullscreenButton,
   PlayButton,
@@ -29,6 +30,7 @@ const Controls = () => {
           <div className="mx__controls-bottom-center"></div>
           <div className="mx__controls-bottom-right">
             <DanmakuButton />
+            <CaptionButton />
             <ScreenshotButton />
             <TimestampButton />
             <SpeedControl />

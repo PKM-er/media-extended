@@ -42,7 +42,7 @@ export const getProviderSlice = (
           [file: SerializableTFile, type: MediaType, tracks?: Track[]]
         >,
       ) => {
-        const [file, type] = action.payload;
+        const [file, type, track] = action.payload;
         const media: ObsidianMedia = {
           from: "obsidian",
           playerType: type,
@@ -53,6 +53,7 @@ export const getProviderSlice = (
           title: file.basename,
         };
         state.source = media;
+        state.tracks = track ?? [];
       },
       renameObsidianMedia: (
         state,

@@ -1,12 +1,8 @@
-import _hookStoreToHTMLPlayer from "@hook-player";
-import {
-  respondScreenshotReq,
-  sendScreenshot,
-} from "@player/component/hook-player/screenshot";
-import {
-  respondTimestampReq,
-  sendTimestamp,
-} from "@player/component/hook-player/timestamp";
+import { hookHTMLEvents } from "@hook-player/events/webview";
+import { onStartH5 } from "@hook-player/on-start";
+import { respondScreenshotReq, sendScreenshot } from "@hook-player/screenshot";
+import { hookHTMLState } from "@hook-player/subc-state/webview";
+import { respondTimestampReq, sendTimestamp } from "@hook-player/timestamp";
 import { PlayerStore } from "@player/store";
 import { HTMLMedia } from "@player/utils/media";
 
@@ -14,8 +10,11 @@ const hookStoreToHTMLPlayer = (
   player: HTMLMediaElement,
   store: PlayerStore,
 ) => {
-  const unloads = [
-    _hookStoreToHTMLPlayer(player, store),
+  let media = new HTMLMedia(player);
+  onStartH5(media, store);
+  const toUnload = [
+    hookHTMLEvents(player, store),
+    hookHTMLState(media, store),
     respondTimestampReq(new HTMLMedia(player), store, (...args) =>
       sendTimestamp(store.msgHandler.port!, ...args),
     ),
@@ -23,6 +22,6 @@ const hookStoreToHTMLPlayer = (
       sendScreenshot(store.msgHandler.port!, ...args),
     ),
   ];
-  return () => unloads.forEach((unload) => unload());
+  return () => toUnload.forEach((unload) => unload());
 };
 export default hookStoreToHTMLPlayer;

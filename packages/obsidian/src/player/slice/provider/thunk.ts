@@ -1,5 +1,6 @@
 import { getMediaType } from "@base/media-type";
 import parseURL from "@base/url-parse";
+import getTracks from "@feature/subtitle";
 import { stripHash } from "@misc";
 import { AppDispatch, AppThunk } from "@player/store";
 import assertNever from "assert-never";
@@ -72,7 +73,7 @@ export const setObsidianMediaSrc =
     }
     resetNonProvider(dispatch);
     dispatch(canScreenshot(mediaType === "video"));
-    dispatch(_ob([serializeTFile(file), mediaType]));
+    dispatch(_ob([serializeTFile(file), mediaType, await getTracks(file)]));
   };
 export const setMediaUrlSrc =
   (url: string): AppThunk =>

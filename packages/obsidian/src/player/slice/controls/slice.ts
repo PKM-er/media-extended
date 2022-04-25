@@ -7,6 +7,7 @@ import { parse as parseQS } from "query-string";
 
 export type UserSeekSource = "progress-bar" | "drag" | "manual";
 
+type Track = Pick<TextTrack, "kind" | "label" | "language" | "mode">;
 export interface ControlsState {
   /**
    * the currentTime of the provider
@@ -54,6 +55,12 @@ export interface ControlsState {
   error: string | null;
   ignoreEvent: {
     playpause: boolean;
+    caption: boolean;
+  };
+  captions: {
+    list: Track[];
+    default: number;
+    active: number;
   };
 }
 const initialState: ControlsState = {
@@ -77,7 +84,9 @@ const initialState: ControlsState = {
   error: null,
   ignoreEvent: {
     playpause: false,
+    caption: false,
   },
+  captions: { list: [], active: -1, default: -1 },
 };
 
 export const controlsSlice = createSlice({
@@ -105,6 +114,34 @@ export const controlsSlice = createSlice({
     handleLoopChange: (state, action: PayloadAction<boolean>) => {
       state.loop = action.payload;
     },
+    toggleCaption: (state) => {
+      const { active, default: _default, list } = state.captions;
+      if (active < 0) {
+        if (list.length < 0) {
+          state.captions.active = -1;
+        } else if (_default < 0) {
+          state.captions.active = 0;
+        } else if (_default >= list.length) {
+          console.error("default caption index out of range");
+        } else {
+          state.captions.active = _default;
+        }
+      } else {
+        state.captions.active = -1;
+      }
+    },
+    lockCaptionUpdateEvent: (state) => {
+      state.ignoreEvent.caption = true;
+    },
+    unlockCaptionUpdateEvent: (state) => {
+      state.ignoreEvent.caption = false;
+    },
+    handleTrackListChange: (
+      state,
+      action: PayloadAction<ControlsState["captions"]>,
+    ) => {
+      if (!state.ignoreEvent.caption) state.captions = action.payload;
+    },
     handleAutoplayChange: (state, action: PayloadAction<boolean>) => {
       state.autoplay = action.payload;
     },
@@ -120,14 +157,14 @@ export const controlsSlice = createSlice({
     },
     play: (state) => {
       state.paused = false;
-      state.ignoreEvent.playpause = true;
     },
     pause: (state) => {
       state.paused = true;
-      state.ignoreEvent.playpause = true;
     },
     togglePlay: (state) => {
       state.paused = !state.paused;
+    },
+    lockPlayPauseEvent: (state) => {
       state.ignoreEvent.playpause = true;
     },
     unlockPlayPauseEvent: (state) => {

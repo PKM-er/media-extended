@@ -2,10 +2,7 @@ import { PlayerStore } from "@player/store";
 import { LARGE_CURRENT_TIME } from "@slice/controls";
 import { switchToAudio, unknownTypeDetermined } from "@slice/provider/thunk";
 
-const hookStoreToHTMLPlayer = (
-  player: HTMLMediaElement,
-  store: PlayerStore,
-) => {
+const WebmFix = (player: HTMLMediaElement, store: PlayerStore) => {
   const handler = () => {
     // useWebmFixes
     // if webm audio-only, switch to audio
@@ -31,4 +28,4 @@ const hookStoreToHTMLPlayer = (
   };
 };
 
-export default hookStoreToHTMLPlayer;
+export default WebmFix;

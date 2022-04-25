@@ -11,10 +11,7 @@ export type EventHandlers = {
   [K in keyof HTMLMediaElementEventMap]?: CoreEventHandler<HTMLMedia>;
 };
 
-export const hookHTMLEvents = (
-  player: HTMLMediaElement,
-  store: PlayerStore,
-) => {
+const hookHTMLEvents = (player: HTMLMediaElement, store: PlayerStore) => {
   const dispatch = (action: Parameters<AppDispatch>[0]) =>
     store.dispatch(action);
 
@@ -53,5 +50,7 @@ export const hookHTMLEvents = (
       toUnload.push(() => player.removeEventListener(eventName, warpper));
     }
   }
+
   return () => toUnload.forEach((unload) => unload());
 };
+export default hookHTMLEvents;

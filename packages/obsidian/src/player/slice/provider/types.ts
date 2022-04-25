@@ -1,12 +1,6 @@
 import { enumerate } from "@ipc/must-include";
 import type { TFile } from "obsidian";
 
-interface Caption {
-  src: string;
-  kind: "captions";
-  default: boolean;
-}
-
 type HTML5PlayerType = "unknown" | "audio" | "video";
 export const HTML5PlayerTypes = enumerate<HTML5PlayerType>()(
   "unknown",
@@ -69,10 +63,16 @@ interface Subtitle {
   src: string;
   kind: "subtitles";
   // must be a valid BCP 47 language tag
-  srcLang: string;
-  label: string;
+  srcLang?: string;
+  label?: string;
+  default?: boolean;
+}
+interface Caption {
+  src: string;
+  kind: "captions";
   default: boolean;
 }
+
 export type Track = Caption | Subtitle;
 
 export type SerializableTFile = Pick<
