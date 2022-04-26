@@ -149,13 +149,10 @@ export default class ObMediaView
     return MEDIA_VIEW_TYPE;
   }
   getDisplayText(): string {
+    if (this.file) return this.file.basename;
     const { source } = this.store.getState().provider;
-    if (source?.from === "obsidian") {
-      if (!this.file) {
-        console.error("no file for media view");
-        return "No Media";
-      } else return this.file.basename;
-    }
+    if (source?.from === "obsidian") return "No Media";
+
     const title = source?.title;
     let titleText: string;
     if (title === null) {
