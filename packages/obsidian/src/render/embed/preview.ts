@@ -1,6 +1,6 @@
-// import getPlayer from "../legacy/get-player";
 import type MediaExtended from "@plugin";
-import { CONTROLS_ENABLED_CLASS } from "@view";
+import { getInfoFromWarpper, setMediaUrl } from "@slice/set-media";
+import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
 import { MarkdownPostProcessor, MarkdownPostProcessorContext } from "obsidian";
 
 import { ElementWithRenderChild } from "./base";
@@ -14,11 +14,11 @@ const getEmbedProcessor = (
       ? "span.internal-embed, div.internal-embed"
       : "img[referrerpolicy]";
   return async (secEl, ctx) => {
-    for (const warpper of secEl.querySelectorAll(selector)) {
+    for (const warpper of secEl.querySelectorAll<HTMLElement>(selector)) {
       if (type === "internal") {
         handleInternalEmbed(warpper, ctx);
       } else {
-        // handleExternalEmbed(warpper, ctx, plugin);
+        handleExternalEmbed(warpper, ctx, plugin);
       }
     }
   };
@@ -26,7 +26,7 @@ const getEmbedProcessor = (
 export default getEmbedProcessor;
 
 const handleInternalEmbed = (
-  warpper: Element,
+  warpper: HTMLElement,
   ctx: MarkdownPostProcessorContext,
 ) => {
   warpper.addClass(CONTROLS_ENABLED_CLASS);
@@ -45,28 +45,27 @@ const handleInternalEmbed = (
   observer.observe(warpper, { attributeFilter: ["class"] });
 };
 
-// const handleExternalEmbed = async (
-//   warpper: Element,
-//   ctx: MarkdownPostProcessorContext,
-//   plugin: MediaExtended,
-// ) => {
-//   const elToGetInfo = warpper as HTMLImageElement;
-//   const src = elToGetInfo.src;
-//   if (!src) return;
-//   const info = await getMediaInfo({ type: "external", link: src }, plugin.app);
-//   if (!info) return;
-//   const [playerEl, children] = await getPlayer(info, elToGetInfo, plugin);
-//   children.forEach(ctx.addChild.bind(ctx));
-//   elToGetInfo.replaceWith(
-//     createSpan(
-//       {
-//         cls: ["media-embed", "external-embed", "is-loaded"],
-//         attr: {
-//           src: elToGetInfo.getAttr("src"),
-//           alt: elToGetInfo.getAttr("alt"),
-//         },
-//       },
-//       (span) => span.append(playerEl),
-//     ),
-//   );
-// };
+const handleExternalEmbed = async (
+  warpper: HTMLElement,
+  ctx: MarkdownPostProcessorContext,
+  plugin: MediaExtended,
+) => {
+  const info = getInfoFromWarpper(warpper);
+  if (!info) return;
+  const newWarpper = createSpan({
+    cls: ["media-embed", "external-embed", "is-loaded"],
+    attr: {
+      src: warpper.getAttr("src"),
+      alt: warpper.getAttr("alt"),
+    },
+  });
+  warpper.replaceWith(newWarpper);
+  const child = new PlayerRenderChild(
+    setMediaUrl(info.linktext, info.linkTitle),
+    plugin,
+    newWarpper,
+    false,
+  );
+  ctx.addChild(child);
+  child.load();
+};

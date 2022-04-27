@@ -2,7 +2,7 @@ import { parseLinktext, TFile } from "obsidian";
 
 import { AppThunk } from "../store";
 import { setHash } from "./controls/thunk";
-import { setObsidianMediaSrc } from "./provider/thunk";
+import { setMediaUrlSrc, setObsidianMediaSrc } from "./provider/thunk";
 
 export const getFileHashFromLinktext = (
   linktext: string,
@@ -46,5 +46,16 @@ export const setObsidianMedia =
     // const [title, _size] = parseSizeFromLinkTitle(alt);
     // link title to size/title
     dispatch(setObsidianMediaSrc(file));
+    dispatch(setHash(hash));
+  };
+
+import { stripHash } from "@misc";
+export const setMediaUrl =
+  (url: string, linkTitle?: string): AppThunk =>
+  (dispatch) => {
+    // const [title, _size] = parseSizeFromLinkTitle(alt);
+    // link title to size/title
+    const [src, hash] = stripHash(url);
+    dispatch(setMediaUrlSrc(src));
     dispatch(setHash(hash));
   };
