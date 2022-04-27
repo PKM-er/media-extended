@@ -1,9 +1,10 @@
 import "obsidian";
 
-import { openMediaFile, openMediaLink } from "@feature/open-media";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
-import { MarkdownView, parseLinktext } from "obsidian";
+import { MarkdownView } from "obsidian";
+
+import { onExternalLinkClick, onInternalLinkClick } from "./common";
 
 declare module "obsidian" {
   interface MarkdownView {
@@ -20,22 +21,16 @@ export const patchEditorClick = (plugin: MediaExtended) => {
       triggerClickableToken: (next) =>
         function (this: MarkdownView, token, newLeaf, ...args) {
           const fallback = () => next.call(this, token, newLeaf, ...args);
-          try {
-            if (
-              "internal-link" === token.type &&
-              plugin.settings.timestampLink
-            ) {
-              const { metadataCache } = this.app,
-                { path, subpath: hash } = parseLinktext(token.text),
-                file = metadataCache.getFirstLinkpathDest(path, this.file.path);
-              if (!file || !openMediaFile(file, hash, true, newLeaf))
-                fallback();
-            } else if ("external-link" === token.type) {
-              if (!openMediaLink(token.text, true, newLeaf)) fallback();
-            }
-          } catch (error) {
-            console.error(error);
-            fallback();
+          if ("internal-link" === token.type) {
+            onInternalLinkClick(
+              token.text,
+              this.file.path,
+              newLeaf,
+              fallback,
+              plugin,
+            );
+          } else if ("external-link" === token.type) {
+            onExternalLinkClick(token.text, newLeaf, fallback);
           }
         },
     }),

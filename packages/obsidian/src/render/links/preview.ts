@@ -10,6 +10,8 @@ import { around } from "monkey-around";
 import { EventHelper, Keymap, parseLinktext } from "obsidian";
 import { MarkdownPreviewRenderer } from "obsidian";
 
+import { onExternalLinkClick, onInternalLinkClick } from "./common";
+
 type MarkedCtor = typeof EventHelper & { __MX_PATCHED__?: true };
 const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
   const EventHelper = helper.constructor as MarkedCtor;
@@ -19,32 +21,20 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
     onExternalLinkClick: (next) =>
       function (this: EventHelper, evt, target, link, ...args) {
         evt.preventDefault();
-        const fallback = () => next.call(this, evt, target, link, ...args);
-        try {
-          if (!openMediaLink(link, true, Keymap.isModEvent(evt))) fallback();
-        } catch (error) {
-          console.error(error);
-          fallback();
-        }
+        onExternalLinkClick(link, Keymap.isModEvent(evt), () =>
+          next.call(this, evt, target, link, ...args),
+        );
       },
     onInternalLinkClick: (next) =>
       function (this: EventHelper, evt, target, linktext, ...args) {
         evt.preventDefault();
-        const fallback = () => next.call(this, evt, target, linktext, ...args);
-        if (!plugin.settings.timestampLink) return fallback();
-        try {
-          const { metadataCache } = this.app,
-            { path, subpath: hash } = parseLinktext(linktext),
-            file = metadataCache.getFirstLinkpathDest(
-              path,
-              this.getFile().path,
-            );
-          if (!file || !openMediaFile(file, hash, true, Keymap.isModEvent(evt)))
-            fallback();
-        } catch (error) {
-          console.error(error);
-          fallback();
-        }
+        onInternalLinkClick(
+          linktext,
+          this.getFile().path,
+          Keymap.isModEvent(evt),
+          () => next.call(this, evt, target, linktext, ...args),
+          plugin,
+        );
       },
     mx_onExternalLinkMouseover: (next) =>
       // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
