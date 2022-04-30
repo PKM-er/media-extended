@@ -9,12 +9,7 @@ export interface PlayerComponent extends Component {
   store: PlayerStore;
   port: MessagePort | null;
   scope: Scope;
-  keymap: KeymapEventHandler[];
 }
-
-export const unloadKeymap = (scope: Scope, keymap: KeymapEventHandler[]) => {
-  keymap.forEach((k) => scope.unregister(k));
-};
 
 export const createStore = (name: string) => {
   const store = _createStore(name);

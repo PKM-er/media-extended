@@ -1,7 +1,7 @@
 import { ExtensionAccepted } from "@base/media-type";
-import { getPlayerKeymaps } from "@feature/keyboard-control";
+import { setPlayerKeymaps } from "@feature/keyboard-control";
 import { Player } from "@player";
-import { observeStore, subscribe } from "@player/store";
+import { subscribe } from "@player/store";
 import type MediaExtended from "@plugin";
 import { revertDuration, setFragment } from "@slice/controls";
 import { seekTo, setHash } from "@slice/controls/thunk";
@@ -29,7 +29,6 @@ import {
   MEDIA_VIEW_TYPE,
   MediaState,
   PlayerComponent,
-  unloadKeymap,
 } from "./common";
 
 declare module "obsidian" {
@@ -52,7 +51,6 @@ export default class ObMediaView
   // no need to manage this manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
   scope;
-  keymap;
   store;
   set port(port: MessagePort | null) {
     this.store.msgHandler.port = port;
@@ -92,7 +90,7 @@ export default class ObMediaView
     super(leaf);
     this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
-    this.keymap = getPlayerKeymaps(this);
+    setPlayerKeymaps(this);
 
     this.openExternalAction = this.addAction(
       "open-elsewhere-glyph",
@@ -224,7 +222,6 @@ export default class ObMediaView
     );
   }
   async onClose() {
-    unloadKeymap(this.scope, this.keymap);
     ReactDOM.unmountComponentAtNode(this.contentEl);
     return super.onClose();
   }

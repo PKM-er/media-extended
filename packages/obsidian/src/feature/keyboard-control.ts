@@ -89,16 +89,16 @@ export const registerGlobalControlCmd = (plugin: MediaExtended) => {
   }
 };
 
-export const getPlayerKeymaps = (component: PlayerComponent) =>
-  actions.reduce<KeymapEventHandler[]>((handlers, { localHotkeys, action }) => {
-    if (!localHotkeys) return handlers;
+export const setPlayerKeymaps = (component: PlayerComponent) => {
+  for (const { localHotkeys, action } of actions) {
+    if (!localHotkeys) continue;
     for (const { modifiers, key } of localHotkeys) {
-      handlers.push(
+      component.registerScopeEvent(
         component.scope.register(modifiers, key, (evt) => {
           evt.preventDefault();
           component.store.dispatch(action);
         }),
       );
     }
-    return handlers;
-  }, []);
+  }
+};

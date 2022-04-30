@@ -1,20 +1,18 @@
-import { getPlayerKeymaps } from "@feature/keyboard-control";
+import { setPlayerKeymaps } from "@feature/keyboard-control";
 import { Player } from "@player";
-import { MessageHandler } from "@player/ipc/redux-sync";
 import { AppThunk } from "@player/store";
 import MediaExtended from "@plugin";
 import { MarkdownRenderChild, Scope } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { createStore, PlayerComponent, unloadKeymap } from "./common";
+import { createStore, PlayerComponent } from "./common";
 
 export default class PlayerRenderChild
   extends MarkdownRenderChild
   implements PlayerComponent
 {
   scope;
-  keymap;
   store;
   set port(port: MessagePort | null) {
     this.store.msgHandler.port = port;
@@ -40,7 +38,7 @@ export default class PlayerRenderChild
     store.dispatch(initAction);
     this.store = store;
     this.scope = new Scope(this.app.scope);
-    this.keymap = getPlayerKeymaps(this);
+    setPlayerKeymaps(this);
   }
 
   async onload() {
@@ -63,7 +61,6 @@ export default class PlayerRenderChild
   }
   onunload(): void {
     this.popScope();
-    unloadKeymap(this.scope, this.keymap);
     ReactDOM.unmountComponentAtNode(this.containerEl);
   }
 }
