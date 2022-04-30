@@ -1,3 +1,4 @@
+import { vaildateMediaURL } from "@base/url-parse";
 import type MediaExtended from "@plugin";
 import { getInfoFromWarpper, setMediaUrl } from "@slice/set-media";
 import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
@@ -51,7 +52,7 @@ const handleExternalEmbed = async (
   plugin: MediaExtended,
 ) => {
   const info = getInfoFromWarpper(warpper);
-  if (!info) return;
+  if (!info || !(await vaildateMediaURL(info.linktext))) return;
   const newWarpper = createSpan({
     cls: ["media-embed", "external-embed", "is-loaded"],
     attr: {

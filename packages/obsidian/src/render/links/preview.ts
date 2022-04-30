@@ -39,7 +39,6 @@ const patchHelper = (plugin: MediaExtended, helper: EventHelper) => {
     mx_onExternalLinkMouseover: (next) =>
       // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
       function (this: EventHelper, evt, target, url, ...args) {
-        console.log(evt, target, url);
         evt.preventDefault();
         if (!plugin.settings.extendedImageEmbedSyntax) return;
         try {
