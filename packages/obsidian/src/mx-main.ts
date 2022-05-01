@@ -81,6 +81,22 @@ export default class MediaExtended extends Plugin {
 
     await this.loadSettings();
 
+    const { workspace } = this.app;
+
+    // reload prevoisly opened media views
+    workspace.onLayoutReady(() =>
+      workspace.iterateAllLeaves(async (leaf) => {
+        if (
+          leaf.view?.getViewType() === MEDIA_VIEW_TYPE &&
+          !(leaf.view instanceof MediaView)
+        ) {
+          const state = leaf.getViewState();
+          await leaf.setViewState({ type: "empty" });
+          await leaf.setViewState(state);
+        }
+      }),
+    );
+
     updateAccentColor();
     this.registerEvent(this.app.workspace.on("css-change", updateAccentColor));
 
