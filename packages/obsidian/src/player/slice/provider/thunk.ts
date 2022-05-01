@@ -21,6 +21,7 @@ const {
   setHostMedia: _host,
   resetProvider: _reset,
   switchToAudio: _switchToAudio,
+  disableCORS: _disableCORS,
   unknownTypeDetermined: _unknownTypeDetermined,
 } = getProviderSlice().actions;
 
@@ -116,6 +117,13 @@ export const setMediaUrlSrc =
 export const resetProvider = (): AppThunk => async (dispatch) => {
   resetNonProvider(dispatch);
   dispatch(_reset());
+};
+
+export const disableCORS = (): AppThunk => (dispatch, getState) => {
+  if (getState().provider.source?.from === "direct") {
+    dispatch(_disableCORS());
+    dispatch(canScreenshot(false));
+  }
 };
 
 const serializeTFile = (file: TFile): SerializableTFile => {

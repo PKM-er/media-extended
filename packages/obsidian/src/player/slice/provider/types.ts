@@ -30,6 +30,7 @@ export interface DirectLinkMedia extends SourceBase {
   from: "direct";
   /** raw url without process (e.g. file://) */
   url: string;
+  allowCORS: boolean;
   playerType: HTML5PlayerType;
 }
 interface VideoHostMediaBase extends SourceBase {

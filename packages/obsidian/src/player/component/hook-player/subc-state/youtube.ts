@@ -7,9 +7,10 @@ import {
   handleVolumeChange,
   unlockPlayPauseEvent,
 } from "@slice/controls";
+import { selectDuration } from "@slice/provider";
 import { setVolumeByOffestDone } from "@slice/youtube";
 
-import { selectDuration, updateBufferYtb } from "../common";
+import { updateBufferYtb } from "../common";
 import { respondTimestampReq } from "../timestamp";
 import hookState, { getApplyPauseHandler } from "./general";
 

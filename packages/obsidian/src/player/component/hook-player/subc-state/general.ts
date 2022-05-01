@@ -2,8 +2,7 @@ import { onFragUpdate } from "@base/fragment";
 import { getSubscribeFunc, PlayerStore, subscribe } from "@player/store";
 import { Media } from "@player/utils/media";
 import { lockPlayPauseEvent, unlockPlayPauseEvent } from "@slice/controls";
-
-import { selectFrag, selectVolumeMute } from "../common";
+import { selectFrag, selectVolumeMute } from "@slice/provider";
 
 const hookState = (media: Media, store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store);

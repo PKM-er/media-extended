@@ -217,7 +217,11 @@ export default class ObMediaView
   protected async onOpen(): Promise<void> {
     await super.onOpen();
     ReactDOM.render(
-      <Player store={this.store} pluginDir={this.plugin.getFullPluginDir()} />,
+      <Player
+        store={this.store}
+        pluginDir={this.plugin.getFullPluginDir()}
+        plugin={this.plugin}
+      />,
       this.contentEl,
     );
   }

@@ -16,8 +16,7 @@ import {
   handleVolumeChange,
   handleWaiting,
 } from "@slice/controls";
-
-import { selectFrag, selectLoop } from "../common";
+import { selectFrag, selectLoop } from "@slice/provider";
 
 const generalEventHandlers = <M extends Media>(store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store),

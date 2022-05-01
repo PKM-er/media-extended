@@ -3,10 +3,12 @@ import { onStartH5 } from "@hook-player/on-start";
 import { respondScreenshotReq } from "@hook-player/screenshot";
 import { hookHTMLState } from "@hook-player/subc-state/local-h5";
 import { respondTimestampReq } from "@hook-player/timestamp";
-import { useAppSelector } from "@player/hooks";
-import { PlayerStore } from "@player/store";
+import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { PlayerStore, subscribe } from "@player/store";
 import { HTMLMedia } from "@player/utils/media";
 import { gotScreenshot, gotTimestamp } from "@slice/action/thunk";
+import { selectAllowCORS, selectLoop } from "@slice/provider";
+import { disableCORS } from "@slice/provider/thunk";
 import { useUnmount } from "ahooks";
 import React from "react";
 import { useStore } from "react-redux";
@@ -20,6 +22,9 @@ const hookStoreToHTMLPlayer = (
 ) => {
   let media = new HTMLMedia(player);
   onStartH5(media, store);
+  if (selectAllowCORS(store.getState())) {
+    player.crossOrigin = "anonymous";
+  }
   const toUnload = [
     hookHTMLEvents(player, store),
     hookHTMLState(media, store),
@@ -29,6 +34,19 @@ const hookStoreToHTMLPlayer = (
     ),
     respondScreenshotReq(player, store, (...args) =>
       store.dispatch(gotScreenshot(...args)),
+    ),
+    subscribe(
+      store,
+      selectAllowCORS,
+      (allowCORS) => {
+        if (allowCORS) {
+          player.crossOrigin = "anonymous";
+        } else {
+          player.removeAttribute("crossOrigin");
+        }
+        player.load();
+      },
+      false,
     ),
   ];
   return () => toUnload.forEach((unload) => unload());
@@ -44,10 +62,6 @@ const HTMLPlayer = ({
   const source = useAppSelector((state) => state.provider.source),
     tracks = useAppSelector((state) => state.provider.tracks);
 
-  const autoPlay = useAppSelector((state) => state.controls.autoplay),
-    loop = useAppSelector((state) => state.controls.loop),
-    controls = useAppSelector((state) => state.interface.controls === "native");
-
   const store = useStore() as PlayerStore;
   const ref = useRefEffect<HTMLMediaElement>(
     (player) => hookStoreToHTMLPlayer(player, store),
@@ -58,16 +72,19 @@ const HTMLPlayer = ({
     ref,
     style,
     className,
-    loop,
+    loop: useAppSelector(selectLoop),
     // preload: "auto",
-    autoPlay,
-    controls,
+    autoPlay: useAppSelector((state) => state.controls.autoplay),
+    controls: useAppSelector((state) => state.interface.controls === "native"),
   };
+
+  const dispatch = useAppDispatch();
+
   let player;
   if (source) {
     const children = (
       <>
-        <source src={source.src} />
+        <source src={source.src} onError={() => dispatch(disableCORS())} />
         {tracks.map((p) => (
           <track key={p.src} {...p} />
         ))}

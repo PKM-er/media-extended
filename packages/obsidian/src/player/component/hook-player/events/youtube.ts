@@ -11,10 +11,11 @@ import {
   handleTimeUpdate,
   handleWaiting,
 } from "@slice/controls";
+import { selectDuration } from "@slice/provider";
 import { handleStateChange } from "@slice/youtube";
 import assertNever from "assert-never";
 
-import { selectDuration, updateBufferYtb } from "../common";
+import { updateBufferYtb } from "../common";
 import generalEventHandlers from "./general";
 
 // Messages copied from https://developers.google.com/youtube/iframe_api_reference#onError

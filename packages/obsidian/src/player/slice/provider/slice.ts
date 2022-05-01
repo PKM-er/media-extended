@@ -99,11 +99,17 @@ export const getProviderSlice = (
         const media: DirectLinkMedia = {
           from: "direct",
           playerType,
+          allowCORS: true,
           src,
           url,
           title: filename ? filename : src,
         };
         state.source = media;
+      },
+      disableCORS: (state) => {
+        if (state.source?.from === "direct") {
+          state.source.allowCORS = false;
+        }
       },
       setHostMedia: (
         state,

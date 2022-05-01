@@ -1,4 +1,5 @@
 import { PlayerStore } from "@player/store";
+import type MediaExtended from "@plugin";
 import React from "react";
 import { Provider } from "react-redux";
 
@@ -12,11 +13,9 @@ const PlayerWarpper = ({
   ...context
 }: {
   store: PlayerStore;
-  inEditor?: boolean;
-  pluginDir?: string;
   onFocus?: React.FocusEventHandler<HTMLDivElement>;
   onBlur?: React.FocusEventHandler<HTMLDivElement>;
-}) => {
+} & IPlayerContext) => {
   return (
     <React.StrictMode>
       <PlayerContext.Provider value={{ inEditor, ...context }}>
@@ -29,14 +28,12 @@ const PlayerWarpper = ({
 };
 
 interface IPlayerContext {
-  inEditor: boolean;
+  inEditor?: boolean;
   pluginDir?: string;
+  plugin: MediaExtended;
 }
 
-export const PlayerContext = React.createContext<IPlayerContext>({
-  pluginDir: undefined,
-  inEditor: false,
-});
+export const PlayerContext = React.createContext<IPlayerContext>({} as any);
 
 export { PlayerWarpper as Player };
 export type { PlayerStore } from "@player/store";

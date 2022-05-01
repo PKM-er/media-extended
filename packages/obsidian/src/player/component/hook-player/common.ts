@@ -35,14 +35,7 @@ export const updateBufferYtb = (
     dispatch(handleProgress({ buffered: fraction * duration, duration }));
 };
 
-export const selectFrag = (state: RootState) => state.controls.fragment,
-  selectLoop = (state: RootState) => state.controls.loop,
-  selectDuration = (state: RootState) => state.controls.duration,
-  selectVolumeMute = (state: RootState): [muted: boolean, volume: number] => [
-    state.controls.muted,
-    state.controls.volume,
-  ],
-  selectYtbResetProp = (state: RootState) => [
+export const selectYtbResetProp = (state: RootState) => [
     state.controls.autoplay,
     state.interface.controls === "native",
   ],
