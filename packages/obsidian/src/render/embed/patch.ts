@@ -35,11 +35,10 @@ const patchMediaEmbed = (plugin: MediaExtended) => {
     async function (this: any, file, app, containerEl, ...args) {
       const fallback = () => next.call(this, file, app, containerEl, ...args);
       try {
-        if (
-          containerEl instanceof HTMLDivElement &&
-          plugin.settings.livePreview
-        ) {
-          containerEl.style.display = "none"; // prevent default live preview player from rendering
+        if (containerEl instanceof HTMLDivElement) {
+          if (containerEl.classList.contains("popover")) return fallback();
+          else if (plugin.settings.livePreview)
+            containerEl.style.display = "none"; // prevent default live preview player from rendering
         } else if (
           containerEl instanceof HTMLSpanElement &&
           plugin.settings.mediaFragmentsEmbed &&
