@@ -4,7 +4,7 @@ import { EditorState } from "@codemirror/state";
 import { tokenClassNodeProp } from "@codemirror/stream-parser";
 import { Decoration, WidgetType } from "@codemirror/view";
 import type MediaExtended from "@plugin";
-import { editorViewField, Platform } from "obsidian";
+import { editorViewField } from "obsidian";
 
 import { getFileHashFromLinktext } from "../../player/slice/set-media";
 import {
@@ -14,7 +14,7 @@ import {
   parseLinktextAlias,
   toVaildURL,
 } from "./utils";
-import PlayerWidget from "./widget";
+import { ExternalEmbedWidget, InternalEmbedWidget } from "./widget";
 
 const getPlayerDecos = (
   plugin: MediaExtended,
@@ -26,7 +26,7 @@ const getPlayerDecos = (
   let mdView = state.field(editorViewField),
     sourcePath = mdView.file?.path ?? "";
 
-  if (!sourcePath) console.error("missing sourcePath", mdView);
+  if (!sourcePath) console.warn("missing sourcePath", mdView);
 
   let doc = state.doc;
   let isInternalEmbed = !1,
@@ -45,18 +45,26 @@ const getPlayerDecos = (
     linktextAlias: string,
     from: number,
     to: number,
-  ): PlayerWidget | null => {
+  ) => {
     const { href: linktext, title } = parseLinktextAlias(linktextAlias);
     const result = getFileHashFromLinktext(linktext, sourcePath);
     if (!result || !getMediaType(result[0])) return null;
-    let widget = new PlayerWidget(
+    let widget = new InternalEmbedWidget(
       plugin,
-      linktext,
-      sourcePath,
+      { linktext, file: result[0], hash: result[1] },
       title,
       from,
       to,
     );
+    return widget;
+  };
+  const getExternalPlayerWidget = (
+    src: string,
+    alt: string,
+    from: number,
+    to: number,
+  ) => {
+    let widget = new ExternalEmbedWidget(plugin, { src }, alt, from, to);
     return widget;
   };
 
@@ -138,11 +146,11 @@ const getPlayerDecos = (
           );
         } else {
           imgUrl = toVaildURL(imgUrl);
-          const fileProtocol = "file:///";
-          if (Platform.isDesktopApp && imgUrl.startsWith(fileProtocol)) {
-            imgUrl = "app://local/" + imgUrl.substring(fileProtocol.length);
-          }
-          // widget = ...
+          // const fileProtocol = "file:///";
+          // if (Platform.isDesktopApp && imgUrl.startsWith(fileProtocol)) {
+          //   imgUrl = "app://local/" + imgUrl.substring(fileProtocol.length);
+          // }
+          widget = getExternalPlayerWidget(imgUrl, imgAltText, imgMarkLoc, to);
         }
         widget && addDeco(widget, imgMarkLoc, to);
 

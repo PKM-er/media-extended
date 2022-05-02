@@ -1,23 +1,31 @@
+import { vaildateMediaURL } from "@base/url-parse";
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { parseSizeSyntax } from "@misc";
+import type { AppThunk } from "@player/store";
 import type MediaExtended from "@plugin";
-import { getFileHashFromLinktext, setObsidianMedia } from "@slice/set-media";
+import { setMediaUrl, setObsidianMedia } from "@slice/set-media";
 import { PlayerRenderChild } from "@view";
-import { Platform, setIcon } from "obsidian";
+import { Platform, setIcon, TFile } from "obsidian";
 
-type ElWithInfo = HTMLElement & {
+type ElWithInfo<Media extends Record<string, any> = {}> = HTMLElement & {
   playerInfo?: {
-    linktext: string;
-    sourcePath: string;
     title: string;
     start: number;
     end: number;
     child: PlayerRenderChild;
-  };
+  } & Media;
 };
 
-export default class InternalPlayerWidget extends WidgetType {
+class InvaildMediaInfoError extends Error {
+  constructor() {
+    super("invalid media info");
+  }
+}
+
+abstract class PlayerWidget<
+  Media extends Record<string, any>,
+> extends WidgetType {
   setPos(dom: HTMLElement) {
     let info = (dom as ElWithInfo).playerInfo;
     if (info) {
@@ -65,8 +73,7 @@ export default class InternalPlayerWidget extends WidgetType {
 
   constructor(
     public plugin: MediaExtended,
-    public linktext: string,
-    public sourcePath: string,
+    public media: Media,
     public title: string,
     public start: number,
     public end: number,
@@ -75,29 +82,32 @@ export default class InternalPlayerWidget extends WidgetType {
   }
 
   setInfo(dom: HTMLElement, child: PlayerRenderChild) {
-    (dom as ElWithInfo).playerInfo = {
-      linktext: this.linktext,
-      sourcePath: this.sourcePath,
+    (dom as ElWithInfo<Media>).playerInfo = {
       title: this.title,
       start: this.start,
       end: this.end,
       child,
+      ...this.media,
     };
   }
 
-  updateDOM(domToUpdate: HTMLElement) {
-    const info = (domToUpdate as ElWithInfo).playerInfo;
+  abstract sameMedia(media: Media): boolean;
+  abstract getSetMediaAction(): Promise<AppThunk<void, undefined> | null>;
+
+  updateDOM(domToUpdate: HTMLElement): boolean {
+    const info = (domToUpdate as ElWithInfo<Media>).playerInfo;
     if (!info) return false;
-    const { linktext, sourcePath, title } = info;
-    if (this.linktext === linktext && this.sourcePath === sourcePath) {
+    const { title } = info;
+    if (this.sameMedia(info)) {
       if (this.title !== title) {
         info.title = this.title;
         this.applyTitle(domToUpdate);
         this.setPos(domToUpdate);
       }
     } else {
-      const action = this.getSetMediaAction();
-      action && info.child.store.dispatch(action);
+      this.getSetMediaAction().then(
+        (action) => action && info.child.store.dispatch(action),
+      );
     }
     return true;
   }
@@ -108,41 +118,40 @@ export default class InternalPlayerWidget extends WidgetType {
       info.child.unload();
     }
   }
-  eq(other: InternalPlayerWidget): boolean {
-    return (
-      this.linktext === other.linktext &&
-      this.sourcePath === other.sourcePath &&
-      this.title === other.title
-    );
+  eq(other: PlayerWidget<Media>): boolean {
+    return this.sameMedia(other.media) && this.title === other.title;
   }
 
-  getSetMediaAction() {
-    const result = getFileHashFromLinktext(this.linktext, this.sourcePath);
-    if (result) {
-      return setObsidianMedia(...result, this.title);
-    } else return null;
-  }
-  toDOM(view: EditorView) {
-    const container = createDiv("internal-embed cm-embed-block mx-media-embed");
+  abstract toDOM(view: EditorView): HTMLDivElement;
+
+  setDOM(view: EditorView, container: HTMLDivElement) {
     container.tabIndex = -1;
-    container.setAttr("src", this.linktext);
+    // container.setAttr("src", this.linktext);
     this.applyTitle(container);
     // container.addEventListener(
     //   "mousedown",
     //   (evt) => 0 === evt.button && view.hasFocus && evt.preventDefault(),
     // );
-    const action = this.getSetMediaAction();
-    if (action) {
-      const child = new PlayerRenderChild(action, this.plugin, container, true);
-      child.load();
-      this.hookClickHandler(view, container);
-      this.setInfo(container, child);
-    } else {
-      container.setText("Failed to get media info");
-    }
-    this.resizeWidget(view, container);
-
-    return container;
+    this.getSetMediaAction()
+      .then((action) => {
+        if (!action) throw new InvaildMediaInfoError();
+        const child = new PlayerRenderChild(
+          action,
+          this.plugin,
+          container,
+          true,
+        );
+        child.load();
+        this.hookClickHandler(view, container);
+        this.setInfo(container, child);
+        this.resizeWidget(view, container);
+      })
+      .catch((reason) => {
+        if (!(reason instanceof InvaildMediaInfoError))
+          console.error("failed to get set media action: ", reason);
+        container.setText("Failed to get media info");
+        this.resizeWidget(view, container);
+      });
   }
   private applyTitle(dom: HTMLElement) {
     if (!this.title) {
@@ -180,8 +189,60 @@ export default class InternalPlayerWidget extends WidgetType {
     }
   }
 }
-Object.defineProperty(InternalPlayerWidget.prototype, "estimatedHeight", {
+Object.defineProperty(PlayerWidget.prototype, "estimatedHeight", {
   get: () => 100,
   enumerable: false,
   configurable: true,
 });
+
+export class InternalEmbedWidget extends PlayerWidget<{
+  linktext: string;
+  file: TFile;
+  hash: string;
+}> {
+  sameMedia(media: { linktext: string; file: TFile; hash: string }): boolean {
+    return (
+      this.media.file.path === media.file.path && this.media.hash === media.hash
+    );
+  }
+  async getSetMediaAction() {
+    return setObsidianMedia(this.media.file, this.media.hash, this.title);
+  }
+  toDOM(view: EditorView): HTMLDivElement {
+    const container = createDiv({
+      cls: ["internal-embed", "cm-embed-block", "mx-media-embed"],
+      attr: { src: this.media.linktext },
+    });
+    this.setDOM(view, container);
+    return container;
+  }
+}
+export class ExternalEmbedWidget extends PlayerWidget<{
+  src: string;
+}> {
+  sameMedia(media: { src: string }): boolean {
+    return this.media.src === media.src;
+  }
+  async getSetMediaAction() {
+    const { src } = this.media;
+    if (src) {
+      return setMediaUrl(src, this.title);
+    } else return null;
+  }
+  toDOM(view: EditorView): HTMLDivElement {
+    const container = createDiv();
+    container.style.display = "none";
+    vaildateMediaURL(this.media.src).then((vaild) => {
+      container.setAttr("src", this.media.src);
+      container.addClasses([
+        "external-embed",
+        "cm-embed-block",
+        "mx-media-embed",
+      ]);
+      container.style.removeProperty("display");
+      this.setDOM(view, container);
+    });
+
+    return container;
+  }
+}
