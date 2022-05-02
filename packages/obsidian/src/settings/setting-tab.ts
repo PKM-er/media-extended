@@ -2,8 +2,9 @@
 // import { isCssValue } from "../modules/parse-unit";
 import type MediaExtended from "@plugin";
 import { MxSettings } from "@settings";
-import { App, debounce, PluginSettingTab, Setting } from "obsidian";
+import { App, debounce, Platform, PluginSettingTab, Setting } from "obsidian";
 
+import LoginModal from "./login";
 // import { getPortSetting, isAvailable } from "../feature/bili-bridge";
 import { hideYtbRecommClass } from "./misc";
 
@@ -54,6 +55,20 @@ export default class MESettingTab extends PluginSettingTab {
     containerEl.empty();
 
     this.general();
+    if (Platform.isDesktopApp) {
+      new Setting(this.containerEl)
+        .setName("Login")
+        .setDesc(
+          "If you are trying to embed media from a website that require login" +
+            "you can open the login page in here first",
+        )
+        .addButton((btn) =>
+          btn
+            .setIcon("log-in")
+            .setTooltip("Open Login Page")
+            .onClick(() => new LoginModal().open()),
+        );
+    }
     this.noteTaking();
     this.player();
     this.ytb();
