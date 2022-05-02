@@ -122,7 +122,7 @@ const WebView = React.forwardRef<
         console.log("webview attached");
         applyAttrsWithMethod(props, webview);
         // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-        unloadPort = (function initPort() {
+        const initPort = () => {
           const webviewId = webview.getWebContentsId();
           ipcRenderer
             .invoke(DisableInput, webviewId)
@@ -150,7 +150,15 @@ const WebView = React.forwardRef<
             portRef.current?.close();
             portRef.current = null;
           };
-        })();
+        };
+
+        // additional retrys to avoid method called before webview is attached
+        try {
+          unloadPort = initPort();
+        } catch (error) {
+          console.log("failed to init port for webview, retrying: ", error);
+          setTimeout(() => (unloadPort = initPort()), 500);
+        }
         webviewRef.current = webview;
         setViewAttached(true);
       });
