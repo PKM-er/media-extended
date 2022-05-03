@@ -1,11 +1,12 @@
 import { MediaType } from "@base/media-type";
+import { getBasename, getFilename } from "@base/url-parse/misc";
 import {
   ActionReducerMapBuilder,
   createSlice,
   PayloadAction,
 } from "@reduxjs/toolkit";
 import { TFile } from "obsidian";
-import Url from "url-parse";
+import URLParse from "url-parse";
 
 import {
   BilibiliMedia,
@@ -85,8 +86,8 @@ export const getProviderSlice = (
         action: PayloadAction<[src: string, type: MediaType]>,
       ) => {
         let [src, playerType] = action.payload;
-        const { pathname } = Url(src),
-          filename = decodeURI(pathname).split("/").pop();
+        const { pathname } = new URLParse(src),
+          filename = getFilename(pathname);
 
         let isFileUrl = false;
         let url = src;
@@ -102,7 +103,7 @@ export const getProviderSlice = (
           allowCORS: true,
           src,
           url,
-          title: filename ? filename : src,
+          title: filename ? getBasename(filename) : src,
         };
         state.source = media;
       },

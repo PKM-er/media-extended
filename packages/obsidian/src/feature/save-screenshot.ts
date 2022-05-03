@@ -1,5 +1,6 @@
 import "obsidian";
 
+import { getBasename, getFilename } from "@base/url-parse/misc";
 import { getMostRecentViewOfType, insertToCursor } from "@misc";
 import { Source } from "@player/slice/provider/types";
 import type MediaExtended from "@plugin";
@@ -18,8 +19,13 @@ const getScreenshotName = (source: Source, time: number) => {
   } else if (source.from === "direct") {
     if (source.title) name = source.title;
     else {
-      const url = new URLParse(source.src);
-      name = url.pathname.split("/").pop() ?? url.hostname + "-" + url.pathname;
+      const url = new URLParse(source.src),
+        filename = getFilename(url.pathname);
+      if (filename) {
+        name = getBasename(filename);
+      } else {
+        name = url.hostname + "-" + url.pathname;
+      }
     }
   } else {
     name = source.title ?? source.id;
