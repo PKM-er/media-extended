@@ -3,7 +3,11 @@ import { AppDispatch } from "@player/store";
 import type MediaExtended from "@plugin";
 import { requestTimestamp, requsetScreenshot } from "@slice/action/thunk";
 import { toggleMute, togglePlay } from "@slice/controls";
-import { seekByOffset, setVolumeByOffest } from "@slice/controls/thunk";
+import {
+  seekByOffset,
+  setPlaybackRate,
+  setVolumeByOffest,
+} from "@slice/controls/thunk";
 import { Hotkey, KeymapEventHandler } from "obsidian";
 
 import { MediaView } from "../media-view";
@@ -69,6 +73,14 @@ const actions: ControlAction[] = [
     action: requsetScreenshot(),
     localHotkeys: [{ key: "s", modifiers: [] }],
   },
+  ...[0.5, 1, 1.25, 1.5, 2, 4].map((speed, index) => ({
+    id: `speed-${speed}`,
+    name: `${speed}× Playback`,
+    action: setPlaybackRate(speed),
+    localHotkeys: [
+      { key: index === 0 ? "`" : index.toString(), modifiers: [] },
+    ],
+  })),
 ];
 
 export const registerGlobalControlCmd = (plugin: MediaExtended) => {
