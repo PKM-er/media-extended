@@ -96,9 +96,9 @@ export const controlsSlice = createSlice({
       state.autoplay = is(query, "autoplay");
       state.muted = is(query, "muted");
 
+      if (fromLink) state.paused = false;
       // start playing when timestamp is seeked to
       if (frag && isTimestamp(frag)) {
-        if (fromLink) state.paused = false;
         state.currentTime = frag[0];
       }
     },

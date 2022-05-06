@@ -5,10 +5,10 @@ import "./style/caption-fix.less";
 import { ExtensionAccepted } from "@base/media-type";
 import { registerIPCMain } from "@ipc/hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
-import { MEDIA_VIEW_TYPE, MediaView } from "@view";
+import { MEDIA_VIEW_TYPE, MediaView, PatchOpenFile } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
-import { App, FileSystemAdapter, Platform, Plugin } from "obsidian";
+import { FileSystemAdapter, Platform, Plugin } from "obsidian";
 
 import { setupRec } from "./feature/audio-rec";
 import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
@@ -80,6 +80,7 @@ export default class MediaExtended extends Plugin {
     this.register(registerIPCMain(this));
 
     await this.loadSettings();
+    PatchOpenFile(this);
 
     const { workspace } = this.app;
 
