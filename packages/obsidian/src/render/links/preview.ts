@@ -81,14 +81,29 @@ const patchPreviewLinks = (plugin: MediaExtended) => {
               ? href
               : null;
           };
-          el.on("mouseover", "a.external-link", (e, t) => {
-            const linktext = getLinktext(t);
-            linktext && helper.mx_onExternalLinkMouseover(e, t, linktext);
-          });
+          const handler = (evt: MouseEvent, el: HTMLElement) => {
+            const linktext = getLinktext(el);
+            linktext && helper.mx_onExternalLinkMouseover(evt, el, linktext);
+          };
+          el.on("mouseover", "a.external-link", handler);
+          plugin.register(() =>
+            el.off("mouseover", "a.external-link", handler),
+          );
           return result;
         },
     }),
   );
+  // if layout is ready on load,
+  // reload all existing markdown view for patch to work
+  if (null === (app.workspace as any).onLayoutReadyCallbacks) {
+    Promise.all(
+      app.workspace.getLeavesOfType("markdown").map(async (leaf) => {
+        const state = leaf.getViewState();
+        await leaf.setViewState({ type: "empty" });
+        await leaf.setViewState(state);
+      }),
+    ); //.then(() => console.log("Markdown previews are reloaded"));
+  }
 };
 export default patchPreviewLinks;
 
