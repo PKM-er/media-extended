@@ -5,7 +5,7 @@ import "./style/caption-fix.less";
 import { ExtensionAccepted } from "@base/media-type";
 import { registerIPCMain } from "@ipc/hack";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
-import { MEDIA_VIEW_TYPE, MediaView, PatchOpenFile } from "@view";
+import { MEDIA_VIEW_TYPE, MediaView, patchLeaf, ToggleMediaPin } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
 import { FileSystemAdapter, Platform, Plugin } from "obsidian";
@@ -80,7 +80,7 @@ export default class MediaExtended extends Plugin {
     this.register(registerIPCMain(this));
 
     await this.loadSettings();
-    PatchOpenFile(this);
+    patchLeaf(this);
 
     const { workspace } = this.app;
 
@@ -123,6 +123,7 @@ export default class MediaExtended extends Plugin {
     const exts = getExts();
     this.app.viewRegistry.unregisterExtensions(exts);
     this.registerView(MEDIA_VIEW_TYPE, (leaf) => new MediaView(leaf, this));
+    this.addCommand(ToggleMediaPin);
     this.app.viewRegistry.registerExtensions(exts, MEDIA_VIEW_TYPE);
   }
 

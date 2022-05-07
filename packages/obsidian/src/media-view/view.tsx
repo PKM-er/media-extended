@@ -11,6 +11,7 @@ import {
   setObsidianMediaSrc,
 } from "@slice/provider/thunk";
 import {
+  Command,
   EditableFileView,
   ItemView,
   Menu,
@@ -28,6 +29,7 @@ import {
   createStore,
   MEDIA_VIEW_TYPE,
   MediaState,
+  MediaStateBase,
   PlayerComponent,
 } from "./common";
 
@@ -106,6 +108,7 @@ export default class ObMediaView
         }
       },
     );
+    this.pinnedAction.style.display = "none";
 
     this.register(
       subscribe(
@@ -166,23 +169,46 @@ export default class ObMediaView
   getState(): MediaState {
     let viewState = super.getState() as MediaState;
     const { controls, provider } = this.store.getState();
-    const controlsState = {
+    const common: Required<MediaStateBase> = {
       fragment: controls.fragment,
       currentTime: controls.currentTime,
       duration: controls.duration,
+      pinned: this.pinned,
     };
 
     let url;
     if (this.file) {
-      return { ...viewState, ...controlsState };
+      return { ...viewState, ...common };
     } else if ((url = this.getUrl())) {
-      return { ...viewState, file: null, url, ...controlsState };
+      return { ...viewState, file: null, url, ...common };
     } else {
       console.error("unexpected state", viewState, provider.source);
       return viewState;
       // throw new Error("Failed to get state for media view: unexpected state");
     }
   }
+
+  /**
+   * internal pinned state,
+   * prevent other types of view from opening in current leaf
+   * but allow history to be restored
+   */
+  private _pinned: boolean = false;
+  get pinned() {
+    return this._pinned;
+  }
+  set pinned(pinned: boolean) {
+    if (this.pinned !== pinned) {
+      this._pinned = pinned;
+      if (pinned) this.pinnedAction.style.removeProperty("display");
+      else this.pinnedAction.style.display = "none";
+    }
+  }
+  pinnedAction = this.addAction(
+    "pin",
+    "Unpin Media View",
+    () => (this.pinned = false),
+  );
 
   async setState(state: MediaState, result: ViewStateResult): Promise<void> {
     if (state.file === state.url || (state.file && state.url)) {
@@ -195,7 +221,7 @@ export default class ObMediaView
     if (state.url) {
       this.setUrl(state.url);
     }
-    const { fragment, currentTime, duration } = state as MediaState;
+    let { fragment, currentTime, duration, pinned } = state;
     if (
       fragment !== undefined &&
       (fragment === null || Array.isArray(fragment))
@@ -208,6 +234,8 @@ export default class ObMediaView
     if (typeof duration === "number" && duration > 0) {
       this.store.dispatch(revertDuration(duration));
     }
+
+    if (pinned !== undefined) this.pinned = pinned;
   }
   async onLoadFile(file: TFile): Promise<void> {
     this.setFile(file);
@@ -266,6 +294,14 @@ export default class ObMediaView
 
   onMoreOptionsMenu(menu: Menu): void {
     let url;
+    if (!this.pinned) {
+      menu.addItem((item) =>
+        item
+          .setIcon("pin")
+          .setTitle("Pin Media View")
+          .onClick(() => (this.pinned = true)),
+      );
+    }
     if (this.file) {
       super.onMoreOptionsMenu(menu);
     } else if ((url = this.getUrl())) {
@@ -284,3 +320,14 @@ export default class ObMediaView
   }
   //#endregion
 }
+
+export const ToggleMediaPin: Command = {
+  id: "toggle-media-pin",
+  name: "Toggle Media Pin",
+  checkCallback: (checking) => {
+    const active = app.workspace.activeLeaf;
+    if (!(active?.view instanceof ObMediaView)) return false;
+    if (!checking) active.view.pinned = !active.view.pinned;
+    return true;
+  },
+};

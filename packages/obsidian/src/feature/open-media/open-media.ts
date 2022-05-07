@@ -11,8 +11,10 @@ import { TFile, ViewState, WorkspaceLeaf } from "obsidian";
 
 import {
   createLeafBySplit,
-  findMediaViewByFile,
-  findMediaViewByUrl,
+  filterMediaViewByFile,
+  filterMediaViewByUrl,
+  findMediaView,
+  ViewFilter,
 } from "./smart-view-open";
 
 const getViewState = (type: "url" | "file", link: string, hash: string) => {
@@ -36,9 +38,14 @@ export const openMediaLink = (
   newLeaf = false,
 ) =>
   vaildateMediaURL(url, (url, hash) => {
-    const viewState = getViewState("url", url, hash),
-      findMediaView = () => findMediaViewByUrl(url);
-    return openMediaView(viewState, hash, fromLink, findMediaView, newLeaf);
+    const viewState = getViewState("url", url, hash);
+    return openMediaView(
+      viewState,
+      hash,
+      fromLink,
+      filterMediaViewByUrl(url),
+      newLeaf,
+    );
   });
 
 export const openMediaLinkInHoverEditor = (
@@ -60,11 +67,12 @@ export const openMediaLinkInHoverEditor = (
     await leaf.setViewState(viewState, eState);
   });
 };
+
 const openMediaView = async (
   viewState: ViewState,
   hash: string,
   fromLink: boolean,
-  findMediaView: () => MediaView | null,
+  viewFilter: ViewFilter,
   newLeaf: boolean,
 ) => {
   let view: MediaView | null;
@@ -73,7 +81,7 @@ const openMediaView = async (
   if (newLeaf) {
     const leaf = createLeafBySplit(app.workspace.getLeaf());
     await setViewState(leaf);
-  } else if ((view = findMediaView())) {
+  } else if ((view = findMediaView(viewFilter))) {
     let state = view.leaf.getViewState();
     state.state = { ...state.state, fragment: getFragFromHash(hash) };
     await setViewState(view.leaf);
@@ -93,7 +101,12 @@ export const openMediaFile = async (
 ): Promise<boolean> => {
   if (app.viewRegistry.getTypeByExtension(file.extension) !== MEDIA_VIEW_TYPE)
     return false;
-  const viewState = getViewState("file", file.path, hash),
-    findMediaView = () => findMediaViewByFile(file);
-  return openMediaView(viewState, hash, fromLink, findMediaView, newLeaf);
+  const viewState = getViewState("file", file.path, hash);
+  return openMediaView(
+    viewState,
+    hash,
+    fromLink,
+    filterMediaViewByFile(file),
+    newLeaf,
+  );
 };

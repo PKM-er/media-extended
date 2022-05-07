@@ -22,28 +22,33 @@ export const createLeafBySplit = (leaf: WorkspaceLeaf): WorkspaceLeaf => {
   return workspace.createLeafBySplit(leaf, direction);
 };
 
+export type ViewFilter = (leaf: WorkspaceLeaf) => boolean;
 /**
- * @param url url without hash
  * @returns the most recent MediaView with given url opened
  */
-export const findMediaViewByUrl = (url: string): MediaView | null => {
-  return (
-    (app.workspace
-      .getLeavesOfType(MEDIA_VIEW_TYPE)
-      .filter(({ view }) => view.getState().url === url)
-      .sort((a, b) => b.activeTime - a.activeTime)[0]?.view as
-      | MediaView
-      | undefined) ?? null
-  );
-};
-
-/**
- * @returns the most recent MediaView with given file opened
- */
-export const findMediaViewByFile = (file: TFile): MediaView | null =>
+export const findMediaView = (filterFn: ViewFilter): MediaView | null =>
   (app.workspace
     .getLeavesOfType(MEDIA_VIEW_TYPE)
-    .filter(({ view }) => view.getState().file === file.path)
-    .sort((a, b) => b.activeTime - a.activeTime)[0]?.view as
-    | MediaView
-    | undefined) ?? null;
+    .filter(filterFn)
+    .sort(sortFn)[0]?.view as MediaView | undefined) ?? null;
+
+/**
+ * @param url url without hash
+ */
+export const filterMediaViewByUrl =
+  (url: string): ViewFilter =>
+  ({ view }) =>
+    view.getState().url === url;
+
+export const filterMediaViewByFile =
+  (file: TFile): ViewFilter =>
+  ({ view }) =>
+    view.getState().file === file.path;
+
+const sortFn = (a: WorkspaceLeaf, b: WorkspaceLeaf) => {
+  const aView = a.view as MediaView,
+    bView = b.view as MediaView;
+  const comparePinned = +bView.pinned - +aView.pinned;
+  if (comparePinned !== 0) return comparePinned;
+  return b.activeTime - a.activeTime;
+};

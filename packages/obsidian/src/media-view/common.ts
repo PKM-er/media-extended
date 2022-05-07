@@ -17,10 +17,11 @@ export const createStore = (name: string) => {
   return store;
 };
 
-interface MediaStateBase {
+export interface MediaStateBase {
   fragment?: [number, number] | null;
   currentTime?: number;
   duration?: number | null;
+  pinned?: boolean;
 }
 
 export interface MediaFileState extends MediaStateBase {
