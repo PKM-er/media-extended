@@ -1,4 +1,9 @@
-export type { MediaFileState, MediaState, MediaUrlState } from "./common";
+export type {
+  MediaFileState,
+  MediaState,
+  MediaStateBase,
+  MediaUrlState,
+} from "./common";
 export { MEDIA_VIEW_TYPE } from "./common";
 export { default as patchLeaf } from "./monkey-patch";
 export { default as PlayerRenderChild } from "./render-child";

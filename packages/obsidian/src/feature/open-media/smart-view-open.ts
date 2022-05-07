@@ -26,11 +26,11 @@ export type ViewFilter = (leaf: WorkspaceLeaf) => boolean;
 /**
  * @returns the most recent MediaView with given url opened
  */
-export const findMediaView = (filterFn: ViewFilter): MediaView | null =>
-  (app.workspace
-    .getLeavesOfType(MEDIA_VIEW_TYPE)
-    .filter(filterFn)
-    .sort(sortFn)[0]?.view as MediaView | undefined) ?? null;
+export const findMediaView = (filterFn?: ViewFilter) => {
+  const leaves = app.workspace.getLeavesOfType(MEDIA_VIEW_TYPE).sort(sortFn);
+  if (filterFn) return leaves.filter(filterFn)[0];
+  else return leaves[0];
+};
 
 /**
  * @param url url without hash

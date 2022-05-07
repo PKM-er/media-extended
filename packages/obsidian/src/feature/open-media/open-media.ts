@@ -1,6 +1,6 @@
 import { getFragFromHash } from "@base/hash-tool";
 import { vaildateMediaURL } from "@base/url-parse";
-import { getMostRecentViewOfType } from "@misc";
+import { getMostRecentLeafOfView, getMostRecentViewOfType } from "@misc";
 import {
   MEDIA_VIEW_TYPE,
   MediaFileState,
@@ -37,16 +37,13 @@ export const openMediaLink = (
   fromLink: boolean,
   newLeaf = false,
 ) =>
-  vaildateMediaURL(url, (url, hash) => {
-    const viewState = getViewState("url", url, hash);
-    return openMediaView(
-      viewState,
-      hash,
-      fromLink,
+  vaildateMediaURL(url, (url, hash) =>
+    openMediaView(
+      { state: getViewState("url", url, hash), hash },
       filterMediaViewByUrl(url),
-      newLeaf,
-    );
-  });
+      { fromLink, newLeaf },
+    ),
+  );
 
 export const openMediaLinkInHoverEditor = (
   url: string,
@@ -68,29 +65,30 @@ export const openMediaLinkInHoverEditor = (
   });
 };
 
+/**
+ * @param isSameMedia filter to determine if media is the same
+ */
 const openMediaView = async (
-  viewState: ViewState,
-  hash: string,
-  fromLink: boolean,
-  viewFilter: ViewFilter,
-  newLeaf: boolean,
+  info: { state: ViewState; hash: string },
+  isSameMedia: ViewFilter,
+  options?: Partial<{ fromLink: boolean; newLeaf: boolean }>,
 ) => {
-  let view: MediaView | null;
-  const setViewState = (leaf: WorkspaceLeaf) =>
-    leaf.setViewState(viewState, getEphemeralState(hash, fromLink));
+  const { fromLink = false, newLeaf = false } = options ?? {};
+  let leaf: WorkspaceLeaf | undefined | null;
   if (newLeaf) {
-    const leaf = createLeafBySplit(app.workspace.getLeaf());
-    await setViewState(leaf);
-  } else if ((view = findMediaView(viewFilter))) {
-    let state = view.leaf.getViewState();
-    state.state = { ...state.state, fragment: getFragFromHash(hash) };
-    await setViewState(view.leaf);
-  } else if ((view = getMostRecentViewOfType(MediaView))) {
-    await setViewState(view.leaf);
-  } else {
-    await setViewState(app.workspace.getLeaf());
+    leaf = createLeafBySplit(app.workspace.getUnpinnedLeaf());
+  } else if ((leaf = findMediaView(isSameMedia))) {
+    // if found view playing same media, update only the hash
+    let { state } = leaf.getViewState();
+    info.state = { ...state, fragment: getFragFromHash(info.hash) };
+  } else if (!(leaf = findMediaView())) {
+    // if no media view found, fallback to bulti-in getLeaf
+    leaf = app.workspace.getLeaf();
   }
-  return true;
+  if (leaf) {
+    leaf.setViewState(info.state, getEphemeralState(info.hash, fromLink));
+    return true;
+  } else return false;
 };
 
 export const openMediaFile = async (
@@ -101,12 +99,9 @@ export const openMediaFile = async (
 ): Promise<boolean> => {
   if (app.viewRegistry.getTypeByExtension(file.extension) !== MEDIA_VIEW_TYPE)
     return false;
-  const viewState = getViewState("file", file.path, hash);
   return openMediaView(
-    viewState,
-    hash,
-    fromLink,
+    { state: getViewState("file", file.path, hash), hash },
     filterMediaViewByFile(file),
-    newLeaf,
+    { fromLink, newLeaf },
   );
 };

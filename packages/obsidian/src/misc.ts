@@ -129,10 +129,17 @@ declare module "obsidian" {
 export const getMostRecentViewOfType = <T extends View>(
   ctor: Constructor<T>,
 ): T | null => {
-  let activeView = app.workspace.getActiveViewOfType(ctor);
-  if (activeView) return activeView;
+  const leaf = getMostRecentLeafOfView(ctor);
+  return leaf ? (leaf.view as T) : null;
+};
 
-  let recent: WorkspaceLeaf | undefined;
+export const getMostRecentLeafOfView = <T extends View>(
+  ctor: Constructor<T>,
+): WorkspaceLeaf | null => {
+  if (app.workspace.activeLeaf?.view instanceof ctor)
+    return app.workspace.activeLeaf;
+
+  let recent: WorkspaceLeaf | null = null;
   app.workspace.iterateRootLeaves((leaf) => {
     if (
       leaf.view instanceof ctor &&
@@ -141,8 +148,7 @@ export const getMostRecentViewOfType = <T extends View>(
       recent = leaf;
     }
   });
-  if (recent) return recent.view as T;
-  return null;
+  return recent;
 };
 
 import { moment } from "obsidian";
