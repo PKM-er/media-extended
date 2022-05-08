@@ -49,9 +49,20 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
         return null;
       }
     } else {
-      const link = source.from === "direct" ? source.url : source.src;
       const linktext = secondToDuration(offsetCurrentTime);
-      return `[${linktext}](${link}#t=${offsetCurrentTime})`;
+      const link = source.from === "direct" ? source.url : source.src,
+        hash = `#t=${offsetCurrentTime}`;
+
+      let url = link + hash;
+      try {
+        if (decodeURI(url) !== url) {
+          url = `<${decodeURI(url)}>`;
+        }
+      } catch (error) {
+        console.warn("malformed URI: " + url);
+      }
+
+      return `[${linktext}](${url})`;
     }
   };
 };
