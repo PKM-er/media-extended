@@ -77,16 +77,12 @@ const openMediaView = async (
   let leaf: WorkspaceLeaf | undefined | null;
   if (newLeaf) {
     leaf = createLeafBySplit(app.workspace.getUnpinnedLeaf());
-  } else if ((leaf = findMediaView(isSameMedia))) {
-    // if found view playing same media, update only the hash
-    let { state } = leaf.getViewState();
-    info.state = { ...state, fragment: getFragFromHash(info.hash) };
-  } else if (!(leaf = findMediaView())) {
-    // if no media view found, fallback to bulti-in getLeaf
-    leaf = app.workspace.getLeaf();
+  } else {
+    leaf =
+      findMediaView(isSameMedia) ?? findMediaView() ?? app.workspace.getLeaf();
   }
   if (leaf) {
-    leaf.setViewState(info.state, getEphemeralState(info.hash, fromLink));
+    await leaf.setViewState(info.state, getEphemeralState(info.hash, fromLink));
     return true;
   } else return false;
 };
