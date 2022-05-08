@@ -92,8 +92,6 @@ export default class MessageHandler {
           this.dispatch(gotInitState(data[1]));
         }
         break;
-      default:
-        assertNever(data);
     }
   };
 }
