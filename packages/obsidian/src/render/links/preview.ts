@@ -104,6 +104,20 @@ const patchPreviewLinks = (plugin: MediaExtended) => {
       }),
     ); //.then(() => console.log("Markdown previews are reloaded"));
   }
+  plugin.registerMarkdownPostProcessor((el) =>
+    el.querySelectorAll("a").forEach((a) => {
+      const label = a.getAttr("aria-label");
+      if (!label) return;
+      let newLabel = label;
+      try {
+        // decode uri to make uri more readable
+        newLabel = decodeURI(label);
+      } catch (error) {}
+      if (label !== newLabel) {
+        a.setAttr("aria-label", newLabel);
+      }
+    }),
+  );
 };
 export default patchPreviewLinks;
 

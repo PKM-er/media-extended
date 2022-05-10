@@ -302,6 +302,23 @@ export default class ObMediaView
           .onClick(() => (this.pinned = true)),
       );
     }
+    const media =
+      this.contentEl.querySelector("video") ??
+      this.contentEl.querySelector("audio");
+    if (media) {
+      menu.addItem((item) =>
+        item
+          .setIcon("reset")
+          .setTitle("Reload Media")
+          .onClick(async () => {
+            const time = media.currentTime;
+            media.load();
+            media.currentTime = time;
+            await media.play();
+            if (this.store.getState().controls.paused) media.pause();
+          }),
+      );
+    }
     if (this.file) {
       super.onMoreOptionsMenu(menu);
     } else if ((url = this.getUrl())) {
