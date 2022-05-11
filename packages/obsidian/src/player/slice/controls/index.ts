@@ -23,6 +23,8 @@ export const {
   dragSeekEnd,
   progressBarSeek,
   progressBarSeekEnd,
+  keyboardSeek,
+  keyboardSeekEnd,
   handleTimeUpdate,
   handleFullscreenChange,
   handleVolumeChange,

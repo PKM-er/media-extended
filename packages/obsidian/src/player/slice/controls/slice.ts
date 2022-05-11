@@ -298,10 +298,45 @@ const PreciseSeekReducerFor =
       // state.paused = true;
     }
   };
+const OffsetSeekReducerFor =
+  (
+    source: UserSeekSource,
+    onUpdate: (state: ControlsState, offset: number) => any,
+  ) =>
+  (state: ControlsState, action: PayloadAction<number>) => {
+    const priority = compareSeekPriority(source, state);
+    if (priority < 0) return;
+    const offset = action.payload;
+    if (priority === 0) {
+      onUpdate(state, offset);
+    } else {
+      // new seek action or override existing seek action
+      state.userSeek = {
+        initialTime: state.currentTime,
+        currentTime: clampTime(offset + state.currentTime, state.duration),
+        source,
+        pausedBeforeSeek: state.paused,
+      };
+      // state.paused = true;
+    }
+  };
+const handleOffsetSeek = (
+  source: UserSeekSource,
+  offset: number,
+  state: ControlsState,
+) => {};
 const userSeekReducers = getReducer({
   progressBarSeek: PreciseSeekReducerFor(UserSeekSource.PROGRESS_BAR),
   progressBarSeekEnd: UserSeekEndReducerFor(UserSeekSource.PROGRESS_BAR),
-  keyboardSeek: PreciseSeekReducerFor(UserSeekSource.KEYBOARD),
+  keyboardSeek: OffsetSeekReducerFor(
+    UserSeekSource.KEYBOARD,
+    (state, offset) => {
+      state.userSeek!.currentTime = clampTime(
+        offset + state.userSeek!.currentTime,
+        state.duration,
+      );
+    },
+  ),
   keyboardSeekEnd: UserSeekEndReducerFor(UserSeekSource.KEYBOARD),
   dragSeek: (state, action: PayloadAction<number>) => {
     const source = UserSeekSource.DRAG;
@@ -344,21 +379,9 @@ const userSeekReducers = getReducer({
     };
     // state.paused = true;
   },
-  requestManualOffsetSeek: (state, action: PayloadAction<number>) => {
-    const source = UserSeekSource.MANUAL;
-    const priority = compareSeekPriority(source, state);
-    if (priority < 0) return;
-    if (priority === 0)
-      throw new Error("manual seek request is called before manual seek ends");
-    const offset = action.payload;
-    state.userSeek = {
-      initialTime: state.currentTime,
-      currentTime: clampTime(offset + state.currentTime, state.duration),
-      source,
-      pausedBeforeSeek: state.paused,
-    };
-    // state.paused = true;
-  },
+  requestManualOffsetSeek: OffsetSeekReducerFor(UserSeekSource.MANUAL, () => {
+    throw new Error("manual seek request is called before manual seek ends");
+  }),
   manualSeekDone: UserSeekEndReducerFor(UserSeekSource.MANUAL),
 });
 

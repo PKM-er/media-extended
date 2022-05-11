@@ -1,14 +1,19 @@
 import { getMostRecentViewOfType } from "@misc";
-import { AppDispatch } from "@player/store";
+import { AppDispatch, PlayerStore } from "@player/store";
 import type MediaExtended from "@plugin";
 import { requestTimestamp, requsetScreenshot } from "@slice/action/thunk";
-import { toggleMute, togglePlay } from "@slice/controls";
+import {
+  keyboardSeek,
+  keyboardSeekEnd,
+  toggleMute,
+  togglePlay,
+} from "@slice/controls";
 import {
   seekByOffset,
   setPlaybackRate,
   setVolumeByOffest,
 } from "@slice/controls/thunk";
-import { Hotkey, KeymapEventHandler } from "obsidian";
+import { Component, debounce, Hotkey } from "obsidian";
 
 import { MediaView } from "../media-view";
 import { PlayerComponent } from "../media-view/common";
@@ -33,13 +38,13 @@ const actions: ControlAction[] = [
     id: "forward-5s",
     name: "Forward 5 second",
     action: seekByOffset(5),
-    localHotkeys: [{ key: "ArrowRight", modifiers: [] }],
+    // localHotkeys: [{ key: "ArrowRight", modifiers: [] }],
   },
   {
     id: "rewind-5s",
     name: "Rewind 5 second",
     action: seekByOffset(-5),
-    localHotkeys: [{ key: "ArrowLeft", modifiers: [] }],
+    // localHotkeys: [{ key: "ArrowLeft", modifiers: [] }],
   },
   {
     id: "volume-up",
@@ -113,4 +118,68 @@ export const setPlayerKeymaps = (component: PlayerComponent) => {
       );
     }
   }
+  localForward(component);
+};
+
+const forwardActions = {
+    regular: seekByOffset(5),
+    repeat: setPlaybackRate(5),
+    repeatDone: setPlaybackRate(1),
+  },
+  rewindActions = {
+    regular: seekByOffset(-5),
+    repeat: keyboardSeek(-5),
+    repeatDone: keyboardSeekEnd(),
+  };
+const getRepeatHandler = (
+  component: Component,
+  store: PlayerStore,
+  {
+    regular,
+    repeat,
+    repeatDone,
+  }: Record<"regular" | "repeat" | "repeatDone", Parameters<AppDispatch>[0]>,
+) => {
+  let repeated = false;
+  let handler: (() => any) | undefined;
+  component.register(
+    () => handler && window.removeEventListener("keyup", handler),
+  );
+  return (evt: KeyboardEvent) => {
+    evt.preventDefault();
+    if (!handler) {
+      handler = () => {
+        if (repeated) {
+          store.dispatch(repeatDone);
+          repeated = false;
+        }
+        handler && window.removeEventListener("keyup", handler);
+        handler = undefined;
+      };
+      window.addEventListener("keyup", handler);
+    }
+    if (!evt.repeat) {
+      store.dispatch(regular);
+    } else {
+      store.dispatch(repeat);
+      repeated = true;
+    }
+  };
+};
+
+const localForward = (component: PlayerComponent) => {
+  component.registerScopeEvent(
+    component.scope.register(
+      [],
+      "ArrowRight",
+      getRepeatHandler(component, component.store, forwardActions),
+    ),
+  );
+  component.registerScopeEvent(
+    component.scope.register(
+      [],
+      "ArrowLeft",
+      getRepeatHandler(component, component.store, rewindActions),
+    ),
+  );
 };
