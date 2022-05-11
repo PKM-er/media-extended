@@ -9,7 +9,13 @@ import {
 import { isTimestamp, parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
-export type UserSeekSource = "progress-bar" | "drag" | "manual";
+// larger the value, lower the priority
+const enum UserSeekSource {
+  MANUAL = 1,
+  PROGRESS_BAR,
+  KEYBOARD,
+  DRAG,
+}
 
 export interface ControlsState {
   /**
@@ -242,25 +248,39 @@ const evtHandlerReducer: SliceCaseReducers<ControlsState> = {
   },
 };
 
-const handleUserSeekEnd = (state: ControlsState) => {
-  if (!state.userSeek) return;
-  if (state.userSeek.pausedBeforeSeek !== null) {
-    state.paused = state.userSeek.pausedBeforeSeek;
-  }
-  // apply currentTime immediately to avoid latency from onTimeUpdate
-  state.currentTime = state.userSeek.currentTime;
-  state.userSeek = null;
+/**
+ * @returns negative: given has lower priority, 0 equal, positive: given higher
+ */
+const compareSeekPriority = (
+  source: UserSeekSource,
+  state: ControlsState,
+): number => {
+  if (!state.userSeek) return 1;
+  const { source: toCompare } = state.userSeek;
+  return toCompare - source;
 };
-const userSeekReducers: SliceCaseReducers<ControlsState> = {
-  progressBarSeek: (state, action: PayloadAction<number>) => {
-    if (state.userSeek?.source === "manual") return;
-    const source: UserSeekSource = "progress-bar";
-    let time = action.payload;
-    time = clampTime(time, state.duration);
 
-    if (state.userSeek?.source === source) {
+const UserSeekEndReducerFor =
+  (source: UserSeekSource) => (state: ControlsState) => {
+    const priority = compareSeekPriority(source, state);
+    if (priority < 0) return;
+    if (!state.userSeek) return;
+    if (state.userSeek.pausedBeforeSeek !== null) {
+      state.paused = state.userSeek.pausedBeforeSeek;
+    }
+    // apply currentTime immediately to avoid latency from onTimeUpdate
+    state.currentTime = state.userSeek.currentTime;
+    state.userSeek = null;
+  };
+const PreciseSeekReducerFor =
+  (source: UserSeekSource) =>
+  (state: ControlsState, action: PayloadAction<number>) => {
+    const priority = compareSeekPriority(source, state);
+    if (priority < 0) return;
+    const time = clampTime(action.payload, state.duration);
+    if (priority === 0) {
       // only update seek time
-      state.userSeek.currentTime = time;
+      state.userSeek!.currentTime = time;
     } else {
       // new seek action or override existing seek action
       state.userSeek = {
@@ -271,14 +291,15 @@ const userSeekReducers: SliceCaseReducers<ControlsState> = {
       };
       // state.paused = true;
     }
-  },
-  progressBarSeekEnd: (state) => {
-    if (state.userSeek?.source === "manual") return;
-    handleUserSeekEnd(state);
-  },
+  };
+const userSeekReducers: SliceCaseReducers<ControlsState> = {
+  progressBarSeek: PreciseSeekReducerFor(UserSeekSource.PROGRESS_BAR),
+  progressBarSeekEnd: UserSeekEndReducerFor(UserSeekSource.PROGRESS_BAR),
   dragSeek: (state, action: PayloadAction<number>) => {
-    const source = "drag";
-    if (!state.userSeek) {
+    const source = UserSeekSource.DRAG;
+    const priority = compareSeekPriority(source, state);
+    if (priority < 0) return;
+    if (priority > 0) {
       // new seek action
       let time = state.currentTime;
       state.userSeek = {
@@ -288,26 +309,23 @@ const userSeekReducers: SliceCaseReducers<ControlsState> = {
         pausedBeforeSeek: state.paused,
       };
       // state.paused = true;
-    } else if (state.userSeek.source === "drag") {
+    } else {
       const forwardSeconds = action.payload;
-      const { initialTime } = state.userSeek,
+      const { initialTime } = state.userSeek!,
         { duration } = state;
-      state.userSeek.currentTime = clampTime(
+      state.userSeek!.currentTime = clampTime(
         forwardSeconds + initialTime,
         duration,
       );
     }
   },
-  dragSeekEnd: (state) => {
-    if (
-      state.userSeek &&
-      ["progress-bar", "manual"].includes(state.userSeek.source)
-    )
-      return;
-    handleUserSeekEnd(state);
-  },
+  dragSeekEnd: UserSeekEndReducerFor(UserSeekSource.DRAG),
   requestManualSeek: (state, action: PayloadAction<number>) => {
-    const source: UserSeekSource = "manual";
+    const source = UserSeekSource.MANUAL;
+    const priority = compareSeekPriority(source, state);
+    if (priority < 0) return;
+    if (priority === 0)
+      throw new Error("manual seek request is called before manual seek ends");
     let time = action.payload;
     time = clampTime(time, state.duration);
     state.userSeek = {
@@ -319,7 +337,11 @@ const userSeekReducers: SliceCaseReducers<ControlsState> = {
     // state.paused = true;
   },
   requestManualOffsetSeek: (state, action: PayloadAction<number>) => {
-    const source: UserSeekSource = "manual";
+    const source = UserSeekSource.MANUAL;
+    const priority = compareSeekPriority(source, state);
+    if (priority < 0) return;
+    if (priority === 0)
+      throw new Error("manual seek request is called before manual seek ends");
     const offset = action.payload;
     state.userSeek = {
       initialTime: state.currentTime,
@@ -329,10 +351,7 @@ const userSeekReducers: SliceCaseReducers<ControlsState> = {
     };
     // state.paused = true;
   },
-  manualSeekDone: (state) => {
-    // highest priority, no check for source
-    handleUserSeekEnd(state);
-  },
+  manualSeekDone: UserSeekEndReducerFor(UserSeekSource.MANUAL),
 };
 
 export const controlsSlice = createSlice({
