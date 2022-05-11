@@ -48,47 +48,23 @@ const hookState = (media: Media, store: PlayerStore) => {
 export default hookState;
 
 /**
- * @param tryApplyPause return function if state changed and new state need to be applied
+ * @param tryApplyPause return function if need to apply pause
  */
 export const getApplyPauseHandler = (
   store: PlayerStore,
   tryApplyPause: (paused: boolean) => (() => void | Promise<void>) | null,
-) => {
-  let pending: Promise<void> | void;
-  let nextPaused: boolean | void;
-  return subscribe(
+) =>
+  subscribe(
     store,
     (state) => state.controls.paused,
     async (paused) => {
-      let apply = tryApplyPause(paused);
-      if (!apply) return;
-      if (pending) {
-        // if currently pausing/playing, wait for the current operation to finish
-        nextPaused = paused;
-      } else {
+      const apply = tryApplyPause(paused);
+      if (apply) {
         store.dispatch(lockPlayPauseEvent());
-        do {
-          pending = apply();
-          try {
-            await pending;
-          } catch (error) {
-            console.error("Failed to apply paused state", error);
-          }
-          pending = void 0;
-          if (nextPaused) {
-            // apply the queued request to play/pause
-            apply = tryApplyPause(nextPaused);
-            nextPaused = void 0;
-          } else {
-            // if nothing in queue, exit the loop
-            apply = null;
-          }
-        } while (apply);
-        await sleep(50);
-        store.dispatch(unlockPlayPauseEvent());
+        await apply();
+        setTimeout(() => {
+          store.dispatch(unlockPlayPauseEvent());
+        }, 50);
       }
     },
   );
-};
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
