@@ -5,6 +5,7 @@ import { subscribe } from "@player/store";
 import type MediaExtended from "@plugin";
 import { revertDuration, setFragment } from "@slice/controls";
 import { seekTo, setHash } from "@slice/controls/thunk";
+import { toggleFilter } from "@slice/interface";
 import {
   renameObsidianMedia,
   setMediaUrlSrc,
@@ -319,6 +320,17 @@ export default class ObMediaView
           }),
       );
     }
+    const { source } = this.store.getState().provider;
+    const isVideo = source && source.playerType !== "audio";
+    if (isVideo) {
+      menu.addItem((item) =>
+        item
+          .setIcon("aperture")
+          .setTitle("Toggle Filter")
+          .onClick(() => this.store.dispatch(toggleFilter())),
+      );
+    }
+
     if (this.file) {
       super.onMoreOptionsMenu(menu);
     } else if ((url = this.getUrl())) {

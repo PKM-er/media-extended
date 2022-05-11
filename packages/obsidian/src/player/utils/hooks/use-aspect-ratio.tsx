@@ -3,7 +3,7 @@ import "@styles/aspect-ratio.less";
 
 import { useAppSelector } from "@player/hooks";
 import { selectPlayerType } from "@slice/provider";
-import cls from "classnames";
+import cls, { Argument } from "classnames";
 import React from "react";
 
 const CUSTOM_PROPERTY_NAME = "--aspect-ratio";
@@ -18,7 +18,10 @@ const DefaultRatio = {
   webview: "16/9",
 } as const;
 
-const useAspectRatio = (keepRatio: "width" | "height", _className?: string) => {
+const useAspectRatio = (
+  keepRatio: "width" | "height",
+  _className?: Argument[],
+) => {
   const provider = useAppSelector(selectPlayerType);
   let ratio = useAppSelector((state) => state.interface.ratio);
   if (ratio === null && provider) {

@@ -21,6 +21,7 @@ export interface InterfaceState {
   ignoreEvent: {
     tracks: boolean;
   };
+  filter: boolean;
 }
 
 const initialState: InterfaceState = {
@@ -29,6 +30,7 @@ const initialState: InterfaceState = {
   activeCues: null,
   textTracks: { list: [], active: -1, enabled: true },
   ignoreEvent: { tracks: false },
+  filter: false,
 };
 
 export const interfaceSlice = createSlice({
@@ -90,6 +92,12 @@ export const interfaceSlice = createSlice({
     ) => {
       if (!state.ignoreEvent.tracks) state.textTracks = action.payload;
     },
+    setFilter: (state, action: PayloadAction<boolean>) => {
+      state.filter = action.payload;
+    },
+    toggleFilter: (state) => {
+      state.filter = !state.filter;
+    },
   },
 });
 
@@ -102,6 +110,8 @@ export const {
   setActiveTrack,
   toggleTracks,
   unlockTracksUpdateEvent,
+  setFilter,
+  toggleFilter,
 } = interfaceSlice.actions;
 
 export default interfaceSlice.reducer;

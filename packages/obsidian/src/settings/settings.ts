@@ -21,6 +21,7 @@ export interface MxSettings {
   // hideEmbedControls: boolean;
   livePreview: boolean;
   auths: Record<string, Auth>;
+  filter: string;
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -70,4 +71,5 @@ export const DEFAULT_SETTINGS: MxSettings = {
   // hideEmbedControls: false,
   livePreview: true,
   auths: {},
+  filter: "grayscale(1) contrast(3) invert(1)",
 };

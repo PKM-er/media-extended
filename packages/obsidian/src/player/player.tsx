@@ -56,7 +56,11 @@ const Player = ({
 
   const keepRatio = useKeepRatio(containerRef);
 
-  const ratioProps = useAspectRatio(keepRatio, "mx__video-wrapper");
+  const filter = useAppSelector((state) => state.interface.filter);
+  const ratioProps = useAspectRatio(keepRatio, [
+    "mx__video-wrapper",
+    { "mx__video-filter": filter },
+  ]);
 
   const paused = useAppSelector((state) => state.controls.paused);
 
