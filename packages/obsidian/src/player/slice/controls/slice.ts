@@ -5,6 +5,7 @@ import {
   createSlice,
   PayloadAction,
   SliceCaseReducers,
+  ValidateSliceCaseReducers,
 } from "@reduxjs/toolkit";
 import { isTimestamp, parseTF } from "mx-lib";
 import { parse as parseQS } from "query-string";
@@ -90,7 +91,12 @@ const initialState: ControlsState = {
   },
 };
 
-const alterStateReducers: SliceCaseReducers<ControlsState> = {
+const getReducer = <
+  CR extends SliceCaseReducers<ControlsState> = SliceCaseReducers<ControlsState>,
+>(
+  a: CR,
+): CR => a;
+const alterStateReducers = getReducer({
   setHash: (
     state,
     action: PayloadAction<{ hash: string; fromLink: boolean }>,
@@ -156,19 +162,19 @@ const alterStateReducers: SliceCaseReducers<ControlsState> = {
   setVolumeByOffest: (state, action: PayloadAction<number>) => {
     setVolumeTo(state.volume + action.payload / 100, state);
   },
-};
+});
 
 // lock event handlers when applying state changes
-const actionLockReducers: SliceCaseReducers<ControlsState> = {
+const actionLockReducers = getReducer({
   lockPlayPauseEvent: (state) => {
     state.ignoreEvent.playpause = true;
   },
   unlockPlayPauseEvent: (state) => {
     state.ignoreEvent.playpause = false;
   },
-};
+});
 
-const evtHandlerReducer: SliceCaseReducers<ControlsState> = {
+const evtHandlerReducer = getReducer({
   handleLoopChange: (state, action: PayloadAction<boolean>) => {
     state.loop = action.payload;
   },
@@ -246,7 +252,7 @@ const evtHandlerReducer: SliceCaseReducers<ControlsState> = {
   ) => {
     state.error = `${action.payload.message} (${action.payload.code})`;
   },
-};
+});
 
 /**
  * @returns negative: given has lower priority, 0 equal, positive: given higher
@@ -292,9 +298,11 @@ const PreciseSeekReducerFor =
       // state.paused = true;
     }
   };
-const userSeekReducers: SliceCaseReducers<ControlsState> = {
+const userSeekReducers = getReducer({
   progressBarSeek: PreciseSeekReducerFor(UserSeekSource.PROGRESS_BAR),
   progressBarSeekEnd: UserSeekEndReducerFor(UserSeekSource.PROGRESS_BAR),
+  keyboardSeek: PreciseSeekReducerFor(UserSeekSource.KEYBOARD),
+  keyboardSeekEnd: UserSeekEndReducerFor(UserSeekSource.KEYBOARD),
   dragSeek: (state, action: PayloadAction<number>) => {
     const source = UserSeekSource.DRAG;
     const priority = compareSeekPriority(source, state);
@@ -352,7 +360,7 @@ const userSeekReducers: SliceCaseReducers<ControlsState> = {
     // state.paused = true;
   },
   manualSeekDone: UserSeekEndReducerFor(UserSeekSource.MANUAL),
-};
+});
 
 export const controlsSlice = createSlice({
   name: "controls",
