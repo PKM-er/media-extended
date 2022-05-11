@@ -314,8 +314,8 @@ export default class ObMediaView
             const time = media.currentTime;
             media.load();
             media.currentTime = time;
-            await media.play();
-            if (this.store.getState().controls.paused) media.pause();
+            let { paused } = this.store.getState().controls;
+            if (!paused) await media.play();
           }),
       );
     }
