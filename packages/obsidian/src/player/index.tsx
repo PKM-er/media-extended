@@ -29,7 +29,6 @@ const PlayerWarpper = ({
 
 interface IPlayerContext {
   inEditor?: boolean;
-  pluginDir?: string;
   plugin: MediaExtended;
 }
 

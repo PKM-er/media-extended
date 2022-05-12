@@ -1,13 +1,7 @@
-import { initObsidianPort } from "@ipc/comms";
-import { onHackReady } from "@ipc/hack";
-import {
-  CreateChannel,
-  DisableInput,
-  MxPreloadScriptUA,
-} from "@ipc/hack/const";
+import { MxPreloadScriptUA } from "@ipc/hack/const";
 import { useLatest } from "ahooks";
 import cls from "classnames";
-import { ipcRenderer } from "electron";
+import RecievePort from "inline:./recieve-port";
 import React, { useRef, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
@@ -27,7 +21,8 @@ type WebviewProps = {
     nodeintegration: boolean;
     plugins: boolean;
     /** absolute path to preload script (without file://) */
-    preload: string;
+    // preload: string;
+    targetOrigin: string;
     httpreferrer: string;
     useragent: string;
     disablewebsecurity: boolean;
@@ -49,7 +44,7 @@ const applyAttrs = (
     src,
     nodeintegration,
     plugins,
-    preload,
+    // preload,
     httpreferrer,
     useragent,
     disablewebsecurity,
@@ -73,7 +68,7 @@ const applyAttrs = (
   partition !== undefined && (webview.partition = partition);
   allowpopups !== undefined && (webview.allowpopups = allowpopups);
   webpreferences !== undefined && (webview.webpreferences = webpreferences);
-  preload !== undefined && (webview.preload = "file://" + preload);
+  // preload !== undefined && (webview.preload = "file://" + preload);
   enableblinkfeatures !== undefined &&
     (webview.enableblinkfeatures = enableblinkfeatures);
   disableblinkfeatures !== undefined &&
@@ -86,12 +81,14 @@ const applyAttrsWithMethod = (
   devtools !== undefined && setDevTools(devtools, webview);
   muted !== undefined && webview.setAudioMuted(muted);
 };
-
 const WebView = React.forwardRef<
   Electron.WebviewTag,
   WebviewProps
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
->(function ElectronWebview({ hideView, className, style, ...props }, ref) {
+>(function ElectronWebview(
+  { hideView, className, style, targetOrigin = "*", ...props },
+  ref,
+) {
   const webviewRef = useMergeRefs([useRef<Electron.WebviewTag>(null), ref]);
   const portRef = useMergeRefs([
     useRef<MessagePort | null>(null),
@@ -117,48 +114,16 @@ const WebView = React.forwardRef<
       webview.style.width = "100%";
       applyAttrs(props, webview);
 
-      let unloadPort: (() => void) | undefined;
+      const initPort = async () => {
+        await webview.executeJavaScript(RecievePort);
+        const { port1: portOb, port2: portView } = new MessageChannel();
+        portRef.current = portOb;
+        webview.contentWindow.postMessage("port", targetOrigin, [portView]);
+      };
+
       webview.addEventListener("did-attach", () => {
         console.log("webview attached");
         applyAttrsWithMethod(props, webview);
-        // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-        const initPort = () => {
-          const webviewId = webview.getWebContentsId();
-          ipcRenderer
-            .invoke(DisableInput, webviewId)
-            .then((result) => console.log("disable input: ", result));
-          ipcRenderer.send(CreateChannel, webviewId);
-          const handleWillNav = () => {
-            // cannot use will-prevernt-unload event
-            // since preventDefault will not work via remote
-            // https://github.com/electron/electron/issues/23521
-            console.log("view reloaded");
-            const prevPort = portRef.current;
-            if (prevPort) {
-              portRef.current = null;
-              prevPort.close();
-            }
-            initObsidianPort(webviewId).then(
-              (port) => (portRef.current = port),
-            );
-          };
-          webview.addEventListener("will-navigate", handleWillNav);
-
-          initObsidianPort(webviewId).then((port) => (portRef.current = port));
-          return () => {
-            webview.removeEventListener("will-navigate", handleWillNav);
-            portRef.current?.close();
-            portRef.current = null;
-          };
-        };
-
-        // additional retrys to avoid method called before webview is attached
-        try {
-          unloadPort = initPort();
-        } catch (error) {
-          console.log("failed to init port for webview, retrying: ", error);
-          setTimeout(() => (unloadPort = initPort()), 500);
-        }
         webviewRef.current = webview;
         setViewAttached(true);
       });
@@ -169,13 +134,18 @@ const WebView = React.forwardRef<
         setViewAttached(false);
       });
       webview.addEventListener("dom-ready", () => {
+        console.log("webview dom ready");
         setHideView(false);
+        initPort();
       });
-
-      onHackReady(() => container.replaceChildren(webview));
-
+      container.replaceChildren(webview);
       return () => {
-        unloadPort?.();
+        // don't do unload event handler here,
+        // webview already unmouted from dom
+        if (portRef.current) {
+          portRef.current.close();
+          portRef.current = null;
+        }
         webviewRef.current = null;
         setViewAttached(false);
         container.empty();

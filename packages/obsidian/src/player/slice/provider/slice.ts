@@ -162,6 +162,13 @@ export const getProviderSlice = (
           );
         }
       },
+      setTitle: (state, action: PayloadAction<Partial<string>>) => {
+        if (state.source) {
+          state.source.title = action.payload;
+        } else {
+          console.error("no source to set title: ", state);
+        }
+      },
     },
     extraReducers,
   });

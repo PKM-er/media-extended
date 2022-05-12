@@ -23,10 +23,10 @@ const registerIPCMain = (plugin: MediaExtended): (() => void) => {
   try {
     require("@electron/remote").require(pathToInjectScript);
     console.log("main process script injected");
-    ipcRenderer.send(HackWebviewPreload);
+    // ipcRenderer.send(HackWebviewPreload);
     ipcRenderer.send(AllowAuth);
     return () => {
-      ipcRenderer.send(RevertHackWebviewPreload);
+      // ipcRenderer.send(RevertHackWebviewPreload);
       ipcRenderer.send(RevertAllowAuth);
     };
   } catch (error) {

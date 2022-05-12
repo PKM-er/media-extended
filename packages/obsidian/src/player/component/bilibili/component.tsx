@@ -1,10 +1,10 @@
-import { PRELOAD_BILIBILI } from "@const";
+import { INJECT_BILIBILI } from "@const";
 import { PlayerContext } from "@player";
 import { useAppSelector } from "@player/hooks";
 import { observeStore, PlayerStore } from "@player/store";
 import { gotScreenshot, gotTimestamp } from "@slice/action/thunk";
 import { join } from "path";
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext, useMemo, useRef, useState } from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
@@ -29,11 +29,24 @@ const BilibiliPlayer = ({
 
   const store = useStore() as PlayerStore;
 
+  const { plugin } = useContext(PlayerContext);
+
+  const webviewRef = useRef<Electron.WebviewTag>(null);
   const portRef = useRefEffect<MessagePort>((port) => {
+    const webview = webviewRef.current;
+    if (!webview)
+      throw new Error(
+        "failed to inject script for bilibili: webview not ready",
+      );
+    if (!plugin.BilibiliInjectCode) {
+      throw new Error(
+        "failed to inject script for bilibili: no script code available",
+      );
+    }
+    webview.executeJavaScript(plugin.BilibiliInjectCode);
     store.msgHandler.port = port;
     const showView = () => {
       window.clearTimeout(timeout);
-      console.log("enter web fscreen");
       setHideView(false);
     };
     const timeout = setTimeout(() => {
@@ -45,7 +58,9 @@ const BilibiliPlayer = ({
       store,
       (state) => state.bilibili.webFscreen,
       (fullscreen) => {
-        if (fullscreen) showView();
+        if (!fullscreen) return;
+        console.log("enter web fscreen");
+        showView();
       },
     );
     moniterTimestampMsg(port, (...args) =>
@@ -60,18 +75,13 @@ const BilibiliPlayer = ({
     };
   }, []);
 
-  const { pluginDir } = useContext(PlayerContext);
-  if (!pluginDir)
-    throw new Error("failed to init bilibili player: pluginDir not available");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const preload = useMemo(() => join(pluginDir, PRELOAD_BILIBILI), []);
-
   return src ? (
     <WebView
+      ref={webviewRef}
       portRef={portRef}
       hideView={hideView}
       src={src}
-      preload={preload}
+      // preload={preload}
       style={style}
       className={className}
     />

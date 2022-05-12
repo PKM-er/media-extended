@@ -9,7 +9,9 @@ import { MEDIA_VIEW_TYPE, MediaView, patchLeaf, ToggleMediaPin } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
 import { FileSystemAdapter, Platform, Plugin } from "obsidian";
+import { join } from "path";
 
+import { INJECT_BILIBILI } from "./const.mjs";
 import { setupRec } from "./feature/audio-rec";
 import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
 import { registerGlobalControlCmd } from "./feature/keyboard-control";
@@ -80,6 +82,16 @@ export default class MediaExtended extends Plugin {
     this.register(registerIPCMain(this));
 
     await this.loadSettings();
+    if (Platform.isDesktopApp && this.manifest.dir) {
+      try {
+        this.BilibiliInjectCode = await this.app.vault.adapter.read(
+          join(this.manifest.dir, INJECT_BILIBILI),
+        );
+      } catch (error) {
+        console.log("no bilibili inject code found", error);
+      }
+    }
+
     patchLeaf(this);
 
     const { workspace } = this.app;
@@ -154,6 +166,8 @@ export default class MediaExtended extends Plugin {
     if (!(adapter instanceof FileSystemAdapter) || !this.manifest.dir) return;
     return adapter.getFullPath(this.manifest.dir);
   }
+
+  BilibiliInjectCode: string | null = null;
 }
 
 const getExts = () =>

@@ -11909,6 +11909,16 @@ declare namespace Electron {
   }
 
   interface WebviewTag extends HTMLElement {
+    /**
+     * https://developer.chrome.com/docs/extensions/reference/webviewTag/#type-ContentWindow
+     */
+    contentWindow: {
+      postMessage(
+        message: any,
+        targetOrigin: string,
+        transfer?: Transferable[],
+      ): void;
+    };
 
     // Docs: https://electronjs.org/docs/api/webview-tag
 
@@ -11917,86 +11927,191 @@ declare namespace Electron {
      * document as well as subframe document-level loads, but does not include
      * asynchronous resource loads.
      */
-    addEventListener(event: 'load-commit', listener: (event: LoadCommitEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'load-commit', listener: (event: LoadCommitEvent) => void): this;
+    addEventListener(
+      event: "load-commit",
+      listener: (event: LoadCommitEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "load-commit",
+      listener: (event: LoadCommitEvent) => void,
+    ): this;
     /**
      * Fired when the navigation is done, i.e. the spinner of the tab will stop
      * spinning, and the `onload` event is dispatched.
      */
-    addEventListener(event: 'did-finish-load', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-finish-load', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "did-finish-load",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-finish-load",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * This event is like `did-finish-load`, but fired when the load failed or was
      * cancelled, e.g. `window.stop()` is invoked.
      */
-    addEventListener(event: 'did-fail-load', listener: (event: DidFailLoadEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-fail-load', listener: (event: DidFailLoadEvent) => void): this;
+    addEventListener(
+      event: "did-fail-load",
+      listener: (event: DidFailLoadEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-fail-load",
+      listener: (event: DidFailLoadEvent) => void,
+    ): this;
     /**
      * Fired when a frame has done navigation.
      */
-    addEventListener(event: 'did-frame-finish-load', listener: (event: DidFrameFinishLoadEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-frame-finish-load', listener: (event: DidFrameFinishLoadEvent) => void): this;
+    addEventListener(
+      event: "did-frame-finish-load",
+      listener: (event: DidFrameFinishLoadEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-frame-finish-load",
+      listener: (event: DidFrameFinishLoadEvent) => void,
+    ): this;
     /**
      * Corresponds to the points in time when the spinner of the tab starts spinning.
      */
-    addEventListener(event: 'did-start-loading', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-start-loading', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "did-start-loading",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-start-loading",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Corresponds to the points in time when the spinner of the tab stops spinning.
      */
-    addEventListener(event: 'did-stop-loading', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-stop-loading', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "did-stop-loading",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-stop-loading",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Fired when attached to the embedder web contents.
      */
-    addEventListener(event: 'did-attach', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-attach', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "did-attach",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-attach",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Fired when document in the given frame is loaded.
      */
-    addEventListener(event: 'dom-ready', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'dom-ready', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "dom-ready",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "dom-ready",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Fired when page title is set during navigation. `explicitSet` is false when
      * title is synthesized from file url.
      */
-    addEventListener(event: 'page-title-updated', listener: (event: PageTitleUpdatedEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'page-title-updated', listener: (event: PageTitleUpdatedEvent) => void): this;
+    addEventListener(
+      event: "page-title-updated",
+      listener: (event: PageTitleUpdatedEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "page-title-updated",
+      listener: (event: PageTitleUpdatedEvent) => void,
+    ): this;
     /**
      * Fired when page receives favicon urls.
      */
-    addEventListener(event: 'page-favicon-updated', listener: (event: PageFaviconUpdatedEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'page-favicon-updated', listener: (event: PageFaviconUpdatedEvent) => void): this;
+    addEventListener(
+      event: "page-favicon-updated",
+      listener: (event: PageFaviconUpdatedEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "page-favicon-updated",
+      listener: (event: PageFaviconUpdatedEvent) => void,
+    ): this;
     /**
      * Fired when page enters fullscreen triggered by HTML API.
      */
-    addEventListener(event: 'enter-html-full-screen', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'enter-html-full-screen', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "enter-html-full-screen",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "enter-html-full-screen",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Fired when page leaves fullscreen triggered by HTML API.
      */
-    addEventListener(event: 'leave-html-full-screen', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'leave-html-full-screen', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "leave-html-full-screen",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "leave-html-full-screen",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Fired when the guest window logs a console message.
      *
      * The following example code forwards all log messages to the embedder's console
      * without regard for log level or other properties.
      */
-    addEventListener(event: 'console-message', listener: (event: ConsoleMessageEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'console-message', listener: (event: ConsoleMessageEvent) => void): this;
+    addEventListener(
+      event: "console-message",
+      listener: (event: ConsoleMessageEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "console-message",
+      listener: (event: ConsoleMessageEvent) => void,
+    ): this;
     /**
      * Fired when a result is available for `webview.findInPage` request.
      */
-    addEventListener(event: 'found-in-page', listener: (event: FoundInPageEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'found-in-page', listener: (event: FoundInPageEvent) => void): this;
+    addEventListener(
+      event: "found-in-page",
+      listener: (event: FoundInPageEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "found-in-page",
+      listener: (event: FoundInPageEvent) => void,
+    ): this;
     /**
      * Fired when the guest page attempts to open a new browser window.
      *
      * The following example code opens the new url in system's default browser.
      */
-    addEventListener(event: 'new-window', listener: (event: NewWindowEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'new-window', listener: (event: NewWindowEvent) => void): this;
+    addEventListener(
+      event: "new-window",
+      listener: (event: NewWindowEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "new-window",
+      listener: (event: NewWindowEvent) => void,
+    ): this;
     /**
      * Emitted when a user or the page wants to start navigation. It can happen when
      * the `window.location` object is changed or a user clicks a link in the page.
@@ -12010,20 +12125,41 @@ declare namespace Electron {
      *
      * Calling `event.preventDefault()` does __NOT__ have any effect.
      */
-    addEventListener(event: 'will-navigate', listener: (event: WillNavigateEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'will-navigate', listener: (event: WillNavigateEvent) => void): this;
+    addEventListener(
+      event: "will-navigate",
+      listener: (event: WillNavigateEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "will-navigate",
+      listener: (event: WillNavigateEvent) => void,
+    ): this;
     /**
      * Emitted when any frame (including main) starts navigating. `isInPlace` will be
      * `true` for in-page navigations.
      */
-    addEventListener(event: 'did-start-navigation', listener: (event: DidStartNavigationEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-start-navigation', listener: (event: DidStartNavigationEvent) => void): this;
+    addEventListener(
+      event: "did-start-navigation",
+      listener: (event: DidStartNavigationEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-start-navigation",
+      listener: (event: DidStartNavigationEvent) => void,
+    ): this;
     /**
      * Emitted after a server side redirect occurs during navigation. For example a 302
      * redirect.
      */
-    addEventListener(event: 'did-redirect-navigation', listener: (event: DidRedirectNavigationEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-redirect-navigation', listener: (event: DidRedirectNavigationEvent) => void): this;
+    addEventListener(
+      event: "did-redirect-navigation",
+      listener: (event: DidRedirectNavigationEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-redirect-navigation",
+      listener: (event: DidRedirectNavigationEvent) => void,
+    ): this;
     /**
      * Emitted when a navigation is done.
      *
@@ -12031,8 +12167,15 @@ declare namespace Electron {
      * or updating the `window.location.hash`. Use `did-navigate-in-page` event for
      * this purpose.
      */
-    addEventListener(event: 'did-navigate', listener: (event: DidNavigateEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-navigate', listener: (event: DidNavigateEvent) => void): this;
+    addEventListener(
+      event: "did-navigate",
+      listener: (event: DidNavigateEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-navigate",
+      listener: (event: DidNavigateEvent) => void,
+    ): this;
     /**
      * Emitted when any frame navigation is done.
      *
@@ -12040,8 +12183,15 @@ declare namespace Electron {
      * or updating the `window.location.hash`. Use `did-navigate-in-page` event for
      * this purpose.
      */
-    addEventListener(event: 'did-frame-navigate', listener: (event: DidFrameNavigateEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-frame-navigate', listener: (event: DidFrameNavigateEvent) => void): this;
+    addEventListener(
+      event: "did-frame-navigate",
+      listener: (event: DidFrameNavigateEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-frame-navigate",
+      listener: (event: DidFrameNavigateEvent) => void,
+    ): this;
     /**
      * Emitted when an in-page navigation happened.
      *
@@ -12049,84 +12199,195 @@ declare namespace Electron {
      * navigation outside of the page. Examples of this occurring are when anchor links
      * are clicked or when the DOM `hashchange` event is triggered.
      */
-    addEventListener(event: 'did-navigate-in-page', listener: (event: DidNavigateInPageEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-navigate-in-page', listener: (event: DidNavigateInPageEvent) => void): this;
+    addEventListener(
+      event: "did-navigate-in-page",
+      listener: (event: DidNavigateInPageEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-navigate-in-page",
+      listener: (event: DidNavigateInPageEvent) => void,
+    ): this;
     /**
      * Fired when the guest page attempts to close itself.
      *
      * The following example code navigates the `webview` to `about:blank` when the
      * guest attempts to close itself.
      */
-    addEventListener(event: 'close', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'close', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "close",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(event: "close", listener: (event: Event) => void): this;
     /**
      * Fired when the guest page has sent an asynchronous message to embedder page.
      *
      * With `sendToHost` method and `ipc-message` event you can communicate between
      * guest page and embedder page:
      */
-    addEventListener(event: 'ipc-message', listener: (event: IpcMessageEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'ipc-message', listener: (event: IpcMessageEvent) => void): this;
+    addEventListener(
+      event: "ipc-message",
+      listener: (event: IpcMessageEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "ipc-message",
+      listener: (event: IpcMessageEvent) => void,
+    ): this;
     /**
      * Fired when the renderer process is crashed.
      */
-    addEventListener(event: 'crashed', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'crashed', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "crashed",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "crashed",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Fired when a plugin process is crashed.
      */
-    addEventListener(event: 'plugin-crashed', listener: (event: PluginCrashedEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'plugin-crashed', listener: (event: PluginCrashedEvent) => void): this;
+    addEventListener(
+      event: "plugin-crashed",
+      listener: (event: PluginCrashedEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "plugin-crashed",
+      listener: (event: PluginCrashedEvent) => void,
+    ): this;
     /**
      * Fired when the WebContents is destroyed.
      */
-    addEventListener(event: 'destroyed', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'destroyed', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "destroyed",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "destroyed",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Emitted when media starts playing.
      */
-    addEventListener(event: 'media-started-playing', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'media-started-playing', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "media-started-playing",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "media-started-playing",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Emitted when media is paused or done playing.
      */
-    addEventListener(event: 'media-paused', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'media-paused', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "media-paused",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "media-paused",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Emitted when a page's theme color changes. This is usually due to encountering a
      * meta tag:
      */
-    addEventListener(event: 'did-change-theme-color', listener: (event: DidChangeThemeColorEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'did-change-theme-color', listener: (event: DidChangeThemeColorEvent) => void): this;
+    addEventListener(
+      event: "did-change-theme-color",
+      listener: (event: DidChangeThemeColorEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "did-change-theme-color",
+      listener: (event: DidChangeThemeColorEvent) => void,
+    ): this;
     /**
      * Emitted when mouse moves over a link or the keyboard moves the focus to a link.
      */
-    addEventListener(event: 'update-target-url', listener: (event: UpdateTargetUrlEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'update-target-url', listener: (event: UpdateTargetUrlEvent) => void): this;
+    addEventListener(
+      event: "update-target-url",
+      listener: (event: UpdateTargetUrlEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "update-target-url",
+      listener: (event: UpdateTargetUrlEvent) => void,
+    ): this;
     /**
      * Emitted when DevTools is opened.
      */
-    addEventListener(event: 'devtools-opened', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'devtools-opened', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "devtools-opened",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "devtools-opened",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Emitted when DevTools is closed.
      */
-    addEventListener(event: 'devtools-closed', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'devtools-closed', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "devtools-closed",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "devtools-closed",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Emitted when DevTools is focused / opened.
      */
-    addEventListener(event: 'devtools-focused', listener: (event: Event) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'devtools-focused', listener: (event: Event) => void): this;
+    addEventListener(
+      event: "devtools-focused",
+      listener: (event: Event) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "devtools-focused",
+      listener: (event: Event) => void,
+    ): this;
     /**
      * Emitted when there is a new context menu that needs to be handled.
      */
-    addEventListener(event: 'context-menu', listener: (event: ContextMenuEvent) => void, useCapture?: boolean): this;
-    removeEventListener(event: 'context-menu', listener: (event: ContextMenuEvent) => void): this;
-    addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, useCapture?: boolean): void;
-    addEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
-    removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, useCapture?: boolean): void;
-    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, useCapture?: boolean): void;
+    addEventListener(
+      event: "context-menu",
+      listener: (event: ContextMenuEvent) => void,
+      useCapture?: boolean,
+    ): this;
+    removeEventListener(
+      event: "context-menu",
+      listener: (event: ContextMenuEvent) => void,
+    ): this;
+    addEventListener<K extends keyof HTMLElementEventMap>(
+      type: K,
+      listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+      useCapture?: boolean,
+    ): void;
+    addEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      useCapture?: boolean,
+    ): void;
+    removeEventListener<K extends keyof HTMLElementEventMap>(
+      type: K,
+      listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+      useCapture?: boolean,
+    ): void;
+    removeEventListener(
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      useCapture?: boolean,
+    ): void;
     /**
      * Whether the guest page can go back.
      */
@@ -12358,7 +12619,9 @@ declare namespace Electron {
      *
      * See webContents.sendInputEvent for detailed description of `event` object.
      */
-    sendInputEvent(event: (MouseInputEvent) | (MouseWheelInputEvent) | (KeyboardInputEvent)): Promise<void>;
+    sendInputEvent(
+      event: MouseInputEvent | MouseWheelInputEvent | KeyboardInputEvent,
+    ): Promise<void>;
     /**
      * Send an asynchronous message to renderer process via `channel`, you can also
      * send arbitrary arguments. The renderer process can handle the message by
@@ -12366,7 +12629,11 @@ declare namespace Electron {
      *
      * See webContents.sendToFrame for examples.
      */
-    sendToFrame(frameId: [number, number], channel: string, ...args: any[]): Promise<void>;
+    sendToFrame(
+      frameId: [number, number],
+      channel: string,
+      ...args: any[]
+    ): Promise<void>;
     /**
      * Set guest page muted.
      */
@@ -12378,7 +12645,10 @@ declare namespace Electron {
     /**
      * Sets the maximum and minimum pinch-to-zoom level.
      */
-    setVisualZoomLevelLimits(minimumLevel: number, maximumLevel: number): Promise<void>;
+    setVisualZoomLevelLimits(
+      minimumLevel: number,
+      maximumLevel: number,
+    ): Promise<void>;
     /**
      * Changes the zoom factor to the specified factor. Zoom factor is zoom percent
      * divided by 100, so 300% = 3.0.
@@ -12409,7 +12679,9 @@ declare namespace Electron {
     /**
      * Stops any `findInPage` request for the `webview` with the provided `action`.
      */
-    stopFindInPage(action: 'clearSelection' | 'keepSelection' | 'activateSelection'): void;
+    stopFindInPage(
+      action: "clearSelection" | "keepSelection" | "activateSelection",
+    ): void;
     /**
      * Executes editing command `undo` in page.
      */

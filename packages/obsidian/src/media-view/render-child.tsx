@@ -46,7 +46,6 @@ export default class PlayerRenderChild
       <Player
         store={this.store}
         inEditor={this.inEditor}
-        pluginDir={this.plugin.getFullPluginDir()}
         plugin={this.plugin}
         onFocus={this.pushScope.bind(this)}
         onBlur={this.popScope.bind(this)}

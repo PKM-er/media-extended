@@ -2,7 +2,7 @@ import type { RootState } from "@player/store";
 
 import { getProviderSlice } from "./slice";
 
-export const { renameStateReverted } = getProviderSlice().actions;
+export const { renameStateReverted, setTitle } = getProviderSlice().actions;
 
 export default getProviderSlice;
 

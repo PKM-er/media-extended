@@ -39,7 +39,7 @@ import { promises } from "fs";
 import { join } from "path";
 
 import inlineCodePlugin from "./scripts/inline-code.mjs";
-import { MAIN_PS, PRELOAD_BILIBILI } from "./src/const.mjs";
+import { INJECT_BILIBILI, MAIN_PS } from "./src/const.mjs";
 /**
  * @type {import("esbuild").Plugin}
  */
@@ -79,6 +79,21 @@ const LessPathAlias = {
   },
 };
 
+const injectScriptConfig = {
+  bundle: true,
+  watch: !isProd,
+  platform: "browser",
+  target: "es2020",
+  format: "iife",
+  mainFields: ["browser", "module", "main"],
+  banner: { js: banner },
+  sourcemap: isProd ? false : "inline",
+  minify: isProd,
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+  },
+};
+
 try {
   const main = build({
     entryPoints: ["src/mx-main.ts"],
@@ -103,44 +118,19 @@ try {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: "build/main.js",
-    plugins: [LessPathAlias, lessLoader(), obPlugin()],
+    plugins: [
+      LessPathAlias,
+      lessLoader(),
+      obPlugin(),
+      inlineCodePlugin(injectScriptConfig),
+    ],
     // metafile: true,
   });
   const preloadBili = build({
-    entryPoints: ["src/player/component/bilibili/preload.ts"],
-    bundle: true,
-    watch: !isProd,
-    platform: "browser",
-    external: ["electron"],
-    target: "es2020",
-    format: "iife",
-    mainFields: ["browser", "module", "main"],
-    banner: { js: banner },
-    sourcemap: isProd ? false : "inline",
-    minify: isProd,
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
-    },
-    outfile: join("build", PRELOAD_BILIBILI),
-    incremental: !isProd,
-    plugins: [
-      inlineCodePlugin({
-        target: "es2020",
-        watch: !isProd
-          ? {
-              onRebuild: async (error) => {
-                if (error) console.error("watch build failed:", error);
-                else (await preloadBili).rebuild();
-              },
-            }
-          : false,
-        define: {
-          "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
-        },
-        sourcemap: isProd ? false : "inline",
-        minify: isProd,
-      }),
-    ],
+    entryPoints: ["src/player/component/bilibili/inject/index.ts"],
+    outfile: join("build", INJECT_BILIBILI),
+    ...injectScriptConfig,
+    // incremental: !isProd,
     // metafile: true,
   });
   const mainProcess = build({
