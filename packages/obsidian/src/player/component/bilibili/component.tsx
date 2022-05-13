@@ -38,37 +38,41 @@ const BilibiliPlayer = ({
       throw new Error(
         "failed to inject script for bilibili: webview not ready",
       );
-    if (!plugin.BilibiliInjectCode) {
-      throw new Error(
-        "failed to inject script for bilibili: no script code available",
-      );
-    }
-    webview.executeJavaScript(plugin.BilibiliInjectCode);
-    store.msgHandler.port = port;
-    const showView = () => {
-      window.clearTimeout(timeout);
-      setHideView(false);
-    };
-    const timeout = setTimeout(() => {
-      unsub();
-      console.log("web fullscreen timeout");
-      showView();
-    }, 10e3);
-    const unsub = observeStore(
-      store,
-      (state) => state.bilibili.webFscreen,
-      (fullscreen) => {
-        if (!fullscreen) return;
-        console.log("enter web fscreen");
+    (async () => {
+      const injectCode = await plugin.BilibiliInjectCode;
+      if (!injectCode) {
+        throw new Error(
+          "failed to inject script for bilibili: no script code available",
+        );
+      }
+      store.msgHandler.port = port;
+      const showView = () => {
+        window.clearTimeout(timeout);
+        setHideView(false);
+      };
+      const timeout = setTimeout(() => {
+        unsub();
+        console.log("web fullscreen timeout");
         showView();
-      },
-    );
-    moniterTimestampMsg(port, (...args) =>
-      store.dispatch(gotTimestamp(...args)),
-    );
-    moniterScreenshotMsg(port, (...args) =>
-      store.dispatch(gotScreenshot(...args)),
-    );
+      }, 10e3);
+      const unsub = observeStore(
+        store,
+        (state) => state.bilibili.webFscreen,
+        (fullscreen) => {
+          if (!fullscreen) return;
+          console.log("enter web fscreen");
+          showView();
+        },
+      );
+      moniterTimestampMsg(port, (...args) =>
+        store.dispatch(gotTimestamp(...args)),
+      );
+      moniterScreenshotMsg(port, (...args) =>
+        store.dispatch(gotScreenshot(...args)),
+      );
+      await webview.executeJavaScript(injectCode);
+    })();
+
     return () => {
       console.log("port unmount");
       store.msgHandler.port = null;

@@ -83,13 +83,13 @@ export default class MediaExtended extends Plugin {
 
     await this.loadSettings();
     if (Platform.isDesktopApp && this.manifest.dir) {
-      try {
-        this.BilibiliInjectCode = await this.app.vault.adapter.read(
-          join(this.manifest.dir, INJECT_BILIBILI),
+      this.BilibiliInjectCode = this.app.vault.adapter
+        .read(join(this.manifest.dir, INJECT_BILIBILI))
+        .catch(
+          (error) => (
+            console.log("no bilibili inject code found", error), null
+          ),
         );
-      } catch (error) {
-        console.log("no bilibili inject code found", error);
-      }
     }
 
     patchLeaf(this);
@@ -167,7 +167,7 @@ export default class MediaExtended extends Plugin {
     return adapter.getFullPath(this.manifest.dir);
   }
 
-  BilibiliInjectCode: string | null = null;
+  BilibiliInjectCode?: Promise<string | null>;
 }
 
 const getExts = () =>
