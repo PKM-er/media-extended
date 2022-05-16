@@ -99,14 +99,15 @@ export default class MediaExtended extends Plugin {
 
     // reload prevoisly opened media views
     workspace.onLayoutReady(() =>
-      workspace.iterateAllLeaves(async (leaf) => {
+      workspace.iterateAllLeaves((leaf) => {
         if (
           leaf.view?.getViewType() === MEDIA_VIEW_TYPE &&
           !(leaf.view instanceof MediaView)
         ) {
           const state = leaf.getViewState();
-          await leaf.setViewState({ type: "empty" });
-          await leaf.setViewState(state);
+          leaf
+            .setViewState({ type: "empty" })
+            .then(() => leaf.setViewState(state));
         }
       }),
     );
