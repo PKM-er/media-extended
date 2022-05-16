@@ -3,9 +3,12 @@ import { createStore as _createStore } from "@player/store/ob-store";
 import { setPlatform } from "@slice/action";
 import { Component, KeymapEventHandler, Platform, Scope } from "obsidian";
 
+import type MediaExtended from "../mx-main";
+
 export const MEDIA_VIEW_TYPE = "media-view-v2";
 
 export interface PlayerComponent extends Component {
+  plugin: MediaExtended;
   store: PlayerStore;
   port: MessagePort | null;
   scope: Scope;

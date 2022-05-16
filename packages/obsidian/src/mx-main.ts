@@ -8,6 +8,7 @@ import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MEDIA_VIEW_TYPE, MediaView, patchLeaf, ToggleMediaPin } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
+import { merge } from "lodash-es";
 import { FileSystemAdapter, Platform, Plugin } from "obsidian";
 import { join } from "path";
 
@@ -28,7 +29,7 @@ export default class MediaExtended extends Plugin {
   recStartTime: number | null = null;
 
   async loadSettings() {
-    this.settings = { ...this.settings, ...(await this.loadData()) };
+    this.settings = merge(this.settings, await this.loadData());
     Platform.isDesktopApp &&
       require("electron").ipcRenderer.send(SetAuth, this.settings.auths);
   }

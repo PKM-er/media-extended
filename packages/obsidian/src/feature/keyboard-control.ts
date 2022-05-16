@@ -27,69 +27,72 @@ interface ControlAction {
   action: Parameters<AppDispatch>[0];
 }
 
-const actions: ControlAction[] = [
-  {
-    id: "toggle-play",
-    name: "Play/Pause",
-    action: togglePlay(),
-    localHotkeys: [{ key: " ", modifiers: [] }],
-  },
-  {
-    id: "forward-5s",
-    name: "Forward 5 second",
-    action: seekByOffset(5),
-    // localHotkeys: [{ key: "ArrowRight", modifiers: [] }],
-  },
-  {
-    id: "rewind-5s",
-    name: "Rewind 5 second",
-    action: seekByOffset(-5),
-    // localHotkeys: [{ key: "ArrowLeft", modifiers: [] }],
-  },
-  {
-    id: "volume-up",
-    name: "Volume Up by 5%",
-    action: setVolumeByOffest(5),
-    localHotkeys: [{ key: "ArrowUp", modifiers: [] }],
-  },
-  {
-    id: "volume-down",
-    name: "Volume Down by 5%",
-    action: setVolumeByOffest(-5),
-    localHotkeys: [{ key: "ArrowDown", modifiers: [] }],
-  },
-  {
-    id: "toggle-mute",
-    name: "Mute/Unmute",
-    action: toggleMute(),
-    localHotkeys: [{ key: "m", modifiers: [] }],
-  },
-  {
-    id: "get-timestamp",
-    name: "Get timestamp from active player",
-    action: requestTimestamp(),
-    // https://github.com/aidenlx/media-extended/issues/33
-    globalHotkeys: [{ key: ";", modifiers: ["Mod"] }],
-    localHotkeys: [{ key: ";", modifiers: [] }],
-  },
-  {
-    id: "take-screenshot",
-    name: "Take screenshot from active player",
-    action: requsetScreenshot(),
-    localHotkeys: [{ key: "s", modifiers: [] }],
-  },
-  ...[0.5, 1, 1.25, 1.5, 2, 4].map((speed, index) => ({
-    id: `speed-${speed}`,
-    name: `${speed}× Playback`,
-    action: setPlaybackRate(speed),
-    localHotkeys: [
-      { key: index === 0 ? "`" : index.toString(), modifiers: [] },
-    ],
-  })),
-];
+const getActions: (plugin: MediaExtended) => ControlAction[] = (plugin) => {
+  const { forwardStep, rewindStep } = plugin.settings.controls;
+  return [
+    {
+      id: "toggle-play",
+      name: "Play/Pause",
+      action: togglePlay(),
+      localHotkeys: [{ key: " ", modifiers: [] }],
+    },
+    {
+      id: "forward-5s",
+      name: "Forward 5 second",
+      action: seekByOffset(forwardStep),
+      // localHotkeys: [{ key: "ArrowRight", modifiers: [] }],
+    },
+    {
+      id: "rewind-5s",
+      name: "Rewind 5 second",
+      action: seekByOffset(-rewindStep),
+      // localHotkeys: [{ key: "ArrowLeft", modifiers: [] }],
+    },
+    {
+      id: "volume-up",
+      name: "Volume Up by 5%",
+      action: setVolumeByOffest(5),
+      localHotkeys: [{ key: "ArrowUp", modifiers: [] }],
+    },
+    {
+      id: "volume-down",
+      name: "Volume Down by 5%",
+      action: setVolumeByOffest(-5),
+      localHotkeys: [{ key: "ArrowDown", modifiers: [] }],
+    },
+    {
+      id: "toggle-mute",
+      name: "Mute/Unmute",
+      action: toggleMute(),
+      localHotkeys: [{ key: "m", modifiers: [] }],
+    },
+    {
+      id: "get-timestamp",
+      name: "Get timestamp from active player",
+      action: requestTimestamp(),
+      // https://github.com/aidenlx/media-extended/issues/33
+      globalHotkeys: [{ key: ";", modifiers: ["Mod"] }],
+      localHotkeys: [{ key: ";", modifiers: [] }],
+    },
+    {
+      id: "take-screenshot",
+      name: "Take screenshot from active player",
+      action: requsetScreenshot(),
+      localHotkeys: [{ key: "s", modifiers: [] }],
+    },
+    ...[0.5, 1, 1.25, 1.5, 2, 4].map((speed, index) => ({
+      id: `speed-${speed}`,
+      name: `${speed}× Playback`,
+      action: setPlaybackRate(speed),
+      localHotkeys: [
+        { key: index === 0 ? "`" : index.toString(), modifiers: [] },
+      ],
+    })),
+  ];
+};
 
 export const registerGlobalControlCmd = (plugin: MediaExtended) => {
-  for (const { id, name, globalHotkeys, action } of actions) {
+  for (const { id, name, globalHotkeys, action } of getActions(plugin)) {
     plugin.addCommand({
       id,
       name,
@@ -107,7 +110,7 @@ export const registerGlobalControlCmd = (plugin: MediaExtended) => {
 };
 
 export const setPlayerKeymaps = (component: PlayerComponent) => {
-  for (const { localHotkeys, action } of actions) {
+  for (const { localHotkeys, action } of getActions(component.plugin)) {
     if (!localHotkeys) continue;
     for (const { modifiers, key } of localHotkeys) {
       component.registerScopeEvent(
@@ -121,16 +124,6 @@ export const setPlayerKeymaps = (component: PlayerComponent) => {
   localForward(component);
 };
 
-const forwardActions = {
-    regular: seekByOffset(5),
-    repeat: setPlaybackRate(5),
-    repeatDone: setPlaybackRate(1),
-  },
-  rewindActions = {
-    regular: seekByOffset(-5),
-    repeat: keyboardSeek(-5),
-    repeatDone: keyboardSeekEnd(),
-  };
 const getRepeatHandler = (
   component: Component,
   store: PlayerStore,
@@ -168,6 +161,19 @@ const getRepeatHandler = (
 };
 
 const localForward = (component: PlayerComponent) => {
+  const { fastForwardRate, forwardStep, rewindStep } =
+    component.plugin.settings.controls;
+  const forwardActions = {
+      regular: seekByOffset(forwardStep),
+      repeat: setPlaybackRate(fastForwardRate),
+      // TODO: revert to previous rate
+      repeatDone: setPlaybackRate(1),
+    },
+    rewindActions = {
+      regular: seekByOffset(rewindStep),
+      repeat: keyboardSeek(-rewindStep),
+      repeatDone: keyboardSeekEnd(),
+    };
   component.registerScopeEvent(
     component.scope.register(
       [],

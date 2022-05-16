@@ -22,6 +22,11 @@ export interface MxSettings {
   livePreview: boolean;
   auths: Record<string, Auth>;
   filter: string;
+  controls: {
+    fastForwardRate: number;
+    forwardStep: number;
+    rewindStep: number;
+  };
 }
 
 export const DEFAULT_SETTINGS: MxSettings = {
@@ -71,5 +76,10 @@ export const DEFAULT_SETTINGS: MxSettings = {
   // hideEmbedControls: false,
   livePreview: true,
   auths: {},
-  filter: "grayscale(1) contrast(3) invert(1)",
+  filter: "grayscale(1)",
+  controls: {
+    fastForwardRate: 5,
+    forwardStep: 5,
+    rewindStep: 5,
+  },
 };

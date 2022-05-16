@@ -89,7 +89,7 @@ export default class ObMediaView
 
   openExternalAction: HTMLElement;
 
-  constructor(leaf: WorkspaceLeaf, private plugin: MediaExtended) {
+  constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
     this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
