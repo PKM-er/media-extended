@@ -7,7 +7,7 @@ import {
   MediaUrlState,
   MediaView,
 } from "@view";
-import { TFile, ViewState, WorkspaceLeaf } from "obsidian";
+import { Keymap, TFile, ViewState, WorkspaceLeaf } from "obsidian";
 
 import {
   createLeafBySplit,
@@ -51,7 +51,7 @@ export const openMediaLinkInHoverEditor = (
   event: MouseEvent,
 ) => {
   let hoverEditor = app.plugins.plugins["obsidian-hover-editor"];
-  if (!hoverEditor) return false;
+  if (!Keymap.isModEvent(event) || !hoverEditor) return false;
   return vaildateMediaURL(url, async (url, hash) => {
     const viewState = getViewState("url", url, hash),
       eState = getEphemeralState(hash, true);
