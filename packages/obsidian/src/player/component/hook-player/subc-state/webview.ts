@@ -1,5 +1,5 @@
-import type { PlayerStore } from "@player/store";
 import type { HTMLMedia } from "@player/utils/media";
+import type { PlayerStore } from "@store";
 
 import _hookHTMLState from "./html5";
 

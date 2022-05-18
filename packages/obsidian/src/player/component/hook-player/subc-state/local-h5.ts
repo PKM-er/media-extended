@@ -1,9 +1,10 @@
-import { PlayerStore, subscribe } from "@player/store";
 import type { HTMLMedia } from "@player/utils/media";
 import {
+  Controls,
   lockTracksUpdateEvent,
   unlockTracksUpdateEvent,
 } from "@slice/interface";
+import { PlayerStore, subscribe } from "@store";
 
 import _hookHTMLState from "./html5";
 
@@ -22,7 +23,7 @@ export const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
         for (let i = 0; i < media.instance.textTracks.length; i++) {
           const track = media.instance.textTracks[i];
           if (enabled && i === active) {
-            track.mode = controls === "custom" ? "hidden" : "showing";
+            track.mode = controls === Controls.custom ? "hidden" : "showing";
           } else {
             track.mode = "disabled";
           }

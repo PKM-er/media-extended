@@ -1,6 +1,6 @@
-import { AppDispatch } from "@player/store";
 import type { Media } from "@player/utils/media";
 import type { SubscribeHookType } from "@player/utils/subscribe";
+import { AppDispatch } from "@store";
 import { useLatest } from "ahooks";
 import { MutableRefObject } from "react";
 
@@ -11,7 +11,7 @@ export const useApplyUserSeek = <R, M extends Media>(
 ) => {
   const extraRef = useLatest(extra);
   useSubscribe(
-    (state) => state.controls.userSeek,
+    (state) => state.userSeek,
     ([seek, prevSeek], dispatch, media) => {
       if (!media) return;
       let params: [time: number, options: { allowSeekAhead: boolean }] | null =

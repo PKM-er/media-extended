@@ -1,6 +1,6 @@
-import { getSubscribeFunc, PlayerStore } from "@player/store";
 import { HTMLMedia } from "@player/utils/media";
-import { lockPlayPauseEvent, unlockPlayPauseEvent } from "@slice/controls";
+import { PlayerType } from "@slice/source/types";
+import { getSubscribeFunc, PlayerStore } from "@store";
 
 import { selectShouldLoadResource } from "../common";
 import hookState, { getApplyPauseHandler } from "./general";
@@ -8,16 +8,20 @@ import hookState, { getApplyPauseHandler } from "./general";
 const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store);
 
-  const shouldLoadSource = ["audio", "video", "unknown"] as const;
+  const shouldLoadSource = [
+    PlayerType.video,
+    PlayerType.audio,
+    PlayerType.unknown,
+  ];
 
   const toUnload: (() => void)[] = [
     hookState(media, store),
     // useLoadSources
     subscribe(
       selectShouldLoadResource,
-      ([playerType, src], prev) => {
+      ([type, src], prev) => {
         if (
-          shouldLoadSource.includes(playerType as any) &&
+          shouldLoadSource.includes(type as any) &&
           prev?.[1] &&
           src !== prev[1]
         ) {
@@ -33,7 +37,7 @@ const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
     }),
     // pause when seeking
     subscribe(
-      (state) => state.controls.userSeek,
+      (state) => state.userSeek,
       (seek, prevSeek) => {
         if (seek && !prevSeek) {
           media.pause();

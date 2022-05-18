@@ -2,6 +2,9 @@ import "@styles/player.less";
 
 import { useAspectRatio, useKeepRatio } from "@hook-utils";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
+import { isHTMLPlayerType, PlayerType } from "@slice/source/types";
+import { dragSeek, dragSeekEnd } from "@slice/user-seek";
+import { selectPaused, selectPlayerType } from "@store";
 import { useMemoizedFn } from "ahooks";
 import cls from "classnames";
 import React, { useCallback, useRef } from "react";
@@ -12,9 +15,6 @@ import useFullScreen from "./component/fullscreen";
 import HTMLPlayer from "./component/html5";
 import TextTracks from "./component/text-tracks";
 import YoutubePlayer from "./component/youtube";
-import { dragSeek, dragSeekEnd } from "./slice/controls";
-import { selectPlayerType } from "./slice/provider";
-import { HTML5PlayerTypes } from "./slice/provider/types";
 import { useSizeRef } from "./utils/hooks/use-size";
 
 const useDragForward = (target: React.RefObject<HTMLElement>) => {
@@ -51,8 +51,7 @@ const Player = ({
   onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }) => {
   const containerRef = useFullScreen();
-  const playerType = useAppSelector(selectPlayerType),
-    provider = useAppSelector((state) => state.provider.source?.from);
+  const playerType = useAppSelector(selectPlayerType);
 
   const keepRatio = useKeepRatio(containerRef);
 
@@ -62,7 +61,7 @@ const Player = ({
     { "mx__video-filter": filter },
   ]);
 
-  const paused = useAppSelector((state) => state.controls.paused);
+  const paused = useAppSelector(selectPaused);
 
   return (
     <div
@@ -74,12 +73,12 @@ const Player = ({
       onKeyDownCapture={handleKeyDownCapture}
       {...useDragForward(containerRef)}
     >
-      {playerType === "youtube" ? (
+      {playerType === PlayerType.youtubeAPI ? (
         <YoutubePlayer {...ratioProps} />
-      ) : HTML5PlayerTypes.includes(playerType as any) ? (
-        <HTMLPlayer {...ratioProps} />
-      ) : provider === "bilibili" ? (
+      ) : playerType === PlayerType.bilibili ? (
         <BilibiliPlayer {...ratioProps} />
+      ) : isHTMLPlayerType(playerType) ? (
+        <HTMLPlayer {...ratioProps} />
       ) : null}
       <Controls />
       <TextTracks />

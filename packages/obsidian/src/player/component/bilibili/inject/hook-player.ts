@@ -3,8 +3,8 @@ import { onStartH5 } from "@hook-player/on-start";
 import { respondScreenshotReq, sendScreenshot } from "@hook-player/screenshot";
 import { hookHTMLState } from "@hook-player/subc-state/webview";
 import { respondTimestampReq, sendTimestamp } from "@hook-player/timestamp";
-import { PlayerStore } from "@player/store";
 import { HTMLMedia } from "@player/utils/media";
+import { PlayerStore } from "@store";
 
 const hookStoreToHTMLPlayer = (
   player: HTMLMediaElement,

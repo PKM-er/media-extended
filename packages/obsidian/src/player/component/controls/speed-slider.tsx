@@ -1,6 +1,7 @@
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setPlaybackRate } from "@slice/controls/thunk";
+import { setPlaybackRate } from "@slice/controlled";
+import { selectSpeed } from "@store";
 import React, { useCallback } from "react";
 
 const valuetext = (speed: number) => `${speed}×`,
@@ -37,7 +38,7 @@ const max = 16,
   min = 0.25;
 
 const SpeedSlider = () => {
-  const speed = useAppSelector((state) => state.controls.playbackRate);
+  const speed = useAppSelector(selectSpeed);
   const dispatch = useAppDispatch();
   const value = speedToVal(speed);
 
@@ -70,7 +71,7 @@ const SpeedSlider = () => {
 export default SpeedSlider;
 
 export const SpeedInput = () => {
-  const speed = useAppSelector((state) => state.controls.playbackRate);
+  const speed = useAppSelector(selectSpeed);
   const dispatch = useAppDispatch();
 
   const handleInputChange = useCallback<

@@ -1,8 +1,7 @@
-import { AppDispatch, RootState } from "@player/store";
 import { getBuffered } from "@player/utils/get-buffered";
-import { handleProgress } from "@slice/controls";
 import { setRatio } from "@slice/interface";
-import { Source } from "@slice/provider/types";
+import { handleProgress } from "@slice/status";
+import { AppDispatch, RootState, selectIsNativeControls } from "@store";
 
 export const updateRatio = (
   player: HTMLMediaElement,
@@ -35,13 +34,7 @@ export const updateBufferYtb = (
     dispatch(handleProgress({ buffered: fraction * duration, duration }));
 };
 
-export const selectYtbResetProp = (state: RootState) => [
-    state.controls.autoplay,
-    state.interface.controls === "native",
-  ],
-  selectShouldLoadResource = (
-    state: RootState,
-  ): [
-    player: Source["playerType"] | undefined,
-    src: Source["src"] | undefined,
-  ] => [state.provider.source?.playerType, state.provider.source?.src];
+export const selectYtbResetProp = (state: RootState) =>
+    [state.controlled.autoplay, selectIsNativeControls(state)] as const,
+  selectShouldLoadResource = ({ source }: RootState) =>
+    [source.type, source.src] as const;

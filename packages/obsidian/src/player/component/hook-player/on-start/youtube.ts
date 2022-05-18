@@ -1,5 +1,5 @@
-import { PlayerStore } from "@player/store";
 import { YoutubeMedia } from "@player/utils/media";
+import { PlayerStore } from "@store";
 
 import onStart from "./general";
 

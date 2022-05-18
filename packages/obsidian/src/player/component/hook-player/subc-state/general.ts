@@ -1,8 +1,15 @@
 import { onFragUpdate } from "@base/fragment";
-import { getSubscribeFunc, PlayerStore, subscribe } from "@player/store";
 import { Media } from "@player/utils/media";
-import { lockPlayPauseEvent, unlockPlayPauseEvent } from "@slice/controls";
-import { selectFrag, selectVolumeMute } from "@slice/provider";
+import { lockPlayPauseEvent, unlockPlayPauseEvent } from "@slice/controlled";
+import {
+  getSubscribeFunc,
+  PlayerStore,
+  selectFrag,
+  selectPaused,
+  selectSpeed,
+  selectVolumeMute,
+  subscribe,
+} from "@store";
 
 const hookState = (media: Media, store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store);
@@ -11,12 +18,9 @@ const hookState = (media: Media, store: PlayerStore) => {
     // useApplyTimeFragment
     subscribe(selectFrag, (newFrag) => onFragUpdate(newFrag, media)),
     // useApplyPlaybackRate
-    subscribe(
-      (state) => state.controls.playbackRate,
-      (rate) => {
-        media.playbackRate !== rate && (media.playbackRate = rate);
-      },
-    ),
+    subscribe(selectSpeed, (rate) => {
+      media.playbackRate !== rate && (media.playbackRate = rate);
+    }),
     // useApplyVolume
     subscribe(selectVolumeMute, ([muted, volume]) => {
       media.volume !== volume && (media.volume = volume);
@@ -24,7 +28,7 @@ const hookState = (media: Media, store: PlayerStore) => {
     }),
     // useApplyUserSeek
     subscribe(
-      (state) => state.controls.userSeek,
+      (state) => state.userSeek,
       (seek, prevSeek) => {
         let params:
           | [time: number, options: { allowSeekAhead: boolean }]
@@ -54,17 +58,13 @@ export const getApplyPauseHandler = (
   store: PlayerStore,
   tryApplyPause: (paused: boolean) => (() => void | Promise<void>) | null,
 ) =>
-  subscribe(
-    store,
-    (state) => state.controls.paused,
-    async (paused) => {
-      const apply = tryApplyPause(paused);
-      if (apply) {
-        store.dispatch(lockPlayPauseEvent());
-        await apply();
-        setTimeout(() => {
-          store.dispatch(unlockPlayPauseEvent());
-        }, 50);
-      }
-    },
-  );
+  subscribe(store, selectPaused, async (paused) => {
+    const apply = tryApplyPause(paused);
+    if (apply) {
+      store.dispatch(lockPlayPauseEvent());
+      await apply();
+      setTimeout(() => {
+        store.dispatch(unlockPlayPauseEvent());
+      }, 50);
+    }
+  });

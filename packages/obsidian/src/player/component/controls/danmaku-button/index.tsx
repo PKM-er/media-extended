@@ -1,6 +1,7 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { toggleDanmaku } from "@slice/bilibili";
+import { PlayerType } from "@slice/source/types";
 import { addIcon } from "obsidian";
 import React, { useCallback } from "react";
 
@@ -28,8 +29,10 @@ export const DanmakuButton = React.forwardRef<
       [dispatch],
     );
 
-    const provider = useAppSelector((state) => state.provider.source?.from);
-    return provider === "bilibili" ? (
+    const isBili = useAppSelector(
+      (state) => state.source.type === PlayerType.bilibili,
+    );
+    return isBili ? (
       <Toggle
         {...props}
         ref={ref}

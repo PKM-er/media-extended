@@ -1,11 +1,11 @@
 import "obsidian";
 
-import type MediaExtended from "@plugin";
 import {
   getFileHashFromLinktext,
   getInfoFromWarpper,
   setObsidianMedia,
-} from "@slice/set-media";
+} from "@player/thunk/set-media";
+import type MediaExtended from "@plugin";
 import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
 import { around } from "monkey-around";
 import type { AudioView, displayInElFunc, VideoView } from "obsidian";

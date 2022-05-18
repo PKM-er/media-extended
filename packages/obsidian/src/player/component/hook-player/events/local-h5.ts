@@ -1,7 +1,11 @@
 import { isDefaultLang } from "@feature/subtitle";
-import { PlayerStore, subscribe } from "@player/store";
-import { handleTrackListChange, InterfaceState } from "@slice/interface";
+import {
+  Controls,
+  handleTrackListChange,
+  InterfaceState,
+} from "@slice/interface";
 import { updateCues } from "@slice/interface";
+import { PlayerStore, selectIsCustomControls } from "@store";
 import { debounce } from "obsidian";
 
 import _hookHTMLEvents from "./html5";
@@ -60,7 +64,7 @@ const hookTracksUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   };
 
   const hideTracks = () => {
-    const shouldHide = store.getState().interface.controls === "custom";
+    const shouldHide = selectIsCustomControls(store.getState());
     for (let i = 0; i < trackList.length; i++) {
       const track = trackList[i];
       if (shouldHide && track.mode === "showing") {

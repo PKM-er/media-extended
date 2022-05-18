@@ -1,11 +1,11 @@
-import { RootState } from "@player/store";
 import { PayloadAction } from "@reduxjs/toolkit";
 import {
   applyParentFullscreen,
   handleDanmakuChange,
   handleWebFscreenChange,
 } from "@slice/bilibili";
-import { handleAutoplayChange, handleLoopChange } from "@slice/controls";
+import { handleAutoplayChange, handleLoopChange } from "@slice/controlled";
+import { RootState } from "@store";
 
 import {
   dispatch,
@@ -84,7 +84,7 @@ const hookWebFscreenState = () => {
 
   // applyParentFullscreen
   subscribe(
-    (state) => state.controls.fullscreen,
+    (state) => state.interface.fullscreen,
     (fullscreen) => {
       fullscreen && dispatch(applyParentFullscreen());
     },
@@ -99,13 +99,13 @@ export const hookBilibiliControls = () => {
   hookInputButton(
     ref.settingsMenuWarp!,
     SettingMenuToggleCls.autoplay,
-    (s) => s.controls.autoplay,
+    (s) => s.controlled.autoplay,
     handleAutoplayChange,
   );
   hookInputButton(
     ref.settingsMenuWarp!,
     SettingMenuToggleCls.repeat,
-    (s) => s.controls.loop,
+    (s) => s.controlled.loop,
     handleLoopChange,
   );
   // danmaku toggle

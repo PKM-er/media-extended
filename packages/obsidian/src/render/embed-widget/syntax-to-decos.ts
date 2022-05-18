@@ -6,7 +6,7 @@ import { Decoration, WidgetType } from "@codemirror/view";
 import type MediaExtended from "@plugin";
 import { editorViewField } from "obsidian";
 
-import { getFileHashFromLinktext } from "../../player/slice/set-media";
+import { getFileHashFromLinktext } from "../../player/thunk/set-media";
 import {
   getUrlFromMarkdown,
   isMdFavorInternalLink,

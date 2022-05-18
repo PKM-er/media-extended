@@ -1,6 +1,6 @@
 import "obsidian";
 
-import { Source } from "@player/slice/provider/types";
+import type { MediaMeta } from "@slice/meta/types";
 
 declare module "obsidian" {
   interface App {
@@ -36,19 +36,19 @@ declare module "obsidian" {
         ab: ArrayBuffer,
         time: number,
         ext: "jpg" | "webp",
-        source: Source,
+        source: MediaMeta,
       ) => any,
     ): EventRef;
     on(
       name: "mx:timestamp",
-      callback: (time: number, duration: number, source: Source) => any,
+      callback: (time: number, duration: number, source: MediaMeta) => any,
     ): EventRef;
     trigger(
       name: "mx:screenshot",
       ab: ArrayBuffer,
       time: number,
       ext: "jpg" | "webp",
-      source: Source,
+      source: MediaMeta,
     ): void;
     trigger(
       name: "hover-link",
@@ -65,7 +65,7 @@ declare module "obsidian" {
       name: "mx:timestamp",
       time: number,
       duration: number,
-      source: Source,
+      source: MediaMeta,
     ): void;
 
     trigger(

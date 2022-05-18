@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { AppDispatch, RootState } from "@player/store";
+import { AppDispatch, RootState } from "@store";
 import { useLatest } from "ahooks";
 import equal from "fast-deep-equal/es6";
 import { MutableRefObject, useEffect, useRef } from "react";

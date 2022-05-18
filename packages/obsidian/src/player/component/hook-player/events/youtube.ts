@@ -1,18 +1,16 @@
 import { EventHandlers } from "@player/component/youtube/event";
-import { PlayerStore } from "@player/store";
 import { YoutubeMedia } from "@player/utils/media";
-import { handleError } from "@slice/controls";
+import { handlePause, handlePlaying } from "@slice/controlled";
 import {
   handleDurationChange,
   handleEnded,
-  handlePause,
-  handlePlaying,
+  handleError,
   handleSeeked,
   handleTimeUpdate,
   handleWaiting,
-} from "@slice/controls";
-import { selectDuration } from "@slice/provider";
+} from "@slice/status";
 import { handleStateChange } from "@slice/youtube";
+import { PlayerStore, selectDuration, selectIsCustomControls } from "@store";
 import assertNever from "assert-never";
 
 import { updateBufferYtb } from "../common";
@@ -35,7 +33,7 @@ const getYoutubeEventHandlers = (store: PlayerStore) => {
 
   const onerror: EventHandlers["onError"] = ({ data: code }) => {
     // YouTube may fire onError twice, so only handle it once
-    if (!store.getState().controls.error) {
+    if (!store.getState().status.error) {
       const message = errorMessages[code] || "An unknown error occured";
       store.dispatch(handleError({ message, code }));
     }
@@ -68,9 +66,9 @@ const getStateChangeHandler =
   ({ data, target: instance }) => {
     const { dispatch } = store,
       state = store.getState(),
-      { seeking, loop, autoplay, paused, hasStarted, duration, muted } =
-        state.controls,
-      customControls = state.interface.controls === "custom",
+      { loop, autoplay, paused, muted } = state.controlled,
+      customControls = selectIsCustomControls(state),
+      { seeking, hasStarted, duration } = state.status,
       seeked =
         seeking &&
         [YT.PlayerState.PLAYING, YT.PlayerState.PAUSED].includes(data);

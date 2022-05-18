@@ -1,14 +1,9 @@
-import { getSubscribeFunc, PlayerStore } from "@player/store";
+import { gotTimestamp } from "@player/thunk/action";
 import { YoutubeMedia } from "@player/utils/media";
-import { gotTimestamp } from "@slice/action/thunk";
-import {
-  handleSeeking,
-  handleTimeUpdate,
-  handleVolumeChange,
-  unlockPlayPauseEvent,
-} from "@slice/controls";
-import { selectDuration } from "@slice/provider";
+import { handleVolumeChange } from "@slice/controlled";
+import { handleSeeking, handleTimeUpdate } from "@slice/status";
 import { setVolumeByOffestDone } from "@slice/youtube";
+import { getSubscribeFunc, PlayerStore, selectDuration } from "@store";
 
 import { updateBufferYtb } from "../common";
 import { respondTimestampReq } from "../timestamp";
@@ -24,7 +19,7 @@ export const hookYoutubeState = (media: YoutubeMedia, store: PlayerStore) => {
     hookState(media, store),
     // useApplyUserSeek
     subscribe(
-      (state) => state.controls.userSeek,
+      (state) => state.userSeek,
       (seek, prevSeek) => {
         let currentTime = -1;
         if (seek) {
@@ -55,7 +50,7 @@ export const hookYoutubeState = (media: YoutubeMedia, store: PlayerStore) => {
     }),
     // useUpdateSeekState
     subscribe(
-      (state) => state.provider,
+      (state) => state.source,
       () => updateBufferYtb(media.instance, dispatch, duration),
     ),
     respondTimestampReq(

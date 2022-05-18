@@ -1,5 +1,5 @@
-import { getSubscribeFunc } from "@player/store";
 import { createStore } from "@player/store/remote-store";
+import { getSubscribeFunc } from "@store";
 
 export const WebFscreenClass = "player-mode-webfullscreen",
   EndingPanelClass = "bilibili-player-ending-panel";

@@ -1,19 +1,16 @@
 import { getMostRecentViewOfType } from "@misc";
-import { AppDispatch, PlayerStore } from "@player/store";
+import { seekByOffset } from "@player/thunk/seek";
 import type MediaExtended from "@plugin";
-import { requestTimestamp, requsetScreenshot } from "@slice/action/thunk";
+import { requestTimestamp, requsetScreenshot } from "@slice/action";
 import {
-  keyboardSeek,
-  keyboardSeekEnd,
-  toggleMute,
-  togglePlay,
-} from "@slice/controls";
-import {
-  seekByOffset,
   setPlaybackRate,
   setVolumeByOffest,
-} from "@slice/controls/thunk";
-import { Component, debounce, Hotkey } from "obsidian";
+  toggleMute,
+  togglePlay,
+} from "@slice/controlled";
+import { keyboardSeek, keyboardSeekEnd } from "@slice/user-seek";
+import { AppDispatch, PlayerStore } from "@store";
+import { Component, Hotkey } from "obsidian";
 
 import { MediaView } from "../media-view";
 import { PlayerComponent } from "../media-view/common";

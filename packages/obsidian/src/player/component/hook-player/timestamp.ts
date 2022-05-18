@@ -1,6 +1,5 @@
-import { PlayerStore, subscribe } from "@player/store";
 import { Media } from "@player/utils/media";
-import { selectTimestampRequested } from "@slice/action/thunk";
+import { PlayerStore, selectTimestampRequested, subscribe } from "@store";
 
 type onTimestamp = (timestamp: number, duration: number) => void;
 

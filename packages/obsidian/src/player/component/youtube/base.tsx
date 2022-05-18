@@ -6,7 +6,7 @@ import {
   destroyPlayer,
   initializePlayer,
   resetPlayer,
-} from "@slice/youtube/thunk";
+} from "@player/thunk/youtube";
 import { useInterval, useUpdateEffect } from "ahooks";
 import React, { useRef } from "react";
 import { useState } from "react";
@@ -111,7 +111,7 @@ const useTimeUpdateEvent = (
     (state) => state.youtube.playerStatus === "ready",
   );
 
-  const seeking = useAppSelector((state) => !!state.controls.userSeek);
+  const seeking = useAppSelector((state) => !!state.userSeek);
   const [playing, setPlaying] = useState(false);
 
   const interval =

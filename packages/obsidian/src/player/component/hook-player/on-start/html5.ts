@@ -1,7 +1,7 @@
-import { PlayerStore } from "@player/store";
 import { getBuffered } from "@player/utils/get-buffered";
 import { HTMLMedia } from "@player/utils/media";
-import { updateBasicInfo } from "@slice/controls";
+import { updateBasicInfo } from "@slice/status";
+import { PlayerStore } from "@store";
 
 import { updateRatio } from "../common";
 import onStart from "./general";

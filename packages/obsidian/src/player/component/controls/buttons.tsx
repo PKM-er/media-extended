@@ -1,12 +1,9 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import {
-  requestTimestamp,
-  requsetScreenshot,
-  selectScreenshotSupported,
-} from "@slice/action/thunk";
-import { toggleFullscreen, toggleMute, togglePlay } from "@slice/controls";
-import { setVolumeByOffest } from "@slice/controls/thunk";
+import { requestTimestamp, requsetScreenshot } from "@slice/action";
+import { setVolumeByOffest, toggleMute, togglePlay } from "@slice/controlled";
+import { toggleFullscreen } from "@slice/interface";
+import { selectScreenshotSupported } from "@store";
 import { useLatest } from "ahooks";
 import React, { useCallback } from "react";
 
@@ -19,7 +16,7 @@ export const PlayButton = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function PlayButton(props, ref) {
-    const paused = useAppSelector((state) => state.controls.paused);
+    const paused = useAppSelector((state) => state.controlled.paused);
     const dispatch = useAppDispatch();
 
     const handleClick = useCallback(() => dispatch(togglePlay()), [dispatch]);
@@ -43,8 +40,8 @@ export const MuteButton = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function MuteButton(props, ref) {
-    const muted = useAppSelector((state) => state.controls.muted);
-    const volume = useAppSelector((state) => state.controls.volume);
+    const muted = useAppSelector((state) => state.controlled.muted);
+    const volume = useAppSelector((state) => state.controlled.volume);
     const dispatch = useAppDispatch();
 
     const volumeRef = useLatest(volume);
@@ -75,7 +72,7 @@ export const FullscreenButton = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function FullscreenButton(props, ref) {
-    const fullscreen = useAppSelector((state) => state.controls.fullscreen);
+    const fullscreen = useAppSelector((state) => state.interface.fullscreen);
     const dispatch = useAppDispatch();
 
     const handleClick = useCallback(

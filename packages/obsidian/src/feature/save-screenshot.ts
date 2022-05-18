@@ -2,8 +2,8 @@ import "obsidian";
 
 import { getBasename, getFilename } from "@base/url-parse/misc";
 import { getMostRecentViewOfType, insertToCursor } from "@misc";
-import { Source } from "@player/slice/provider/types";
 import type MediaExtended from "@plugin";
+import { MediaMeta, Provider } from "@slice/meta/types";
 import filenamify from "filenamify/browser";
 import { MarkdownView, moment, Notice } from "obsidian";
 import URLParse from "url-parse";
@@ -11,15 +11,15 @@ import URLParse from "url-parse";
 const toDurationString = (duration: number) =>
   duration === 0 ? "DT0S" : moment.duration(duration, "seconds").toISOString();
 
-const getScreenshotName = (source: Source, time: number) => {
+const getScreenshotName = (meta: MediaMeta, time: number) => {
   const timestamp = toDurationString(time);
   let name: string;
-  if (source.from === "obsidian") {
-    name = source.title ?? source.basename;
-  } else if (source.from === "direct") {
-    if (source.title) name = source.title;
+  if (meta.provider === Provider.obsidian) {
+    name = meta.title ?? meta.file.basename;
+  } else if (meta.provider === Provider.html5) {
+    if (meta.title) name = meta.title;
     else {
-      const url = new URLParse(source.src),
+      const url = new URLParse(meta.url),
         filename = getFilename(url.pathname);
       if (filename) {
         name = getBasename(filename);
@@ -27,8 +27,10 @@ const getScreenshotName = (source: Source, time: number) => {
         name = url.hostname + "-" + url.pathname;
       }
     }
+  } else if (meta.provider) {
+    name = meta.title ?? meta.id ?? Date.now().toString();
   } else {
-    name = source.title ?? source.id;
+    throw new Error("no provider");
   }
   return filenamify(name) + timestamp;
 };

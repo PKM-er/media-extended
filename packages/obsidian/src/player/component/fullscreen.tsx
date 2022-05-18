@@ -1,6 +1,7 @@
 import "@styles/fullscreen.less";
 
 import { useAppSelector } from "@player/hooks";
+import { selectFscreen } from "@store";
 import fscreen from "fscreen";
 import { useRefEffect } from "react-use-ref-effect";
 
@@ -19,7 +20,7 @@ const exitFullscreen = async (container: HTMLElement) => {
 };
 
 const useFullScreen = () => {
-  const fullscreen = useAppSelector((state) => state.controls.fullscreen);
+  const fullscreen = useAppSelector(selectFscreen);
   return useRefEffect<HTMLElement>(
     (container) => {
       if (isFullscreenEnabled) {

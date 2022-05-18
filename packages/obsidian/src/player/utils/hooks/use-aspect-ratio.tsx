@@ -2,7 +2,8 @@
 import "@styles/aspect-ratio.less";
 
 import { useAppSelector } from "@player/hooks";
-import { selectPlayerType } from "@slice/provider";
+import { PlayerType } from "@slice/source/types";
+import { selectPlayerType } from "@store";
 import cls, { Argument } from "classnames";
 import React from "react";
 
@@ -10,12 +11,13 @@ const CUSTOM_PROPERTY_NAME = "--aspect-ratio";
 const DEFAULT_CLASS_NAME = "react-aspect-ratio-placeholder";
 
 const DefaultRatio = {
-  video: "16/9",
-  unknown: "16/9",
-  audio: 0,
-  youtube: "16/9",
-  vimeo: "16/9",
-  webview: "16/9",
+  [PlayerType.video]: "16/9",
+  [PlayerType.unknown]: "16/9",
+  [PlayerType.audio]: 0,
+  [PlayerType.youtubeAPI]: "16/9",
+  [PlayerType.vimeoAPI]: "16/9",
+  [PlayerType.generalHost]: "16/9",
+  [PlayerType.bilibili]: "16/9",
 } as const;
 
 const useAspectRatio = (

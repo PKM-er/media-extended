@@ -1,12 +1,13 @@
 import { setPlayerKeymaps } from "@feature/keyboard-control";
 import { Player } from "@player";
-import { AppThunk } from "@player/store";
+import { createStore } from "@player/store/ob-store";
 import MediaExtended from "@plugin";
+import { AppThunk } from "@store";
 import { MarkdownRenderChild, Scope } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { createStore, PlayerComponent } from "./common";
+import { PlayerComponent } from "./common";
 
 export default class PlayerRenderChild
   extends MarkdownRenderChild
@@ -27,7 +28,7 @@ export default class PlayerRenderChild
 
   constructor(
     initAction: AppThunk,
-    private plugin: MediaExtended,
+    public plugin: MediaExtended,
     containerEl: HTMLElement,
     private inEditor: boolean,
   ) {

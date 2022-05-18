@@ -1,10 +1,9 @@
-import { INJECT_BILIBILI } from "@const";
 import { PlayerContext } from "@player";
 import { useAppSelector } from "@player/hooks";
-import { observeStore, PlayerStore } from "@player/store";
-import { gotScreenshot, gotTimestamp } from "@slice/action/thunk";
-import { join } from "path";
-import React, { useContext, useMemo, useRef, useState } from "react";
+import { gotScreenshot, gotTimestamp } from "@player/thunk/action";
+import { PlayerType } from "@slice/source/types";
+import { observeStore, PlayerStore } from "@store";
+import React, { useContext, useRef, useState } from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
@@ -20,9 +19,7 @@ const BilibiliPlayer = ({
   className?: string;
 }) => {
   const src = useAppSelector((state) =>
-    state.provider.source?.from === "bilibili"
-      ? state.provider.source.src
-      : null,
+    state.source.type === PlayerType.bilibili ? state.source.src : null,
   );
 
   const [hideView, setHideView] = useState(true);

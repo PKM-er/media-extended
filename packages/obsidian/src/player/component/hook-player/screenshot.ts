@@ -1,9 +1,10 @@
-import { PlayerStore, subscribe } from "@player/store";
-import { selectIsIOS } from "@slice/action";
+import { cancelScreenshot } from "@player/thunk/action";
 import {
-  cancelScreenshot,
+  PlayerStore,
+  selectIsIOS,
   selectScreenshotRequested,
-} from "@slice/action/thunk";
+  subscribe,
+} from "@store";
 import { captureScreenshot } from "mx-lib";
 
 type onScreenshot = (

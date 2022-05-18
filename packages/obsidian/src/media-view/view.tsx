@@ -1,16 +1,23 @@
 import { ExtensionAccepted } from "@base/media-type";
 import { setPlayerKeymaps } from "@feature/keyboard-control";
 import { Player } from "@player";
-import { subscribe } from "@player/store";
-import type MediaExtended from "@plugin";
-import { revertDuration, setFragment } from "@slice/controls";
-import { seekTo, setHash } from "@slice/controls/thunk";
-import { toggleFilter } from "@slice/interface";
+import { createStore } from "@player/store/ob-store";
 import {
   renameObsidianMedia,
   setMediaUrlSrc,
   setObsidianMediaSrc,
-} from "@slice/provider/thunk";
+} from "@player/thunk/provider";
+import { seekTo } from "@player/thunk/seek";
+import type MediaExtended from "@plugin";
+import { setFragment, setHash } from "@slice/controlled";
+import { toggleFilter } from "@slice/interface";
+import { revertDuration } from "@slice/status";
+import {
+  selectCurrentTime,
+  selectDuration,
+  selectFrag,
+  subscribe,
+} from "@store";
 import {
   Command,
   EditableFileView,
@@ -26,8 +33,9 @@ import {
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { Provider } from "../store/slice/meta/types";
+import { isHTMLMediaSource, PlayerType } from "../store/slice/source/types";
 import {
-  createStore,
   MEDIA_VIEW_TYPE,
   MediaState,
   MediaStateBase,
@@ -62,8 +70,8 @@ export default class ObMediaView
     return this.store.msgHandler.port;
   }
 
-  public setHash(hash: string, fromLink: boolean) {
-    this.store.dispatch(setHash(hash, fromLink));
+  public setHash(...args: [hash: string, fromLink: boolean]) {
+    this.store.dispatch(setHash(args));
   }
   setFile(file: TFile) {
     this.store.dispatch(setObsidianMediaSrc(file));
@@ -72,12 +80,10 @@ export default class ObMediaView
     this.store.dispatch(setMediaUrlSrc(url));
   }
   getUrl(src = false): string | null {
-    const { source } = this.store.getState().provider;
-    if (!source || source.from === "obsidian") {
-      return null;
-    } else if (source.from === "direct") {
-      return src ? source.src : source.url;
-    } else return source.src;
+    const { meta } = this.store.getState();
+    if (meta.provider !== Provider.obsidian && meta.provider) {
+      return meta.url;
+    } else return null;
   }
 
   canAcceptExtension(ext: string): boolean {
@@ -114,22 +120,22 @@ export default class ObMediaView
     this.register(
       subscribe(
         this.store,
-        (state) => state.provider.source?.title,
+        (state) => state.meta.title,
         () => this.titleEl.setText(this.getDisplayText()),
       ),
     );
     this.register(
       subscribe(
         this.store,
-        (state) => state.provider.source?.from,
+        (state) => state.meta.provider,
         (from) => {
-          if (from === "obsidian" && Platform.isDesktopApp) {
+          if (from === Provider.obsidian && Platform.isDesktopApp) {
             this.openExternalAction.style.removeProperty("display");
             this.openExternalAction.setAttr(
               "aria-label",
               "Open In External Player",
             );
-          } else if (from && from !== "obsidian") {
+          } else if (from && from !== Provider.obsidian) {
             this.openExternalAction.style.removeProperty("display");
             this.openExternalAction.setAttr("aria-label", "Open In Browser");
           } else {
@@ -152,10 +158,9 @@ export default class ObMediaView
   }
   getDisplayText(): string {
     if (this.file) return this.file.basename;
-    const { source } = this.store.getState().provider;
-    if (source?.from === "obsidian") return "No Media";
+    const { provider, title } = this.store.getState().meta;
+    if (provider === Provider.obsidian) return "No Media";
 
-    const title = source?.title;
     let titleText: string;
     if (title === null) {
       titleText = ""; // loading title
@@ -169,11 +174,11 @@ export default class ObMediaView
 
   getState(): MediaState {
     let viewState = super.getState() as MediaState;
-    const { controls, provider } = this.store.getState();
+    const state = this.store.getState();
     const common: Required<MediaStateBase> = {
-      fragment: controls.fragment,
-      currentTime: controls.currentTime,
-      duration: controls.duration,
+      fragment: selectFrag(state),
+      currentTime: selectCurrentTime(state),
+      duration: selectDuration(state),
       pinned: this.pinned,
     };
 
@@ -183,7 +188,7 @@ export default class ObMediaView
     } else if ((url = this.getUrl())) {
       return { ...viewState, file: null, url, ...common };
     } else {
-      console.error("unexpected state", viewState, provider.source);
+      console.error("unexpected state", viewState, state.source);
       return viewState;
       // throw new Error("Failed to get state for media view: unexpected state");
     }
@@ -277,6 +282,21 @@ export default class ObMediaView
 
   async onRename(file: TFile) {
     if (file === this.file) {
+      const mediaEl =
+        this.containerEl.querySelector<HTMLMediaElement>("video, audio");
+      if (mediaEl) {
+        const { currentTime, paused } = mediaEl;
+        mediaEl.addEventListener(
+          "loadedmetadata",
+          function () {
+            this.currentTime = currentTime;
+            if (this.paused !== paused) {
+              this[paused ? "pause" : "play"]();
+            }
+          },
+          { once: true, passive: true },
+        );
+      }
       this.store.dispatch(renameObsidianMedia(file));
     }
     return super.onRename(file);
@@ -311,14 +331,13 @@ export default class ObMediaView
             const time = media.currentTime;
             media.load();
             media.currentTime = time;
-            let { paused } = this.store.getState().controls;
+            let { paused } = this.store.getState().controlled;
             if (!paused) await media.play();
           }),
       );
     }
-    const { source } = this.store.getState().provider;
-    const isVideo = source && source.playerType !== "audio";
-    if (isVideo) {
+    const { source } = this.store.getState();
+    if (isHTMLMediaSource(source) && source.type !== PlayerType.audio) {
       menu.addItem((item) =>
         item
           .setIcon("aperture")

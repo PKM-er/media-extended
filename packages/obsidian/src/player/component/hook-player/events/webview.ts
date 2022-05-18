@@ -1,4 +1,4 @@
-import type { PlayerStore } from "@player/store";
+import type { PlayerStore } from "@store";
 
 import _hookHTMLEvents from "./html5";
 

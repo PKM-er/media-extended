@@ -1,8 +1,7 @@
-import { AppDispatch, PlayerStore } from "@player/store";
 import { CoreEventHandler } from "@player/utils";
 import { HTMLMedia } from "@player/utils/media";
-import { handleError } from "@slice/controls";
-import { renameStateReverted } from "@slice/provider";
+import { handleError } from "@slice/status";
+import { AppDispatch, PlayerStore } from "@store";
 
 import { updateBufferH5, updateRatio } from "../common";
 import generalEventHandlers from "./general";
@@ -22,12 +21,6 @@ const hookHTMLEvents = (player: HTMLMediaElement, store: PlayerStore) => {
     loadedmetadata: ({ instance }) => {
       // useUpdateRatio
       updateRatio(instance, dispatch);
-      // useRevertTimeOnRename
-      const renamed = store.getState().provider.renamed;
-      if (renamed) {
-        instance.currentTime = renamed.time;
-        dispatch(renameStateReverted());
-      }
     },
     progress: ({ instance }) => updateBufferH5(instance, dispatch),
     error: ({ instance }) => {

@@ -3,15 +3,21 @@ import "@styles/progress-bar.less";
 import { secondToDuration } from "@misc";
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { progressBarSeek, progressBarSeekEnd } from "@slice/controls";
+import { progressBarSeek, progressBarSeekEnd } from "@slice/user-seek";
+import {
+  selectBuffered,
+  selectCurrentTime,
+  selectDuration,
+  selectFrag,
+} from "@store";
 import { isTimestamp } from "mx-lib";
 import React from "react";
 
 const valuetext = (seconds: number) => secondToDuration(seconds);
 
 const useTimeRange = () => {
-  const duration = useAppSelector((state) => state.controls.duration);
-  const frag = useAppSelector((state) => state.controls.fragment);
+  const duration = useAppSelector(selectDuration);
+  const frag = useAppSelector(selectFrag);
 
   let min = 0,
     max = duration;
@@ -31,8 +37,8 @@ const useTimeRange = () => {
 const ProgressBar = () => {
   const dispatch = useAppDispatch();
 
-  const currentTime = useAppSelector((state) => state.controls.currentTime),
-    seekTime = useAppSelector((state) => state.controls.userSeek?.currentTime);
+  const currentTime = useAppSelector(selectCurrentTime),
+    seekTime = useAppSelector((state) => state.userSeek?.currentTime);
 
   const range = useTimeRange();
 
@@ -64,8 +70,8 @@ const BufferProgress = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function BufferProgress({ className }, ref) {
-    const duration = useAppSelector((state) => state.controls.duration),
-      buffered = useAppSelector((state) => state.controls.buffered);
+    const duration = useAppSelector(selectDuration),
+      buffered = useAppSelector(selectBuffered);
 
     const range = useTimeRange();
 

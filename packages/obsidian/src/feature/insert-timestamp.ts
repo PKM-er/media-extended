@@ -5,10 +5,9 @@ import {
   insertToCursor,
   secondToDuration,
   secondToFragFormat,
-  stripHash,
 } from "@misc";
-import { Source } from "@player/slice/provider/types";
 import type MediaExtended from "@plugin";
+import { MediaMeta, Provider } from "@slice/meta/types";
 import { MarkdownView, Notice, TFile } from "obsidian";
 
 export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
@@ -28,15 +27,15 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
   const getTimeStamp = (
     currentTime: number,
     duration: number,
-    source: Source,
+    meta: MediaMeta,
   ): string | null => {
     const { timestampOffset: offset } = plugin.settings;
     let offsetCurrentTime = currentTime - offset;
     if (currentTime - offset < 0) offsetCurrentTime = 0;
     else if (currentTime - offset > duration) offsetCurrentTime = duration;
 
-    if (source.from === "obsidian") {
-      const file = plugin.app.vault.getAbstractFileByPath(source.path);
+    if (meta.provider === Provider.obsidian) {
+      const file = plugin.app.vault.getAbstractFileByPath(meta.file.path);
       let linktext;
       if (
         file instanceof TFile &&
@@ -45,12 +44,12 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
         const frag = secondToFragFormat(offsetCurrentTime);
         return `[[${linktext}#t=${frag}]]`;
       } else {
-        new Notice("Could not find source file of timestamp: " + source.path);
+        new Notice("Could not find source file of timestamp: " + meta.file);
         return null;
       }
-    } else {
+    } else if (meta.provider) {
       const linktext = secondToDuration(offsetCurrentTime);
-      const link = source.from === "direct" ? source.url : source.src,
+      const link = meta.url,
         hash = `#t=${offsetCurrentTime}`;
 
       let url = link + hash;
@@ -64,5 +63,6 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
 
       return `[${linktext}](${url})`;
     }
+    return null;
   };
 };

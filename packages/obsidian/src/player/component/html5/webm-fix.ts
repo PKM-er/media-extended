@@ -1,6 +1,7 @@
-import { PlayerStore } from "@player/store";
-import { LARGE_CURRENT_TIME } from "@slice/controls";
-import { switchToAudio, unknownTypeDetermined } from "@slice/provider/thunk";
+import { switchToAudio, unknownTypeDetermined } from "@slice/source";
+import { PlayerType } from "@slice/source/types";
+import { LARGE_CURRENT_TIME } from "@slice/status";
+import { PlayerStore, selectPlayerType } from "@store";
 
 const WebmFix = (player: HTMLMediaElement, store: PlayerStore) => {
   const handler = () => {
@@ -11,7 +12,7 @@ const WebmFix = (player: HTMLMediaElement, store: PlayerStore) => {
       (player.videoHeight === 0 || player.videoWidth === 0)
     ) {
       store.dispatch(switchToAudio());
-    } else {
+    } else if (selectPlayerType(store.getState()) === PlayerType.unknown) {
       store.dispatch(unknownTypeDetermined());
     }
     // https://www.bugs.cc/p/webm-progress-bar-problem-and-solution/

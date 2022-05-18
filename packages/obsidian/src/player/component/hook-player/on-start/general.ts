@@ -1,8 +1,8 @@
-import { PlayerStore } from "@player/store";
 import { Media } from "@player/utils/media";
+import { PlayerStore, selectCurrentTime } from "@store";
 
 const onStart = (player: Media, store: PlayerStore) => {
-  const { currentTime } = store.getState().controls;
+  const currentTime = selectCurrentTime(store.getState());
   if (currentTime > 0) {
     player.seekTo(currentTime);
   }

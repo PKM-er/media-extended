@@ -2,9 +2,10 @@ import { getYoutubeEventHandlers } from "@hook-player/events";
 import { hookYoutubeState } from "@hook-player/subc-state";
 import { useWillUnmount } from "@hook-utils";
 import { useAppSelector } from "@player/hooks";
-import { PlayerStore } from "@player/store";
 import { CoreEventHandler } from "@player/utils";
 import { YoutubeMedia } from "@player/utils/media";
+import { PlayerType } from "@slice/source/types";
+import { PlayerStore } from "@store";
 import { useUpdateEffect } from "ahooks";
 import { useMemo, useRef } from "react";
 import React from "react";
@@ -64,8 +65,8 @@ const YoutubePlayer = ({
   className?: string;
 }) => {
   const videoId = useAppSelector((state) => {
-    const source = state.provider.source;
-    if (source?.playerType !== "youtube") return null;
+    const source = state.source;
+    if (source.type !== PlayerType.youtubeAPI) return null;
     return source.id;
   });
 

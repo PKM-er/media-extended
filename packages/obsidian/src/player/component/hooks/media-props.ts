@@ -1,22 +1,25 @@
 import { useAppDispatch } from "@player/hooks";
 import { CoreEventHandler } from "@player/utils";
 import {
-  handleDurationChange,
-  handleEnded,
   handlePause,
   handlePlaying,
   handleRateChange,
-  handleTimeUpdate,
   handleVolumeChange,
+} from "@slice/controlled";
+import {
+  handleDurationChange,
+  handleEnded,
+  handleTimeUpdate,
   handleWaiting,
-} from "@slice/controls";
+} from "@slice/status";
+import { selectSpeed, selectVolumeMute } from "@store";
 import { useCallback } from "react";
 
 import { ApplyHookType } from "./utils";
 
 export const useApplyPlaybackRate: ApplyHookType = (useSubscribe, ref) =>
   useSubscribe(
-    (state) => state.controls.playbackRate,
+    selectSpeed,
     ([playbackRate], _dispatch, media) => {
       if (!media || media.playbackRate === playbackRate) return;
       media.playbackRate = playbackRate;
@@ -25,7 +28,7 @@ export const useApplyPlaybackRate: ApplyHookType = (useSubscribe, ref) =>
   );
 export const useApplyVolume: ApplyHookType = (useSubscribe, ref) =>
   useSubscribe(
-    (state) => [state.controls.muted, state.controls.volume] as const,
+    selectVolumeMute,
     ([[muted, volume]], _dispatch, media) => {
       if (!media) return;
       media.volume !== volume && (media.volume = volume);

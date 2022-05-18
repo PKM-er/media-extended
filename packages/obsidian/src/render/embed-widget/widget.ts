@@ -2,9 +2,9 @@ import { vaildateMediaURL } from "@base/url-parse";
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { parseSizeSyntax } from "@misc";
-import type { AppThunk } from "@player/store";
+import { setMediaUrl, setObsidianMedia } from "@player/thunk/set-media";
 import type MediaExtended from "@plugin";
-import { setMediaUrl, setObsidianMedia } from "@slice/set-media";
+import type { AppThunk } from "@store";
 import { PlayerRenderChild } from "@view";
 import { Platform, setIcon, TFile } from "obsidian";
 

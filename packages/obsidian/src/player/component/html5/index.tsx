@@ -4,16 +4,26 @@ import { respondScreenshotReq } from "@hook-player/screenshot";
 import { hookHTMLState } from "@hook-player/subc-state/local-h5";
 import { respondTimestampReq } from "@hook-player/timestamp";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { PlayerStore, subscribe } from "@player/store";
+import { gotScreenshot, gotTimestamp } from "@player/thunk/action";
 import { HTMLMedia } from "@player/utils/media";
-import { gotScreenshot, gotTimestamp } from "@slice/action/thunk";
-import { selectAllowCORS, selectLoop } from "@slice/provider";
-import { disableCORS } from "@slice/provider/thunk";
+import { disableCORS } from "@slice/source";
+import {
+  PlayerStore,
+  selectAllowCORS,
+  selectAutoplay,
+  selectHTMLPlayerType,
+  selectHTMLSrc,
+  selectIsNativeControls,
+  selectLoop,
+  selectTracks,
+  subscribe,
+} from "@store";
 import { useUnmount } from "ahooks";
 import React from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
+import { PlayerType } from "../../../store/slice/source/types";
 import webmFix from "./webm-fix";
 
 const hookStoreToHTMLPlayer = (
@@ -59,9 +69,6 @@ const HTMLPlayer = ({
   style?: React.CSSProperties;
   className?: string;
 }) => {
-  const source = useAppSelector((state) => state.provider.source),
-    tracks = useAppSelector((state) => state.provider.tracks);
-
   const store = useStore() as PlayerStore;
   const ref = useRefEffect<HTMLMediaElement>(
     (player) => hookStoreToHTMLPlayer(player, store),
@@ -74,34 +81,36 @@ const HTMLPlayer = ({
     className,
     loop: useAppSelector(selectLoop),
     // preload: "auto",
-    autoPlay: useAppSelector((state) => state.controls.autoplay),
-    controls: useAppSelector((state) => state.interface.controls === "native"),
+    autoPlay: useAppSelector(selectAutoplay),
+    controls: useAppSelector(selectIsNativeControls),
   };
 
   const dispatch = useAppDispatch();
 
+  const src = useAppSelector(selectHTMLSrc),
+    tracks = useAppSelector(selectTracks),
+    type = useAppSelector(selectHTMLPlayerType);
+
   let player;
-  if (source) {
+  if (src && type) {
     const children = (
       <>
-        <source src={source.src} onError={() => dispatch(disableCORS())} />
-        {tracks.map((p) => (
+        <source src={src} onError={() => dispatch(disableCORS())} />
+        {tracks?.map((p) => (
           <track key={p.src} {...p} />
         ))}
       </>
     );
-    if (source.playerType === "video" || source.playerType === "unknown") {
+    if (type === PlayerType.video) {
       player = <video {...props}>{children}</video>;
-    } else if (source.playerType === "audio") {
+    } else {
       player = <audio {...props}>{children}</audio>;
     }
   }
   useUnmount(() => {
-    for (const { src } of tracks) {
-      if (src.startsWith("blob:")) {
-        URL.revokeObjectURL(src);
-      }
-    }
+    tracks?.forEach(
+      ({ src }) => src.startsWith("blob:") && URL.revokeObjectURL(src),
+    );
   });
   return player ?? null;
 };

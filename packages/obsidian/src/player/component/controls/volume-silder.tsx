@@ -1,11 +1,11 @@
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setVolumeUnmute } from "@player/slice/controls";
+import { setVolumeUnmute } from "@slice/controlled";
+import { selectVolumeMute } from "@store";
 import React, { useCallback } from "react";
 
 const VolumeSilder = () => {
-  const volume = useAppSelector((state) => state.controls.volume);
-  const muted = useAppSelector((state) => state.controls.muted);
+  const [muted, volume] = useAppSelector(selectVolumeMute);
   const dispatch = useAppDispatch();
 
   const handleSilderChange = useCallback(

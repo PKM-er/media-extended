@@ -2,21 +2,22 @@ import {
   onPlay as restrictTimeOnPlay,
   onTimeUpdate as restrictTimeOnTimeUpdate,
 } from "@base/fragment";
-import { getSubscribeFunc, PlayerStore } from "@player/store";
 import { Media } from "@player/utils/media";
 import {
-  handleDurationChange,
-  handleEnded,
   handlePause,
   handlePlaying,
   handleRateChange,
+  handleVolumeChange,
+} from "@slice/controlled";
+import {
+  handleDurationChange,
+  handleEnded,
   handleSeeked,
   handleSeeking,
   handleTimeUpdate,
-  handleVolumeChange,
   handleWaiting,
-} from "@slice/controls";
-import { selectFrag, selectLoop } from "@slice/provider";
+} from "@slice/status";
+import { getSubscribeFunc, PlayerStore, selectFrag, selectLoop } from "@store";
 
 const generalEventHandlers = <M extends Media>(store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store),

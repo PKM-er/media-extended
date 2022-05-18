@@ -1,5 +1,5 @@
-import { createStateSyncMiddleware, MessageHandler } from "@ipc/redux-sync";
 import { Action, configureStore, Reducer } from "@reduxjs/toolkit";
+import { createStateSyncMiddleware, MessageHandler } from "@store/redux-sync";
 
 export const createStoreWithMsgHandler = <S, A extends Action>(
   name: string,
@@ -8,7 +8,7 @@ export const createStoreWithMsgHandler = <S, A extends Action>(
   const allowed = undefined;
   const msgHandler = new MessageHandler(false, allowed);
   const store = configureStore({
-    reducer: reducer,
+    reducer,
     devTools: process.env.NODE_ENV !== "production",
     enhancers: [],
     middleware: (getDefault) =>

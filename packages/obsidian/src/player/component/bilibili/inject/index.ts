@@ -1,4 +1,4 @@
-import { initStateFromHost } from "@ipc/redux-sync";
+import { initStateFromHost } from "@store/redux-sync";
 
 import {
   EndingPanelClass,

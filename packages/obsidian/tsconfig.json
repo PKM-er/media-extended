@@ -4,7 +4,9 @@
     "baseUrl": "src",
     "paths": {
       "@player/*": ["player/*"],
-      "@slice/*": ["player/slice/*"],
+      "@slice/*": ["store/slice/*"],
+      "@store": ["store"],
+      "@store/*": ["store/*"],
       "@player": ["player"],
       "@render/*": ["render/*"],
       "@view": ["media-view"],
