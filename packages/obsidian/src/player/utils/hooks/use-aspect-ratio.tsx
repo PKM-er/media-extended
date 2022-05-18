@@ -30,14 +30,18 @@ const useAspectRatio = (
     ratio = DefaultRatio[provider];
   }
   let style: React.CSSProperties = {
-    height: keepRatio === "width" ? "auto" : "100%",
-    width: keepRatio === "height" ? "auto" : "100%",
+    // height: keepRatio === "width" ? "auto" : "100%",
+    // width: keepRatio === "height" ? "auto" : "100%",
   };
   if (typeof ratio === "string") {
     (style as any)[CUSTOM_PROPERTY_NAME] = `(${ratio})`;
   }
 
-  const className = cls(_className ?? DEFAULT_CLASS_NAME, { active: !!ratio });
+  const className = cls(_className ?? DEFAULT_CLASS_NAME, {
+    active: !!ratio,
+    "mx__keep-ratio-width": keepRatio === "width",
+    "mx__keep-ratio-height": keepRatio === "height",
+  });
   return { style, className };
 };
 export default useAspectRatio;

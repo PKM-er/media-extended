@@ -23,8 +23,8 @@
   font-weight: 500;
   line-height: 1.7;
   max-width: 100%;
-  min-height: 100px;
-  min-width: 200px;
+  // min-height: 100px;
+  // min-width: 200px;
   position: relative;
   text-shadow: none;
   transition: box-shadow 0.3s ease;
@@ -34,7 +34,11 @@
     margin: auto;
     overflow: hidden;
     position: relative;
-
+    .markdown-source-view &,
+    .markdown-reading-view & {
+      max-height: var(--mx-embed-max-height, 50vh);
+      min-height: var(--mx-embed-min-height, 200px);
+    }
     & > webview {
       transition: opacity 0.4s ease-in-out;
       opacity: 1;

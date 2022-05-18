@@ -78,7 +78,9 @@ const Player = ({
       ) : playerType === PlayerType.bilibili ? (
         <BilibiliPlayer {...ratioProps} />
       ) : isHTMLPlayerType(playerType) ? (
-        <HTMLPlayer {...ratioProps} />
+        <div {...ratioProps}>
+          <HTMLPlayer />
+        </div>
       ) : null}
       <Controls />
       <TextTracks />
