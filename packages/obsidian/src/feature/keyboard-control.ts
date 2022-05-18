@@ -167,7 +167,7 @@ const localForward = (component: PlayerComponent) => {
       repeatDone: setPlaybackRate(1),
     },
     rewindActions = {
-      regular: seekByOffset(rewindStep),
+      regular: seekByOffset(-rewindStep),
       repeat: keyboardSeek(-rewindStep),
       repeatDone: keyboardSeekEnd(),
     };
