@@ -1,7 +1,7 @@
 import "obsidian";
 
 import { getBasename, getFilename } from "@base/url-parse/misc";
-import { getMostRecentViewOfType, insertToCursor } from "@misc";
+import { getMostRecentViewOfType, insertToCursor } from "@misc/obsidian";
 import type MediaExtended from "@plugin";
 import { MediaMeta, Provider } from "@slice/meta/types";
 import filenamify from "filenamify/browser";

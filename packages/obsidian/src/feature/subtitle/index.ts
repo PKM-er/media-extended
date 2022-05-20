@@ -3,6 +3,8 @@ import iso from "iso-639-1";
 import { TFile } from "obsidian";
 import toVtt from "srt-webvtt";
 
+import { isDefaultLang } from "./default-lang";
+
 const getSubtitles = (video: TFile): TFile[] => {
   const { basename: videoName, parent: folder } = video;
 
@@ -111,6 +113,3 @@ const getTracks = async (video: TFile) => {
   return getSubtitleTracks(subtitles);
 };
 export default getTracks;
-
-export const isDefaultLang = (languageCode: string) =>
-  (localStorage.language ?? "en") === languageCode;

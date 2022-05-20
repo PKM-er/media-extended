@@ -41,6 +41,7 @@ import {
   MediaStateBase,
   PlayerComponent,
 } from "./common";
+import { createWindow } from "./window";
 
 declare module "obsidian" {
   interface FileView {
@@ -248,6 +249,7 @@ export default class ObMediaView
     return super.onLoadFile(file);
   }
 
+  window?: Electron.BrowserWindow;
   protected async onOpen(): Promise<void> {
     await super.onOpen();
     ReactDOM.render(
@@ -255,8 +257,11 @@ export default class ObMediaView
       this.contentEl,
     );
   }
+  private _closed = false;
   async onClose() {
     ReactDOM.unmountComponentAtNode(this.contentEl);
+    this._closed = true;
+    this.window?.destroy();
     return super.onClose();
   }
 
@@ -311,6 +316,26 @@ export default class ObMediaView
 
   onMoreOptionsMenu(menu: Menu): void {
     let url;
+    let _pluginDir: string | undefined;
+    if ((_pluginDir = this.plugin.getFullPluginDir())) {
+      let pluginDir = _pluginDir;
+      menu.addItem((item) =>
+        item
+          .setIcon("open-elsewhere-glyph")
+          .setTitle("Open In Window")
+          .onClick(() => {
+            this.window = createWindow(this.store, pluginDir);
+            this.window.on("close", () => {
+              if (!this._closed)
+                ReactDOM.render(
+                  <Player store={this.store} plugin={this.plugin} />,
+                  this.contentEl,
+                );
+            });
+            ReactDOM.unmountComponentAtNode(this.contentEl);
+          }),
+      );
+    }
     if (!this.pinned) {
       menu.addItem((item) =>
         item

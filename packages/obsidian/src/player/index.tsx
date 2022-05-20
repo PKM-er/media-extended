@@ -29,7 +29,7 @@ const PlayerWarpper = ({
 
 interface IPlayerContext {
   inEditor?: boolean;
-  plugin: MediaExtended;
+  plugin?: MediaExtended;
 }
 
 export const PlayerContext = React.createContext<IPlayerContext>({} as any);

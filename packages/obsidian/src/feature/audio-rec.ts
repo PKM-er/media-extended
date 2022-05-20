@@ -1,4 +1,5 @@
-import { insertToCursor, secondToFragFormat } from "@misc";
+import { secondToFragFormat } from "@misc";
+import { insertToCursor } from "@misc/obsidian";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
 import { MarkdownView, TAbstractFile, TFile } from "obsidian";

@@ -1,4 +1,4 @@
-import { isDefaultLang } from "@feature/subtitle";
+import { isDefaultLang } from "@feature/subtitle/default-lang";
 import {
   Controls,
   handleTrackListChange,
@@ -91,8 +91,11 @@ const hookTracksUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   };
 };
 
-const toHTML = (frag: DocumentFragment) =>
-  createDiv({}, (div) => div.append(frag)).innerHTML;
+const toHTML = (frag: DocumentFragment) => {
+  const div = document.createElement("div");
+  div.append(frag);
+  return div.innerHTML;
+};
 const hookCueUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   const trackList = player.textTracks;
 

@@ -1,4 +1,5 @@
 import obPlugin from "@aidenlx/esbuild-plugin-obsidian";
+import { htmlPlugin } from "@craftamap/esbuild-plugin-html";
 import { build } from "esbuild";
 import { lessLoader } from "esbuild-plugin-less";
 import svgrPlugin from "esbuild-plugin-svgr";
@@ -95,6 +96,19 @@ const injectScriptConfig = {
   },
 };
 
+const windowTemplate = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>
+`;
+
 try {
   const main = build({
     entryPoints: ["src/mx-main.ts"],
@@ -147,6 +161,40 @@ try {
       "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
     },
     outfile: join("build", MAIN_PS),
+    // metafile: true,
+  });
+  const window = build({
+    entryPoints: ["src/index-win.tsx"],
+    metafile: true,
+    outdir: "build/window/",
+    bundle: true,
+    watch: !isProd,
+    platform: "browser",
+    external: ["electron"],
+    format: "cjs",
+    mainFields: ["browser", "module", "main"],
+    sourcemap: isProd ? false : "inline",
+    minify: isProd,
+    define: {
+      "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+    },
+    plugins: [
+      LessPathAlias,
+      lessLoader(),
+      inlineCodePlugin(injectScriptConfig),
+      svgrPlugin(),
+      htmlPlugin({
+        files: [
+          {
+            entryPoints: ["src/index-win.tsx"],
+            filename: "index.html",
+            scriptLoading: "blocking",
+            title: "Media Extended",
+            htmlTemplate: windowTemplate,
+          },
+        ],
+      }),
+    ],
     // metafile: true,
   });
   // await promises.writeFile(

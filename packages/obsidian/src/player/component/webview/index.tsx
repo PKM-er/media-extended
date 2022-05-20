@@ -1,7 +1,7 @@
 // import { MxPreloadScriptUA } from "@ipc/hack/const";
 import { useLatest } from "ahooks";
 import cls from "classnames";
-import RecievePort from "inline:./recieve-port";
+import RecievePort from "inline:../../../ipc/recieve-port";
 import React, { useRef, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";

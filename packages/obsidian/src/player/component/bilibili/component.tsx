@@ -36,7 +36,7 @@ const BilibiliPlayer = ({
         "failed to inject script for bilibili: webview not ready",
       );
     (async () => {
-      const injectCode = await plugin.BilibiliInjectCode;
+      const injectCode = await plugin?.BilibiliInjectCode;
       if (!injectCode) {
         throw new Error(
           "failed to inject script for bilibili: no script code available",

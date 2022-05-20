@@ -1,8 +1,8 @@
-import type { request } from "https";
-import { FileSystemAdapter, MarkdownView, Platform } from "obsidian";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import Url from "url-parse";
 
-import type MediaExtended from "./mx-main";
+dayjs.extend(duration);
 
 export type mutationParam = {
   callback: MutationCallback;
@@ -45,43 +45,10 @@ export const setRatioWidth = (
   el.style.setProperty("--max-ratio-width", `calc(${maxHeight} * ${ratio})`);
 };
 
-export const insertToCursor = async (str: string, view: MarkdownView) => {
-  const { editor } = view;
-  const cursor = editor.getCursor("to");
-  if (view.getMode() === "source") {
-    editor.replaceRange(str, cursor, cursor);
-    editor.setCursor(
-      editor.offsetToPos(editor.posToOffset(cursor) + str.length),
-    );
-  } else {
-    const pos = editor.posToOffset(cursor),
-      doc = editor.getValue();
-    return app.vault.modify(
-      view.file,
-      doc.slice(0, pos) + str + doc.slice(pos),
-    );
-  }
-};
-
-export const getBiliRedirectUrl = (id: string): Promise<string> =>
-  new Promise((resolve, reject) => {
-    if (Platform.isDesktopApp) {
-      const req = (<typeof request>require("https").request)(
-        { hostname: "b23.tv", port: 443, path: "/" + id, method: "GET" },
-        (res) =>
-          res.headers.location
-            ? resolve(res.headers.location)
-            : reject(new Error("No redirect location found")),
-      );
-      req.on("error", (err) => reject(err));
-      req.end();
-    } else
-      reject(new TypeError("Calling node https in non-electron environment"));
-  });
-
 export type Size = [width: number, height: number];
 const sizeSyntaxAllowedChar = /^[\d\sx]+$/,
   sizeDefPattern = /^\s*(\d+)\s*$/;
+
 export const parseSizeSyntax = (str: string | undefined): Size | null => {
   if (!str || !sizeSyntaxAllowedChar.test(str)) return null;
   let [x, y, ...rest] = str.split("x");
@@ -118,41 +85,6 @@ export const getLink = (url: string): string => {
   } else return url;
 };
 
-import { App, Constructor, View, WorkspaceLeaf } from "obsidian";
-
-declare module "obsidian" {
-  interface WorkspaceLeaf {
-    activeTime: number;
-  }
-}
-
-export const getMostRecentViewOfType = <T extends View>(
-  ctor: Constructor<T>,
-): T | null => {
-  const leaf = getMostRecentLeafOfView(ctor);
-  return leaf ? (leaf.view as T) : null;
-};
-
-export const getMostRecentLeafOfView = <T extends View>(
-  ctor: Constructor<T>,
-): WorkspaceLeaf | null => {
-  if (app.workspace.activeLeaf?.view instanceof ctor)
-    return app.workspace.activeLeaf;
-
-  let recent: WorkspaceLeaf | null = null;
-  app.workspace.iterateRootLeaves((leaf) => {
-    if (
-      leaf.view instanceof ctor &&
-      (!recent || recent.activeTime < leaf.activeTime)
-    ) {
-      recent = leaf;
-    }
-  });
-  return recent;
-};
-
-import { moment } from "obsidian";
-
 const fillZero = (time: number, fractionDigits = 2) => {
   let main: string, frac: string | undefined;
   if (Number.isInteger(time)) {
@@ -165,7 +97,10 @@ const fillZero = (time: number, fractionDigits = 2) => {
 };
 
 export const secondToFragFormat = (_seconds: number | string) => {
-  const duration = moment.duration(_seconds, "seconds");
+  _seconds = +_seconds;
+  if (Number.isNaN(_seconds)) return "NaN";
+
+  const duration = dayjs.duration(+_seconds, "seconds");
 
   const hours = duration.hours(),
     minutes = duration.minutes(),
@@ -184,7 +119,9 @@ export const secondToFragFormat = (_seconds: number | string) => {
 
 // no fill zero
 export const secondToDuration = (_seconds: number | string) => {
-  const duration = moment.duration(_seconds, "seconds");
+  _seconds = +_seconds;
+  if (Number.isNaN(_seconds)) return "NaN";
+  const duration = dayjs.duration(+_seconds, "seconds");
 
   const hours = duration.hours(),
     minutes = duration.minutes(),

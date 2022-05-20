@@ -1,11 +1,7 @@
 import "obsidian";
 
-import {
-  getMostRecentViewOfType,
-  insertToCursor,
-  secondToDuration,
-  secondToFragFormat,
-} from "@misc";
+import { secondToDuration, secondToFragFormat } from "@misc";
+import { getMostRecentViewOfType, insertToCursor } from "@misc/obsidian";
 import type MediaExtended from "@plugin";
 import { MediaMeta, Provider } from "@slice/meta/types";
 import { MarkdownView, Notice, TFile } from "obsidian";
