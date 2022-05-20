@@ -4,6 +4,7 @@ import "./style/caption-fix.less";
 
 import { ExtensionAccepted } from "@base/media-type";
 import { registerIPCMain } from "@ipc/hack";
+import { SetAuth } from "@ipc/hack/const";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MEDIA_VIEW_TYPE, MediaView, patchLeaf, ToggleMediaPin } from "@view";
 import assertNever from "assert-never";
@@ -19,7 +20,6 @@ import { registerGlobalControlCmd } from "./feature/keyboard-control";
 import registerOpenMediaLink from "./feature/open-media";
 import { registerSaveScreenshotHandler } from "./feature/save-screenshot";
 import { getMostRecentViewOfType } from "./misc";
-import { SetAuth } from "./player/ipc/hack/const";
 import registerEmbedHandlers from "./render/embed";
 import registerLinkHandlers from "./render/links";
 

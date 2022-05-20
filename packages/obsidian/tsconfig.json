@@ -17,7 +17,7 @@
       "@hook-utils": ["player/utils/hooks"],
       "@styles/*": ["player/component/styles/*"],
       "@const": ["./const.mjs"],
-      "@ipc/*": ["player/ipc/*"],
+      "@ipc/*": ["ipc/*"],
       "@hook-player": ["player/component/hook-player"],
       "@hook-player/*": ["player/component/hook-player/*"],
       "@feature/*": ["feature/*"]

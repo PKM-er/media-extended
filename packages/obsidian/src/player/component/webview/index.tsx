@@ -1,4 +1,4 @@
-import { MxPreloadScriptUA } from "@ipc/hack/const";
+// import { MxPreloadScriptUA } from "@ipc/hack/const";
 import { useLatest } from "ahooks";
 import cls from "classnames";
 import RecievePort from "inline:./recieve-port";
@@ -58,7 +58,7 @@ const applyAttrs = (
 ) => {
   // changable
   webview.src = src;
-  webview.useragent = MxPreloadScriptUA + (useragent ?? "");
+  useragent !== undefined && (webview.useragent = useragent); // MxPreloadScriptUA + (useragent ?? "");
   // cannot be changed once loaded
   nodeintegration !== undefined && (webview.nodeintegration = nodeintegration);
   plugins !== undefined && (webview.plugins = plugins);
