@@ -1,6 +1,6 @@
 import "@styles/button.less";
 
-import { useIcon } from "@hook-utils";
+// import { useIcon } from "@hook-utils";
 import type { ButtonUnstyledProps } from "@mui/base";
 import { useButton } from "@mui/base";
 import cls from "classnames";
@@ -8,7 +8,7 @@ import React from "react";
 import { useMergeRefs } from "use-callback-ref";
 
 export type ButtonProps = ButtonUnstyledProps & {
-  icon: string;
+  icon: React.ReactNode;
   id?: string;
 };
 
@@ -17,7 +17,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   function Button(props, ref) {
     const { children, icon, id, ...other } = props;
 
-    const setIconCallback = useIcon([icon]);
+    // const setIconCallback = useIcon([icon]);
 
     const { active, disabled, focusVisible, getRootProps } = useButton({
       ...props,
@@ -32,12 +32,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       { ref: buttonRef, ...rootProps } = getRootProps();
     return (
       <button
-        ref={useMergeRefs([buttonRef, setIconCallback])}
+        ref={ref}
         id={id}
         {...other}
         {...rootProps}
         className={cls("mx__button", classes)}
       >
+        {icon}
         {children}
       </button>
     );

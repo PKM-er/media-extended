@@ -7,8 +7,7 @@ import MenuItem from "@mui/base/MenuItemUnstyled";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { setActiveTrack, toggleTracks } from "@slice/interface";
 import React from "react";
-
-import Icon from "../basic/icon";
+import { FiCheck } from "react-icons/fi";
 
 export const TracksMenu = () => {
   const tracks = useAppSelector((state) => state.interface.textTracks.list);
@@ -30,7 +29,7 @@ export const TracksMenu = () => {
             }}
           >
             {enabled && active === i ? (
-              <Icon className="menu-item-icon" icon="checkmark" />
+              <FiCheck className="menu-item-icon" />
             ) : (
               <div className="menu-item-icon"></div>
             )}

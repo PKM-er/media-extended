@@ -1,6 +1,7 @@
 import obPlugin from "@aidenlx/esbuild-plugin-obsidian";
 import { build } from "esbuild";
 import { lessLoader } from "esbuild-plugin-less";
+import svgrPlugin from "esbuild-plugin-svgr";
 import open from "open";
 
 const banner = `/*
@@ -107,9 +108,6 @@ try {
       "electron",
       ...cmModules,
     ],
-    loader: {
-      ".svg": "text",
-    },
     format: "cjs",
     mainFields: ["browser", "module", "main"],
     sourcemap: isProd ? false : "inline",
@@ -123,6 +121,7 @@ try {
       lessLoader(),
       obPlugin(),
       inlineCodePlugin(injectScriptConfig),
+      svgrPlugin(),
     ],
     // metafile: true,
   });
@@ -152,7 +151,7 @@ try {
   });
   // await promises.writeFile(
   //   "meta.json",
-  //   JSON.stringify(result.metafile),
+  //   JSON.stringify((await main).metafile),
   //   "utf8",
   // );
   if (!isProd) open("obsidian://open?vault=mx-test");

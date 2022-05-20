@@ -6,6 +6,17 @@ import { toggleFullscreen } from "@slice/interface";
 import { selectScreenshotSupported } from "@store";
 import { useLatest } from "ahooks";
 import React, { useCallback } from "react";
+import {
+  FiCamera,
+  FiFlag,
+  FiMaximize2,
+  FiMinimize2,
+  FiPause,
+  FiPlay,
+  FiVolume1,
+  FiVolume2,
+  FiVolumeX,
+} from "react-icons/fi";
 
 import Button from "./basic/button";
 import Toggle from "./basic/toggle";
@@ -27,8 +38,8 @@ export const PlayButton = React.forwardRef<
         aria-label={paused ? "Play" : "Pause"}
         selected={paused}
         onClick={handleClick}
-        selectedIcon="play"
-        unselectedIcon="pause"
+        selectedIcon={<FiPlay className="play" />}
+        unselectedIcon={<FiPause className="pause" />}
       />
     );
   },
@@ -59,8 +70,8 @@ export const MuteButton = React.forwardRef<
         aria-label={muted ? "Unmute" : "Mute"}
         selected={muted || volume === 0}
         onClick={handleClick}
-        selectedIcon="volume-x"
-        unselectedIcon="volume-2"
+        selectedIcon={<FiVolumeX />}
+        unselectedIcon={<FiVolume2 />}
       />
     );
   },
@@ -86,8 +97,8 @@ export const FullscreenButton = React.forwardRef<
         aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         selected={fullscreen}
         onClick={handleClick}
-        selectedIcon="minimize-2"
-        unselectedIcon="maximize-2"
+        selectedIcon={<FiMinimize2 />}
+        unselectedIcon={<FiMaximize2 />}
       />
     );
   },
@@ -109,7 +120,7 @@ export const ScreenshotButton = React.forwardRef<
       <Button
         {...props}
         ref={ref}
-        icon="camera"
+        icon={<FiCamera />}
         onClick={handleClick}
         aria-label="Capture Screenshot"
       />
@@ -130,14 +141,13 @@ export const VolumeButton = React.forwardRef<
     );
 
     const label = `Volume ${offset > 0 ? "Up" : "Down"} by ${Math.abs(
-        offset,
-      )}%`,
-      icon = offset > 0 ? "volume-2" : "volume-1";
+      offset,
+    )}%`;
     return (
       <Button
         {...props}
         ref={ref}
-        icon={icon}
+        icon={offset > 0 ? <FiVolume2 /> : <FiVolume1 />}
         onClick={handleClick}
         aria-label={label}
       />
@@ -160,7 +170,7 @@ export const TimestampButton = React.forwardRef<
       <Button
         {...props}
         ref={ref}
-        icon="flag"
+        icon={<FiFlag />}
         onClick={handleClick}
         aria-label="Take timestamp"
       />

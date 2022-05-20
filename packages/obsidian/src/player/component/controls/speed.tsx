@@ -1,6 +1,7 @@
 import "@styles/speed.less";
 
 import React from "react";
+import { MdSpeed } from "react-icons/md";
 
 import Button from "./basic/button";
 import Popover from "./basic/popover";
@@ -18,7 +19,7 @@ const SpeedControl = () => {
         </>
       )}
     >
-      <Button icon="gauge" />
+      <Button icon={<MdSpeed />} />
     </Popover>
   );
 };

@@ -1,6 +1,6 @@
 import "@styles/button.less";
 
-import { useIcon } from "@hook-utils";
+// import { useIcon } from "@hook-utils";
 import type { ButtonUnstyledProps } from "@mui/base";
 import { useButton } from "@mui/base";
 import cls from "classnames";
@@ -9,8 +9,8 @@ import { useMergeRefs } from "use-callback-ref";
 
 export type ToggleButtonProps = ButtonUnstyledProps & {
   selected: boolean;
-  selectedIcon: string;
-  unselectedIcon: string;
+  selectedIcon: React.ReactNode;
+  unselectedIcon: React.ReactNode;
   id?: string;
 };
 
@@ -27,8 +27,6 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
       id,
       ...other
     } = props;
-
-    const setIconCallback = useIcon([selectedIcon, unselectedIcon]);
 
     const { active, disabled, focusVisible, getRootProps } = useButton({
       ...props,
@@ -54,9 +52,12 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
         selected,
       },
       { ref: buttonRef, ...rootProps } = getRootProps();
+    // seems that ref return from useButton is not working
+    // with @floating-ui/react-dom-interactions
+    // use ref from forwardRef instead
     return (
       <button
-        ref={useMergeRefs([buttonRef, setIconCallback])}
+        ref={ref}
         {...other}
         {...rootProps}
         id={id}
@@ -65,6 +66,8 @@ const ToggleButton = React.forwardRef<HTMLButtonElement, ToggleButtonProps>(
         onChange={onChange}
         aria-pressed={selected}
       >
+        {selectedIcon}
+        {unselectedIcon}
         {children}
       </button>
     );

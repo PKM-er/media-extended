@@ -2,19 +2,11 @@ import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { toggleDanmaku } from "@slice/bilibili";
 import { PlayerType } from "@slice/source/types";
-import { addIcon } from "obsidian";
 import React, { useCallback } from "react";
 
-import offIcon from "./off.svg";
-import onIcon from "./on.svg";
-
-const onIconId = "danmaku-on",
-  offIconId = "danmaku-off";
-
-addIcon(onIconId, onIcon);
-addIcon(offIconId, offIcon);
-
 import Toggle from "../basic/toggle";
+import DanmakuOff from "./off.svg";
+import DanmakuOn from "./on.svg";
 export const DanmakuButton = React.forwardRef<
   HTMLButtonElement,
   ButtonUnstyledProps
@@ -39,8 +31,8 @@ export const DanmakuButton = React.forwardRef<
         aria-label={danmakuOn ? "Disable Danmaku" : "Enable Danmaku"}
         selected={danmakuOn}
         onClick={handleClick}
-        selectedIcon={onIconId}
-        unselectedIcon={offIconId}
+        selectedIcon={<DanmakuOn />}
+        unselectedIcon={<DanmakuOff />}
       />
     ) : null;
   },

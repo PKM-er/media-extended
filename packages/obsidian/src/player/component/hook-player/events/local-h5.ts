@@ -6,7 +6,7 @@ import {
 } from "@slice/interface";
 import { updateCues } from "@slice/interface";
 import { PlayerStore, selectIsCustomControls } from "@store";
-import { debounce } from "obsidian";
+import { debounce } from "lodash-es";
 
 import _hookHTMLEvents from "./html5";
 
@@ -75,7 +75,7 @@ const hookTracksUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
     }
   };
 
-  handleTrackUpdate = debounce(handleTrackUpdate, 50, true);
+  handleTrackUpdate = debounce(handleTrackUpdate, 50);
   trackList.addEventListener("addtrack", handleTrackUpdate);
   trackList.addEventListener("removetrack", handleTrackUpdate);
   trackList.addEventListener("change", handleTrackUpdate);
