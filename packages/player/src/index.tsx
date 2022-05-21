@@ -34,8 +34,8 @@ export { PlayerContext };
 export { PlayerWarpper as Player };
 
 export { default as config } from "./config";
-export { sendScreenshot } from "./hook-player/screenshot";
-export { sendTimestamp } from "./hook-player/timestamp";
+export { moniterScreenshotMsg, sendScreenshot } from "./hook-player/screenshot";
+export { moniterTimestampMsg, sendTimestamp } from "./hook-player/timestamp";
 export { getPortWithTimeout } from "./ipc/get-port";
 export * from "./store";
 export * from "./thunk/fetch-meta";

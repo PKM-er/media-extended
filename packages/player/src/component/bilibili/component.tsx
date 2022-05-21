@@ -1,4 +1,6 @@
 import { PlayerContext } from "@context";
+import { moniterScreenshotMsg } from "@hook-player/screenshot";
+import { moniterTimestampMsg } from "@hook-player/timestamp";
 import { useAppSelector } from "@store-hooks";
 import { PlayerType } from "mx-store";
 import { observeStore, PlayerStore } from "mx-store";
@@ -6,8 +8,6 @@ import React, { useContext, useRef, useState } from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
-import { moniterScreenshotMsg } from "../../hook-player/screenshot";
-import { moniterTimestampMsg } from "../../hook-player/timestamp";
 import WebView from "../webview";
 
 const BilibiliPlayer = ({
