@@ -3,7 +3,7 @@ import { moniterScreenshotMsg } from "@hook-player/screenshot";
 import { moniterTimestampMsg } from "@hook-player/timestamp";
 import { useAppSelector } from "@store-hooks";
 import { PlayerType } from "mx-store";
-import { observeStore, PlayerStore } from "mx-store";
+import { PlayerStore, subscribe } from "mx-store";
 import React, { useContext, useRef, useState } from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
@@ -41,25 +41,30 @@ const BilibiliPlayer = ({
           "failed to inject script for bilibili: no script code available",
         );
       }
-      store.msgHandler.port = port;
-      const showView = () => {
-        window.clearTimeout(timeout);
-        setHideView(false);
-      };
-      const timeout = setTimeout(() => {
-        unsub();
-        console.log("web fullscreen timeout");
-        showView();
-      }, 10e3);
-      const unsub = observeStore(
-        store,
-        (state) => state.bilibili.webFscreen,
-        (fullscreen) => {
-          if (!fullscreen) return;
-          console.log("enter web fscreen");
+      store.webviewMsg.port = port;
+      if (store.getState().bilibili.webFscreen) {
+        const showView = () => {};
+        const tryReveal = () => {
+            if (store.getState().bilibili.webFscreen) {
+              console.log("enter web fscreen");
+              window.clearTimeout(timeout);
+              setTimeout(() => setHideView(false), 500);
+            } else {
+              window.clearTimeout(timeout);
+              setHideView(false);
+            }
+          },
+          options = { once: true } as any;
+        const timeout = setTimeout(() => {
+          webview.removeEventListener("did-stop-loading", tryReveal, options);
+          console.log("web fullscreen timeout");
           showView();
-        },
-      );
+        }, 10e3);
+        webview.addEventListener("did-stop-loading", tryReveal, options);
+      } else {
+        setHideView(false);
+      }
+
       moniterTimestampMsg(port, (...args) =>
         actions.gotTimestamp(store.dispatch, args),
       );
@@ -71,7 +76,7 @@ const BilibiliPlayer = ({
 
     return () => {
       console.log("port unmount");
-      store.msgHandler.port = null;
+      store.webviewMsg.port = null;
     };
   }, []);
 

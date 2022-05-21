@@ -13,9 +13,8 @@ export type PlayerStore = EnhancedStore<
   RootState,
   AnyAction,
   [ThunkMiddleware<RootState, AnyAction, undefined>]
-> & {
-  msgHandler: MessageHandler;
-};
+> &
+  Record<"webviewMsg" | "windowMsg", MessageHandler>;
 export type AppDispatch = PlayerStore["dispatch"];
 
 export type AppThunk<

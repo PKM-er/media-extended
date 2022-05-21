@@ -1,21 +1,30 @@
 import { Action, configureStore, Reducer } from "@reduxjs/toolkit";
-import { createStateSyncMiddleware, MessageHandler } from "mx-store";
+import {
+  createStateSyncMiddleware,
+  MessageHandler,
+  PlayerStore,
+} from "mx-store";
 
-export const createStoreWithMsgHandler = <S, A extends Action>(
+export const createStoreWithMsgHandler = (
   name: string,
-  reducer: Reducer<S, A>,
-) => {
+  reducer: Reducer,
+): PlayerStore => {
   const allowed = undefined;
-  const msgHandler = new MessageHandler(false, allowed);
+  const webviewMsg = new MessageHandler(false, allowed);
+  const windowMsg = new MessageHandler(false, allowed);
   const store = configureStore({
     reducer,
     devTools: process.env.NODE_ENV !== "production",
     enhancers: [],
     middleware: (getDefault) =>
-      getDefault().concat(createStateSyncMiddleware(msgHandler, allowed)),
-  });
-  msgHandler.store = store;
-  const storeWithMsg: typeof store & { msgHandler: typeof msgHandler } =
-    Object.assign(store, { msgHandler });
-  return storeWithMsg;
+      getDefault().concat(
+        createStateSyncMiddleware(webviewMsg, allowed),
+        createStateSyncMiddleware(windowMsg, allowed),
+      ),
+  }) as PlayerStore;
+  webviewMsg.store = store;
+  windowMsg.store = store;
+  store.webviewMsg = webviewMsg;
+  store.windowMsg = windowMsg;
+  return store;
 };

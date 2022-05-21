@@ -65,12 +65,12 @@ export default class ObMediaView
   // as it's implicitly called and handled by the WorkspaceLeaf
   scope;
   store;
-  set port(port: MessagePort | null) {
-    this.store.msgHandler.port = port;
-  }
-  get port() {
-    return this.store.msgHandler.port;
-  }
+  // set port(port: MessagePort | null) {
+  //   this.store.msgHandler.port = port;
+  // }
+  // get port() {
+  //   return this.store.msgHandler.port;
+  // }
 
   public setHash(...args: [hash: string, fromLink: boolean]) {
     this.store.dispatch(setHash(args));
@@ -329,7 +329,7 @@ export default class ObMediaView
           .setIcon("open-elsewhere-glyph")
           .setTitle("Open In Window")
           .onClick(() => {
-            this.window = createWindow(this.store, pluginDir);
+            this.window = createWindow(this.store, this.plugin);
             this.window.on("close", () => {
               if (!this._closed)
                 ReactDOM.render(

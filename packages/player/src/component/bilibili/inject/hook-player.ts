@@ -16,10 +16,10 @@ const hookStoreToHTMLPlayer = (
     hookHTMLEvents(player, store),
     hookHTMLState(media, store),
     respondTimestampReq(new HTMLMedia(player), store, (...args) =>
-      sendTimestamp(store.msgHandler.port!, ...args),
+      sendTimestamp(store.webviewMsg.port!, ...args),
     ),
     respondScreenshotReq(player, store, (...args) =>
-      sendScreenshot(store.msgHandler.port!, ...args),
+      sendScreenshot(store.webviewMsg.port!, ...args),
     ),
   ];
   return () => toUnload.forEach((unload) => unload());

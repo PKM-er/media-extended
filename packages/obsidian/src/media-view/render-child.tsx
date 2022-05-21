@@ -15,12 +15,12 @@ export default class PlayerRenderChild
 {
   scope;
   store;
-  set port(port: MessagePort | null) {
-    this.store.msgHandler.port = port;
-  }
-  get port() {
-    return this.store.msgHandler.port;
-  }
+  // set port(port: MessagePort | null) {
+  //   this.store.webviewMsg.port = port;
+  // }
+  // get port() {
+  //   return this.store.webviewMsg.port;
+  // }
 
   get app() {
     return this.plugin.app;

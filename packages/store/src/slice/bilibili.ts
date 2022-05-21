@@ -8,7 +8,7 @@ export interface BiliState {
 }
 
 const initialState: BiliState = {
-  webFscreen: false,
+  webFscreen: true,
   danmaku: false,
 };
 

@@ -9,7 +9,6 @@ export const MEDIA_VIEW_TYPE = "media-view-v2";
 export interface PlayerComponent extends Component {
   plugin: MediaExtended;
   store: PlayerStore;
-  port: MessagePort | null;
   scope: Scope;
 }
 

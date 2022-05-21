@@ -16,7 +16,7 @@ declare global {
 }
 
 window.MX_MESSAGE_PORT.then((port) => {
-  store.msgHandler.port = port;
+  store.webviewMsg.port = port;
   initStateFromHost(store);
 });
 

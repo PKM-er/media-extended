@@ -1,6 +1,7 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import {
   applyParentFullscreen,
+  enterWebFscreen,
   handleDanmakuChange,
   handleWebFscreenChange,
 } from "mx-store";
@@ -11,6 +12,7 @@ import {
   dispatch,
   SettingButtonCls,
   SettingMenuToggleCls,
+  store,
   subscribe,
   WebFscreenClass,
 } from "./common";
@@ -63,23 +65,20 @@ const hookWebFscreenState = () => {
   const ref = window.__PLAYER_REF__;
   // on web fscreen change
   observeClass(document.body, WebFscreenClass, (fullscreen) => {
-    setTimeout(() => {
-      dispatch(handleWebFscreenChange(fullscreen));
-    }, 200);
+    dispatch(handleWebFscreenChange(fullscreen));
   });
 
   // apply web fscreen state
   const button = ref.controls!.querySelector<HTMLInputElement>(
     `.${SettingButtonCls.webFullscreen}`,
   )!;
+
   subscribe(
     (state) => state.bilibili.webFscreen,
     (fullscreen) => {
-      let active = button.classList.contains("closed");
-      if (fullscreen !== active) {
-        button.click();
-      }
+      setWebFscreen(fullscreen, button);
     },
+    true, // by default, will enter web fullscreen
   );
 
   // applyParentFullscreen
@@ -89,9 +88,24 @@ const hookWebFscreenState = () => {
       fullscreen && dispatch(applyParentFullscreen());
     },
   );
+};
 
-  // enter web fullscreen on start
-  button.click();
+const setWebFscreen = (fullscreen: boolean, button: HTMLElement) => {
+  let tries = 0;
+  const interval = setInterval(() => {
+    if (tries > 10) {
+      console.log("failed to webfs");
+      window.clearInterval(interval);
+    }
+    if (fullscreen !== document.body.classList.contains(WebFscreenClass)) {
+      button.click();
+      console.log("webfs button clicked");
+    } else {
+      window.clearInterval(interval);
+      console.log("webfs applied, exiting");
+    }
+    tries++;
+  }, 200);
 };
 
 export const hookBilibiliControls = () => {
