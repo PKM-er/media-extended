@@ -1,10 +1,10 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { requestTimestamp, requsetScreenshot } from "@slice/action";
-import { setVolumeByOffest, toggleMute, togglePlay } from "@slice/controlled";
-import { toggleFullscreen } from "@slice/interface";
-import { selectScreenshotSupported } from "@store";
 import { useLatest } from "ahooks";
+import { requestTimestamp, requsetScreenshot } from "mx-store";
+import { setVolumeByOffest, toggleMute, togglePlay } from "mx-store";
+import { toggleFullscreen } from "mx-store";
+import { selectScreenshotSupported } from "mx-store";
 import React, { useCallback } from "react";
 import {
   FiCamera,

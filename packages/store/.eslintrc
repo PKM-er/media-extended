@@ -1,0 +1,3 @@
+{
+  "extends": ["@aidenlx/eslint-config", "plugin:workspaces/recommended"]
+}

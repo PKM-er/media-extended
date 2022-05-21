@@ -1,7 +1,7 @@
 import { getBuffered } from "@player/utils/get-buffered";
 import { HTMLMedia } from "@player/utils/media";
-import { updateBasicInfo } from "@slice/status";
-import { PlayerStore } from "@store";
+import { updateBasicInfo } from "mx-store";
+import { PlayerStore } from "mx-store";
 
 import { updateRatio } from "../common";
 import onStart from "./general";

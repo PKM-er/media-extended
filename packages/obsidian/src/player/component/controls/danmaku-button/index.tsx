@@ -1,7 +1,7 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { toggleDanmaku } from "@slice/bilibili";
-import { PlayerType } from "@slice/source/types";
+import { toggleDanmaku } from "mx-store";
+import { PlayerType } from "mx-store";
 import React, { useCallback } from "react";
 
 import Toggle from "../basic/toggle";

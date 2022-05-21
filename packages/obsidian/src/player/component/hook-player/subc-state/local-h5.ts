@@ -3,8 +3,8 @@ import {
   Controls,
   lockTracksUpdateEvent,
   unlockTracksUpdateEvent,
-} from "@slice/interface";
-import { PlayerStore, subscribe } from "@store";
+} from "mx-store";
+import { PlayerStore, subscribe } from "mx-store";
 
 import _hookHTMLState from "./html5";
 

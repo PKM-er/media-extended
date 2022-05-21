@@ -3,8 +3,8 @@ import "./style/index-win.less";
 import { getWebViewPort } from "@ipc/comms";
 import { Player } from "@player";
 import { createStore } from "@player/store/window-store";
-import { getSubscribeFunc } from "@store";
-import { initStateFromHost } from "@store/redux-sync";
+import { getSubscribeFunc } from "mx-store";
+import { initStateFromHost } from "mx-store";
 import React from "react";
 import ReactDOM from "react-dom";
 

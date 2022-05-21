@@ -5,14 +5,14 @@ import {
   handlePlaying,
   handleRateChange,
   handleVolumeChange,
-} from "@slice/controlled";
+} from "mx-store";
 import {
   handleDurationChange,
   handleEnded,
   handleTimeUpdate,
   handleWaiting,
-} from "@slice/status";
-import { selectSpeed, selectVolumeMute } from "@store";
+} from "mx-store";
+import { selectSpeed, selectVolumeMute } from "mx-store";
 import { useCallback } from "react";
 
 import { ApplyHookType } from "./utils";

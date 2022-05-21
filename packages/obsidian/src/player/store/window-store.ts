@@ -1,5 +1,5 @@
-import createReducer from "@store";
-import { withReduxStateSync } from "@store/redux-sync";
+import createReducer from "mx-store";
+import { withReduxStateSync } from "mx-store";
 
 import initAPIReducers from "../thunk/youtube";
 import { createStoreWithMsgHandler } from "./create-store";

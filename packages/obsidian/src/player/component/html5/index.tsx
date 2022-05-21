@@ -6,7 +6,8 @@ import { respondTimestampReq } from "@hook-player/timestamp";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
 import { gotScreenshot, gotTimestamp } from "@player/thunk/action";
 import { HTMLMedia } from "@player/utils/media";
-import { disableCORS } from "@slice/source";
+import { useUnmount } from "ahooks";
+import { disableCORS } from "mx-store";
 import {
   PlayerStore,
   selectAllowCORS,
@@ -17,13 +18,12 @@ import {
   selectLoop,
   selectTracks,
   subscribe,
-} from "@store";
-import { useUnmount } from "ahooks";
+} from "mx-store";
+import { PlayerType } from "mx-store";
 import React from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
-import { PlayerType } from "../../../store/slice/source/types";
 import webmFix from "./webm-fix";
 
 const hookStoreToHTMLPlayer = (

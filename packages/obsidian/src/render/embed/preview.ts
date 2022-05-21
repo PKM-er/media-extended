@@ -1,7 +1,7 @@
-import { vaildateMediaURL } from "@base/url-parse";
 import { getInfoFromWarpper, setMediaUrl } from "@player/thunk/set-media";
 import type MediaExtended from "@plugin";
 import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
+import { vaildateMediaURL } from "mx-base";
 import { MarkdownPostProcessor, MarkdownPostProcessorContext } from "obsidian";
 
 import { ElementWithRenderChild } from "./base";

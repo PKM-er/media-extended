@@ -1,11 +1,11 @@
 import { cancelScreenshot } from "@player/thunk/action";
+import { captureScreenshot } from "mx-lib";
 import {
   PlayerStore,
   selectIsIOS,
   selectScreenshotRequested,
   subscribe,
-} from "@store";
-import { captureScreenshot } from "mx-lib";
+} from "mx-store";
 
 type onScreenshot = (
   buffer: ArrayBuffer,

@@ -1,5 +1,5 @@
 import { Action, configureStore, Reducer } from "@reduxjs/toolkit";
-import { createStateSyncMiddleware, MessageHandler } from "@store/redux-sync";
+import { createStateSyncMiddleware, MessageHandler } from "mx-store";
 
 export const createStoreWithMsgHandler = <S, A extends Action>(
   name: string,

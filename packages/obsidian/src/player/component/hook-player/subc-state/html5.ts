@@ -1,6 +1,6 @@
 import { HTMLMedia } from "@player/utils/media";
-import { PlayerType } from "@slice/source/types";
-import { getSubscribeFunc, PlayerStore } from "@store";
+import { PlayerType } from "mx-store";
+import { getSubscribeFunc, PlayerStore } from "mx-store";
 
 import { selectShouldLoadResource } from "../common";
 import hookState, { getApplyPauseHandler } from "./general";

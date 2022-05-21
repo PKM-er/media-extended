@@ -2,9 +2,9 @@
 import "@styles/aspect-ratio.less";
 
 import { useAppSelector } from "@player/hooks";
-import { PlayerType } from "@slice/source/types";
-import { selectPlayerType } from "@store";
 import cls, { Argument } from "classnames";
+import { PlayerType } from "mx-store";
+import { selectPlayerType } from "mx-store";
 import React from "react";
 
 const CUSTOM_PROPERTY_NAME = "--aspect-ratio";

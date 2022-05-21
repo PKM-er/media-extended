@@ -1,7 +1,7 @@
 import { gotTimestamp } from "@player/thunk/action";
-import type { Media } from "@player/utils/media";
 import type { SubscribeHookType } from "@player/utils/subscribe";
-import { selectTimestampRequested } from "@store";
+import type { Media } from "mx-base";
+import { selectTimestampRequested } from "mx-store";
 
 const useGetTimestamp = <R, M extends Media>(
   ref: React.MutableRefObject<R | null>,

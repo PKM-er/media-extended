@@ -2,7 +2,7 @@ import "@styles/progress-label.less";
 
 import { secondToDuration } from "@misc";
 import { useAppSelector } from "@player/hooks";
-import { selectCurrentTime, selectDuration } from "@store";
+import { selectCurrentTime, selectDuration } from "mx-store";
 import React from "react";
 
 const ProgressLabel = () => {

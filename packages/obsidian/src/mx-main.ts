@@ -2,7 +2,6 @@ import "./style/main.less";
 import "./style/ytb.less";
 import "./style/caption-fix.less";
 
-import { ExtensionAccepted } from "@base/media-type";
 import { registerIPCMain } from "@ipc/hack";
 import { SetAuth } from "@ipc/hack/const";
 import { getMostRecentViewOfType } from "@misc/obsidian";
@@ -11,6 +10,7 @@ import { MEDIA_VIEW_TYPE, MediaView, patchLeaf, ToggleMediaPin } from "@view";
 import assertNever from "assert-never";
 import Color from "color";
 import { merge } from "lodash-es";
+import { ExtensionAccepted } from "mx-base";
 import { FileSystemAdapter, Platform, Plugin } from "obsidian";
 import { join } from "path";
 

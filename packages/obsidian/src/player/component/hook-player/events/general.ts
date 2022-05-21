@@ -1,14 +1,11 @@
-import {
-  onPlay as restrictTimeOnPlay,
-  onTimeUpdate as restrictTimeOnTimeUpdate,
-} from "@base/fragment";
-import { Media } from "@player/utils/media";
+import { Media } from "mx-base";
+import { Frag } from "mx-base";
 import {
   handlePause,
   handlePlaying,
   handleRateChange,
   handleVolumeChange,
-} from "@slice/controlled";
+} from "mx-store";
 import {
   handleDurationChange,
   handleEnded,
@@ -16,8 +13,16 @@ import {
   handleSeeking,
   handleTimeUpdate,
   handleWaiting,
-} from "@slice/status";
-import { getSubscribeFunc, PlayerStore, selectFrag, selectLoop } from "@store";
+} from "mx-store";
+import {
+  getSubscribeFunc,
+  PlayerStore,
+  selectFrag,
+  selectLoop,
+} from "mx-store";
+
+const { onPlay: restrictTimeOnPlay, onTimeUpdate: restrictTimeOnTimeUpdate } =
+  Frag;
 
 const generalEventHandlers = <M extends Media>(store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store),

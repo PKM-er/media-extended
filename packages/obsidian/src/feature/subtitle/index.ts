@@ -1,5 +1,5 @@
-import type { Track } from "@slice/source/types";
 import iso from "iso-639-1";
+import type { Track } from "mx-store";
 import { TFile } from "obsidian";
 import toVtt from "srt-webvtt";
 

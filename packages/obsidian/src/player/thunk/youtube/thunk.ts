@@ -1,6 +1,6 @@
 import type { PlayerRef } from "@player/component/youtube/utils";
-import { destroyPlayer as _destroy } from "@slice/youtube";
-import type { AppThunk } from "@store";
+import type { AppThunk } from "mx-store";
+import { destroyPlayer as _destroy } from "mx-store";
 
 import initAPI from "./init-api";
 

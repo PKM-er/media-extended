@@ -2,7 +2,7 @@ import { setPlayerKeymaps } from "@feature/keyboard-control";
 import { Player } from "@player";
 import { createStore } from "@player/store/ob-store";
 import MediaExtended from "@plugin";
-import { AppThunk } from "@store";
+import { AppThunk } from "mx-store";
 import { MarkdownRenderChild, Scope } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";

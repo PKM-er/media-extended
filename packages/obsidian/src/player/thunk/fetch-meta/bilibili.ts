@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import metaSlice from "@slice/meta";
-import { MediaMeta, Provider } from "@slice/meta/types";
-import { RootState } from "@store";
+import { Provider } from "mx-base";
+import metaSlice from "mx-store";
+import { RootState } from "mx-store";
 import { requestUrl } from "obsidian";
 
 import { logNotMatch, ReducerBuilder } from "./common";

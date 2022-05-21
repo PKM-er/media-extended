@@ -1,10 +1,11 @@
 import "obsidian";
 
-import { getBasename, getFilename } from "@base/url-parse/misc";
 import { getMostRecentViewOfType, insertToCursor } from "@misc/obsidian";
 import type MediaExtended from "@plugin";
-import { MediaMeta, Provider } from "@slice/meta/types";
 import filenamify from "filenamify/browser";
+import { getBasename, getFilename } from "mx-base";
+import { Provider } from "mx-base";
+import { MediaMeta } from "mx-store";
 import { MarkdownView, moment, Notice } from "obsidian";
 import URLParse from "url-parse";
 

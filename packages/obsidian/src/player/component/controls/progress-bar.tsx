@@ -3,14 +3,14 @@ import "@styles/progress-bar.less";
 import { secondToDuration } from "@misc";
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { progressBarSeek, progressBarSeekEnd } from "@slice/user-seek";
+import { isTimestamp } from "mx-lib";
+import { progressBarSeek, progressBarSeekEnd } from "mx-store";
 import {
   selectBuffered,
   selectCurrentTime,
   selectDuration,
   selectFrag,
-} from "@store";
-import { isTimestamp } from "mx-lib";
+} from "mx-store";
 import React from "react";
 
 const valuetext = (seconds: number) => secondToDuration(seconds);

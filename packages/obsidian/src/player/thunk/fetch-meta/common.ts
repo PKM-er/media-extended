@@ -1,6 +1,6 @@
 import type { ActionReducerMapBuilder } from "@reduxjs/toolkit";
-import { MediaMeta } from "@slice/meta/types";
-import { RootState } from "@store";
+import { MediaMeta } from "mx-store";
+import { RootState } from "mx-store";
 
 export const logNotMatch = (type: string, state: MediaMeta) =>
   console.error(

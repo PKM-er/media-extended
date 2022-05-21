@@ -1,8 +1,8 @@
 import "@styles/fullscreen.less";
 
 import { useAppSelector } from "@player/hooks";
-import { selectFscreen } from "@store";
 import fscreen from "fscreen";
+import { selectFscreen } from "mx-store";
 import { useRefEffect } from "react-use-ref-effect";
 
 const isFullscreenEnabled = fscreen.fullscreenEnabled;

@@ -1,5 +1,5 @@
-import { vaildateMediaURL } from "@base/url-parse";
 import type MediaExtended from "@plugin";
+import { vaildateMediaURL } from "mx-base";
 import { Menu } from "obsidian";
 
 import { registerCommand } from "./command";

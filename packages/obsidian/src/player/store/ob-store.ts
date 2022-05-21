@@ -1,4 +1,4 @@
-import createReducer, { setPlatform } from "@store";
+import createReducer, { setPlatform } from "mx-store";
 import { Platform } from "obsidian";
 
 import fetchMetaReducers from "../thunk/fetch-meta";

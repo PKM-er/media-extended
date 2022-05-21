@@ -1,6 +1,5 @@
 import { useMemoizedFn } from "ahooks";
-
-import { Media } from "./media";
+import { Media } from "mx-base";
 
 export const noop = () => {};
 

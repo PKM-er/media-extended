@@ -1,5 +1,5 @@
 import { ActionReducerMapBuilder } from "@reduxjs/toolkit";
-import { RootState } from "@store";
+import { RootState } from "mx-store";
 
 export * from "./thunk";
 

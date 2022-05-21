@@ -1,7 +1,7 @@
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setPlaybackRate } from "@slice/controlled";
-import { selectSpeed } from "@store";
+import { setPlaybackRate } from "mx-store";
+import { selectSpeed } from "mx-store";
 import React, { useCallback } from "react";
 
 const valuetext = (speed: number) => `${speed}×`,

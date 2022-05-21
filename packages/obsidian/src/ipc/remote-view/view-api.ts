@@ -1,4 +1,4 @@
-import type { PlayerStore } from "@store";
+import type { PlayerStore } from "mx-store";
 
 export interface IWebViewAPI {
   store: PlayerStore;

@@ -3,15 +3,15 @@
 import type { PlayerRef } from "@player/component/youtube/utils";
 import config from "@player/config";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Controls } from "@slice/interface";
-import { handlePlayerReady } from "@slice/youtube";
+import load from "load-script";
+import { around } from "monkey-around";
+import { Controls } from "mx-store";
+import { handlePlayerReady } from "mx-store";
 import {
   RootState,
   selectIsCustomControls,
   selectIsNativeControls,
-} from "@store";
-import load from "load-script";
-import { around } from "monkey-around";
+} from "mx-store";
 
 declare global {
   interface Window {

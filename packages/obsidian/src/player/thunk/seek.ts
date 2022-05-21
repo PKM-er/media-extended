@@ -2,8 +2,8 @@ import {
   manualSeekDone,
   requestManualOffsetSeek,
   requestManualSeek,
-} from "@slice/user-seek";
-import { AppThunk } from "@store";
+} from "mx-store";
+import { AppThunk } from "mx-store";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

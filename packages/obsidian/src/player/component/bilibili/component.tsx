@@ -1,8 +1,8 @@
 import { PlayerContext } from "@player";
 import { useAppSelector } from "@player/hooks";
 import { gotScreenshot, gotTimestamp } from "@player/thunk/action";
-import { PlayerType } from "@slice/source/types";
-import { observeStore, PlayerStore } from "@store";
+import { PlayerType } from "mx-store";
+import { observeStore, PlayerStore } from "mx-store";
 import React, { useContext, useRef, useState } from "react";
 import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";

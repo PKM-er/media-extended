@@ -4,7 +4,7 @@ import { respondScreenshotReq, sendScreenshot } from "@hook-player/screenshot";
 import { hookHTMLState } from "@hook-player/subc-state/webview";
 import { respondTimestampReq, sendTimestamp } from "@hook-player/timestamp";
 import { HTMLMedia } from "@player/utils/media";
-import { PlayerStore } from "@store";
+import { PlayerStore } from "mx-store";
 
 const hookStoreToHTMLPlayer = (
   player: HTMLMediaElement,

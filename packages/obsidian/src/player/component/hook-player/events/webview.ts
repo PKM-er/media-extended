@@ -1,4 +1,4 @@
-import type { PlayerStore } from "@store";
+import type { PlayerStore } from "mx-store";
 
 import _hookHTMLEvents from "./html5";
 

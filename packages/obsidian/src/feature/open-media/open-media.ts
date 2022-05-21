@@ -1,6 +1,6 @@
-import { getFragFromHash } from "@base/hash-tool";
-import { vaildateMediaURL } from "@base/url-parse";
 import { MEDIA_VIEW_TYPE, MediaFileState, MediaUrlState } from "@view";
+import { getFragFromHash } from "mx-base";
+import { vaildateMediaURL } from "mx-base";
 import { Keymap, TFile, ViewState, WorkspaceLeaf } from "obsidian";
 
 import {

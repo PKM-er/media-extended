@@ -1,5 +1,5 @@
 import type MediaExtended from "@plugin";
-import { PlayerStore } from "@store";
+import { PlayerStore } from "mx-store";
 import React from "react";
 import { Provider } from "react-redux";
 
@@ -35,4 +35,4 @@ interface IPlayerContext {
 export const PlayerContext = React.createContext<IPlayerContext>({} as any);
 
 export { PlayerWarpper as Player };
-export type { PlayerStore } from "@store";
+export type { PlayerStore } from "mx-store";

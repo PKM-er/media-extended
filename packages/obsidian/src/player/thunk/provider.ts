@@ -1,16 +1,16 @@
-import { getMediaType } from "@base/media-type";
-import parseURL from "@base/url-parse";
 import getTracks from "@feature/subtitle";
 import { stripHash } from "@misc";
-import { Provider, SerializableTFile } from "@slice/meta/types";
+import assertNever from "assert-never";
+import { getMediaType, parseURL } from "mx-base";
+import { Provider } from "mx-base";
+import { SerializableTFile } from "mx-store";
 import {
   renameObsidianMedia as _renameOb,
   setDirectLink,
   setHostMedia,
   setObsidianMedia,
-} from "@slice/source";
-import { AppThunk } from "@store";
-import assertNever from "assert-never";
+} from "mx-store";
+import { AppThunk } from "mx-store";
 import type { TFile } from "obsidian";
 
 import { fetchBiliMeta, fetchYoutubeMeta } from "./fetch-meta";

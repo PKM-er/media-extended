@@ -1,9 +1,9 @@
 import { gotTimestamp } from "@player/thunk/action";
 import { YoutubeMedia } from "@player/utils/media";
-import { handleVolumeChange } from "@slice/controlled";
-import { handleSeeking, handleTimeUpdate } from "@slice/status";
-import { setVolumeByOffestDone } from "@slice/youtube";
-import { getSubscribeFunc, PlayerStore, selectDuration } from "@store";
+import { handleVolumeChange } from "mx-store";
+import { handleSeeking, handleTimeUpdate } from "mx-store";
+import { setVolumeByOffestDone } from "mx-store";
+import { getSubscribeFunc, PlayerStore, selectDuration } from "mx-store";
 
 import { updateBufferYtb } from "../common";
 import { respondTimestampReq } from "../timestamp";

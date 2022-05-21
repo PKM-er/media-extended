@@ -1,7 +1,7 @@
-import type { Media } from "@player/utils/media";
 import type { SubscribeHookType } from "@player/utils/subscribe";
-import { AppDispatch } from "@store";
 import { useLatest } from "ahooks";
+import type { Media } from "mx-base";
+import { AppDispatch } from "mx-store";
 import { MutableRefObject } from "react";
 
 export const useApplyUserSeek = <R, M extends Media>(

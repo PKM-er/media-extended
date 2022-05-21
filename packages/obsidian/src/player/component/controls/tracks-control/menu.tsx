@@ -5,7 +5,7 @@ import {
 } from "@mui/base";
 import MenuItem from "@mui/base/MenuItemUnstyled";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setActiveTrack, toggleTracks } from "@slice/interface";
+import { setActiveTrack, toggleTracks } from "mx-store";
 import React from "react";
 import { FiCheck } from "react-icons/fi";
 

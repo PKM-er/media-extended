@@ -1,5 +1,5 @@
 import { YoutubeMedia } from "@player/utils/media";
-import { PlayerStore } from "@store";
+import { PlayerStore } from "mx-store";
 
 import onStart from "./general";
 

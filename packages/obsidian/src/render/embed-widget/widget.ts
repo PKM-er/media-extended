@@ -1,11 +1,11 @@
-import { vaildateMediaURL } from "@base/url-parse";
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { parseSizeSyntax } from "@misc";
 import { setMediaUrl, setObsidianMedia } from "@player/thunk/set-media";
 import type MediaExtended from "@plugin";
-import type { AppThunk } from "@store";
 import { PlayerRenderChild } from "@view";
+import { vaildateMediaURL } from "mx-base";
+import type { AppThunk } from "mx-store";
 import { Platform, setIcon, TFile } from "obsidian";
 
 type ElWithInfo<Media extends Record<string, any> = {}> = HTMLElement & {

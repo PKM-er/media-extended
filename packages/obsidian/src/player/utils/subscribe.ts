@@ -1,10 +1,9 @@
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { AppDispatch, RootState } from "@store";
 import { useLatest } from "ahooks";
 import equal from "fast-deep-equal/es6";
+import { Media } from "mx-base";
+import { AppDispatch, RootState } from "mx-store";
 import { MutableRefObject, useEffect, useRef } from "react";
-
-import { Media } from "./media";
 
 export type SubscribeHookType<R, M extends Media> = <T>(
   selector: (state: RootState) => T,

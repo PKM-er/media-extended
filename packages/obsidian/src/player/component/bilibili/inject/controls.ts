@@ -3,9 +3,9 @@ import {
   applyParentFullscreen,
   handleDanmakuChange,
   handleWebFscreenChange,
-} from "@slice/bilibili";
-import { handleAutoplayChange, handleLoopChange } from "@slice/controlled";
-import { RootState } from "@store";
+} from "mx-store";
+import { handleAutoplayChange, handleLoopChange } from "mx-store";
+import { RootState } from "mx-store";
 
 import {
   dispatch,

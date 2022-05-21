@@ -1,5 +1,5 @@
-import { Media } from "@player/utils/media";
 import { SubscribeHookType } from "@player/utils/subscribe";
+import { Media } from "mx-base";
 import { MutableRefObject } from "react";
 
 export type ApplyHookType = <R, M extends Media>(

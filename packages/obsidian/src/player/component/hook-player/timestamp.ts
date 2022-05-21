@@ -1,5 +1,5 @@
-import { Media } from "@player/utils/media";
-import { PlayerStore, selectTimestampRequested, subscribe } from "@store";
+import { Media } from "mx-base";
+import { PlayerStore, selectTimestampRequested, subscribe } from "mx-store";
 
 type onTimestamp = (timestamp: number, duration: number) => void;
 

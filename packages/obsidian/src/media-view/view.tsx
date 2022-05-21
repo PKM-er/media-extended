@@ -1,4 +1,3 @@
-import { ExtensionAccepted } from "@base/media-type";
 import { setPlayerKeymaps } from "@feature/keyboard-control";
 import { Player } from "@player";
 import { createStore } from "@player/store/ob-store";
@@ -9,15 +8,18 @@ import {
 } from "@player/thunk/provider";
 import { seekTo } from "@player/thunk/seek";
 import type MediaExtended from "@plugin";
-import { setFragment, setHash } from "@slice/controlled";
-import { toggleFilter } from "@slice/interface";
-import { revertDuration } from "@slice/status";
+import { ExtensionAccepted } from "mx-base";
+import { Provider } from "mx-base";
+import { setFragment, setHash } from "mx-store";
+import { toggleFilter } from "mx-store";
+import { revertDuration } from "mx-store";
 import {
   selectCurrentTime,
   selectDuration,
   selectFrag,
   subscribe,
-} from "@store";
+} from "mx-store";
+import { isHTMLMediaSource, PlayerType } from "mx-store";
 import {
   Command,
   EditableFileView,
@@ -33,8 +35,6 @@ import {
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { Provider } from "../store/slice/meta/types";
-import { isHTMLMediaSource, PlayerType } from "../store/slice/source/types";
 import {
   MEDIA_VIEW_TYPE,
   MediaState,

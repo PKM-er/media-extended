@@ -1,6 +1,7 @@
 import { EventHandlers } from "@player/component/youtube/event";
 import { YoutubeMedia } from "@player/utils/media";
-import { handlePause, handlePlaying } from "@slice/controlled";
+import assertNever from "assert-never";
+import { handlePause, handlePlaying } from "mx-store";
 import {
   handleDurationChange,
   handleEnded,
@@ -8,10 +9,9 @@ import {
   handleSeeked,
   handleTimeUpdate,
   handleWaiting,
-} from "@slice/status";
-import { handleStateChange } from "@slice/youtube";
-import { PlayerStore, selectDuration, selectIsCustomControls } from "@store";
-import assertNever from "assert-never";
+} from "mx-store";
+import { handleStateChange } from "mx-store";
+import { PlayerStore, selectDuration, selectIsCustomControls } from "mx-store";
 
 import { updateBufferYtb } from "../common";
 import generalEventHandlers from "./general";

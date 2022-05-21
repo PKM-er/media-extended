@@ -1,9 +1,9 @@
 import config from "@player/config";
-import { ActionReducerMapBuilder, createAsyncThunk } from "@reduxjs/toolkit";
-import { setRatio } from "@slice/interface";
-import metaSlice from "@slice/meta";
-import { MediaMeta, Provider } from "@slice/meta/types";
-import { RootState } from "@store";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { Provider } from "mx-base";
+import { setRatio } from "mx-store";
+import metaSlice from "mx-store";
+import { RootState } from "mx-store";
 
 import { logNotMatch, ReducerBuilder } from "./common";
 

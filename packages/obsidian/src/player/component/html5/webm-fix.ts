@@ -1,7 +1,7 @@
-import { switchToAudio, unknownTypeDetermined } from "@slice/source";
-import { PlayerType } from "@slice/source/types";
-import { LARGE_CURRENT_TIME } from "@slice/status";
-import { PlayerStore, selectPlayerType } from "@store";
+import { switchToAudio, unknownTypeDetermined } from "mx-store";
+import { PlayerType } from "mx-store";
+import { LARGE_CURRENT_TIME } from "mx-store";
+import { PlayerStore, selectPlayerType } from "mx-store";
 
 const WebmFix = (player: HTMLMediaElement, store: PlayerStore) => {
   const handler = () => {

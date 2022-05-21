@@ -1,7 +1,7 @@
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { setVolumeUnmute } from "@slice/controlled";
-import { selectVolumeMute } from "@store";
+import { setVolumeUnmute } from "mx-store";
+import { selectVolumeMute } from "mx-store";
 import React, { useCallback } from "react";
 
 const VolumeSilder = () => {

@@ -4,13 +4,9 @@
     "baseUrl": "src",
     "paths": {
       "@player/*": ["player/*"],
-      "@slice/*": ["store/slice/*"],
-      "@store": ["store"],
-      "@store/*": ["store/*"],
       "@player": ["player"],
       "@render/*": ["render/*"],
       "@view": ["media-view"],
-      "@base/*": ["base/*"],
       "@plugin": ["mx-main"],
       "@settings": ["settings"],
       "@misc": ["misc"],

@@ -1,12 +1,8 @@
 import { isDefaultLang } from "@feature/subtitle/default-lang";
-import {
-  Controls,
-  handleTrackListChange,
-  InterfaceState,
-} from "@slice/interface";
-import { updateCues } from "@slice/interface";
-import { PlayerStore, selectIsCustomControls } from "@store";
 import { debounce } from "lodash-es";
+import { Controls, handleTrackListChange, InterfaceState } from "mx-store";
+import { updateCues } from "mx-store";
+import { PlayerStore, selectIsCustomControls } from "mx-store";
 
 import _hookHTMLEvents from "./html5";
 

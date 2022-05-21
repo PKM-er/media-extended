@@ -3,12 +3,12 @@ import {
   gotTimestamp as _gotTimestamp,
   requestTimestamp as _reqTimestamp,
   requsetScreenshot as _reqScreenshot,
-} from "@slice/action";
+} from "mx-store";
 import {
   AppThunk,
   selectScreenshotRequested,
   selectTimestampRequested,
-} from "@store";
+} from "mx-store";
 
 const reqTimeout = 2e3;
 

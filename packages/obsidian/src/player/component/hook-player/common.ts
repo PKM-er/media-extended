@@ -1,7 +1,7 @@
 import { getBuffered } from "@player/utils/get-buffered";
-import { setRatio } from "@slice/interface";
-import { handleProgress } from "@slice/status";
-import { AppDispatch, RootState, selectIsNativeControls } from "@store";
+import { setRatio } from "mx-store";
+import { handleProgress } from "mx-store";
+import { AppDispatch, RootState, selectIsNativeControls } from "mx-store";
 
 export const updateRatio = (
   player: HTMLMediaElement,

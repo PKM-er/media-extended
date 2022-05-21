@@ -1,5 +1,5 @@
-import { Media } from "@player/utils/media";
-import { PlayerStore, selectCurrentTime } from "@store";
+import { Media } from "mx-base";
+import { PlayerStore, selectCurrentTime } from "mx-store";
 
 const onStart = (player: Media, store: PlayerStore) => {
   const currentTime = selectCurrentTime(store.getState());

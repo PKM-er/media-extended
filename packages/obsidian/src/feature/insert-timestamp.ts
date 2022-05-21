@@ -3,7 +3,8 @@ import "obsidian";
 import { secondToDuration, secondToFragFormat } from "@misc";
 import { getMostRecentViewOfType, insertToCursor } from "@misc/obsidian";
 import type MediaExtended from "@plugin";
-import { MediaMeta, Provider } from "@slice/meta/types";
+import { Provider } from "mx-base";
+import { MediaMeta } from "mx-store";
 import { MarkdownView, Notice, TFile } from "obsidian";
 
 export const registerInsetTimestampHandler = (plugin: MediaExtended) => {

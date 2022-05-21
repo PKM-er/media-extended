@@ -1,12 +1,9 @@
-import {
-  onFragUpdate,
-  onPlay as _onplay,
-  onTimeUpdate as _ontu,
-} from "@base/fragment";
+import { Frag } from "mx-base";
+const { onFragUpdate, onPlay: _onplay, onTimeUpdate: _ontu } = Frag;
 import { useAppSelector } from "@player/hooks";
 import { CoreEventHandler } from "@player/utils";
-import { selectFrag, selectLoop } from "@store";
 import { useMemoizedFn } from "ahooks";
+import { selectFrag, selectLoop } from "mx-store";
 
 import { ApplyHookType } from "./utils";
 

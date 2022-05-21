@@ -1,5 +1,5 @@
-import { setHash } from "@slice/controlled";
-import { AppThunk } from "@store";
+import { setHash } from "mx-store";
+import { AppThunk } from "mx-store";
 import { parseLinktext, TFile } from "obsidian";
 
 import { setMediaUrlSrc, setObsidianMediaSrc } from "./provider";

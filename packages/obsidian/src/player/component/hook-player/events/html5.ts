@@ -1,7 +1,7 @@
 import { CoreEventHandler } from "@player/utils";
 import { HTMLMedia } from "@player/utils/media";
-import { handleError } from "@slice/status";
-import { AppDispatch, PlayerStore } from "@store";
+import { handleError } from "mx-store";
+import { AppDispatch, PlayerStore } from "mx-store";
 
 import { updateBufferH5, updateRatio } from "../common";
 import generalEventHandlers from "./general";

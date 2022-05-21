@@ -1,6 +1,6 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { toggleTracks } from "@slice/interface";
+import { toggleTracks } from "mx-store";
 import React, { useCallback } from "react";
 import { MdClosedCaption, MdClosedCaptionDisabled } from "react-icons/md";
 

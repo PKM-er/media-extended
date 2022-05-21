@@ -2,11 +2,11 @@ import "@styles/player.less";
 
 import { useAspectRatio, useKeepRatio } from "@hook-utils";
 import { useAppDispatch, useAppSelector } from "@player/hooks";
-import { isHTMLPlayerType, PlayerType } from "@slice/source/types";
-import { dragSeek, dragSeekEnd } from "@slice/user-seek";
-import { selectPaused, selectPlayerType } from "@store";
 import { useMemoizedFn } from "ahooks";
 import cls from "classnames";
+import { isHTMLPlayerType, PlayerType } from "mx-store";
+import { dragSeek, dragSeekEnd } from "mx-store";
+import { selectPaused, selectPlayerType } from "mx-store";
 import React, { useCallback, useRef } from "react";
 
 import BilibiliPlayer from "./component/bilibili";

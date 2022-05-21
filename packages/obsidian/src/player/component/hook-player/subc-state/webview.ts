@@ -1,5 +1,5 @@
 import type { HTMLMedia } from "@player/utils/media";
-import type { PlayerStore } from "@store";
+import type { PlayerStore } from "mx-store";
 
 import _hookHTMLState from "./html5";
 

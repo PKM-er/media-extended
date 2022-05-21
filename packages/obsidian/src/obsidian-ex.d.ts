@@ -1,6 +1,6 @@
 import "obsidian";
 
-import type { MediaMeta } from "@slice/meta/types";
+import type { MediaMeta } from "mx-store";
 
 declare module "obsidian" {
   interface App {

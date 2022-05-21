@@ -5,7 +5,7 @@ import {
 } from "@electron/remote";
 import { initObsidianPort } from "@ipc/comms";
 import createChannel from "@ipc/create-channel";
-import { PlayerStore } from "@store";
+import { PlayerStore } from "mx-store";
 import { join } from "path";
 
 export const createWindow = (store: PlayerStore, pluginDir: string) => {
