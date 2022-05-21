@@ -1,7 +1,8 @@
 import { PlayerContext } from "@context";
 import { getYoutubeEventHandlers } from "@hook-player/events";
+import { onStartYtb } from "@hook-player/on-start";
 import { hookYoutubeState } from "@hook-player/subc-state";
-import { useAppSelector } from "@store-hooks";
+import { useAppSelector, usePlayerStore } from "@store-hooks";
 import { CoreEventHandler } from "@utils";
 import { useWillUnmount } from "@utils/hooks";
 import { YoutubeMedia } from "@utils/media";
@@ -11,9 +12,7 @@ import { PlayerStore } from "mx-store";
 import { useContext, useMemo, useRef } from "react";
 import React from "react";
 import { useCallback } from "react";
-import { useStore } from "react-redux";
 
-import { onStartYtb } from "../../hook-player/on-start";
 import YoutubeBase from "./base";
 import { YoutubePlayerEvents } from "./event";
 import { PlayerRef } from "./utils";
@@ -26,7 +25,7 @@ const useEventHandler = (handler: CoreEventHandler<YoutubeMedia>) =>
   );
 
 const useEvents = (): YoutubePlayerEvents => {
-  const store = useStore() as PlayerStore;
+  const store = usePlayerStore();
   const {
     handlers: { ratechange, timeupdate, progress, error, onStateChange },
     unload,
@@ -45,7 +44,7 @@ const useEvents = (): YoutubePlayerEvents => {
 };
 
 const useActions = (ref: PlayerRef) => {
-  const store = useStore() as PlayerStore;
+  const store = usePlayerStore();
 
   const { actions } = useContext(PlayerContext);
   const ready = useAppSelector(

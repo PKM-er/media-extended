@@ -2,7 +2,7 @@ import type { PlayerRef } from "@component/youtube/utils";
 import type { AppThunk } from "mx-store";
 import { destroyPlayer as _destroy } from "mx-store";
 
-import initAPI from "./init-api";
+import { initAPI, initPlayer } from "./init-api";
 
 const destroyPlayer =
   (playerRef: PlayerRef): AppThunk =>
@@ -20,8 +20,9 @@ const destroyPlayer =
   };
 const resetPlayer =
   (playerRef: PlayerRef, playerEl: HTMLElement, videoId: string): AppThunk =>
-  (dispatch) => {
+  (dispatch, getState) => {
     dispatch(destroyPlayer(playerRef));
-    dispatch(initAPI([playerRef, playerEl, videoId]));
+    dispatch(initAPI());
+    initPlayer(playerRef, playerEl, videoId, { dispatch, getState });
   };
 export { destroyPlayer, initAPI, resetPlayer };

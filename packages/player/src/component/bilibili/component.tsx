@@ -1,11 +1,9 @@
 import { PlayerContext } from "@context";
 import { moniterScreenshotMsg } from "@hook-player/screenshot";
 import { moniterTimestampMsg } from "@hook-player/timestamp";
-import { useAppSelector } from "@store-hooks";
+import { useAppSelector, usePlayerStore } from "@store-hooks";
 import { PlayerType } from "mx-store";
-import { PlayerStore, subscribe } from "mx-store";
 import React, { useContext, useRef, useState } from "react";
-import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
 import WebView from "../webview";
@@ -23,7 +21,7 @@ const BilibiliPlayer = ({
 
   const [hideView, setHideView] = useState(true);
 
-  const store = useStore() as PlayerStore;
+  const store = usePlayerStore();
 
   const { getBiliInjectCode, actions } = useContext(PlayerContext);
 

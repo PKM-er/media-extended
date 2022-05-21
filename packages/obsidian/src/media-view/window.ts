@@ -50,7 +50,7 @@ export const createWindow = (store: PlayerStore, plugin: MediaExtended) => {
     );
     handleBiliInjectCodeReq(port, () => plugin.BilibiliInjectCode);
   });
-  win.loadFile(join(pluginDir, "window", "index.html"));
+  win.loadURL("app://local" + join(pluginDir, "window", "index.html"));
   win.webContents.once("dom-ready", sendPort);
   win.once("ready-to-show", win.show);
   return win;

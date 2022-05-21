@@ -1,14 +1,15 @@
 import config from "@config";
 import { selectYtbResetProp } from "@hook-player/common";
-import { useAppDispatch, useAppSelector } from "@store-hooks";
+import { useAppDispatch, useAppSelector, usePlayerStore } from "@store-hooks";
 import {
   destroyPlayer,
-  initializePlayer,
+  initAPI,
+  initPlayer,
   resetPlayer,
 } from "@thunk/youtube-api";
 import { useWillUnmount } from "@utils/hooks";
 import { useInterval, useUpdateEffect } from "ahooks";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 import { useMergeRefs } from "use-callback-ref";
@@ -76,8 +77,13 @@ const YoutubePlayer = React.forwardRef<YT.Player | null, YoutubePlayerProps>(
       playerRef = useMergeRefs([forwardRef, internalRef]);
 
     const dispatch = useAppDispatch();
+    useEffect(() => {
+      dispatch(initAPI());
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    const store = usePlayerStore();
     const containerRef = useRefEffect((node: HTMLElement) => {
-      dispatch(initializePlayer([playerRef, node, videoId]));
+      initPlayer(playerRef, node, videoId, store);
     }, []); // not include videoId in deps, since it will update on-the-fly
 
     useResetToApplyProps(containerRef, playerRef, videoId);

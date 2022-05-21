@@ -5,7 +5,7 @@ import config from "@config";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import load from "load-script";
 import { around } from "monkey-around";
-import { handlePlayerReady } from "mx-store";
+import { handlePlayerReady, PlayerStore } from "mx-store";
 import {
   RootState,
   selectIsCustomControls,
@@ -58,7 +58,7 @@ const baseOptions = {
   width: 0,
   height: 0,
   playerVars: {
-    origin: config.origin,
+    origin: window.location.href,
     // Disable keyboard as we handle it
     disablekb: +true,
     modestbranding: +true,
@@ -66,56 +66,56 @@ const baseOptions = {
   },
 };
 
-const initPlayer = createAsyncThunk<
-  void,
-  [ref: PlayerRef, container: HTMLElement, videoId: string],
-  { state: RootState }
->(
-  "youtube/initPlayer",
-  async ([ref, container, videoId], { getState, dispatch }) => {
-    const { Player } = await loadAPI();
+export const initAPI = createAsyncThunk("youtube/initAPI", async () => {
+  await loadAPI();
+});
 
-    const state = getState(),
-      { muted, autoplay, loop } = state.controlled;
+export const initPlayer = async (
+  ref: PlayerRef,
+  container: HTMLElement,
+  videoId: string,
+  { getState, dispatch }: Pick<PlayerStore, "getState" | "dispatch">,
+) => {
+  const { Player } = await loadAPI();
 
-    const elToReplace = document.createElement("div");
-    // @ts-ignore something wrong with type checking in react-script...
-    container.replaceChildren(elToReplace);
+  const state = getState(),
+    { muted, autoplay, loop } = state.controlled;
 
-    const player = new Player(elToReplace, {
-      ...baseOptions,
-      videoId,
-      playerVars: {
-        ...baseOptions.playerVars,
-        hl: getState().lang || "en",
-        mute: +muted,
-        autoplay: +autoplay,
-        loop: +loop,
-        controls: +selectIsNativeControls(state),
+  const elToReplace = document.createElement("div");
+  // @ts-ignore something wrong with type checking in react-script...
+  container.replaceChildren(elToReplace);
+
+  const player = new Player(elToReplace, {
+    ...baseOptions,
+    videoId,
+    playerVars: {
+      ...baseOptions.playerVars,
+      hl: getState().lang || "en",
+      mute: +muted,
+      autoplay: +autoplay,
+      loop: +loop,
+      controls: +selectIsNativeControls(state),
+    },
+    events: {
+      onReady: ({ target }) => {
+        // Bail if onReady has already been called.
+        // See https://github.com/sampotts/plyr/issues/1108
+        if (getState().youtube.playerStatus === "ready") return;
+        const availableSpeeds = target.getAvailablePlaybackRates();
+        dispatch(
+          handlePlayerReady({
+            availableSpeeds,
+            duration: target.getDuration(),
+          }),
+        );
+        // dispatch(handleDurationChange(target.getDuration()));
       },
-      events: {
-        onReady: ({ target }) => {
-          // Bail if onReady has already been called.
-          // See https://github.com/sampotts/plyr/issues/1108
-          if (getState().youtube.playerStatus === "ready") return;
-          const availableSpeeds = target.getAvailablePlaybackRates();
-          dispatch(
-            handlePlayerReady({
-              availableSpeeds,
-              duration: target.getDuration(),
-            }),
-          );
-          // dispatch(handleDurationChange(target.getDuration()));
-        },
-      },
-    });
-    let iframe;
-    // Set the tabindex to avoid focus entering iframe
-    if (selectIsCustomControls(state) && (iframe = player.getIframe())) {
-      iframe.tabIndex = -1;
-    }
-    ref.current = player;
-  },
-);
-
-export default initPlayer;
+    },
+  });
+  let iframe;
+  // Set the tabindex to avoid focus entering iframe
+  if (selectIsCustomControls(state) && (iframe = player.getIframe())) {
+    iframe.tabIndex = -1;
+  }
+  ref.current = player;
+};

@@ -4,7 +4,7 @@ import { onStartH5 } from "@hook-player/on-start";
 import { respondScreenshotReq } from "@hook-player/screenshot";
 import { hookHTMLState } from "@hook-player/subc-state/local-h5";
 import { respondTimestampReq } from "@hook-player/timestamp";
-import { useAppDispatch, useAppSelector } from "@store-hooks";
+import { useAppDispatch, useAppSelector, usePlayerStore } from "@store-hooks";
 import { HTMLMedia } from "@utils/media";
 import { useUnmount } from "ahooks";
 import { disableCORS } from "mx-store";
@@ -21,7 +21,6 @@ import {
 } from "mx-store";
 import { PlayerType } from "mx-store";
 import React, { useContext } from "react";
-import { useStore } from "react-redux";
 import { useRefEffect } from "react-use-ref-effect";
 
 import webmFix from "./webm-fix";
@@ -70,7 +69,7 @@ const HTMLPlayer = ({
   style?: React.CSSProperties;
   className?: string;
 }) => {
-  const store = useStore() as PlayerStore;
+  const store = usePlayerStore();
   const { actions } = useContext(PlayerContext);
   const ref = useRefEffect<HTMLMediaElement>(
     (player) => hookStoreToHTMLPlayer(player, store, actions),
