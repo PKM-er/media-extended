@@ -1,4 +1,4 @@
-import { Action, AnyAction } from "@reduxjs/toolkit";
+import { AnyAction } from "@reduxjs/toolkit";
 
 export const REQ_INIT_STATE = "&_REQ_INIT_STATE",
   SEND_INIT_STATE = "&_SEND_INIT_STATE",

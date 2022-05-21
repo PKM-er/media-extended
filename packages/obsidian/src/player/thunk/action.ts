@@ -37,11 +37,7 @@ export const requsetScreenshot = (): AppThunk => (dispatch, getState) => {
         app.workspace.trigger("mx:screenshot", buffer, time, ext, state.meta);
       }
       dispatch(_gotScreenshot());
-    },
-  cancelScreenshot = (): AppThunk => (dispatch) => {
-    console.info("screenshot cancelled");
-    dispatch(_gotScreenshot());
-  };
+    };
 
 export const requestTimestamp = (): AppThunk => (dispatch, getState) => {
     dispatch(_reqTimestamp());

@@ -43,10 +43,18 @@ const slice = createSlice({
         state.getScreenshot = false;
       }
     },
+    cancelScreenshot: (state) => {
+      if (state.getScreenshot !== null) {
+        state.getScreenshot = false;
+      }
+    },
     requestTimestamp: (state) => {
       state.getTimestamp = true;
     },
     gotTimestamp: (state) => {
+      state.getTimestamp = false;
+    },
+    cancelTimestamp: (state) => {
       state.getTimestamp = false;
     },
   },
@@ -79,6 +87,8 @@ export const {
   // resetCanScreenshot,
   gotScreenshot,
   gotTimestamp,
+  cancelScreenshot,
+  cancelTimestamp,
   requestTimestamp,
   requsetScreenshot,
 } = slice.actions;

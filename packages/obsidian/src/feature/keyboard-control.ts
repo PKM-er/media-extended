@@ -1,6 +1,6 @@
 import { getMostRecentViewOfType } from "@misc/obsidian";
-import { seekByOffset } from "@player/thunk/seek";
 import type MediaExtended from "@plugin";
+import { seekByOffset } from "mx-player";
 import { requestTimestamp, requsetScreenshot } from "mx-store";
 import {
   setPlaybackRate,

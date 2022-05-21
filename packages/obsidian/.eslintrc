@@ -15,7 +15,8 @@
           "@electron/remote",
           "electron",
           "inline:",
-          "filenamify/browser"
+          "filenamify/browser",
+          "@codemirror/stream-parser"
         ]
       }
     ]

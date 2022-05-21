@@ -1,18 +1,8 @@
-import {
-  Action,
-  AnyAction,
-  Dispatch,
-  MiddlewareAPI,
-  Store,
-} from "@reduxjs/toolkit";
-import assertNever from "assert-never";
+import { AnyAction, Store } from "@reduxjs/toolkit";
 
 import {
   GOT_INIT_STATE,
   gotInitState,
-  GotInitStateAction,
-  REQ_INIT_STATE,
-  SEND_INIT_STATE,
   sendIniteState,
   StampedAction,
 } from "./actions";

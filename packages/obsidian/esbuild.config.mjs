@@ -74,8 +74,18 @@ const LessPathAlias = {
     build.onResolve(
       { filter: /^@styles.+\.less$/, namespace: "file" },
       async ({ path, namespace }) => {
-        path = path.replace("@styles", "player/component/styles");
-        return { path: join(process.cwd(), "src", path), namespace };
+        return {
+          path: join(
+            process.cwd(),
+            "..",
+            "player",
+            "src",
+            "component",
+            "styles",
+            path.match(/@styles\/(.+)/)[1],
+          ),
+          namespace,
+        };
       },
     );
   },
@@ -140,7 +150,7 @@ try {
     // metafile: true,
   });
   const preloadBili = build({
-    entryPoints: ["src/player/component/bilibili/inject/index.ts"],
+    entryPoints: ["../player/src/component/bilibili/inject/index.ts"],
     outfile: join("build", INJECT_BILIBILI),
     ...injectScriptConfig,
     // incremental: !isProd,

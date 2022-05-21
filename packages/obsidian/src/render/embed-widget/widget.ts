@@ -1,7 +1,7 @@
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { parseSizeSyntax } from "@misc";
-import { setMediaUrl, setObsidianMedia } from "@player/thunk/set-media";
+import { setMediaUrl, setObsidianMedia } from "@player";
 import type MediaExtended from "@plugin";
 import { PlayerRenderChild } from "@view";
 import { vaildateMediaURL } from "mx-base";

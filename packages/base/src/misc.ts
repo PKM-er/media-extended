@@ -9,3 +9,7 @@ export const stripHash = (url: string): [url: string, hash: string] => {
   url = hash.length > 0 ? url.slice(0, -hash.length) : url;
   return [url, hash];
 };
+
+export function empty(this: HTMLElement) {
+  while (this.firstChild) this.removeChild(this.firstChild);
+}

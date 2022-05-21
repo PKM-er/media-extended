@@ -1,4 +1,4 @@
-import { getInfoFromWarpper, setMediaUrl } from "@player/thunk/set-media";
+import { getInfoFromWarpper, setMediaUrl } from "@player";
 import type MediaExtended from "@plugin";
 import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
 import { vaildateMediaURL } from "mx-base";

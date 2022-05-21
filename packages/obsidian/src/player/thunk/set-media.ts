@@ -1,5 +1,5 @@
-import { setHash } from "mx-store";
-import { AppThunk } from "mx-store";
+import { stripHash } from "mx-base";
+import { AppThunk, setHash } from "mx-store";
 import { parseLinktext, TFile } from "obsidian";
 
 import { setMediaUrlSrc, setObsidianMediaSrc } from "./provider";
@@ -49,7 +49,6 @@ export const setObsidianMedia =
     dispatch(setHash([hash]));
   };
 
-import { stripHash } from "@misc";
 export const setMediaUrl =
   (url: string, linkTitle?: string): AppThunk =>
   (dispatch) => {

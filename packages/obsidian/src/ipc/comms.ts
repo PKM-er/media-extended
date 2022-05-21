@@ -1,7 +1,7 @@
 import { ipcRenderer } from "electron";
+import { getPortWithTimeout } from "mx-player";
 
 import { ChannelNameBrowserView, ChannelNameObsidian } from "./create-channel";
-import { getPortWithTimeout } from "./get-port";
 
 const getPort = (channel: string, viewId?: number) =>
   getPortWithTimeout(

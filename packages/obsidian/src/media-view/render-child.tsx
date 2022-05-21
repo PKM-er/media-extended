@@ -1,13 +1,13 @@
 import { setPlayerKeymaps } from "@feature/keyboard-control";
-import { Player } from "@player";
-import { createStore } from "@player/store/ob-store";
+import { createStore } from "@player";
 import MediaExtended from "@plugin";
+import { Player } from "mx-player";
 import { AppThunk } from "mx-store";
 import { MarkdownRenderChild, Scope } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { PlayerComponent } from "./common";
+import { actions, getBiliInjectCodeFunc, PlayerComponent } from "./common";
 
 export default class PlayerRenderChild
   extends MarkdownRenderChild
@@ -47,7 +47,8 @@ export default class PlayerRenderChild
       <Player
         store={this.store}
         inEditor={this.inEditor}
-        plugin={this.plugin}
+        actions={actions}
+        getBiliInjectCode={getBiliInjectCodeFunc(this.plugin)}
         onFocus={this.pushScope.bind(this)}
         onBlur={this.popScope.bind(this)}
       />,

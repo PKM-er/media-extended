@@ -1,15 +1,14 @@
 import { setPlayerKeymaps } from "@feature/keyboard-control";
-import { Player } from "@player";
-import { createStore } from "@player/store/ob-store";
+import { createStore } from "@player";
 import {
   renameObsidianMedia,
   setMediaUrlSrc,
   setObsidianMediaSrc,
-} from "@player/thunk/provider";
-import { seekTo } from "@player/thunk/seek";
+} from "@player";
 import type MediaExtended from "@plugin";
 import { ExtensionAccepted } from "mx-base";
 import { Provider } from "mx-base";
+import { Player, seekTo } from "mx-player";
 import { setFragment, setHash } from "mx-store";
 import { toggleFilter } from "mx-store";
 import { revertDuration } from "mx-store";
@@ -36,6 +35,8 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import {
+  actions,
+  getBiliInjectCodeFunc,
   MEDIA_VIEW_TYPE,
   MediaState,
   MediaStateBase,
@@ -253,7 +254,11 @@ export default class ObMediaView
   protected async onOpen(): Promise<void> {
     await super.onOpen();
     ReactDOM.render(
-      <Player store={this.store} plugin={this.plugin} />,
+      <Player
+        store={this.store}
+        actions={actions}
+        getBiliInjectCode={getBiliInjectCodeFunc(this.plugin)}
+      />,
       this.contentEl,
     );
   }
@@ -328,7 +333,11 @@ export default class ObMediaView
             this.window.on("close", () => {
               if (!this._closed)
                 ReactDOM.render(
-                  <Player store={this.store} plugin={this.plugin} />,
+                  <Player
+                    store={this.store}
+                    actions={actions}
+                    getBiliInjectCode={getBiliInjectCodeFunc(this.plugin)}
+                  />,
                   this.contentEl,
                 );
             });

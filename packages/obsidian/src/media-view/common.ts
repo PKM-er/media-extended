@@ -1,4 +1,5 @@
-import type { PlayerStore } from "@player";
+import { IActions } from "mx-player";
+import type { PlayerStore } from "mx-store";
 import { Component, Scope } from "obsidian";
 
 import type MediaExtended from "../mx-main";
@@ -28,3 +29,16 @@ export interface MediaUrlState extends MediaStateBase {
   url: string;
 }
 export type MediaState = MediaUrlState | MediaFileState;
+
+import { gotScreenshot, gotTimestamp } from "../player/thunk/action";
+export const actions: IActions = {
+  gotScreenshot: (dispatch, args) => {
+    dispatch(gotScreenshot(...args));
+  },
+  gotTimestamp: (dispatch, args) => {
+    dispatch(gotTimestamp(...args));
+  },
+};
+
+export const getBiliInjectCodeFunc = (plugin: MediaExtended) => async () =>
+  await plugin.BilibiliInjectCode;

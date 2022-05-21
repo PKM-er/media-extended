@@ -9,10 +9,13 @@ import type { UserSeek } from "./user-seek";
 import type { YoutubeState } from "./youtube";
 
 type Platform = "safari" | "chromium";
-export const setPlatform = createAction<Platform>("setPlatfrom");
+export const setInitInfo = createAction<{ platform: Platform; lang: string }>(
+  "setInitInfo",
+);
 
 export interface RootState {
   platform: Platform | null;
+  lang: string;
   /**
    * status of current player,
    * obtained via event,
@@ -69,6 +72,7 @@ const createReducer = (
   _createReducer<RootState>(
     {
       platform: null,
+      lang: "en",
       controlled: controlledSlice.initialState,
       status: statusSlice.initialState,
       userSeek: null,
@@ -80,8 +84,10 @@ const createReducer = (
       bilibili: biliSlice.initialState,
     },
     (builder) => {
-      builder.addCase(setPlatform, (state, action) => {
-        state.platform = action.payload;
+      builder.addCase(setInitInfo, (state, action) => {
+        const { lang, platform } = action.payload;
+        state.lang = lang;
+        state.platform = platform;
       });
       const reducers = [
         userSeekReducer(),

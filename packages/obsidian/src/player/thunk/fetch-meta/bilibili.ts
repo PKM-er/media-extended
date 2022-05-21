@@ -1,10 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Provider } from "mx-base";
-import metaSlice from "mx-store";
+import { fetchBiliMetaName } from "mx-player";
+import { metaSlice } from "mx-store";
 import { RootState } from "mx-store";
 import { requestUrl } from "obsidian";
-
-import { logNotMatch, ReducerBuilder } from "./common";
 
 const aid = /^av(\d+)$/i,
   bid = /^(BV[A-Za-z0-9]+)$/;
@@ -105,30 +103,11 @@ const fetchPageList = async (videoId: string) => {
   }
   return data;
 };
-const thunk = createAsyncThunk<
+export const fetchBiliMeta = createAsyncThunk<
   Record<"title", string>,
   string,
   { state: RootState }
->(metaSlice.name + "/fetchBiliMetadata", async (videoId, { dispatch }) => {
+>(fetchBiliMetaName, async (videoId, { dispatch }) => {
   const { title } = await fetchVideoDetails(videoId);
   return { title };
 });
-
-const source = "bilibili";
-export const fetchBiliMetaReducers = (builder: ReducerBuilder) =>
-  builder
-    .addCase(thunk.pending, ({ meta }) => {
-      if (meta.provider === Provider.bilibili) meta.title = "";
-      else logNotMatch(source, meta);
-    })
-    .addCase(thunk.fulfilled, ({ meta }, action) => {
-      const { title } = action.payload;
-      if (meta.provider === Provider.bilibili) meta.title = title;
-      else logNotMatch(source, meta);
-    })
-    .addCase(thunk.rejected, ({ meta }, action) => {
-      if (meta.provider === Provider.bilibili) {
-      } else logNotMatch(source, meta);
-      console.error("Failed to fetch bilibili metadata: ", action.payload);
-    });
-export default thunk;

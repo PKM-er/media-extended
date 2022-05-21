@@ -87,7 +87,9 @@ const getPlayerDecos = (
     from,
     to,
     enter: (type, from, to) => {
-      const nodeTypes = new Set(type.prop(tokenClassNodeProp)?.split(" "));
+      const nodeTypes = new Set(
+        (type.prop(tokenClassNodeProp) as string | undefined)?.split(" "),
+      );
       if (!nodeTypes) return;
       if (nodeTypes.has("formatting-link-start")) {
         isInternalEmbed = nodeTypes.has("formatting-embed");

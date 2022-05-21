@@ -1,7 +1,6 @@
 import getTracks from "@feature/subtitle";
-import { stripHash } from "@misc";
 import assertNever from "assert-never";
-import { getMediaType, parseURL } from "mx-base";
+import { getMediaType, parseURL, stripHash } from "mx-base";
 import { Provider } from "mx-base";
 import { SerializableTFile } from "mx-store";
 import {
@@ -44,7 +43,7 @@ export const setObsidianMediaSrc =
         serializeTFile(file),
         app.vault.getResourcePath(file),
         mediaType,
-        await getTracks(file),
+        await getTracks(file, localStorage.language || "en"),
       ]),
     );
   };

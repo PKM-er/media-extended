@@ -4,7 +4,7 @@ import {
   getFileHashFromLinktext,
   getInfoFromWarpper,
   setObsidianMedia,
-} from "@player/thunk/set-media";
+} from "@player";
 import type MediaExtended from "@plugin";
 import { CONTROLS_ENABLED_CLASS, PlayerRenderChild } from "@view";
 import { around } from "monkey-around";

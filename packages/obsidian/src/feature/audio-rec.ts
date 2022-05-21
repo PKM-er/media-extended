@@ -1,7 +1,7 @@
-import { secondToFragFormat } from "@misc";
 import { insertToCursor } from "@misc/obsidian";
 import type MediaExtended from "@plugin";
 import { around } from "monkey-around";
+import { secondToFragFormat } from "mx-base";
 import { MarkdownView, TAbstractFile, TFile } from "obsidian";
 
 export function setupRec(this: MediaExtended) {

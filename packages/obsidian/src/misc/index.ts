@@ -1,8 +1,4 @@
-import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
 import Url from "url-parse";
-
-dayjs.extend(duration);
 
 export type mutationParam = {
   callback: MutationCallback;
@@ -29,12 +25,6 @@ export const getUrl = (src: string): URL | null => {
     // if url is invaild, do nothing and break current loop
     return null;
   }
-};
-
-export const stripHash = (url: string): [url: string, hash: string] => {
-  const { hash } = Url(url);
-  url = hash.length > 0 ? url.slice(0, -hash.length) : url;
-  return [url, hash];
 };
 
 export const setRatioWidth = (
@@ -83,57 +73,4 @@ export const getLink = (url: string): string => {
   if (protocol === "file:") {
     return "app://local/" + url.substring("file:///".length);
   } else return url;
-};
-
-const fillZero = (time: number, fractionDigits = 2) => {
-  let main: string, frac: string | undefined;
-  if (Number.isInteger(time)) {
-    main = time.toString();
-  } else {
-    [main, frac] = time.toFixed(fractionDigits).split(".");
-  }
-  if (main.length === 1) main = "0" + main;
-  return frac ? main + "." + frac : main;
-};
-
-export const secondToFragFormat = (_seconds: number | string) => {
-  _seconds = +_seconds;
-  if (Number.isNaN(_seconds)) return "NaN";
-
-  const duration = dayjs.duration(+_seconds, "seconds");
-
-  const hours = duration.hours(),
-    minutes = duration.minutes(),
-    seconds = duration.seconds() + duration.milliseconds() / 1e3;
-
-  if (hours > 0) {
-    return [hours, ...[minutes, seconds].map((num) => fillZero(num))].join(":");
-  } else if (minutes > 0) {
-    return [minutes, seconds].map((num) => fillZero(num)).join(":");
-  } else if (seconds > 0) {
-    return seconds.toFixed(2);
-  } else {
-    return "0";
-  }
-};
-
-// no fill zero
-export const secondToDuration = (_seconds: number | string) => {
-  _seconds = +_seconds;
-  if (Number.isNaN(_seconds)) return "NaN";
-  const duration = dayjs.duration(+_seconds, "seconds");
-
-  const hours = duration.hours(),
-    minutes = duration.minutes(),
-    seconds = duration.seconds() + duration.milliseconds() / 1e3;
-
-  if (hours > 0) {
-    return [hours, ...[minutes, seconds].map((num) => fillZero(num, 0))].join(
-      ":",
-    );
-  } else if (minutes > 0) {
-    return [minutes, fillZero(seconds, 0)].join(":");
-  } else {
-    return "0:" + fillZero(seconds, 0);
-  }
 };
