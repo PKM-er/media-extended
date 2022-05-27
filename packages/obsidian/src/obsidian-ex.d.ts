@@ -13,6 +13,13 @@ declare module "obsidian" {
       plugins: Record<string, any>;
     };
     viewRegistry: ViewRegistry;
+    hotkeyManager: {
+      onTrigger: (evt: KeyboardEvent, hotkey: any) => true | void;
+    };
+  }
+
+  interface Command {
+    repeatable?: boolean;
   }
   interface WorkspaceLeaf {
     group: string | null;

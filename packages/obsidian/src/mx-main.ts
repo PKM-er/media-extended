@@ -17,7 +17,7 @@ import { join } from "path";
 import { INJECT_BILIBILI } from "./const.mjs";
 import { setupRec } from "./feature/audio-rec";
 import { registerInsetTimestampHandler } from "./feature/insert-timestamp";
-import { registerGlobalControlCmd } from "./feature/keyboard-control";
+import { registerCommand } from "./feature/keyboard";
 import registerOpenMediaLink from "./feature/open-media";
 import { registerSaveScreenshotHandler } from "./feature/save-screenshot";
 import registerEmbedHandlers from "./render/embed";
@@ -125,7 +125,7 @@ export default class MediaExtended extends Plugin {
     registerLinkHandlers(this);
     registerEmbedHandlers(this);
 
-    registerGlobalControlCmd(this);
+    registerCommand(this);
     registerInsetTimestampHandler(this);
     registerSaveScreenshotHandler(this);
     registerOpenMediaLink(this);

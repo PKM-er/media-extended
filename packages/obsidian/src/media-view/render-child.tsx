@@ -1,4 +1,4 @@
-import { setPlayerKeymaps } from "@feature/keyboard-control";
+import { registerScope } from "@feature/keyboard";
 import { createStore } from "@player";
 import MediaExtended from "@plugin";
 import { Player } from "mx-player";
@@ -39,7 +39,7 @@ export default class PlayerRenderChild
     store.dispatch(initAction);
     this.store = store;
     this.scope = new Scope(this.app.scope);
-    setPlayerKeymaps(this);
+    registerScope(this);
   }
 
   async onload() {

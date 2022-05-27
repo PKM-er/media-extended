@@ -3,6 +3,7 @@ export type {
   MediaState,
   MediaStateBase,
   MediaUrlState,
+  PlayerComponent,
 } from "./common";
 export { MEDIA_VIEW_TYPE } from "./common";
 export { default as patchLeaf } from "./monkey-patch";

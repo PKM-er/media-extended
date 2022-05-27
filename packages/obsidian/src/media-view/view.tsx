@@ -1,4 +1,4 @@
-import { setPlayerKeymaps } from "@feature/keyboard-control";
+import { registerScope } from "@feature/keyboard";
 import { createStore } from "@player";
 import {
   renameObsidianMedia,
@@ -101,7 +101,7 @@ export default class ObMediaView
     super(leaf);
     this.store = createStore("media-view " + (leaf as any).id);
     this.scope = new Scope(this.app.scope);
-    setPlayerKeymaps(this);
+    registerScope(this);
 
     this.openExternalAction = this.addAction(
       "open-elsewhere-glyph",
