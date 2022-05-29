@@ -84,7 +84,6 @@ const handleRepeat = (
   { repeatInterval, repeatWait }: RepeatConfig = repeatConfig,
 ) => {
   const { regular, repeat } = getAction(component.plugin);
-  component.store.dispatch(regular);
   if (!isHotkey) return;
   let timeoutId = -1,
     intervalId = -1;
@@ -101,6 +100,8 @@ const handleRepeat = (
       if (intervalId > 0) {
         const { repeatDone } = getAction(component.plugin);
         component.store.dispatch(repeatDone);
+      } else {
+        component.store.dispatch(regular);
       }
     },
     { passive: true, once: true },
