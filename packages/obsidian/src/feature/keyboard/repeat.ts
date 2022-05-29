@@ -68,19 +68,24 @@ const repeatActions: {
   },
 ];
 
+interface RepeatConfig {
+  repeatWait: number;
+  repeatInterval: number;
+}
+const repeatConfig: RepeatConfig = {
+  repeatWait: 250,
+  repeatInterval: 80,
+};
+
 const handleRepeat = (
   isHotkey: boolean,
   component: PlayerComponent,
   getAction: GetRepeatActions,
-  {
-    repeatInterval,
-    repeatWait,
-  }: { repeatWait: number; repeatInterval: number },
+  { repeatInterval, repeatWait }: RepeatConfig = repeatConfig,
 ) => {
   const { regular, repeat } = getAction(component.plugin);
   component.store.dispatch(regular);
   if (!isHotkey) return;
-  component.store.dispatch(repeat);
   let timeoutId = -1,
     intervalId = -1;
   const cancel = () => {
@@ -143,10 +148,7 @@ export const globalRepeat = (plugin: MediaExtended) => {
         if (checking) {
           return !!view;
         } else if (view) {
-          handleRepeat(!!activeHotkey, view, getAction, {
-            repeatWait: 500,
-            repeatInterval: 200,
-          });
+          handleRepeat(!!activeHotkey, view, getAction);
         }
       },
       hotkeys: globalHotkeys,
@@ -157,14 +159,12 @@ export const globalRepeat = (plugin: MediaExtended) => {
 
 export const localRepeat = (component: PlayerComponent) => {
   for (const { localHotkeys, getAction } of repeatActions) {
-    for (const { modifiers, key } of localHotkeys ?? []) {
+    if (!localHotkeys) continue;
+    for (const { modifiers, key } of localHotkeys) {
       component.registerScopeEvent(
         component.scope.register(modifiers, key, (evt) => {
           if (!evt.repeat) {
-            handleRepeat(true, component, getAction, {
-              repeatWait: 500,
-              repeatInterval: 200,
-            });
+            handleRepeat(true, component, getAction);
           }
         }),
       );
