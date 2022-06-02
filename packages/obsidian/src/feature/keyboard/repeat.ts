@@ -83,10 +83,10 @@ const handleRepeat = (
   getAction: GetRepeatActions,
   { repeatInterval, repeatWait }: RepeatConfig = repeatConfig,
 ) => {
-  const { regular, repeat } = getAction(component.plugin);
   if (!isHotkey) return;
-  let timeoutId = -1,
-    intervalId = -1;
+  const { regular, repeat } = getAction(component.plugin);
+  let timeoutId = -1, // >=0: repeat is waiting to be triggered
+    intervalId = -1; //  >=0: repeat is active
   const cancel = () => {
     // cancel repeat request
     window.clearTimeout(timeoutId);
@@ -95,7 +95,8 @@ const handleRepeat = (
   };
   window.addEventListener(
     "keyup",
-    () => {
+    (evt) => {
+      evt.preventDefault();
       cancel();
       if (intervalId > 0) {
         const { repeatDone } = getAction(component.plugin);
@@ -103,14 +104,16 @@ const handleRepeat = (
       } else {
         component.store.dispatch(regular);
       }
+      intervalId = -1;
     },
-    { passive: true, once: true },
+    { once: true },
   );
   component.register(cancel);
   timeoutId = window.setTimeout(() => {
     intervalId = window.setInterval(() => {
       component.store.dispatch(repeat);
     }, repeatInterval);
+    timeoutId = -1;
   }, repeatWait);
 };
 
@@ -164,6 +167,7 @@ export const localRepeat = (component: PlayerComponent) => {
     for (const { modifiers, key } of localHotkeys) {
       component.registerScopeEvent(
         component.scope.register(modifiers, key, (evt) => {
+          evt.preventDefault();
           if (!evt.repeat) {
             handleRepeat(true, component, getAction);
           }
