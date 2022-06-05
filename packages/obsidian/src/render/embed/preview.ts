@@ -53,6 +53,7 @@ const handleExternalEmbed = async (
 ) => {
   const info = getInfoFromWarpper(warpper);
   if (!info || !(await vaildateMediaURL(info.linktext))) return;
+  const url = info.linktext;
   const newWarpper = createSpan({
     cls: ["media-embed", "external-embed", "is-loaded"],
     attr: {
@@ -62,7 +63,7 @@ const handleExternalEmbed = async (
   });
   warpper.replaceWith(newWarpper);
   const child = new PlayerRenderChild(
-    setMediaUrl(info.linktext, info.linkTitle),
+    setMediaUrl(url, info.linkTitle),
     plugin,
     newWarpper,
     false,

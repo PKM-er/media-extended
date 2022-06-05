@@ -4,7 +4,7 @@ import { parseSizeSyntax } from "@misc";
 import { setMediaUrl, setObsidianMedia } from "@player";
 import type MediaExtended from "@plugin";
 import { PlayerRenderChild } from "@view";
-import { vaildateMediaURL } from "mx-base";
+// import { vaildateMediaURL } from "mx-base";
 import type { AppThunk } from "mx-store";
 import { Platform, setIcon, TFile } from "obsidian";
 
@@ -232,16 +232,16 @@ export class ExternalEmbedWidget extends PlayerWidget<{
   toDOM(view: EditorView): HTMLDivElement {
     const container = createDiv();
     container.style.display = "none";
-    vaildateMediaURL(this.media.src).then((vaild) => {
-      container.setAttr("src", this.media.src);
-      container.addClasses([
-        "external-embed",
-        "cm-embed-block",
-        "mx-media-embed",
-      ]);
-      container.style.removeProperty("display");
-      this.setDOM(view, container);
-    });
+    // vaildateMediaURL(this.media.src).then((vaild) => {
+    container.setAttr("src", this.media.src);
+    container.addClasses([
+      "external-embed",
+      "cm-embed-block",
+      "mx-media-embed",
+    ]);
+    container.style.removeProperty("display");
+    this.setDOM(view, container);
+    // });
 
     return container;
   }

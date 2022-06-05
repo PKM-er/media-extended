@@ -31,13 +31,17 @@ const parseURL = (_url: string): ParsedResult | null => {
 };
 export default parseURL;
 
+/**
+ * @param vaildator perform additional validation on supported media url
+ * @returns media url components or false if invaild
+ */
 export const vaildateMediaURL = async (
   url: string,
-  onVaild?: (
+  vaildator?: (
     url: string,
     hash: string,
   ) => boolean | Promise<boolean> | void | Promise<void>,
-): Promise<boolean> => {
+): Promise<[url: string, hash: string] | false> => {
   let result, args: [url: string, hash: string];
   if (getMediaType(url)) {
     args = stripHash(url);
@@ -45,9 +49,9 @@ export const vaildateMediaURL = async (
     args = [result.url, result.hash];
   } else return false;
 
-  if (onVaild) {
-    const result = await onVaild(...args);
-    if (typeof result === "boolean") return result;
+  if (vaildator) {
+    const result = await vaildator(...args);
+    if (result === false) return false;
   }
-  return true;
+  return args;
 };

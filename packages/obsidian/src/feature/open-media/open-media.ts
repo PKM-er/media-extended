@@ -39,14 +39,14 @@ export const openMediaLink = (
     ),
   );
 
-export const openMediaLinkInHoverEditor = (
+export const openMediaLinkInHoverEditor = async (
   url: string,
   initiatingEl: HTMLElement,
   event: MouseEvent,
-) => {
+): Promise<boolean> => {
   let hoverEditor = app.plugins.plugins["obsidian-hover-editor"];
   if (!Keymap.isModEvent(event) || !hoverEditor) return false;
-  return vaildateMediaURL(url, async (url, hash) => {
+  return !!(await vaildateMediaURL(url, async (url, hash) => {
     const viewState = getViewState("url", url, hash),
       eState = getEphemeralState(hash, true);
     app.workspace.trigger("hover-link", { event } as any);
@@ -56,7 +56,7 @@ export const openMediaLinkInHoverEditor = (
       false,
     ) as WorkspaceLeaf;
     await leaf.setViewState(viewState, eState);
-  });
+  }));
 };
 
 /**
