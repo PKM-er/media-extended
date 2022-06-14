@@ -1,3 +1,8 @@
+import { GetReducer } from "../utils";
+import { PlayerState } from ".";
+
+export const getReducer: GetReducer<PlayerState> = (cr) => cr;
+
 export const clampTime = (time: number, duration: number | null) => {
   if (duration && time > duration) {
     time = duration;
@@ -7,17 +12,15 @@ export const clampTime = (time: number, duration: number | null) => {
   return time;
 };
 
-import type { ControlledState } from "./controlled";
-
-export const setVolumeTo = (newVolume: number, state: ControlledState) => {
-  if (newVolume < 0) {
-    state.volume = 0;
-  } else if (newVolume > 1) {
-    state.volume = 1;
-  } else {
-    state.volume = newVolume;
-  }
-};
+// export const setVolumeTo = (newVolume: number, state: ControlledState) => {
+//   if (newVolume < 0) {
+//     state.volume = 0;
+//   } else if (newVolume > 1) {
+//     state.volume = 1;
+//   } else {
+//     state.volume = newVolume;
+//   }
+// };
 
 export const checkDuration = (duration: unknown): duration is number =>
   typeof duration === "number" && !!duration && duration > 0;
