@@ -1,6 +1,5 @@
-import { syntaxTree } from "@codemirror/language";
+import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import { EditorState } from "@codemirror/state";
-import { tokenClassNodeProp } from "@codemirror/stream-parser";
 import { Decoration, WidgetType } from "@codemirror/view";
 import type MediaExtended from "@plugin";
 import { getMediaType } from "mx-base";
@@ -86,7 +85,7 @@ const getPlayerDecos = (
   syntaxTree(state).iterate({
     from,
     to,
-    enter: (type, from, to) => {
+    enter: ({ type, from, to }) => {
       const nodeTypes = new Set(
         (type.prop(tokenClassNodeProp) as string | undefined)?.split(" "),
       );
