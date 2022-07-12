@@ -88,7 +88,12 @@ export class YoutubeMedia
   }
 
   get paused() {
-    return this.instance.getPlayerState() === YT.PlayerState.PAUSED;
+    const state = this.instance.getPlayerState();
+    return (
+      state === YT.PlayerState.PAUSED ||
+      state === YT.PlayerState.CUED ||
+      state === YT.PlayerState.UNSTARTED
+    );
   }
   _pause() {
     this.instance.pauseVideo();

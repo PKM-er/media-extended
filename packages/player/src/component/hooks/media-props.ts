@@ -21,7 +21,8 @@ export const useApplyPlaybackRate: ApplyHookType = (useSubscribe, ref) =>
   useSubscribe(
     selectSpeed,
     ([playbackRate], _dispatch, media) => {
-      if (!media || media.playbackRate === playbackRate) return;
+      if (!media || !playbackRate || media.playbackRate === playbackRate)
+        return;
       media.playbackRate = playbackRate;
     },
     { immediate: true, ref },
@@ -31,8 +32,12 @@ export const useApplyVolume: ApplyHookType = (useSubscribe, ref) =>
     selectVolumeMute,
     ([[muted, volume]], _dispatch, media) => {
       if (!media) return;
-      media.volume !== volume && (media.volume = volume);
-      media.muted !== muted && (media.muted = muted);
+      if (volume !== undefined && media.volume !== volume) {
+        media.volume = volume;
+      }
+      if (muted !== undefined && media.muted !== muted) {
+        media.muted = muted;
+      }
     },
     { immediate: true, ref },
   );

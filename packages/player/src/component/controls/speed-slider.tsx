@@ -40,7 +40,6 @@ const max = 16,
 const SpeedSlider = () => {
   const speed = useAppSelector(selectSpeed);
   const dispatch = useAppDispatch();
-  const value = speedToVal(speed);
 
   const handleSilderChange = useCallback(
     (_e: any, newValue: number | number[]) => {
@@ -49,10 +48,10 @@ const SpeedSlider = () => {
     [dispatch],
   );
 
-  return (
+  return speed ? (
     <SliderUnstyled
       classes={{ root: "mx__speed-slider" }}
-      value={typeof value === "number" ? value : 0}
+      value={speedToVal(speed)}
       onChange={handleSilderChange}
       scale={valToSpeed}
       marks={marks}
@@ -66,7 +65,7 @@ const SpeedSlider = () => {
       aria-valuemin={min}
       aria-valuemax={max}
     />
-  );
+  ) : null;
 };
 export default SpeedSlider;
 

@@ -1,6 +1,7 @@
 import "@styles/text-tracks.less";
 
 import { useAppSelector } from "@store-hooks";
+import { selectTextTracks } from "mx-store";
 import React from "react";
 
 import Popover from "../basic/popover";
@@ -9,7 +10,7 @@ import { TracksToggle } from "./toggle";
 
 const TrackControl = () => {
   const hasCaption = useAppSelector(
-    (state) => state.interface.textTracks.list.length > 0,
+    (state) => selectTextTracks(state).list.length > 0,
   );
 
   return hasCaption ? (

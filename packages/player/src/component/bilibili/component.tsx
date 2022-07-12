@@ -2,7 +2,7 @@ import { PlayerContext } from "@context";
 import { moniterScreenshotMsg } from "@hook-player/screenshot";
 import { moniterTimestampMsg } from "@hook-player/timestamp";
 import { useAppSelector, usePlayerStore } from "@store-hooks";
-import { PlayerType } from "mx-store";
+import { PlayerType, selectBilibiliSrc, selectBiliWebFscreen } from "mx-store";
 import React, { useContext, useRef, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
 
@@ -15,9 +15,7 @@ const BilibiliPlayer = ({
   style?: React.CSSProperties;
   className?: string;
 }) => {
-  const src = useAppSelector((state) =>
-    state.source.type === PlayerType.bilibili ? state.source.src : null,
-  );
+  const src = useAppSelector(selectBilibiliSrc);
 
   const [hideView, setHideView] = useState(true);
 
@@ -40,10 +38,9 @@ const BilibiliPlayer = ({
         );
       }
       store.webviewMsg.port = port;
-      if (store.getState().bilibili.webFscreen) {
-        const showView = () => {};
+      if (selectBiliWebFscreen(store.getState())) {
         const tryReveal = () => {
-            if (store.getState().bilibili.webFscreen) {
+            if (selectBiliWebFscreen(store.getState())) {
               console.log("enter web fscreen");
               window.clearTimeout(timeout);
               setTimeout(() => setHideView(false), 500);
@@ -56,7 +53,7 @@ const BilibiliPlayer = ({
         const timeout = setTimeout(() => {
           webview.removeEventListener("did-stop-loading", tryReveal, options);
           console.log("web fullscreen timeout");
-          showView();
+          setHideView(false);
         }, 10e3);
         webview.addEventListener("did-stop-loading", tryReveal, options);
       } else {

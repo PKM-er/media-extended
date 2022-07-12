@@ -1,0 +1,24 @@
+{
+  "extends": "@aidenlx/ts-config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@context": ["./context"],
+      "@config": ["./config"],
+      "@store-hooks": ["./hooks"],
+      "@store/*": ["./store/*"],
+      "@utils": ["./utils"],
+      "@utils/*": ["./utils/*"],
+      "@thunk/*": ["./thunk/*"],
+      "@styles/*": ["./component/styles/*"],
+      "@component/*": ["./component/*"],
+      "@hook-player": ["./hook-player"],
+      "@hook-player/*": ["./hook-player/*"],
+    },
+    "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
+    "jsx": "react",
+    "skipLibCheck": true,
+    "allowJs": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

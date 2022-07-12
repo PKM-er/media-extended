@@ -44,4 +44,3 @@ export { getPortWithTimeout } from "./ipc/get-port";
 export * from "./store";
 export * from "./thunk/fetch-meta";
 export * from "./thunk/seek";
-export { initYoutubeAPIReducers } from "./thunk/youtube-api";

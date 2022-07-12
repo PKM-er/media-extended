@@ -1,4 +1,5 @@
 import { AnyAction, Store } from "@reduxjs/toolkit";
+import { createNanoEvents, Emitter } from "nanoevents";
 
 import {
   GOT_INIT_STATE,
@@ -17,7 +18,7 @@ export default class MessageHandler {
   private isSynced;
 
   constructor(
-    isHost: boolean,
+    public isHost: boolean,
     private allowed?: (action: AnyAction) => boolean,
   ) {
     this.isSynced = isHost;

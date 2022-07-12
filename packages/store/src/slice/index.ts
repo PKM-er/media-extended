@@ -4,10 +4,10 @@ import {
   compose,
   createReducer as _createReducer,
 } from "@reduxjs/toolkit";
-import { executeReducerBuilderCallback } from "@reduxjs/toolkit/dist/mapBuilders";
 
 import type { BasicState } from "./basic";
 import basic from "./basic";
+import { executeReducerBuilderCallback } from "./create-slice";
 import type { PlayerState } from "./player";
 import player from "./player";
 
@@ -26,11 +26,12 @@ const createReducer = (
       () => undefined as any,
       ...executeReducerBuilderCallback(extra),
     );
-    return compose(
-      extraReducer,
-      mainReducer, // must be last,
-      // since no init state provided to extra reducer
-    );
+    const reducer: typeof mainReducer = (state, action) => {
+      state = mainReducer(state, action);
+      state = extraReducer(state, action);
+      return state!;
+    };
+    return reducer;
   } else {
     return mainReducer;
   }
@@ -38,7 +39,6 @@ const createReducer = (
 
 export * from "./basic";
 export * from "./player";
-export * from "./player/meta/types";
-export * from "./player/source/types";
-
+export { Controls } from "./player/slice/interface";
+export { LARGE_CURRENT_TIME } from "./player/slice/status";
 export default createReducer;

@@ -2,19 +2,22 @@ import { PlayerContext } from "@context";
 import { getYoutubeEventHandlers } from "@hook-player/events";
 import { onStartYtb } from "@hook-player/on-start";
 import { hookYoutubeState } from "@hook-player/subc-state";
-import { useAppSelector, usePlayerStore } from "@store-hooks";
+import { useAppDispatch, useAppSelector, usePlayerStore } from "@store-hooks";
 import { CoreEventHandler } from "@utils";
 import { useWillUnmount } from "@utils/hooks";
 import { YoutubeMedia } from "@utils/media";
-import { useUpdateEffect } from "ahooks";
-import { PlayerType } from "mx-store";
-import { PlayerStore } from "mx-store";
-import { useContext, useMemo, useRef } from "react";
+import { useMemoizedFn, useUpdateEffect } from "ahooks";
+import {
+  handlePlayerReady,
+  PlayerType,
+  selectUserSeeking,
+  selectYoutubeProps,
+} from "mx-store";
+import Youtube, { YoutubePlayerEvents } from "mx-youtube";
+import { useContext, useMemo, useRef, useState } from "react";
 import React from "react";
 import { useCallback } from "react";
 
-import YoutubeBase from "./base";
-import { YoutubePlayerEvents } from "./event";
 import { PlayerRef } from "./utils";
 
 const useEventHandler = (handler: CoreEventHandler<YoutubeMedia>) =>
@@ -43,15 +46,12 @@ const useEvents = (): YoutubePlayerEvents => {
   };
 };
 
-const useActions = (ref: PlayerRef) => {
+const useActions = (ready: boolean, ref: PlayerRef) => {
   const store = usePlayerStore();
 
   const { actions } = useContext(PlayerContext);
-  const ready = useAppSelector(
-    (state) => state.youtube.playerStatus === "ready",
-  );
+
   useUpdateEffect(() => {
-    if (!ready) return;
     const media = new YoutubeMedia(ref.current!);
     onStartYtb(media, store);
     return hookYoutubeState(media, store, actions);
@@ -65,10 +65,9 @@ const YoutubePlayer = ({
   style?: React.CSSProperties;
   className?: string;
 }) => {
-  const videoId = useAppSelector((state) => {
-    const source = state.source;
-    if (source.type !== PlayerType.youtubeAPI) return null;
-    return source.id;
+  const videoId = useAppSelector(({ player }) => {
+    if (player.type !== PlayerType.youtubeAPI) return null;
+    return player.source.id;
   });
 
   const ref: PlayerRef = useRef(null);
@@ -78,9 +77,28 @@ const YoutubePlayer = ({
     style,
     className,
     ...useEvents(),
+    ...useAppSelector(selectYoutubeProps),
+    seeking: useAppSelector(selectUserSeeking),
   };
-  useActions(ref);
 
-  return videoId ? <YoutubeBase videoId={videoId} {...props} /> : null;
+  const [playerReady, setPlayerReady] = useState(false);
+  useActions(playerReady, ref);
+
+  const dispatch = useAppDispatch();
+  const handleReady = useMemoizedFn<YT.PlayerEventHandler<YT.PlayerEvent>>(
+    ({ target: player }) => {
+      setPlayerReady(true);
+      dispatch(
+        handlePlayerReady({
+          availableSpeeds: player.getAvailablePlaybackRates(),
+          duration: player.getDuration(),
+        }),
+      );
+    },
+  );
+
+  return videoId ? (
+    <Youtube videoId={videoId} {...props} onReady={handleReady} />
+  ) : null;
 };
 export default YoutubePlayer;

@@ -2,10 +2,11 @@ import "@styles/text-tracks.less";
 
 import { useAppSelector } from "@store-hooks";
 import cls from "classnames";
+import { selectActiveCues } from "mx-store";
 import React from "react";
 
 const TextTracks = () => {
-  const content = useAppSelector((state) => state.interface.activeCues);
+  const content = useAppSelector(selectActiveCues);
   return (
     <div className="mx__text-track-container">
       {/* mostly used for positioning */}

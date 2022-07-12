@@ -1,4 +1,5 @@
 import { useAppSelector } from "@store-hooks";
+import { selectRatio } from "mx-store";
 
 import { useSize } from ".";
 
@@ -7,7 +8,7 @@ const useKeepRatio = (
 ): "width" | "height" => {
   const size = useSize(container),
     videoRatio = useAppSelector((state) => {
-      const ratio = state.interface.ratio;
+      const ratio = selectRatio(state);
       if (ratio === null) return 16 / 9;
       if (ratio === 0) return Infinity;
       const [width, height] = ratio.split("/");

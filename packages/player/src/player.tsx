@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "@store-hooks";
 import { useAspectRatio, useKeepRatio } from "@utils/hooks";
 import { useMemoizedFn } from "ahooks";
 import cls from "classnames";
-import { isHTMLPlayerType, PlayerType } from "mx-store";
+import { isHTMLPlayerType, PlayerType, selectFilter } from "mx-store";
 import { dragSeek, dragSeekEnd } from "mx-store";
 import { selectPaused, selectPlayerType } from "mx-store";
 import React, { useCallback, useRef } from "react";
@@ -55,7 +55,7 @@ const Player = ({
 
   const keepRatio = useKeepRatio(containerRef);
 
-  const filter = useAppSelector((state) => state.interface.filter);
+  const filter = useAppSelector(selectFilter);
   const ratioProps = useAspectRatio(keepRatio, [
     "mx__video-wrapper",
     { "mx__video-filter": filter },

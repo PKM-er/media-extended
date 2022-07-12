@@ -137,7 +137,7 @@ importers:
       '@aidenlx/prettier-config': ^0.1.0
       '@aidenlx/release-it-config': ^0.1.7
       '@aidenlx/ts-config': ^0.1.2
-      '@codemirror/language': github:lishid/cm-language
+      '@codemirror/language': https://github.com/lishid/cm-language/tarball/master
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
       '@craftamap/esbuild-plugin-html': ^0.4.0
@@ -195,7 +195,7 @@ importers:
       mx-lib: workspace:*
       mx-player: workspace:*
       mx-store: workspace:*
-      obsidian: ^0.15.1
+      obsidian: 0.15.2
       open: ^8.4.0
       path-browserify: ^1.0.1
       prettier: ^2.5.1
@@ -257,7 +257,7 @@ importers:
       '@aidenlx/prettier-config': 0.1.0_prettier@2.6.2
       '@aidenlx/release-it-config': 0.1.11_oloipdfh7yfeqppmimytlaief4
       '@aidenlx/ts-config': 0.1.5_rrkaqx5mkvti5nim2xqiu732gu
-      '@codemirror/language': github.com/lishid/cm-language/b32c52b99603deef33dd607600ce32d3cc2f83c1
+      '@codemirror/language': '@github.com/lishid/cm-language/tarball/master'
       '@codemirror/state': 6.0.1
       '@codemirror/view': 6.0.1
       '@craftamap/esbuild-plugin-html': 0.4.0_esbuild@0.14.39
@@ -291,7 +291,7 @@ importers:
       eslint-plugin-react-hooks: 4.5.0_eslint@8.16.0
       eslint-plugin-simple-import-sort: 7.0.0_eslint@8.16.0
       eslint-plugin-workspaces: 0.7.0
-      obsidian: 0.15.1_r6rof3sdin6djddni65a5vqiki
+      obsidian: 0.15.2_r6rof3sdin6djddni65a5vqiki
       open: 8.4.0
       prettier: 2.6.2
       release-it: 14.14.3
@@ -329,7 +329,7 @@ importers:
       '@typescript-eslint/eslint-plugin': ^5.10.0
       '@typescript-eslint/parser': ^5.10.0
       '@vimeo/player': ^2.16.4
-      ahooks: ^3.3.0
+      ahooks: ^3.5.2
       assert-never: ^1.2.1
       classnames: ^2.3.1
       color: ^4.2.3
@@ -354,6 +354,7 @@ importers:
       filenamify: ^5.1.0
       fscreen: ^1.2.0
       iso-639-1: ^2.1.12
+      jotai: ^1.7.2
       js-video-url-parser: ^0.5.1
       load-script: ^2.0.0
       lodash-es: ^4.17.21
@@ -361,6 +362,8 @@ importers:
       mx-base: workspace:*
       mx-lib: workspace:*
       mx-store: workspace:*
+      mx-youtube: workspace:*
+      nanoevents: ^6.0.2
       open: ^8.4.0
       path-browserify: ^1.0.1
       prettier: ^2.5.1
@@ -385,7 +388,7 @@ importers:
       '@react-hook/resize-observer': 1.2.5_react@17.0.2
       '@reduxjs/toolkit': 1.8.1_bjryulbxll5jujtwpu5a2wm2cy
       '@vimeo/player': 2.16.4
-      ahooks: 3.3.12_react@17.0.2
+      ahooks: 3.5.2_react@17.0.2
       assert-never: 1.2.1
       classnames: 2.3.1
       color: 4.2.3
@@ -395,6 +398,7 @@ importers:
       filenamify: 5.1.1
       fscreen: 1.2.0
       iso-639-1: 2.1.13
+      jotai: 1.7.2_react@17.0.2
       js-video-url-parser: 0.5.1
       load-script: 2.0.0
       lodash-es: 4.17.21
@@ -402,6 +406,8 @@ importers:
       mx-base: link:../base
       mx-lib: link:../lib
       mx-store: link:../store
+      mx-youtube: link:../youtube
+      nanoevents: 6.0.2
       path-browserify: 1.0.1
       query-string: 7.1.1
       react: 17.0.2
@@ -484,8 +490,10 @@ importers:
       eslint-plugin-simple-import-sort: ^7.0.0
       eslint-plugin-workspaces: ^0.7.0
       fast-deep-equal: ^3.1.3
+      immer: ^9.0.15
       mx-base: workspace:*
       mx-lib: ^2.11.1
+      nanoevents: ^6.0.2
       path-browserify: ^1.0.1
       prettier: ^2.6.2
       query-string: ^7.1.1
@@ -499,8 +507,10 @@ importers:
       '@reduxjs/toolkit': 1.8.1
       assert-never: 1.2.1
       fast-deep-equal: 3.1.3
+      immer: 9.0.15
       mx-base: link:../base
       mx-lib: link:../lib
+      nanoevents: 6.0.2
       path-browserify: 1.0.1
       query-string: 7.1.1
       redux: 4.2.0
@@ -529,6 +539,73 @@ importers:
       eslint-plugin-workspaces: 0.7.0
       prettier: 2.6.2
       remote-redux-devtools: 0.5.16_redux@4.2.0
+      tslib: 2.4.0
+      typescript: 4.6.4
+
+  packages/youtube:
+    specifiers:
+      '@aidenlx/eslint-config': ^0.1.2
+      '@aidenlx/prettier-config': ^0.1.0
+      '@aidenlx/ts-config': ^0.1.2
+      '@types/lodash-es': ^4.17.6
+      '@types/node': ^17.0.21
+      '@types/react': ^17.0.43
+      '@types/youtube': ^0.0.46
+      '@typescript-eslint/eslint-plugin': ^5.10.0
+      '@typescript-eslint/parser': ^5.10.0
+      ahooks: ^3.5.2
+      cross-env: ^7.0.3
+      eslint: ^8.7.0
+      eslint-config-prettier: ^8.3.0
+      eslint-import-resolver-typescript: ^2.5.0
+      eslint-plugin-import: ^2.25.4
+      eslint-plugin-jsdoc: ^37.6.3
+      eslint-plugin-prefer-arrow: ^1.2.3
+      eslint-plugin-prettier: ^4.0.0
+      eslint-plugin-react: ^7.27.0
+      eslint-plugin-react-hooks: ^4.3.0
+      eslint-plugin-simple-import-sort: ^7.0.0
+      eslint-plugin-workspaces: ^0.7.0
+      fast-deep-equal: ^3.1.3
+      load-script: ^2.0.0
+      monkey-around: ^2.3.0
+      prettier: ^2.5.1
+      react: ^17.0.2
+      react-use-ref-effect: ^1.2.0
+      tslib: ^2.3.1
+      typescript: ^4.5.5
+      use-callback-ref: ^1.2.5
+    dependencies:
+      ahooks: 3.5.2_react@17.0.2
+      fast-deep-equal: 3.1.3
+      load-script: 2.0.0
+      monkey-around: 2.3.0
+      react: 17.0.2
+      react-use-ref-effect: 1.2.0_react@17.0.2
+      use-callback-ref: 1.3.0_hx2b44akkvgcgvvtmk7ds2qk6q
+    devDependencies:
+      '@aidenlx/eslint-config': 0.1.2_zt2gfb7jakfjci23ddtzcgdnle
+      '@aidenlx/prettier-config': 0.1.0_prettier@2.6.2
+      '@aidenlx/ts-config': 0.1.5_rrkaqx5mkvti5nim2xqiu732gu
+      '@types/lodash-es': 4.17.6
+      '@types/node': 17.0.35
+      '@types/react': 17.0.45
+      '@types/youtube': 0.0.46
+      '@typescript-eslint/eslint-plugin': 5.25.0_jorowkvdqu6pwramweg5le7ncu
+      '@typescript-eslint/parser': 5.25.0_utdtartgf6fqqgkivzeynh76la
+      cross-env: 7.0.3
+      eslint: 8.16.0
+      eslint-config-prettier: 8.5.0_eslint@8.16.0
+      eslint-import-resolver-typescript: 2.7.1_btspkuwbqkl4adpiufzbathtpi
+      eslint-plugin-import: 2.26.0_fc3ah3mafsevgtah47p4cah6me
+      eslint-plugin-jsdoc: 37.9.7_eslint@8.16.0
+      eslint-plugin-prefer-arrow: 1.2.3_eslint@8.16.0
+      eslint-plugin-prettier: 4.0.0_j7rsahgqtkecno6yauhsgsglf4
+      eslint-plugin-react: 7.30.0_eslint@8.16.0
+      eslint-plugin-react-hooks: 4.5.0_eslint@8.16.0
+      eslint-plugin-simple-import-sort: 7.0.0_eslint@8.16.0
+      eslint-plugin-workspaces: 0.7.0
+      prettier: 2.6.2
       tslib: 2.4.0
       typescript: 4.6.4
 
@@ -1149,8 +1226,8 @@ packages:
       '@lezer/common': 1.0.0
     dev: true
 
-  /@lezer/lr/1.0.0:
-    resolution: {integrity: sha512-k6DEqBh4HxqO/cVGedb6Ern6LS7K6IOzfydJ5WaqCR26v6UR9sIFyb6PS+5rPUs/mXgnBR/QQCW7RkyjSCMoQA==}
+  /@lezer/lr/1.1.0:
+    resolution: {integrity: sha512-Iad04uVwk1PvSnj25mqj7zEEIRAsasbsTRmVzI0AUTs/+1Dz1//iYAaoLr7A+Xa7bZDfql5MKTxZmSlkYZD3Dg==}
     dependencies:
       '@lezer/common': 1.0.0
     dev: true
@@ -1376,7 +1453,7 @@ packages:
       react-redux:
         optional: true
     dependencies:
-      immer: 9.0.14
+      immer: 9.0.15
       redux: 4.2.0
       redux-thunk: 2.4.1_redux@4.2.0
       reselect: 4.1.5
@@ -1393,7 +1470,7 @@ packages:
       react-redux:
         optional: true
     dependencies:
-      immer: 9.0.14
+      immer: 9.0.15
       react: 17.0.2
       react-redux: 7.2.8_sfoxds7t5ydpegc3knd667wn6m
       redux: 4.2.0
@@ -1928,6 +2005,23 @@ packages:
 
   /ahooks/3.3.12_react@17.0.2:
     resolution: {integrity: sha512-SrsANUKn7lD11KwJo5YzrGRxQaPe21hvKkrvqB0/JtcJGo2RKl5WvtGjVf5WgpaPaPp1Lw7p5AJssmFO8IS2bw==}
+    engines: {node: '>=8.0.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      '@types/js-cookie': 2.2.7
+      ahooks-v3-count: 1.0.0
+      dayjs: 1.11.2
+      intersection-observer: 0.12.0
+      js-cookie: 2.2.1
+      lodash: 4.17.21
+      react: 17.0.2
+      resize-observer-polyfill: 1.5.1
+      screenfull: 5.2.0
+    dev: false
+
+  /ahooks/3.5.2_react@17.0.2:
+    resolution: {integrity: sha512-0OrV3/9s339comBg/F+d9Q7lhZERZK3K5f1J8ebK3z076Kc4KkeGc1MLalFRG+95nVA0wUCZ71oJMs66fIU2Uw==}
     engines: {node: '>=8.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
@@ -4360,8 +4454,8 @@ packages:
     dev: true
     optional: true
 
-  /immer/9.0.14:
-    resolution: {integrity: sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==}
+  /immer/9.0.15:
+    resolution: {integrity: sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==}
     dev: false
 
   /import-cwd/3.0.0:
@@ -4752,6 +4846,43 @@ packages:
       es-get-iterator: 1.1.2
       iterate-iterator: 1.0.2
     dev: true
+
+  /jotai/1.7.2_react@17.0.2:
+    resolution: {integrity: sha512-ksvpW1Wu+/HwW1iDYq23PpXLu2df5Vv+eWw70jRAx7IEY4c+qRsORULnqPFurSy/X8LSoPcRhVDJx/cyf8jjMg==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      '@babel/core': '*'
+      '@babel/template': '*'
+      '@urql/core': '*'
+      immer: '*'
+      optics-ts: '*'
+      react: '>=16.8'
+      react-query: '*'
+      valtio: '*'
+      wonka: '*'
+      xstate: '*'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@babel/template':
+        optional: true
+      '@urql/core':
+        optional: true
+      immer:
+        optional: true
+      optics-ts:
+        optional: true
+      react-query:
+        optional: true
+      valtio:
+        optional: true
+      wonka:
+        optional: true
+      xstate:
+        optional: true
+    dependencies:
+      react: 17.0.2
+    dev: false
 
   /js-cookie/2.2.1:
     resolution: {integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==}
@@ -5231,6 +5362,11 @@ packages:
     resolution: {integrity: sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==}
     dev: true
 
+  /nanoevents/6.0.2:
+    resolution: {integrity: sha512-FRS2otuFcPPYDPYViNWQ42+1iZqbXydinkRHTHFxrF4a1CpBfmydR9zkI44WSXAXCyPrkcGtPk5CnpW6Y3lFKQ==}
+    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+    dev: false
+
   /nanoid/2.1.11:
     resolution: {integrity: sha512-s/snB+WGm6uwi0WjsZdaVcuf3KJXlfGl2LcxgwkEwJF0D/BWzVWAZW/XY4bFaiR7s0Jk3FPvlnepg1H1b1UwlA==}
 
@@ -5394,8 +5530,8 @@ packages:
       moment: 2.29.1
     dev: true
 
-  /obsidian/0.15.1_r6rof3sdin6djddni65a5vqiki:
-    resolution: {integrity: sha512-zE6jq3F/iMJTZ5x3lmn7OClS2U+T4VGbAsLrPmyJtc3X2UEEBmXbU4EVrx2+PmjVbgPie/etPWZvP9ZGwfgdAw==}
+  /obsidian/0.15.2_r6rof3sdin6djddni65a5vqiki:
+    resolution: {integrity: sha512-vN+MNwNmyXxyrIrQnc1tDquZYf1Z15Jl63pIBvHRMIDY8jIG4bSQxBVJSqH1vruKcqRd6TPnhpicrfj7yDKYGQ==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
@@ -7288,17 +7424,15 @@ packages:
     resolution: {integrity: sha512-/N5GEDauLHz2uGnuJXWO1Wfib4EC+q4yp9C1jojM7RubwEKADqIqMcYpETMm1lRop403fi3v1qTOdgDE8DIOdw==}
     dev: true
 
-  github.com/lishid/cm-language/b32c52b99603deef33dd607600ce32d3cc2f83c1:
-    resolution: {tarball: https://codeload.github.com/lishid/cm-language/tar.gz/b32c52b99603deef33dd607600ce32d3cc2f83c1}
+  '@github.com/lishid/cm-language/tarball/master':
+    resolution: {tarball: https://github.com/lishid/cm-language/tarball/master}
     name: '@codemirror/language'
     version: 6.0.0
-    prepare: true
-    requiresBuild: true
     dependencies:
       '@codemirror/state': 6.0.1
       '@codemirror/view': 6.0.1
       '@lezer/common': 1.0.0
       '@lezer/highlight': 1.0.0
-      '@lezer/lr': 1.0.0
+      '@lezer/lr': 1.1.0
       style-mod: 4.0.0
     dev: true

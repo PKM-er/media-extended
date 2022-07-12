@@ -1,7 +1,6 @@
-import { GetReducer } from "../utils";
-import { PlayerState } from ".";
+import { createAction } from "@reduxjs/toolkit";
 
-export const getReducer: GetReducer<PlayerState> = (cr) => cr;
+import { BasicPlayerStatus } from "./typings";
 
 export const clampTime = (time: number, duration: number | null) => {
   if (duration && time > duration) {
@@ -12,17 +11,22 @@ export const clampTime = (time: number, duration: number | null) => {
   return time;
 };
 
-// export const setVolumeTo = (newVolume: number, state: ControlledState) => {
-//   if (newVolume < 0) {
-//     state.volume = 0;
-//   } else if (newVolume > 1) {
-//     state.volume = 1;
-//   } else {
-//     state.volume = newVolume;
-//   }
-// };
+export const setVolumeTo = (newVolume: number, state: BasicPlayerStatus) => {
+  if (newVolume < 0) {
+    state.volume = 0;
+  } else if (newVolume > 1) {
+    state.volume = 1;
+  } else {
+    state.volume = newVolume;
+  }
+};
 
 export const checkDuration = (duration: unknown): duration is number =>
   typeof duration === "number" && !!duration && duration > 0;
 
 export const trunc = (number: number) => Math.trunc(number * 20) / 20;
+
+export const createPlayerAction: typeof createAction = ((
+  type: string,
+  ...args: any
+) => (createAction as any)("player/" + type, ...args)) as any;

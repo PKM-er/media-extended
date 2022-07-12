@@ -3,7 +3,7 @@ import { PlayerStore, selectCurrentTime } from "mx-store";
 
 const onStart = (player: Media, store: PlayerStore) => {
   const currentTime = selectCurrentTime(store.getState());
-  if (currentTime > 0) {
+  if (currentTime && currentTime > 0) {
     player.seekTo(currentTime);
   }
 };

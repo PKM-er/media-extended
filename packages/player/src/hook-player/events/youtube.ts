@@ -1,17 +1,29 @@
-import { EventHandlers } from "@component/youtube/event";
 import { YoutubeMedia } from "@utils/media";
 import assertNever from "assert-never";
-import { handlePause, handlePlaying } from "mx-store";
 import {
   handleDurationChange,
   handleEnded,
   handleError,
+  handlePause,
+  handlePlaying,
   handleSeeked,
+  handleStateChange,
   handleTimeUpdate,
   handleWaiting,
+  PlayerStore,
+  PlayerType,
+  selectAutoplay,
+  selectDuration,
+  selectError,
+  selectHasStarted,
+  selectIsCustomControls,
+  selectLoop,
+  selectMuted,
+  selectPaused,
+  selectSeeking,
 } from "mx-store";
-import { handleStateChange } from "mx-store";
-import { PlayerStore, selectDuration, selectIsCustomControls } from "mx-store";
+import { YoutubeAPIStatus } from "mx-store/src/slice/player/typings/youtube-api";
+import { EventHandlers } from "mx-youtube";
 
 import { updateBufferYtb } from "../common";
 import generalEventHandlers from "./general";
@@ -33,7 +45,7 @@ const getYoutubeEventHandlers = (store: PlayerStore) => {
 
   const onerror: EventHandlers["onError"] = ({ data: code }) => {
     // YouTube may fire onError twice, so only handle it once
-    if (!store.getState().status.error) {
+    if (!selectError(store.getState())) {
       const message = errorMessages[code] || "An unknown error occured";
       store.dispatch(handleError({ message, code }));
     }
@@ -65,10 +77,18 @@ const getStateChangeHandler =
   (store: PlayerStore): EventHandlers["onStateChange"] =>
   ({ data, target: instance }) => {
     const { dispatch } = store,
-      state = store.getState(),
-      { loop, autoplay, paused, muted } = state.controlled,
+      state = store.getState();
+    if (state.player.type !== PlayerType.youtubeAPI) {
+      throw new Error("Unexpected player type, expecting: youtubeAPI");
+    }
+    const loop = selectLoop(state),
+      autoplay = selectAutoplay(state),
+      paused = selectPaused(state),
+      muted = selectMuted(state),
+      seeking = selectSeeking(state),
+      duration = selectDuration(state),
+      hasStarted = selectHasStarted(state),
       customControls = selectIsCustomControls(state),
-      { seeking, hasStarted, duration } = state.status,
       seeked =
         seeking &&
         [YT.PlayerState.PLAYING, YT.PlayerState.PAUSED].includes(data);
@@ -82,8 +102,10 @@ const getStateChangeHandler =
     switch (data) {
       case YT.PlayerState.UNSTARTED:
         setTimeout(() => {
+          const state = store.getState();
           if (
-            store.getState().youtube.playerState === YT.PlayerState.UNSTARTED
+            state.player.type === PlayerType.youtubeAPI &&
+            state.player.status.YTPlayerState === YT.PlayerState.UNSTARTED
           ) {
             dispatch(handleTimeUpdate(0));
           }

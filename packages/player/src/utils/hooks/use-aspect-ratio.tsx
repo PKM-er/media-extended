@@ -3,7 +3,7 @@ import "@styles/aspect-ratio.less";
 
 import { useAppSelector } from "@store-hooks";
 import cls, { Argument } from "classnames";
-import { PlayerType } from "mx-store";
+import { PlayerType, selectRatio } from "mx-store";
 import { selectPlayerType } from "mx-store";
 import React from "react";
 
@@ -25,7 +25,7 @@ const useAspectRatio = (
   _className?: Argument[],
 ) => {
   const provider = useAppSelector(selectPlayerType);
-  let ratio = useAppSelector((state) => state.interface.ratio);
+  let ratio = useAppSelector(selectRatio);
   if (ratio === null && provider) {
     ratio = DefaultRatio[provider];
   }

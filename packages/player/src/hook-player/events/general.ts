@@ -28,7 +28,7 @@ const generalEventHandlers = <M extends Media>(store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store),
     { dispatch } = store;
 
-  let frag: [number, number] | null, loop: boolean;
+  let frag: [number, number] | null, loop: boolean | undefined;
   const toUnload = [
     subscribe(selectFrag, (newFrag) => (frag = newFrag)),
     subscribe(selectLoop, (newLoop) => (loop = newLoop)),
@@ -42,7 +42,7 @@ const generalEventHandlers = <M extends Media>(store: PlayerStore) => {
     pause: () => dispatch(handlePause()),
     timeupdate: (media: M) => {
       dispatch(handleTimeUpdate(media.currentTime));
-      restrictTimeOnTimeUpdate(frag, media, loop);
+      restrictTimeOnTimeUpdate(frag, media, loop ?? false);
     },
     volumechange: (media: M) =>
       dispatch(

@@ -1,6 +1,6 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@store-hooks";
-import { toggleDanmaku } from "mx-store";
+import { selectDanmaku, toggleDanmaku } from "mx-store";
 import { PlayerType } from "mx-store";
 import React, { useCallback } from "react";
 
@@ -13,7 +13,7 @@ export const DanmakuButton = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function DanmakuButton(props, ref) {
-    const danmakuOn = useAppSelector((state) => state.bilibili.danmaku);
+    const danmakuOn = useAppSelector(selectDanmaku);
     const dispatch = useAppDispatch();
 
     const handleClick = useCallback(
@@ -21,10 +21,7 @@ export const DanmakuButton = React.forwardRef<
       [dispatch],
     );
 
-    const isBili = useAppSelector(
-      (state) => state.source.type === PlayerType.bilibili,
-    );
-    return isBili ? (
+    return danmakuOn !== null ? (
       <Toggle
         {...props}
         ref={ref}

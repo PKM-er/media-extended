@@ -1,6 +1,6 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import { Provider } from "mx-base";
-import { metaSlice } from "mx-store";
+import { selectMeta } from "mx-store";
 
 import { logNotMatch, ReducerBuilder } from "./common";
 
@@ -9,26 +9,29 @@ export interface YoutubeMeta {
 }
 const source = "fetchYoutubeMeta";
 
-export const name = [metaSlice.name, source].join("/");
+export const name = ["meta", source].join("/");
 
 export const fetchYoutubeMetaReducers = (builder: ReducerBuilder) =>
   builder
-    .addCase(name + "/pending", ({ meta }) => {
-      if (meta.provider === Provider.youtube) meta.title = "";
+    .addCase(name + "/pending", (state) => {
+      const meta = selectMeta(state);
+      if (meta?.provider === Provider.youtube) meta.title = "";
       else logNotMatch(source, meta);
     })
     .addCase<string, PayloadAction<YoutubeMeta>>(
       name + "/fulfilled",
-      ({ meta }, action) => {
+      (state, action) => {
+        const meta = selectMeta(state);
         const { title } = action.payload;
-        if (meta.provider === Provider.youtube) meta.title = title;
+        if (meta?.provider === Provider.youtube) meta.title = title;
         else logNotMatch(source, meta);
       },
     )
     .addCase<string, PayloadAction<unknown>>(
       name + "/rejected",
-      ({ meta }, action) => {
-        if (meta.provider === Provider.bilibili) {
+      (state, action) => {
+        const meta = selectMeta(state);
+        if (meta?.provider === Provider.bilibili) {
         } else logNotMatch(source, meta);
         console.error(`Failed to ${source}: `, action.payload);
       },

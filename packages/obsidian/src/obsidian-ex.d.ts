@@ -48,7 +48,11 @@ declare module "obsidian" {
     ): EventRef;
     on(
       name: "mx:timestamp",
-      callback: (time: number, duration: number, source: MediaMeta) => any,
+      callback: (
+        time: number,
+        duration: number | null,
+        source: MediaMeta,
+      ) => any,
     ): EventRef;
     trigger(
       name: "mx:screenshot",
@@ -71,7 +75,7 @@ declare module "obsidian" {
     trigger(
       name: "mx:timestamp",
       time: number,
-      duration: number,
+      duration: number | null,
       source: MediaMeta,
     ): void;
 

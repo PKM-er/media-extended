@@ -1,5 +1,5 @@
 import { Frag } from "mx-base";
-const { onFragUpdate, onPlay: _onplay, onTimeUpdate: _ontu } = Frag;
+const { onFragUpdate, onPlay: _onplay, onTimeUpdate: _ontimeupdate } = Frag;
 import { useAppSelector } from "@store-hooks";
 import { CoreEventHandler } from "@utils";
 import { useMemoizedFn } from "ahooks";
@@ -16,7 +16,7 @@ export const useTimeFragmentEvents = () => {
       _onplay(fragment, media),
     ),
     onTimeUpdate: useMemoizedFn<CoreEventHandler>((media) =>
-      _ontu(fragment, media, loop),
+      _ontimeupdate(fragment, media, loop ?? false),
     ),
   };
 };

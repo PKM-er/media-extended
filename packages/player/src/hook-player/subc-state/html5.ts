@@ -3,7 +3,7 @@ import { PlayerType } from "mx-store";
 import { getSubscribeFunc, PlayerStore } from "mx-store";
 
 import { selectShouldLoadResource } from "../common";
-import hookState, { getApplyPauseHandler } from "./general";
+import hookState from "./general";
 
 const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store);
@@ -30,14 +30,9 @@ const hookHTMLState = (media: HTMLMedia, store: PlayerStore) => {
       },
       false,
     ),
-    // useApplyPaused
-    getApplyPauseHandler(store, (paused) => {
-      if (media.paused === paused) return null;
-      else return () => media[paused ? "pause" : "play"]();
-    }),
     // pause when seeking
     subscribe(
-      (state) => state.userSeek,
+      (state) => state.player.userSeek,
       (seek, prevSeek) => {
         if (seek && !prevSeek) {
           media.pause();

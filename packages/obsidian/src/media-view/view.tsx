@@ -9,7 +9,17 @@ import type MediaExtended from "@plugin";
 import { ExtensionAccepted } from "mx-base";
 import { Provider } from "mx-base";
 import { Player, seekTo } from "mx-player";
-import { setFragment, setHash } from "mx-store";
+import {
+  isHTMLMediaState,
+  selectMediaSource,
+  selectMeta,
+  selectPlayerType,
+  selectProvider,
+  selectTimeDuration,
+  selectTitle,
+  setFragment,
+  setHash,
+} from "mx-store";
 import { toggleFilter } from "mx-store";
 import { revertDuration } from "mx-store";
 import {
@@ -18,7 +28,7 @@ import {
   selectFrag,
   subscribe,
 } from "mx-store";
-import { isHTMLMediaSource, PlayerType } from "mx-store";
+import { PlayerType } from "mx-store";
 import {
   Command,
   EditableFileView,
@@ -82,8 +92,8 @@ export default class ObMediaView
     this.store.dispatch(setMediaUrlSrc(url));
   }
   getUrl(src = false): string | null {
-    const { meta } = this.store.getState();
-    if (meta.provider !== Provider.obsidian && meta.provider) {
+    const meta = selectMeta(this.store.getState());
+    if (meta && meta.provider !== Provider.obsidian && meta.provider) {
       return meta.url;
     } else return null;
   }
@@ -120,16 +130,14 @@ export default class ObMediaView
     this.pinnedAction.style.display = "none";
 
     this.register(
-      subscribe(
-        this.store,
-        (state) => state.meta.title,
-        () => this.titleEl.setText(this.getDisplayText()),
+      subscribe(this.store, selectTitle, () =>
+        this.titleEl.setText(this.getDisplayText()),
       ),
     );
     this.register(
       subscribe(
         this.store,
-        (state) => state.meta.provider,
+        selectProvider,
         (from) => {
           if (from === Provider.obsidian && Platform.isDesktopApp) {
             this.openExternalAction.style.removeProperty("display");
@@ -160,9 +168,10 @@ export default class ObMediaView
   }
   getDisplayText(): string {
     if (this.file) return this.file.basename;
-    const { provider, title } = this.store.getState().meta;
-    if (provider === Provider.obsidian) return "No Media";
+    const state = this.store.getState();
+    if (selectProvider(state) === Provider.obsidian) return "No Media";
 
+    const title = selectTitle(state);
     let titleText: string;
     if (title === null) {
       titleText = ""; // loading title
@@ -176,21 +185,22 @@ export default class ObMediaView
 
   getState(): MediaState {
     let viewState = super.getState() as MediaState;
-    const state = this.store.getState();
-    const common: Required<MediaStateBase> = {
+    const state = this.store.getState(),
+      [currentTime, duration] = selectTimeDuration(state);
+    const basicState: MediaStateBase = {
       fragment: selectFrag(state),
-      currentTime: selectCurrentTime(state),
-      duration: selectDuration(state),
+      currentTime,
+      duration,
       pinned: this.pinned,
     };
 
     let url;
     if (this.file) {
-      return { ...viewState, ...common };
+      return { ...viewState, ...basicState };
     } else if ((url = this.getUrl())) {
-      return { ...viewState, file: null, url, ...common };
+      return { ...viewState, file: null, url, ...basicState };
     } else {
-      console.error("unexpected state", viewState, state.source);
+      console.error("unexpected state", viewState, state.player);
       return viewState;
       // throw new Error("Failed to get state for media view: unexpected state");
     }
@@ -365,13 +375,16 @@ export default class ObMediaView
             const time = media.currentTime;
             media.load();
             media.currentTime = time;
-            let { paused } = this.store.getState().controlled;
-            if (!paused) await media.play();
+            // let { paused } = this.store.getState().controlled;
+            // if (!paused) await media.play();
           }),
       );
     }
-    const { source } = this.store.getState();
-    if (isHTMLMediaSource(source) && source.type !== PlayerType.audio) {
+    const state = this.store.getState();
+    if (
+      isHTMLMediaState(state.player) &&
+      selectPlayerType(state) !== PlayerType.audio
+    ) {
       menu.addItem((item) =>
         item
           .setIcon("aperture")

@@ -5,6 +5,7 @@ import {
   EnhancedStore,
   ThunkAction,
 } from "@reduxjs/toolkit";
+import { Emitter } from "nanoevents";
 
 import type { MessageHandler } from "./redux-sync";
 import { RootState } from "./slice";
@@ -14,7 +15,9 @@ export type PlayerStore = EnhancedStore<
   AnyAction,
   [ThunkMiddleware<RootState, AnyAction, undefined>]
 > &
-  Record<"webviewMsg" | "windowMsg", MessageHandler>;
+  Record<"webviewMsg" | "windowMsg", MessageHandler> & {
+    emitter: Emitter<EventMap>;
+  };
 export type AppDispatch = PlayerStore["dispatch"];
 
 export type AppThunk<
@@ -25,6 +28,8 @@ export type AppThunk<
 
 import equal from "fast-deep-equal/es6";
 import type { ThunkMiddleware } from "redux-thunk";
+
+import { EventMap } from "./slice/player/direct-exec";
 
 export const observeStore = <T>(
   store: PlayerStore,

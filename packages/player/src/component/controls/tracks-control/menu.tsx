@@ -5,14 +5,14 @@ import {
 } from "@mui/base";
 import MenuItem from "@mui/base/MenuItemUnstyled";
 import { useAppDispatch, useAppSelector } from "@store-hooks";
-import { setActiveTrack, toggleTracks } from "mx-store";
+import { selectTextTracks, setActiveTrack, toggleTracks } from "mx-store";
 import React from "react";
 import { FiCheck } from "react-icons/fi";
 
 export const TracksMenu = () => {
-  const tracks = useAppSelector((state) => state.interface.textTracks.list);
-  const active = useAppSelector((state) => state.interface.textTracks.active);
-  const enabled = useAppSelector((state) => state.interface.textTracks.enabled);
+  const tracks = useAppSelector((state) => selectTextTracks(state).list);
+  const active = useAppSelector((state) => selectTextTracks(state).active);
+  const enabled = useAppSelector((state) => selectTextTracks(state).enabled);
   const dispatch = useAppDispatch();
   return (
     <Menu className="menu">

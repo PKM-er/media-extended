@@ -1,5 +1,5 @@
 import { getBuffered } from "@utils/get-buffered";
-import { setRatio } from "mx-store";
+import { selectAutoplay, selectMediaSource, setRatio } from "mx-store";
 import { handleProgress } from "mx-store";
 import { AppDispatch, RootState, selectIsNativeControls } from "mx-store";
 
@@ -25,7 +25,7 @@ export const updateBufferH5 = (
 export const updateBufferYtb = (
   player: YT.Player,
   dispatch: AppDispatch,
-  duration: number | null,
+  duration: number | null | undefined,
 ) => {
   const fraction = player.getVideoLoadedFraction();
   duration = duration || player.getDuration();
@@ -35,6 +35,8 @@ export const updateBufferYtb = (
 };
 
 export const selectYtbResetProp = (state: RootState) =>
-    [state.controlled.autoplay, selectIsNativeControls(state)] as const,
-  selectShouldLoadResource = ({ source }: RootState) =>
-    [source.type, source.src] as const;
+    [selectAutoplay(state), selectIsNativeControls(state)] as const,
+  selectShouldLoadResource = (state: RootState) => {
+    const source = selectMediaSource(state);
+    return [state.player.type, source?.src] as const;
+  };

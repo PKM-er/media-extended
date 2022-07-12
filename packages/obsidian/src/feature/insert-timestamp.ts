@@ -23,13 +23,14 @@ export const registerInsetTimestampHandler = (plugin: MediaExtended) => {
   );
   const getTimeStamp = (
     currentTime: number,
-    duration: number,
+    duration: number | null,
     meta: MediaMeta,
   ): string | null => {
     const { timestampOffset: offset } = plugin.settings;
     let offsetCurrentTime = currentTime - offset;
     if (currentTime - offset < 0) offsetCurrentTime = 0;
-    else if (currentTime - offset > duration) offsetCurrentTime = duration;
+    else if (duration && currentTime - offset > duration)
+      offsetCurrentTime = duration;
 
     if (meta.provider === Provider.obsidian) {
       const file = plugin.app.vault.getAbstractFileByPath(meta.file.path);

@@ -4,7 +4,7 @@ import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@store-hooks";
 import { secondToDuration } from "mx-base";
 import { isTimestamp } from "mx-lib";
-import { progressBarSeek, progressBarSeekEnd } from "mx-store";
+import { progressBarSeek, progressBarSeekEnd, selectUserSeek } from "mx-store";
 import {
   selectBuffered,
   selectCurrentTime,
@@ -38,7 +38,7 @@ const ProgressBar = () => {
   const dispatch = useAppDispatch();
 
   const currentTime = useAppSelector(selectCurrentTime),
-    seekTime = useAppSelector((state) => state.userSeek?.currentTime);
+    seekTime = useAppSelector((state) => selectUserSeek(state)?.currentTime);
 
   const range = useTimeRange();
 

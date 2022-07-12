@@ -1,6 +1,6 @@
 import { debounce } from "lodash-es";
 import { handleTrackListChange, InterfaceState } from "mx-store";
-import { updateCues } from "mx-store";
+import { handleCueChange } from "mx-store";
 import { PlayerStore, selectIsCustomControls } from "mx-store";
 
 import _hookHTMLEvents from "./html5";
@@ -20,7 +20,7 @@ export const hookHTMLEvents = (
 const hookTracksUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
   const trackList = player.textTracks;
   let handleTrackUpdate = () => {
-    const prevActive = store.getState().interface.textTracks.active;
+    const prevActive = store.getState().player.interface.textTracks.active;
     let tracks: InterfaceState["textTracks"] = {
       list: [],
       active: -1,
@@ -43,7 +43,10 @@ const hookTracksUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
         tracks.active = i;
         tracks.enabled = true;
       }
-      if (defaultTrack === -1 && store.getState().lang === track.language) {
+      if (
+        defaultTrack === -1 &&
+        store.getState().basic.language === track.language
+      ) {
         defaultTrack = i;
       }
     }
@@ -99,7 +102,7 @@ const hookCueUpdate = (player: HTMLMediaElement, store: PlayerStore) => {
     const activeCues = Array.from(active?.activeCues ?? []).map((cue) =>
       toHTML((cue as VTTCue).getCueAsHTML()),
     );
-    store.dispatch(updateCues(activeCues));
+    store.dispatch(handleCueChange(activeCues));
   };
   const registerCueUpdate = (track: TextTrack) => {
       if (active) unregisterCueUpdate();

@@ -1,6 +1,6 @@
 import { ButtonUnstyledProps } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@store-hooks";
-import { toggleTracks } from "mx-store";
+import { selectTextTracks, toggleTracks } from "mx-store";
 import React, { useCallback } from "react";
 import { MdClosedCaption, MdClosedCaptionDisabled } from "react-icons/md";
 
@@ -14,9 +14,7 @@ export const TracksToggle = React.forwardRef<
 >(
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   function TracksToggle(props, ref) {
-    const enabled = useAppSelector(
-      (state) => state.interface.textTracks.enabled,
-    );
+    const enabled = useAppSelector((state) => selectTextTracks(state).enabled);
 
     const dispatch = useAppDispatch();
 

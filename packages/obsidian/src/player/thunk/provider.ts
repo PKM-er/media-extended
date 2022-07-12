@@ -2,7 +2,7 @@ import getTracks from "@feature/subtitle";
 import assertNever from "assert-never";
 import { getMediaType, parseURL, stripHash } from "mx-base";
 import { Provider } from "mx-base";
-import { SerializableTFile } from "mx-store";
+import { selectHTMLSrc, selectMeta, SerializableTFile } from "mx-store";
 import {
   renameObsidianMedia as _renameOb,
   setDirectLink,
@@ -34,8 +34,8 @@ export const setObsidianMediaSrc =
       console.error("given TFile not media");
       return;
     }
-    const { meta } = getState();
-    if (meta.provider === Provider.obsidian && meta.file.path === file.path) {
+    const meta = selectMeta(getState());
+    if (meta?.provider === Provider.obsidian && meta.file.path === file.path) {
       return; // if file is the same, skip
     }
     dispatch(
@@ -50,11 +50,14 @@ export const setObsidianMediaSrc =
 export const setMediaUrlSrc =
   (url: string): AppThunk =>
   async (dispatch, getState) => {
-    const { meta, source } = getState();
+    const state = getState(),
+      meta = selectMeta(state),
+      sourceSrc = selectHTMLSrc(state);
     const [src] = stripHash(url);
     if (
-      (meta.provider === Provider.html5 && meta.url === src) ||
-      (meta.provider !== Provider.obsidian && source.src === src)
+      meta &&
+      ((meta.provider === Provider.html5 && meta.url === src) ||
+        (meta.provider !== Provider.obsidian && sourceSrc === src))
     ) {
       return; // if url is the same, skip
     }

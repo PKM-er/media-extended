@@ -4,6 +4,11 @@ import {
   enterWebFscreen,
   handleDanmakuChange,
   handleWebFscreenChange,
+  selectAutoplay,
+  selectBiliWebFscreen,
+  selectDanmaku,
+  selectFscreen,
+  selectLoop,
 } from "mx-store";
 import { handleAutoplayChange, handleLoopChange } from "mx-store";
 import { RootState } from "mx-store";
@@ -22,7 +27,7 @@ const inputChangeEvent = new Event("change");
 const hookInputButton = (
   findIn: HTMLElement,
   classname: string,
-  selector: (state: RootState) => boolean,
+  selector: (state: RootState) => boolean | null | undefined,
   action: (payload: boolean) => PayloadAction<boolean>,
 ) => {
   const checkbox = findIn.querySelector<HTMLInputElement>(
@@ -35,7 +40,11 @@ const hookInputButton = (
       }
     });
     subscribe(selector, (toggle) => {
-      if (checkbox.checked !== toggle) {
+      if (
+        toggle !== null &&
+        toggle !== undefined &&
+        checkbox.checked !== toggle
+      ) {
         checkbox.checked = toggle;
         checkbox.dispatchEvent(inputChangeEvent);
       }
@@ -74,20 +83,17 @@ const hookWebFscreenState = () => {
   )!;
 
   subscribe(
-    (state) => state.bilibili.webFscreen,
+    selectBiliWebFscreen,
     (fullscreen) => {
-      setWebFscreen(fullscreen, button);
+      if (fullscreen !== null) setWebFscreen(fullscreen, button);
     },
     true, // by default, will enter web fullscreen
   );
 
   // applyParentFullscreen
-  subscribe(
-    (state) => state.interface.fullscreen,
-    (fullscreen) => {
-      fullscreen && dispatch(applyParentFullscreen());
-    },
-  );
+  subscribe(selectFscreen, (fullscreen) => {
+    fullscreen && dispatch(applyParentFullscreen());
+  });
 };
 
 const setWebFscreen = (fullscreen: boolean, button: HTMLElement) => {
@@ -113,20 +119,20 @@ export const hookBilibiliControls = () => {
   hookInputButton(
     ref.settingsMenuWarp!,
     SettingMenuToggleCls.autoplay,
-    (s) => s.controlled.autoplay,
+    selectAutoplay,
     handleAutoplayChange,
   );
   hookInputButton(
     ref.settingsMenuWarp!,
     SettingMenuToggleCls.repeat,
-    (s) => s.controlled.loop,
+    selectLoop,
     handleLoopChange,
   );
   // danmaku toggle
   hookInputButton(
     ref.playerContainer!,
     "bilibili-player-video-danmaku-switch",
-    (s) => s.bilibili.danmaku,
+    selectDanmaku,
     handleDanmakuChange,
   );
   hookWebFscreenState();
@@ -136,29 +142,26 @@ export const hookBilibiliControls = () => {
 const hookDanmakuButton = () => {
   const findIn = window.__PLAYER_REF__.playerContainer!;
 
-  subscribe(
-    (store) => store.bilibili.danmaku,
-    (danmaku) => {
-      console.log("danmaku updated", danmaku);
-      let tries = 0;
-      const interval = window.setInterval(() => {
-        if (tries > 10) {
-          window.clearInterval(interval);
-          console.error("danmaku button not found");
-          return;
-        }
-        const checkbox = findIn.querySelector<HTMLInputElement>(
-          '.bilibili-player-video-danmaku-switch input[type="checkbox"]',
-        );
-        if (!checkbox) {
-          tries++;
-        } else {
-          checkbox.checked = danmaku;
-          checkbox.dispatchEvent(inputChangeEvent);
-          console.log("danmaiku button set to", danmaku);
-          window.clearInterval(interval);
-        }
-      }, 200);
-    },
-  );
+  subscribe(selectDanmaku, (danmaku) => {
+    if (danmaku === null) return;
+    let tries = 0;
+    const interval = window.setInterval(() => {
+      if (tries > 10) {
+        window.clearInterval(interval);
+        console.error("danmaku button not found");
+        return;
+      }
+      const checkbox = findIn.querySelector<HTMLInputElement>(
+        '.bilibili-player-video-danmaku-switch input[type="checkbox"]',
+      );
+      if (!checkbox) {
+        tries++;
+      } else {
+        checkbox.checked = danmaku;
+        checkbox.dispatchEvent(inputChangeEvent);
+        console.log("danmaiku button set to", danmaku);
+        window.clearInterval(interval);
+      }
+    }, 200);
+  });
 };

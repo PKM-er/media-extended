@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { fetchBiliMetaName } from "mx-player";
-import { metaSlice } from "mx-store";
 import { RootState } from "mx-store";
 import { requestUrl } from "obsidian";
 

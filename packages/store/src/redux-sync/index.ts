@@ -49,13 +49,18 @@ export const createStateSyncMiddleware =
         case SEND_INIT_STATE:
           let state = getState();
           state && msgHandler.sendInitState(state);
+          console.info("[redux-sync] sent init state");
+          // skip reducer, as it will not alter state
+          return;
         case GOT_INIT_STATE:
           // dispatched by onmessage
           // handled only by reducer warpper
           break;
         case REQ_INIT_STATE:
           msgHandler.requsetInitState();
-          break;
+          console.info("[redux-sync] request init state");
+          // skip reducer, as it will not alter state
+          return;
         default:
           if (
             !(action as StampedAction).$fromRemote &&
@@ -73,6 +78,7 @@ export const withReduxStateSync =
   (state, action) => {
     let initState = state;
     if (action.type === GOT_INIT_STATE) {
+      // recieved init state from remote, apply it to local store
       initState = (action as GotInitStateAction).payload;
     }
     return appReducer(initState, action);

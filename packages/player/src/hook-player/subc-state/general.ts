@@ -1,35 +1,61 @@
 import { Media } from "mx-base";
 import { Frag } from "mx-base";
 const { onFragUpdate } = Frag;
-import { lockPlayPauseEvent, unlockPlayPauseEvent } from "mx-store";
-import {
-  getSubscribeFunc,
-  PlayerStore,
-  selectFrag,
-  selectPaused,
-  selectSpeed,
-  selectVolumeMute,
-  subscribe,
-} from "mx-store";
+import { getSubscribeFunc, PlayerStore, selectFrag } from "mx-store";
 
 const hookState = (media: Media, store: PlayerStore) => {
   const subscribe = getSubscribeFunc(store);
+
+  let playPromise: Promise<void> | void;
+  const play = async () => {
+    if (!playPromise) {
+      playPromise = media.play();
+      await playPromise;
+      playPromise = undefined;
+    }
+  };
+  const pause = async () => {
+    await playPromise;
+    if (playPromise) playPromise = undefined;
+    media.pause();
+  };
 
   const toUnload: (() => void)[] = [
     // useApplyTimeFragment
     subscribe(selectFrag, (newFrag) => onFragUpdate(newFrag, media)),
     // useApplyPlaybackRate
-    subscribe(selectSpeed, (rate) => {
+    store.emitter.on("setPlaybackRate", (rate) => {
       media.playbackRate !== rate && (media.playbackRate = rate);
     }),
     // useApplyVolume
-    subscribe(selectVolumeMute, ([muted, volume]) => {
+    store.emitter.on("setVolumeUnmute", (volume) => {
       media.volume !== volume && (media.volume = volume);
-      media.muted !== muted && (media.muted = muted);
+      media.muted = false;
+    }),
+    store.emitter.on("setVolume", (volume) => {
+      media.volume !== volume && (media.volume = volume);
+    }),
+    store.emitter.on("setVolumeByOffest", (volumeOffset) => {
+      media.volume = volumeOffset / 100 + media.volume;
+    }),
+    store.emitter.on("setMute", (muted) => {
+      media.muted = muted;
+    }),
+    store.emitter.on("toggleMute", () => {
+      media.muted = !media.muted;
+    }),
+    store.emitter.on("togglePlay", () => {
+      media.paused ? play() : pause();
+    }),
+    store.emitter.on("play", () => {
+      if (media.paused) play();
+    }),
+    store.emitter.on("pause", () => {
+      if (!media.paused) pause();
     }),
     // useApplyUserSeek
     subscribe(
-      (state) => state.userSeek,
+      (state) => state.player.userSeek,
       (seek, prevSeek) => {
         let params:
           | [time: number, options: { allowSeekAhead: boolean }]
@@ -51,21 +77,3 @@ const hookState = (media: Media, store: PlayerStore) => {
   return () => toUnload.forEach((unload) => unload());
 };
 export default hookState;
-
-/**
- * @param tryApplyPause return function if need to apply pause
- */
-export const getApplyPauseHandler = (
-  store: PlayerStore,
-  tryApplyPause: (paused: boolean) => (() => void | Promise<void>) | null,
-) =>
-  subscribe(store, selectPaused, async (paused) => {
-    const apply = tryApplyPause(paused);
-    if (apply) {
-      store.dispatch(lockPlayPauseEvent());
-      await apply();
-      setTimeout(() => {
-        store.dispatch(unlockPlayPauseEvent());
-      }, 50);
-    }
-  });

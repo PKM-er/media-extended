@@ -15,7 +15,7 @@ const VolumeSilder = () => {
     [dispatch],
   );
 
-  return (
+  return muted !== undefined ? (
     <SliderUnstyled
       classes={{ root: "mx__volume-slider" }}
       aria-label="Volume"
@@ -30,7 +30,7 @@ const VolumeSilder = () => {
       valueLabelDisplay="auto"
       onChange={handleSilderChange}
     />
-  );
+  ) : null;
 };
 
 export default VolumeSilder;
