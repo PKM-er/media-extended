@@ -21,7 +21,7 @@ export const createStoreWithMsgHandler = (
     devTools: process.env.NODE_ENV !== "production",
     enhancers: [],
     middleware: (getDefault) =>
-      getDefault().concat(
+      getDefault({ thunk: { extraArgument: emitter } }).concat(
         createMediaControlMiddleware(emitter),
         createStateSyncMiddleware(webviewMsgHanlder, allowed),
         skipMediaControlAction,

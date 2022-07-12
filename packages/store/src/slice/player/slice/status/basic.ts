@@ -1,8 +1,9 @@
-import { PayloadAction } from "@reduxjs/toolkit";
-import { Fragment } from "mx-base";
-import { getFragFromHash } from "mx-base";
+import { AnyAction, PayloadAction } from "@reduxjs/toolkit";
+import { Fragment, getFragFromHash, is } from "mx-base";
+import { isTimestamp } from "mx-lib";
 import { parse as parseQS } from "query-string";
 
+import { AppThunk } from "../../../../utils";
 import { createSlice } from "../../../create-slice";
 import { BasicPlayerStatus } from "../../typings";
 import { checkDuration, setVolumeTo } from "../../utils";
@@ -20,31 +21,23 @@ export const handleDuration = (
   }
 };
 
+type HashProps = [hash: string, fromLink?: boolean];
+
 const { actions, reducer } = createSlice({
   name: "status",
   state: {} as BasicPlayerStatus,
   reducers: {
-    setHash: (
-      state,
-      action: PayloadAction<[hash: string, fromLink?: boolean]>,
-    ) => {
-      const [hash, fromLink = false] = action.payload;
+    setHash: (state, action: PayloadAction<HashProps>) => {
+      const [hash] = action.payload;
       const query = parseQS(hash),
         frag = getFragFromHash(hash);
       state.fragment = frag;
-      // state.loop = is(query, "loop");
-      // state.autoplay = is(query, "autoplay");
-      // state.muted = is(query, "muted");
-
-      // start playing when timestamp is seeked to
-      // if (fromLink) state.paused = false;
+      state.loop = is(query, "loop");
+      state.autoplay = is(query, "autoplay");
     },
     setFragment: (state, action: PayloadAction<Fragment | null>) => {
       const frag = action.payload;
       state.fragment = frag;
-
-      // start playing when timestamp is seeked to
-      // if (frag && isTimestamp(frag)) state.paused = false;
     },
     handleLoopChange: (status, action: PayloadAction<boolean>) => {
       status.loop = action.payload;
@@ -142,8 +135,6 @@ const { actions, reducer } = createSlice({
 
 export default reducer;
 export const {
-  setFragment,
-  setHash,
   handleAutoplayChange,
   handleDurationChange,
   handleEnded,
@@ -161,3 +152,21 @@ export const {
   updateBasicInfo,
   revertDuration,
 } = actions;
+
+export const setHash =
+  ([hash, fromLink = false]: HashProps): AppThunk =>
+  (dispatch, _, emitter) => {
+    dispatch(actions.setHash([hash, fromLink]));
+    const query = parseQS(hash);
+    emitter.emit("setMute", is(query, "muted"));
+    // start playing when link is opened
+    if (fromLink) emitter.emit("play");
+  };
+
+export const setFragment =
+  (frag: Fragment | null): AppThunk =>
+  (dispatch, _, emitter) => {
+    dispatch(actions.setFragment(frag));
+    // start playing when timestamp is seeked to
+    if (frag && isTimestamp(frag)) emitter.emit("play");
+  };

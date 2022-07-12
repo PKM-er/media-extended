@@ -22,7 +22,7 @@ export type AppDispatch = PlayerStore["dispatch"];
 
 export type AppThunk<
   ReturnType = void,
-  ExtraThunkArg = undefined,
+  ExtraThunkArg = Emitter<EventMap>,
 > = ThunkAction<ReturnType, RootState, ExtraThunkArg, Action<string>>;
 //#endregion
 
