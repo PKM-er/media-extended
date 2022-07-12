@@ -2,7 +2,7 @@ import { produce } from "immer";
 import { AnyAction } from "redux";
 
 import actionReducer from "./slice/action";
-import { Controls } from "./slice/interface";
+import { Controls, initialInterface } from "./slice/interface";
 import interfaceReducer from "./slice/interface";
 import { isInitAction } from "./slice/source";
 import initReducer from "./slice/source/set-source";
@@ -21,14 +21,7 @@ const initialState: NoMediaState = {
   meta: null,
   status: null,
   userSeek: null,
-  interface: {
-    controls: Controls.custom,
-    fullscreen: false,
-    ratio: null,
-    activeCues: null,
-    textTracks: { list: [], active: -1, enabled: true },
-    filter: false,
-  },
+  interface: initialInterface,
   action: {
     getScreenshot: null,
     getTimestamp: false,

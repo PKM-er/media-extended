@@ -10,6 +10,15 @@ export const enum Controls {
 
 type Track = Pick<TextTrack, "kind" | "label" | "language">;
 
+export const initialInterface: InterfaceState = {
+  controls: Controls.custom,
+  fullscreen: false,
+  ratio: null,
+  activeCues: null,
+  textTracks: { list: [], active: -1, enabled: true },
+  filter: false,
+};
+
 export interface InterfaceState {
   controls: Controls;
   fullscreen: boolean;

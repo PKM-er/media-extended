@@ -16,6 +16,7 @@ import { Track } from "../../typings";
 import { BilibiliState } from "../../typings/bilibili";
 import { HTML5MediaState, SerializableTFile } from "../../typings/html5";
 import { YouTubeAPIState } from "../../typings/youtube-api";
+import { initialInterface } from "../interface";
 import { initialStatus } from "../status";
 import { getTitleFromObFile } from "./utils";
 
@@ -50,6 +51,7 @@ const { actions, reducer } = createSlice({
       };
       //#endregion
       state.status = initialStatus;
+      state.interface = initialInterface;
     },
     setHostMedia: (
       _state,
@@ -70,6 +72,7 @@ const { actions, reducer } = createSlice({
             YTAPIStatus: "none",
             YTPlayerState: null,
           };
+          state.interface = initialInterface;
           return;
         case Provider.bilibili:
           state = _state as BilibiliState;
@@ -81,6 +84,7 @@ const { actions, reducer } = createSlice({
             danmaku: false,
             webFscreen: true,
           };
+          state.interface = initialInterface;
           return;
         default:
           console.error("given url not supported: ", src, action.payload);
@@ -109,6 +113,7 @@ const { actions, reducer } = createSlice({
         title: getTitleFromObFile(file),
       };
       state.status = initialStatus;
+      state.interface = initialInterface;
     },
   },
 });
