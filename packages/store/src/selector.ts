@@ -74,7 +74,8 @@ export const selectHTMLSrc = (state: RootState) =>
 export const selectFilter = (state: RootState) => state.player.interface.filter,
   selectRatio = (state: RootState) => state.player.interface.ratio;
 export const selectUserSeek = (state: RootState) => state.player.userSeek,
-  selectUserSeeking = (state: RootState) => !!state.player.userSeek;
+  selectUserSeeking = (state: RootState) => !!state.player.userSeek,
+  selectSeekTime = (state: RootState) => state.player.userSeek?.currentTime;
 
 export const selectYoutubeAPIReady = (state: RootState) =>
     state.player.type === PlayerType.youtubeAPI &&

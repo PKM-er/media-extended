@@ -4,7 +4,7 @@ import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@store-hooks";
 import { secondToDuration } from "mx-base";
 import { isTimestamp } from "mx-lib";
-import { progressBarSeek, progressBarSeekEnd, selectUserSeek } from "mx-store";
+import { progressBarSeek, progressBarSeekEnd, selectSeekTime } from "mx-store";
 import {
   selectBuffered,
   selectCurrentTime,
@@ -38,7 +38,7 @@ const ProgressBar = () => {
   const dispatch = useAppDispatch();
 
   const currentTime = useAppSelector(selectCurrentTime),
-    seekTime = useAppSelector((state) => selectUserSeek(state)?.currentTime);
+    seekTime = useAppSelector(selectSeekTime);
 
   const range = useTimeRange();
 
@@ -47,7 +47,7 @@ const ProgressBar = () => {
       <SliderUnstyled
         className="mx__media-progress"
         components={{ Rail: BufferProgress }}
-        value={seekTime ?? currentTime}
+        value={seekTime ?? currentTime ?? 0}
         {...range}
         step={0.01}
         getAriaValueText={valuetext}
