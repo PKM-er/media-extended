@@ -92,7 +92,7 @@ abstract class PlayerWidget<
   }
 
   abstract sameMedia(media: Media): boolean;
-  abstract getSetMediaAction(): Promise<AppThunk<void, undefined> | null>;
+  abstract getSetMediaAction(): Promise<AppThunk | null>;
 
   updateDOM(domToUpdate: HTMLElement): boolean {
     const info = (domToUpdate as ElWithInfo<Media>).playerInfo;

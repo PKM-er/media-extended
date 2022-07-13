@@ -10,19 +10,21 @@ import { Emitter } from "nanoevents";
 import type { MessageHandler } from "./redux-sync";
 import { RootState } from "./slice";
 
+type EvtEmitter = Emitter<EventMap>;
+
 export type PlayerStore = EnhancedStore<
   RootState,
   AnyAction,
-  [ThunkMiddleware<RootState, AnyAction, undefined>]
+  [ThunkMiddleware<RootState, AnyAction, EvtEmitter>]
 > &
   Record<"webviewMsg" | "windowMsg", MessageHandler> & {
-    emitter: Emitter<EventMap>;
+    emitter: EvtEmitter;
   };
 export type AppDispatch = PlayerStore["dispatch"];
 
 export type AppThunk<
   ReturnType = void,
-  ExtraThunkArg = Emitter<EventMap>,
+  ExtraThunkArg = EvtEmitter,
 > = ThunkAction<ReturnType, RootState, ExtraThunkArg, Action<string>>;
 //#endregion
 
