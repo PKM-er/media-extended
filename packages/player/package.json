@@ -81,6 +81,7 @@
     "mx-base": "workspace:*",
     "mx-lib": "workspace:*",
     "mx-store": "workspace:*",
+    "mx-webview": "workspace:*",
     "mx-youtube": "workspace:*",
     "nanoevents": "^6.0.2",
     "path-browserify": "^1.0.1",

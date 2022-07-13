@@ -2,11 +2,10 @@ import { PlayerContext } from "@context";
 import { moniterScreenshotMsg } from "@hook-player/screenshot";
 import { moniterTimestampMsg } from "@hook-player/timestamp";
 import { useAppSelector, usePlayerStore } from "@store-hooks";
-import { PlayerType, selectBilibiliSrc, selectBiliWebFscreen } from "mx-store";
+import { selectBilibiliSrc, selectBiliWebFscreen } from "mx-store";
+import WebView from "mx-webview";
 import React, { useContext, useRef, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
-
-import WebView from "../webview";
 
 const BilibiliPlayer = ({
   style,

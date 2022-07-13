@@ -65,6 +65,12 @@ importers:
       tslib: 2.4.0
       typescript: 4.6.4
 
+  packages/electron-type:
+    specifiers:
+      '@types/node': ^18.0.3
+    dependencies:
+      '@types/node': 18.0.3
+
   packages/lib:
     specifiers:
       '@aidenlx/eslint-config': ^0.1.2
@@ -150,6 +156,7 @@ importers:
       '@release-it/conventional-changelog': ^4.3.0
       '@types/color': ^3.0.3
       '@types/dom-mediacapture-record': ^1.0.11
+      '@types/electron': workspace:*
       '@types/fscreen': ^1.0.1
       '@types/hh-mm-ss': ^1.2.1
       '@types/lodash-es': ^4.17.6
@@ -265,6 +272,7 @@ importers:
       '@release-it/conventional-changelog': 4.3.0_release-it@14.14.3
       '@types/color': 3.0.3
       '@types/dom-mediacapture-record': 1.0.11
+      '@types/electron': link:../electron-type
       '@types/fscreen': 1.0.1
       '@types/hh-mm-ss': 1.2.1
       '@types/lodash-es': 4.17.6
@@ -362,6 +370,7 @@ importers:
       mx-base: workspace:*
       mx-lib: workspace:*
       mx-store: workspace:*
+      mx-webview: workspace:*
       mx-youtube: workspace:*
       nanoevents: ^6.0.2
       open: ^8.4.0
@@ -406,6 +415,7 @@ importers:
       mx-base: link:../base
       mx-lib: link:../lib
       mx-store: link:../store
+      mx-webview: link:../webview
       mx-youtube: link:../youtube
       nanoevents: 6.0.2
       path-browserify: 1.0.1
@@ -539,6 +549,73 @@ importers:
       eslint-plugin-workspaces: 0.7.0
       prettier: 2.6.2
       remote-redux-devtools: 0.5.16_redux@4.2.0
+      tslib: 2.4.0
+      typescript: 4.6.4
+
+  packages/webview:
+    specifiers:
+      '@aidenlx/eslint-config': ^0.1.2
+      '@aidenlx/prettier-config': ^0.1.0
+      '@aidenlx/ts-config': ^0.1.2
+      '@types/electron': workspace:*
+      '@types/lodash-es': ^4.17.6
+      '@types/node': ^17.0.21
+      '@types/react': ^17.0.43
+      '@typescript-eslint/eslint-plugin': ^5.10.0
+      '@typescript-eslint/parser': ^5.10.0
+      ahooks: ^3.5.2
+      classnames: ^2.3.1
+      cross-env: ^7.0.3
+      eslint: ^8.7.0
+      eslint-config-prettier: ^8.3.0
+      eslint-import-resolver-typescript: ^2.5.0
+      eslint-plugin-import: ^2.25.4
+      eslint-plugin-jsdoc: ^37.6.3
+      eslint-plugin-prefer-arrow: ^1.2.3
+      eslint-plugin-prettier: ^4.0.0
+      eslint-plugin-react: ^7.27.0
+      eslint-plugin-react-hooks: ^4.3.0
+      eslint-plugin-simple-import-sort: ^7.0.0
+      eslint-plugin-workspaces: ^0.7.0
+      fast-deep-equal: ^3.1.3
+      mx-base: workspace:*
+      prettier: ^2.5.1
+      react: ^17.0.2
+      react-use-ref-effect: ^1.2.0
+      tslib: ^2.3.1
+      typescript: ^4.5.5
+      use-callback-ref: ^1.2.5
+    dependencies:
+      ahooks: 3.5.2_react@17.0.2
+      classnames: 2.3.1
+      fast-deep-equal: 3.1.3
+      mx-base: link:../base
+      react: 17.0.2
+      react-use-ref-effect: 1.2.0_react@17.0.2
+      use-callback-ref: 1.3.0_hx2b44akkvgcgvvtmk7ds2qk6q
+    devDependencies:
+      '@aidenlx/eslint-config': 0.1.2_zt2gfb7jakfjci23ddtzcgdnle
+      '@aidenlx/prettier-config': 0.1.0_prettier@2.6.2
+      '@aidenlx/ts-config': 0.1.5_rrkaqx5mkvti5nim2xqiu732gu
+      '@types/electron': link:../electron-type
+      '@types/lodash-es': 4.17.6
+      '@types/node': 17.0.35
+      '@types/react': 17.0.45
+      '@typescript-eslint/eslint-plugin': 5.25.0_jorowkvdqu6pwramweg5le7ncu
+      '@typescript-eslint/parser': 5.25.0_utdtartgf6fqqgkivzeynh76la
+      cross-env: 7.0.3
+      eslint: 8.16.0
+      eslint-config-prettier: 8.5.0_eslint@8.16.0
+      eslint-import-resolver-typescript: 2.7.1_btspkuwbqkl4adpiufzbathtpi
+      eslint-plugin-import: 2.26.0_fc3ah3mafsevgtah47p4cah6me
+      eslint-plugin-jsdoc: 37.9.7_eslint@8.16.0
+      eslint-plugin-prefer-arrow: 1.2.3_eslint@8.16.0
+      eslint-plugin-prettier: 4.0.0_j7rsahgqtkecno6yauhsgsglf4
+      eslint-plugin-react: 7.30.0_eslint@8.16.0
+      eslint-plugin-react-hooks: 4.5.0_eslint@8.16.0
+      eslint-plugin-simple-import-sort: 7.0.0_eslint@8.16.0
+      eslint-plugin-workspaces: 0.7.0
+      prettier: 2.6.2
       tslib: 2.4.0
       typescript: 4.6.4
 
@@ -1733,6 +1810,10 @@ packages:
   /@types/node/17.0.35:
     resolution: {integrity: sha512-vu1SrqBjbbZ3J6vwY17jBs8Sr/BKA+/a/WtjRG+whKg1iuLFOosq872EXS0eXWILdO36DHQQeku/ZcL6hz2fpg==}
     dev: true
+
+  /@types/node/18.0.3:
+    resolution: {integrity: sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ==}
+    dev: false
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}

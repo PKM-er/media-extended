@@ -1,4 +1,4 @@
-declare module "inline:../../ipc/recieve-port" {
+declare module "inline:./recieve-port" {
   const code: string;
   export default string;
 }
