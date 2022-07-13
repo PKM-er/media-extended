@@ -21,21 +21,19 @@ import { initialStatus } from "../status";
 import { getTitleFromObFile } from "./utils";
 
 const { actions, reducer } = createSlice({
-  name: "", // not used
+  name: "source", // not used
   state: {} as PlayerState,
   reducers: {
     setDirectLink: (
       _state,
-      action: PayloadAction<[src: string, type: MediaType]>,
+      { payload: [src, type] }: PayloadAction<[src: string, type: MediaType]>,
     ) => {
-      let [src, type] = action.payload;
+      // original src url is saved in meta
+      let originalSrc = src;
 
-      let isFileUrl = false;
-      src = src.replace(/^file:\/\//, () => {
-        isFileUrl = true;
-        return "app://local";
-      });
-      isFileUrl && (src += `?${Date.now()}`);
+      if (src.startsWith("file:///")) {
+        src = src.replace("file:///", "app://local/") + `?${Date.now()}`;
+      }
 
       let state = _state as HTML5MediaState;
       state.type = mediaTypeToPlayerType(type);
@@ -46,7 +44,7 @@ const { actions, reducer } = createSlice({
         filename = getFilename(pathname);
       state.meta = {
         provider: Provider.html5,
-        url: src,
+        url: originalSrc,
         title: filename ? getBasename(filename) : src,
       };
       //#endregion
