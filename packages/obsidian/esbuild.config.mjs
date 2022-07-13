@@ -178,40 +178,40 @@ try {
     outfile: join("build", MAIN_PS),
     // metafile: true,
   });
-  const window = build({
-    entryPoints: ["src/index-win.tsx"],
-    metafile: true,
-    outdir: "build/window/",
-    bundle: true,
-    watch: !isProd,
-    platform: "browser",
-    external: ["electron"],
-    format: "cjs",
-    mainFields: ["browser", "module", "main"],
-    sourcemap: isProd ? false : "inline",
-    minify: isProd,
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
-    },
-    plugins: [
-      LessPathAlias,
-      lessLoader(),
-      inlineCodePlugin(injectScriptConfig),
-      svgrPlugin(),
-      htmlPlugin({
-        files: [
-          {
-            entryPoints: ["src/index-win.tsx"],
-            filename: "index.html",
-            scriptLoading: "blocking",
-            title: "Media Extended",
-            htmlTemplate: windowTemplate,
-          },
-        ],
-      }),
-    ],
-    // metafile: true,
-  });
+  // const window = build({
+  //   entryPoints: ["src/index-win.tsx"],
+  //   metafile: true,
+  //   outdir: "build/window/",
+  //   bundle: true,
+  //   watch: !isProd,
+  //   platform: "browser",
+  //   external: ["electron"],
+  //   format: "cjs",
+  //   mainFields: ["browser", "module", "main"],
+  //   sourcemap: isProd ? false : "inline",
+  //   minify: isProd,
+  //   define: {
+  //     "process.env.NODE_ENV": JSON.stringify(process.env.BUILD),
+  //   },
+  //   plugins: [
+  //     LessPathAlias,
+  //     lessLoader(),
+  //     inlineCodePlugin(injectScriptConfig),
+  //     svgrPlugin(),
+  //     htmlPlugin({
+  //       files: [
+  //         {
+  //           entryPoints: ["src/index-win.tsx"],
+  //           filename: "index.html",
+  //           scriptLoading: "blocking",
+  //           title: "Media Extended",
+  //           htmlTemplate: windowTemplate,
+  //         },
+  //       ],
+  //     }),
+  //   ],
+  //   // metafile: true,
+  // });
   // await promises.writeFile(
   //   "meta.json",
   //   JSON.stringify((await main).metafile),

@@ -52,7 +52,6 @@ import {
   MediaStateBase,
   PlayerComponent,
 } from "./common";
-import { createWindow } from "./window";
 
 declare module "obsidian" {
   interface FileView {
@@ -329,32 +328,8 @@ export default class ObMediaView
     return super.onDelete(file);
   }
 
-  onMoreOptionsMenu(menu: Menu): void {
+  onPaneMenu(menu: Menu, source: string): void {
     let url;
-    let _pluginDir: string | undefined;
-    if ((_pluginDir = this.plugin.getFullPluginDir())) {
-      let pluginDir = _pluginDir;
-      menu.addItem((item) =>
-        item
-          .setIcon("open-elsewhere-glyph")
-          .setTitle("Open In Window")
-          .onClick(() => {
-            this.window = createWindow(this.store, this.plugin);
-            this.window.on("close", () => {
-              if (!this._closed)
-                ReactDOM.render(
-                  <Player
-                    store={this.store}
-                    actions={actions}
-                    getBiliInjectCode={getBiliInjectCodeFunc(this.plugin)}
-                  />,
-                  this.contentEl,
-                );
-            });
-            ReactDOM.unmountComponentAtNode(this.contentEl);
-          }),
-      );
-    }
     if (!this.pinned) {
       menu.addItem((item) =>
         item
@@ -394,9 +369,9 @@ export default class ObMediaView
     }
 
     if (this.file) {
-      super.onMoreOptionsMenu(menu);
+      super.onPaneMenu(menu, source);
     } else if ((url = this.getUrl())) {
-      ItemView.prototype.onMoreOptionsMenu.call(this, menu);
+      ItemView.prototype.onPaneMenu.call(this, menu, source);
       menu.addSeparator();
       this.app.workspace.trigger(
         "media-url-menu",

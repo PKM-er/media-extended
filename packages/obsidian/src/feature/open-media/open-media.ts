@@ -70,7 +70,7 @@ const openMediaView = async (
   const { fromLink = false, newLeaf = false } = options ?? {};
   let leaf: WorkspaceLeaf | undefined | null;
   if (newLeaf) {
-    leaf = createLeafBySplit(app.workspace.getUnpinnedLeaf());
+    leaf = createLeafBySplit(app.workspace.getLeaf(false));
   } else {
     leaf =
       findMediaView(isSameMedia) ?? findMediaView() ?? app.workspace.getLeaf();
