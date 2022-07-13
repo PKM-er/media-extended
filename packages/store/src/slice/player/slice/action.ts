@@ -1,18 +1,7 @@
-import { Provider } from "mx-base";
-
 import { createSlice } from "../../create-slice";
-import {
-  disableCORS,
-  setDirectLink,
-  setHostMedia,
-  setObsidianMedia,
-  switchToAudio,
-  unknownTypeDetermined,
-} from "./source";
 
 export interface ActionState {
-  /** null meaning feature not available */
-  getScreenshot: boolean | null;
+  getScreenshot: boolean;
   getTimestamp: boolean;
 }
 
@@ -45,30 +34,6 @@ const { actions, reducer } = createSlice({
       state.getTimestamp = false;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(disableCORS, (state) => {
-        setAllowedScreenshot(false, state);
-      })
-      .addCase(switchToAudio, (state) => {
-        setAllowedScreenshot(false, state);
-      })
-      .addCase(setObsidianMedia, (state, action) => {
-        const [, , mediaType] = action.payload;
-        setAllowedScreenshot(mediaType === "video", state);
-      })
-      .addCase(setDirectLink, (state, action) => {
-        const [, mediaType] = action.payload;
-        setAllowedScreenshot(mediaType === "video", state);
-      })
-      .addCase(setHostMedia, (state, action) => {
-        const [, provider] = action.payload;
-        setAllowedScreenshot(provider === Provider.bilibili, state);
-      })
-      .addCase(unknownTypeDetermined, (state) => {
-        setAllowedScreenshot(true, state);
-      });
-  },
 });
 
 export default reducer;
@@ -80,6 +45,3 @@ export const {
   requestTimestamp,
   requsetScreenshot,
 } = actions;
-const setAllowedScreenshot = (allowed: boolean, state: ActionState) => {
-  state.getScreenshot = allowed ? false : null;
-};

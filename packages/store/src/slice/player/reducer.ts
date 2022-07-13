@@ -23,7 +23,7 @@ const initialState: NoMediaState = {
   userSeek: null,
   interface: initialInterface,
   action: {
-    getScreenshot: null,
+    getScreenshot: false,
     getTimestamp: false,
   },
 };

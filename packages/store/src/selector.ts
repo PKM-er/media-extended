@@ -29,8 +29,13 @@ export const selectIsIOS = (state: RootState) =>
   state.basic.platform ? state.basic.platform === "safari" : null;
 export const selectScreenshotRequested = (state: RootState) =>
     state.player.action.getScreenshot === true,
-  selectScreenshotSupported = (state: RootState) =>
-    state.player.action.getScreenshot !== null,
+  selectScreenshotSupported = ({ player }: RootState) => {
+    if (player.type === PlayerType.video) {
+      return player.source.allowCORS;
+    } else if (player.type === PlayerType.bilibili) {
+      return true;
+    } else return false;
+  },
   selectTimestampRequested = (state: RootState) =>
     state.player.action.getTimestamp === true;
 export const selectCurrentTime = ({ player }: RootState) =>
