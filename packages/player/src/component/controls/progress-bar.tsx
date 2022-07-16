@@ -2,8 +2,7 @@ import "@styles/progress-bar.less";
 
 import { SliderUnstyled } from "@mui/base";
 import { useAppDispatch, useAppSelector } from "@store-hooks";
-import { secondToDuration } from "mx-base";
-import { isTimestamp } from "mx-lib";
+import { isTimestamp, secondToDuration } from "mx-base";
 import { progressBarSeek, progressBarSeekEnd, selectSeekTime } from "mx-store";
 import {
   selectBuffered,

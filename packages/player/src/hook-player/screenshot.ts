@@ -1,4 +1,4 @@
-import { captureScreenshot } from "mx-lib";
+import { captureScreenshot } from "mx-base";
 import { cancelScreenshot } from "mx-store";
 import {
   PlayerStore,

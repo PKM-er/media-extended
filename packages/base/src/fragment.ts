@@ -1,4 +1,4 @@
-import { isTimestamp } from "mx-lib";
+import { isTimestamp } from "./temporal-frag";
 
 type Frag = readonly [number, number] | null;
 

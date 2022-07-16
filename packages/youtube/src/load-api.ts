@@ -1,8 +1,7 @@
 // derive from https://github.com/gajus/youtube-player/blob/master/src/loadYouTubeIframeApi.js
 
 import { around } from "monkey-around";
-
-import load from "./load";
+import { load } from "mx-base";
 
 declare global {
   interface Window {

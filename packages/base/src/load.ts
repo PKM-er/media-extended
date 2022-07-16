@@ -1,5 +1,3 @@
-type Callback = (errorOrNull: Error | null, script: HTMLScriptElement) => void;
-
 type AllowedAttributes = "type" | "charset" | "async" | "text";
 
 type Options = Partial<Pick<HTMLScriptElement, AllowedAttributes>> & {
@@ -17,7 +15,11 @@ const load = async (src: string, opts: Options = {}): Promise<Event> => {
   script.src = src;
 
   if (opts.attrs) {
-    setAttributes(script, opts.attrs);
+    for (const attr in opts.attrs) {
+      if (!Object.prototype.hasOwnProperty.call(opts.attrs, attr)) continue;
+      const val = opts.attrs[attr];
+      script.setAttribute(attr, val);
+    }
   }
 
   if (opts.text) {
@@ -34,12 +36,3 @@ const load = async (src: string, opts: Options = {}): Promise<Event> => {
   return promise;
 };
 export default load;
-
-const setAttributes = (
-  script: HTMLScriptElement,
-  attrs: Record<string, string>,
-) => {
-  for (let attr in attrs) {
-    script.setAttribute(attr, attrs[attr]);
-  }
-};

@@ -1,5 +1,6 @@
-import { parseTF } from "mx-lib";
 import type { ParsedQuery } from "query-string";
+
+import { parseTF } from "./temporal-frag";
 
 /** Player Properties that can be controlled by hash */
 type PlayerProperties = "loop" | "muted" | "autoplay" | "controls";
@@ -10,7 +11,8 @@ const hashOpts = new Map<string, PlayerProperties>([
   ["controls", "controls"],
 ]);
 
-export const is = (
+/** check if certain prop exists in given hash */
+export const isInHash = (
   hashQuery: ParsedQuery<string>,
   prop: PlayerProperties,
 ): boolean => {

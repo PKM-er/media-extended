@@ -3,7 +3,7 @@ import {
   createAction as _createAction,
   PayloadActionCreator,
 } from "@reduxjs/toolkit";
-import { SeekToOptions } from "mx-base";
+import { enumerate, SeekToOptions } from "mx-base";
 
 type MediaControlAction<
   P = void,
@@ -59,15 +59,7 @@ type Actions = {
   >;
 };
 
-type Invalid<T> = ["Needs to be all of", T];
-const arrayOfAll =
-  <T>() =>
-  <U extends T[]>(
-    ...array: U & ([T] extends [U[number]] ? unknown : Invalid<T>[])
-  ) =>
-    array;
-
-const actionNames = arrayOfAll<keyof EventTypeMap>()(
+const actionNames = enumerate<keyof EventTypeMap>()(
   "play",
   "pause",
   "togglePlay",

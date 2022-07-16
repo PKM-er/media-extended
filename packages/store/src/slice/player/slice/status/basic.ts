@@ -1,6 +1,5 @@
 import { AnyAction, PayloadAction } from "@reduxjs/toolkit";
-import { Fragment, getFragFromHash, is } from "mx-base";
-import { isTimestamp } from "mx-lib";
+import { Fragment, getFragFromHash, isInHash, isTimestamp } from "mx-base";
 import { parse as parseQS } from "query-string";
 
 import { AppThunk } from "../../../../utils";
@@ -32,8 +31,8 @@ const { actions, reducer } = createSlice({
       const query = parseQS(hash),
         frag = getFragFromHash(hash);
       state.fragment = frag;
-      state.loop = is(query, "loop");
-      state.autoplay = is(query, "autoplay");
+      state.loop = isInHash(query, "loop");
+      state.autoplay = isInHash(query, "autoplay");
     },
     setFragment: (state, action: PayloadAction<Fragment | null>) => {
       const frag = action.payload;
@@ -158,7 +157,7 @@ export const setHash =
   (dispatch, _, emitter) => {
     dispatch(actions.setHash([hash, fromLink]));
     const query = parseQS(hash);
-    emitter.emit("setMute", is(query, "muted"));
+    emitter.emit("setMute", isInHash(query, "muted"));
     // start playing when link is opened
     if (fromLink) emitter.emit("play");
   };

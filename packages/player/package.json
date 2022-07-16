@@ -79,7 +79,6 @@
     "lodash-es": "^4.17.21",
     "monkey-around": "^2.3.0",
     "mx-base": "workspace:*",
-    "mx-lib": "workspace:*",
     "mx-store": "workspace:*",
     "mx-webview": "workspace:*",
     "mx-youtube": "workspace:*",

@@ -1,6 +1,7 @@
 export * from "./duration";
 export * as Frag from "./fragment";
 export * from "./hash-tool";
+export { default as load } from "./load";
 export * from "./media-provider";
 export * from "./media-type";
 export * from "./media-warpper";
@@ -8,3 +9,5 @@ export * from "./misc";
 export { enumerate } from "./must-include";
 export * from "./parse-url";
 export { default as parseURL } from "./parse-url";
+export { default as captureScreenshot } from "./screenshot";
+export { isTimestamp } from "./temporal-frag";
