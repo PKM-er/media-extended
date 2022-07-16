@@ -1,7 +1,8 @@
 // derive from https://github.com/gajus/youtube-player/blob/master/src/loadYouTubeIframeApi.js
 
-import load from "load-script";
 import { around } from "monkey-around";
+
+import load from "./load";
 
 declare global {
   interface Window {
@@ -34,9 +35,7 @@ export const loadAPI = (
           const protocol =
             window.location.protocol === "http:" ? "http:" : "https:";
 
-          load(protocol + iframeAPI, (error) => {
-            error && reject(error);
-          });
+          load(protocol + iframeAPI).catch(reject);
         }
         const unloader = around(window as Window, {
           // The API will call this function when page has finished downloading
