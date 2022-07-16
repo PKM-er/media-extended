@@ -36,7 +36,7 @@ export const getMostRecentLeafOfView = <T extends View>(
     return app.workspace.activeLeaf;
 
   let recent: WorkspaceLeaf | null = null;
-  app.workspace.iterateRootLeaves((leaf) => {
+  app.workspace.iterateAllLeaves((leaf) => {
     if (
       leaf.view instanceof ctor &&
       (!recent || recent.activeTime < leaf.activeTime)
