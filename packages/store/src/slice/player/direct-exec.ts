@@ -3,6 +3,7 @@ import {
   createAction as _createAction,
   PayloadActionCreator,
 } from "@reduxjs/toolkit";
+import { SeekToOptions } from "mx-base";
 
 type MediaControlAction<
   P = void,
@@ -25,6 +26,8 @@ const createAction = <P = void, T extends string = string>(type: T) => {
 export const isActionMediaControl = (action: AnyAction) =>
   !!(action as MediaControlAction).$mediaControl;
 
+type SeekParams = { value: number } & SeekToOptions;
+
 interface EventTypeMap {
   play: void;
   pause: void;
@@ -35,6 +38,8 @@ interface EventTypeMap {
   setVolumeUnmute: number;
   setPlaybackRate: number;
   setVolumeByOffest: number;
+  seekTo: number | SeekParams;
+  seekByOffset: number | SeekParams;
 }
 
 export type EventMap = {
@@ -72,6 +77,8 @@ const actionNames = arrayOfAll<keyof EventTypeMap>()(
   "setVolumeUnmute",
   "setPlaybackRate",
   "setVolumeByOffest",
+  "seekTo",
+  "seekByOffset",
 );
 
 // actions declared here will be handled by middleware
@@ -86,6 +93,8 @@ export const {
   setVolumeUnmute,
   toggleMute,
   togglePlay,
+  seekTo,
+  seekByOffset,
 } = actionNames.reduce(
   (map, name) => ((map[name] = createAction(name) as any), map),
   {} as Actions,

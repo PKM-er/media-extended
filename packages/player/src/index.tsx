@@ -42,4 +42,3 @@ export { moniterScreenshotMsg, sendScreenshot } from "./hook-player/screenshot";
 export { moniterTimestampMsg, sendTimestamp } from "./hook-player/timestamp";
 export * from "./store";
 export * from "./thunk/fetch-meta";
-export * from "./thunk/seek";

@@ -6,12 +6,14 @@ import {
   setObsidianMediaSrc,
 } from "@player";
 import type MediaExtended from "@plugin";
-import { ExtensionAccepted } from "mx-base";
-import { Provider } from "mx-base";
-import { Player, seekTo } from "mx-player";
+import { ExtensionAccepted, Provider } from "mx-base";
+import { Player } from "mx-player";
 import {
   isHTMLMediaState,
-  selectMediaSource,
+  PlayerType,
+  revertDuration,
+  seekTo,
+  selectFrag,
   selectMeta,
   selectPlayerType,
   selectProvider,
@@ -19,16 +21,9 @@ import {
   selectTitle,
   setFragment,
   setHash,
-} from "mx-store";
-import { toggleFilter } from "mx-store";
-import { revertDuration } from "mx-store";
-import {
-  selectCurrentTime,
-  selectDuration,
-  selectFrag,
   subscribe,
+  toggleFilter,
 } from "mx-store";
-import { PlayerType } from "mx-store";
 import {
   Command,
   EditableFileView,

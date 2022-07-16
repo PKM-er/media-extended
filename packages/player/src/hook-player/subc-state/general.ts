@@ -53,6 +53,20 @@ const hookState = (media: Media, store: PlayerStore) => {
     store.emitter.on("pause", () => {
       if (!media.paused) pause();
     }),
+    store.emitter.on("seekTo", (param) => {
+      if (typeof param === "number") {
+        media.seekTo(param);
+      } else {
+        media.seekTo(param.value, param);
+      }
+    }),
+    store.emitter.on("seekByOffset", (param) => {
+      if (typeof param === "number") {
+        media.seekTo(media.currentTime + param);
+      } else {
+        media.seekTo(media.currentTime + param.value, param);
+      }
+    }),
     // useApplyUserSeek
     subscribe(
       (state) => state.player.userSeek,

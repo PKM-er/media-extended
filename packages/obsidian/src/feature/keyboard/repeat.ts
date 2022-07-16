@@ -5,9 +5,13 @@ import type MediaExtended from "@plugin";
 import { AnyAction } from "@reduxjs/toolkit";
 import { MediaView, PlayerComponent } from "@view";
 import { around } from "monkey-around";
-import { seekByOffset } from "mx-player";
-import { AppThunk, setPlaybackRate } from "mx-store";
-import { keyboardSeek, keyboardSeekEnd } from "mx-store";
+import {
+  AppThunk,
+  keyboardSeek,
+  keyboardSeekEnd,
+  seekByOffset,
+  setPlaybackRate,
+} from "mx-store";
 import { Hotkey } from "obsidian";
 
 declare module "obsidian" {
