@@ -1,6 +1,6 @@
 // import { PlyrControls } from "../legacy/plyr-controls";
 
-import type { Auth } from "@ipc/hack/const";
+import type { Auth } from "@main-ps/const";
 
 export interface MxSettings {
   mediaFragmentsEmbed: boolean;

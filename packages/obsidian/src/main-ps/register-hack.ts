@@ -4,12 +4,7 @@ import { ipcRenderer } from "electron";
 import { Platform } from "obsidian";
 import { join } from "path";
 
-import {
-  AllowAuth,
-  HackWebviewPreload,
-  RevertAllowAuth,
-  RevertHackWebviewPreload,
-} from "./const";
+import { AllowAuth, RevertAllowAuth } from "./const";
 
 const noop = () => {};
 const registerIPCMain = (plugin: MediaExtended): (() => void) => {

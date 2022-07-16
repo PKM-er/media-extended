@@ -7,6 +7,7 @@ export * from "./media-type";
 export * from "./media-warpper";
 export * from "./misc";
 export { enumerate } from "./must-include";
+export * from "./parse-unit";
 export * from "./parse-url";
 export { default as parseURL } from "./parse-url";
 export { default as captureScreenshot } from "./screenshot";

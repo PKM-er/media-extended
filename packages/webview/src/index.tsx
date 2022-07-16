@@ -1,4 +1,3 @@
-// import { MxPreloadScriptUA } from "@ipc/hack/const";
 import { useLatest } from "ahooks";
 import cls from "classnames";
 import RecievePort from "inline:./recieve-port";

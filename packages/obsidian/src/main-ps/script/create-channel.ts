@@ -1,7 +1,7 @@
-import createChannel from "@ipc/create-channel";
 import { ipcMain, MessageChannelMain, webContents } from "electron";
 
 import { CreateChannel } from "../const";
+import createChannel from "../create-channel";
 
 const RegisterCreateChannel = () => {
   ipcMain.on(CreateChannel, ({ sender }, viewId: number) => {

@@ -34,10 +34,6 @@ export { PlayerContext };
 export { PlayerWarpper as Player };
 
 export { default as config } from "./config";
-export {
-  getBiliInjectCode,
-  handleBiliInjectCodeReq,
-} from "./get-code/bilibili";
 export { moniterScreenshotMsg, sendScreenshot } from "./hook-player/screenshot";
 export { moniterTimestampMsg, sendTimestamp } from "./hook-player/timestamp";
 export * from "./store";

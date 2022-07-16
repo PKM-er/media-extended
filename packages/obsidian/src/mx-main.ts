@@ -2,8 +2,8 @@ import "./style/main.less";
 import "./style/ytb.less";
 import "./style/caption-fix.less";
 
-import { registerIPCMain } from "@ipc/hack";
-import { SetAuth } from "@ipc/hack/const";
+import { registerIPCMain } from "@main-ps";
+import { SetAuth } from "@main-ps/const";
 import { getMostRecentViewOfType } from "@misc/obsidian";
 import { DEFAULT_SETTINGS, MESettingTab, MxSettings } from "@settings";
 import { MEDIA_VIEW_TYPE, MediaView, patchLeaf, ToggleMediaPin } from "@view";

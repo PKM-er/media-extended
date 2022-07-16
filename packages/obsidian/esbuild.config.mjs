@@ -163,7 +163,7 @@ try {
     // metafile: true,
   });
   const mainProcess = build({
-    entryPoints: ["src/ipc/hack/main-ps/index.ts"],
+    entryPoints: ["src/main-ps/script/index.ts"],
     bundle: true,
     watch: !isProd,
     platform: "browser",
