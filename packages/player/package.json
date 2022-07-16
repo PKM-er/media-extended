@@ -26,6 +26,7 @@
     "@types/fscreen": "^1.0.1",
     "@types/hh-mm-ss": "^1.2.1",
     "@types/lodash-es": "^4.17.6",
+    "@types/minimatch": "^3.0.5",
     "@types/node": "^17.0.21",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.11",
@@ -50,6 +51,7 @@
     "eslint-plugin-react-hooks": "^4.3.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "eslint-plugin-workspaces": "^0.7.0",
+    "lodash-es": "^4.17.21",
     "open": "^8.4.0",
     "prettier": "^2.5.1",
     "release-it": "^14.12.5",
@@ -62,6 +64,7 @@
     "@mui/base": "^5.0.0-alpha.81",
     "@react-hook/resize-observer": "^1.2.5",
     "@reduxjs/toolkit": "^1.8.1",
+    "@types/tldjs": "^2.3.1",
     "@vimeo/player": "^2.16.4",
     "ahooks": "^3.5.2",
     "assert-never": "^1.2.1",
@@ -76,10 +79,11 @@
     "jotai": "^1.7.2",
     "js-video-url-parser": "^0.5.1",
     "load-script": "^2.0.0",
-    "lodash-es": "^4.17.21",
+    "minimatch": "^5.1.0",
     "monkey-around": "^2.3.0",
     "mx-base": "workspace:*",
     "mx-store": "workspace:*",
+    "mx-user-script": "workspace:*",
     "mx-webview": "workspace:*",
     "mx-youtube": "workspace:*",
     "nanoevents": "^6.0.2",
@@ -93,7 +97,12 @@
     "redux": "^4.2.0",
     "remote-redux-devtools": "^0.5.16",
     "srt-webvtt": "^2.0.0",
+    "tldjs": "^2.3.1",
+    "url": "^0.11.0",
     "url-parse": "^1.5.10",
     "use-callback-ref": "^1.2.5"
+  },
+  "browser": {
+    "url": "url"
   }
 }

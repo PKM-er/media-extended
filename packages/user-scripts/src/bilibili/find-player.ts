@@ -1,12 +1,12 @@
+import { registerPlayer } from "mx-user-script";
+
 import {
   PlayerContainerID,
   PlayerControlSelector,
   PlayerPlaceholderID,
   SettingBtnSelector,
   SettingMenuWarpSelector,
-  store,
 } from "./common";
-import hookStoreToHTMLPlayer from "./hook-player";
 
 const addRef = <K extends keyof typeof window.__PLAYER_REF__>(
   name: K,
@@ -29,7 +29,7 @@ const findPlayer = (
     let player = warpper.querySelector<HTMLVideoElement>("video, bwp-video");
     if (!player) return;
     obs.disconnect();
-    hookStoreToHTMLPlayer(player, store);
+    registerPlayer(player);
     console.log("player found");
 
     addRef("video", player);

@@ -42,3 +42,6 @@ export { moniterScreenshotMsg, sendScreenshot } from "./hook-player/screenshot";
 export { moniterTimestampMsg, sendTimestamp } from "./hook-player/timestamp";
 export * from "./store";
 export * from "./thunk/fetch-meta";
+export type { UserScriptMeta as UserscriptMeta } from "./user-script/parser";
+export { parseMeta } from "./user-script/parser";
+export { testScript } from "./user-script/tester";

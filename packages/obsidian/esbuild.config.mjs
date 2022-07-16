@@ -155,8 +155,9 @@ try {
     // metafile: true,
   });
   const preloadBili = build({
-    entryPoints: ["../player/src/component/bilibili/inject/index.ts"],
+    entryPoints: ["../user-scripts/src/bilibili/index.ts"],
     outfile: join("build", INJECT_BILIBILI),
+    external: ["mx-user-script"],
     ...injectScriptConfig,
     // incremental: !isProd,
     // metafile: true,

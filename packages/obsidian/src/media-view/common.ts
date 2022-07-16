@@ -38,6 +38,3 @@ export const actions: IActions = {
     dispatch(gotTimestamp(...args));
   },
 };
-
-export const getBiliInjectCodeFunc = (plugin: MediaExtended) => async () =>
-  await plugin.BilibiliInjectCode;

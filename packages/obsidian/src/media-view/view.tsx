@@ -41,7 +41,6 @@ import ReactDOM from "react-dom";
 
 import {
   actions,
-  getBiliInjectCodeFunc,
   MEDIA_VIEW_TYPE,
   MediaState,
   MediaStateBase,
@@ -257,11 +256,12 @@ export default class ObMediaView
   window?: Electron.BrowserWindow;
   protected async onOpen(): Promise<void> {
     await super.onOpen();
+    const userScripts = this.plugin.userScripts;
     ReactDOM.render(
       <Player
         store={this.store}
         actions={actions}
-        getBiliInjectCode={getBiliInjectCodeFunc(this.plugin)}
+        getUserScriptFor={userScripts.getUserScriptFor.bind(userScripts)}
       />,
       this.contentEl,
     );

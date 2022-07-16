@@ -1,0 +1,26 @@
+{
+  "name": "bilibili",
+  "version": "0.0.1",
+  "licence": "MIT",
+  "match": "*://*.bilibili.com/*",
+  "exclude": [
+    "*://api.bilibili.com/*",
+    "*://api.*.bilibili.com/*",
+    "*://*.bilibili.com/api/*",
+    "*://member.bilibili.com/studio/bs-editor/*",
+    "*://t.bilibili.com/h5/dynamic/specification",
+    "*://bbq.bilibili.com/*",
+    "*://message.bilibili.com/pages/nav/header_sync",
+    "*://s1.hdslb.com/bfs/seed/jinkela/short/cols/iframe.html",
+    "*://open-live.bilibili.com/*"
+  ],
+  "run-at": "document-start",
+  "grant": [
+    "unsafeWindow",
+    "GM_getValue",
+    "GM_setValue",
+    "GM_deleteValue",
+    "GM_info",
+    "GM_xmlhttpRequest"
+  ]
+}

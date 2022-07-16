@@ -1,6 +1,4 @@
-// import type { IWebViewAPI } from "@ipc/remote-view/view-api";
-
-export const WebViewAPIName = "MediaExtendedAPI";
+import findPlayer from "./find-player";
 
 declare global {
   interface Window {
@@ -17,3 +15,9 @@ declare global {
     }>;
   }
 }
+
+// prevent bilibili from using wasm to do software decoding on hevc video
+window.__ENABLE_WASM_PLAYER__ = false;
+window.__PLAYER_REF__ = {};
+
+findPlayer();

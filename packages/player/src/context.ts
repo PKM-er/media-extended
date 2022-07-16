@@ -7,7 +7,7 @@ import { TimestampArgs } from "./hook-player/timestamp";
 export interface IPlayerContext {
   inEditor?: boolean;
   actions: IActions;
-  getBiliInjectCode: () => Promise<string | null | undefined>;
+  getUserScriptFor(url: string): Promise<{ css?: string; js: string } | null>;
 }
 
 export interface IActions {

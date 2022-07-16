@@ -1,0 +1,8 @@
+.bilibili-player-video-btn-widescreen,
+.bilibili-player-video-btn-fullscreen,
+.bilibili-player-video-btn-start,
+.bilibili-player-video-btn-speed,
+.bilibili-player-video-btn-volume,
+.bilibili-player-ending-panel {
+  display: none;
+}

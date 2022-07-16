@@ -7,7 +7,7 @@ import { MarkdownRenderChild, Scope } from "obsidian";
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { actions, getBiliInjectCodeFunc, PlayerComponent } from "./common";
+import { actions, PlayerComponent } from "./common";
 
 export default class PlayerRenderChild
   extends MarkdownRenderChild
@@ -43,12 +43,14 @@ export default class PlayerRenderChild
   }
 
   async onload() {
+    const userScripts = this.plugin.userScripts;
+
     ReactDOM.render(
       <Player
         store={this.store}
         inEditor={this.inEditor}
         actions={actions}
-        getBiliInjectCode={getBiliInjectCodeFunc(this.plugin)}
+        getUserScriptFor={userScripts.getUserScriptFor.bind(userScripts)}
         onFocus={this.pushScope.bind(this)}
         onBlur={this.popScope.bind(this)}
       />,

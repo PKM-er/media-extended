@@ -22,9 +22,11 @@ import registerOpenMediaLink from "./feature/open-media";
 import { registerSaveScreenshotHandler } from "./feature/save-screenshot";
 import registerEmbedHandlers from "./render/embed";
 import registerLinkHandlers from "./render/links";
+import UserScriptManager from "./user-script";
 
 export default class MediaExtended extends Plugin {
   settings: MxSettings = DEFAULT_SETTINGS;
+  userScripts: UserScriptManager = new UserScriptManager(this);
 
   recStartTime: number | null = null;
 
@@ -83,15 +85,7 @@ export default class MediaExtended extends Plugin {
     this.register(registerIPCMain(this));
 
     await this.loadSettings();
-    if (Platform.isDesktopApp && this.manifest.dir) {
-      this.BilibiliInjectCode = this.app.vault.adapter
-        .read(join(this.manifest.dir, INJECT_BILIBILI))
-        .catch(
-          (error) => (
-            console.log("no bilibili inject code found", error), null
-          ),
-        );
-    }
+    this.userScripts.loadScripts();
 
     patchLeaf(this);
 
@@ -168,8 +162,6 @@ export default class MediaExtended extends Plugin {
     if (!(adapter instanceof FileSystemAdapter) || !this.manifest.dir) return;
     return adapter.getFullPath(this.manifest.dir);
   }
-
-  BilibiliInjectCode?: Promise<string | null>;
 }
 
 const getExts = () =>

@@ -1,0 +1,14 @@
+{
+  "name": "mx-user-script",
+  "version": "3.0.0-alpha.0",
+  "description": "Media Extended User Script API",
+  "main": "",
+  "types": "api.d.ts",
+  "keywords": [],
+  "author": "AidenLx",
+  "license": "MIT",
+  "dependencies": {
+    "mx-base": "workspace:*",
+    "mx-store": "workspace:*"
+  }
+}

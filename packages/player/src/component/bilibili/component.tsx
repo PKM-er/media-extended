@@ -2,10 +2,13 @@ import { PlayerContext } from "@context";
 import { moniterScreenshotMsg } from "@hook-player/screenshot";
 import { moniterTimestampMsg } from "@hook-player/timestamp";
 import { useAppSelector, usePlayerStore } from "@store-hooks";
+import initCode from "inline:../../user-script/init";
 import { selectBilibiliSrc, selectBiliWebFscreen } from "mx-store";
 import WebView from "mx-webview";
 import React, { useContext, useRef, useState } from "react";
 import { useRefEffect } from "react-use-ref-effect";
+
+import { SendUserScriptID } from "../../user-script/const";
 
 const BilibiliPlayer = ({
   style,
@@ -20,7 +23,7 @@ const BilibiliPlayer = ({
 
   const store = usePlayerStore();
 
-  const { getBiliInjectCode, actions } = useContext(PlayerContext);
+  const { getUserScriptFor, actions } = useContext(PlayerContext);
 
   const webviewRef = useRef<Electron.WebviewTag>(null);
   const portRef = useRefEffect<MessagePort>((port) => {
@@ -30,12 +33,6 @@ const BilibiliPlayer = ({
         "failed to inject script for bilibili: webview not ready",
       );
     (async () => {
-      const injectCode = await getBiliInjectCode();
-      if (!injectCode) {
-        throw new Error(
-          "failed to inject script for bilibili: no script code available",
-        );
-      }
       store.webviewMsg.port = port;
       if (selectBiliWebFscreen(store.getState())) {
         const tryReveal = () => {
@@ -65,7 +62,18 @@ const BilibiliPlayer = ({
       moniterScreenshotMsg(port, (...args) =>
         actions.gotScreenshot(store.dispatch, args),
       );
-      await webview.executeJavaScript(injectCode);
+
+      // prepare to recieve user script
+      await webview.executeJavaScript(initCode);
+
+      let script = src ? await getUserScriptFor(src) : null;
+      if (!script) {
+        throw new Error(
+          "failed to inject script for bilibili: no script code available",
+        );
+      }
+      script.css && webview.insertCSS(script.css);
+      port.postMessage([SendUserScriptID, script.js]);
     })();
 
     return () => {
