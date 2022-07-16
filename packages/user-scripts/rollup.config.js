@@ -3,6 +3,7 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import { join } from "path";
 import copy from "rollup-plugin-copy";
+import { minify } from "rollup-plugin-esbuild";
 import metablock from "rollup-plugin-userscript-metablock";
 
 const isProd = process.env.BUILD === "production";
@@ -32,7 +33,6 @@ export default {
     typescript(),
     nodeResolve({ browser: true }),
     commonjs(),
-    metablock({ file: join(sourceDir, "meta.json") }),
     copy({
       targets: [
         {
@@ -41,6 +41,11 @@ export default {
           rename: `${target}.css`,
         },
       ],
+    }),
+    ...(isProd ? [minify()] : []),
+    metablock({
+      file: join(sourceDir, "meta.json"),
+      override: { namespace: "https://github.com/aidenlx/media-extended" },
     }),
   ],
 };

@@ -2,7 +2,9 @@ declare global {
   var MX_MESSAGE_PORT: Promise<MessagePort>;
 }
 
-import { initStateFromHost } from "mx-store";
+import { getSubscribeFunc, initStateFromHost } from "mx-store";
+import * as Selectors from "mx-store/src/selector";
+import * as Slices from "mx-store/src/slice";
 import type * as API from "mx-user-script";
 
 import { createStore } from "../store/remote-store";
@@ -27,6 +29,12 @@ const MODULES: {
 } = {
   "mx-user-script": {
     registerPlayer: (player) => hookStoreToHTMLPlayer(player, store),
+    dispatch: store.dispatch,
+    getState: store.getState,
+    subscribe: getSubscribeFunc(store),
+    handle: store.emitter.on.bind(store.emitter),
+    Selectors,
+    Slices,
   },
 };
 

@@ -49,6 +49,7 @@ export const parseMeta = (
         description: [],
         downloadURL: [],
         name: [],
+        namespace: [],
         homepageURL: [],
         author: [],
         version: [],

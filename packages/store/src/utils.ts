@@ -10,7 +10,7 @@ import { Emitter } from "nanoevents";
 import type { MessageHandler } from "./redux-sync";
 import { RootState } from "./slice";
 
-type EvtEmitter = Emitter<EventMap>;
+export type EvtEmitter = Emitter<EventMap>;
 
 export type PlayerStore = EnhancedStore<
   RootState,

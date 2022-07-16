@@ -2,9 +2,12 @@ import type MediaExtended from "@plugin";
 import { parseMeta, testScript, UserscriptMeta } from "mx-player";
 import path, { join } from "path";
 
-const folder = "mx-user-script";
+const folder = "mx-scripts";
 
 type ScriptRecord = { meta: UserscriptMeta; js: string; css?: string };
+
+const SourcemapPattern =
+  /^\/\/[@#] sourceMappingURL=data:application\/json(?:;charset[:=][^;]+)?;base64,.*$/gm;
 
 export default class UserScriptManager {
   constructor(public plugin: MediaExtended) {
@@ -84,7 +87,11 @@ export default class UserScriptManager {
             const result = parseMeta(content);
             if (!result)
               throw new Error("Failed to parse meta from script: " + jsPath);
-            const { meta, script } = result;
+            let { meta, script } = result;
+            // trim inline source map if debug not enabled
+            if (!localStorage.getItem("debug-plugin")) {
+              script = script.replace(SourcemapPattern, "");
+            }
             return { meta, js: script };
           }),
           css = cssPath ? app.vault.adapter.read(cssPath) : Promise.resolve();

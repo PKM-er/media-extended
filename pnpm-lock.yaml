@@ -514,6 +514,7 @@ importers:
       '@typescript-eslint/eslint-plugin': ^5.10.0
       '@typescript-eslint/parser': ^5.10.0
       cross-env: ^7.0.3
+      esbuild: ^0.14.25
       eslint: ^8.7.0
       eslint-config-prettier: ^8.3.0
       eslint-import-resolver-typescript: ^2.5.0
@@ -527,6 +528,7 @@ importers:
       prettier: ^2.5.1
       rollup: ^2.77.0
       rollup-plugin-copy: ^3.4.0
+      rollup-plugin-esbuild: ^4.9.1
       rollup-plugin-userscript-metablock: ^0.3.1
       tslib: ^2.4.0
       typescript: ^4.5.5
@@ -545,6 +547,7 @@ importers:
       '@typescript-eslint/eslint-plugin': 5.25.0_jorowkvdqu6pwramweg5le7ncu
       '@typescript-eslint/parser': 5.25.0_utdtartgf6fqqgkivzeynh76la
       cross-env: 7.0.3
+      esbuild: 0.14.39
       eslint: 8.16.0
       eslint-config-prettier: 8.5.0_eslint@8.16.0
       eslint-import-resolver-typescript: 2.7.1_btspkuwbqkl4adpiufzbathtpi
@@ -557,6 +560,7 @@ importers:
       prettier: 2.6.2
       rollup: 2.77.0
       rollup-plugin-copy: 3.4.0
+      rollup-plugin-esbuild: 4.9.1_nnvnjumfjmfws62ilyfrahum5a
       rollup-plugin-userscript-metablock: 0.3.1
       tslib: 2.4.0
       typescript: 4.6.4
@@ -1586,6 +1590,14 @@ packages:
       estree-walker: 1.0.1
       picomatch: 2.3.1
       rollup: 2.77.0
+    dev: true
+
+  /@rollup/pluginutils/4.2.1:
+    resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
+    engines: {node: '>= 8.0.0'}
+    dependencies:
+      estree-walker: 2.0.2
+      picomatch: 2.3.1
     dev: true
 
   /@sindresorhus/is/0.14.0:
@@ -3257,6 +3269,10 @@ packages:
       is-set: 2.0.2
       is-string: 1.0.7
       isarray: 2.0.5
+    dev: true
+
+  /es-module-lexer/0.9.3:
+    resolution: {integrity: sha512-1HQ2M2sPtxwnvOvT1ZClHyQDiggdNjURWpY2we6aMKCQiUVxTmVs2UYPLIrD84sS+kMdUwfBSylbJPwNnBrnHQ==}
     dev: true
 
   /es-shim-unscopables/1.0.0:
@@ -5021,6 +5037,11 @@ packages:
       react: 17.0.2
     dev: false
 
+  /joycon/3.1.1:
+    resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
+    engines: {node: '>=10'}
+    dev: true
+
   /js-cookie/2.2.1:
     resolution: {integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==}
     dev: false
@@ -5135,6 +5156,10 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
     dev: false
+
+  /jsonc-parser/3.1.0:
+    resolution: {integrity: sha512-DRf0QjnNeCUds3xTjKlQQ3DpJD51GvDjJfnxUVWg6PZTo2otSm+slzNAxU/35hF8/oJIKoG9slq30JYOsF2azg==}
+    dev: true
 
   /jsonfile/4.0.0:
     resolution: {integrity: sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==}
@@ -6537,6 +6562,24 @@ packages:
       fs-extra: 8.1.0
       globby: 10.0.1
       is-plain-object: 3.0.1
+    dev: true
+
+  /rollup-plugin-esbuild/4.9.1_nnvnjumfjmfws62ilyfrahum5a:
+    resolution: {integrity: sha512-qn/x7Wz9p3Xnva99qcb+nopH0d2VJwVnsxJTGEg+Sh2Z3tqQl33MhOwzekVo1YTKgv+yAmosjcBRJygMfGrtLw==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      esbuild: '>=0.10.1'
+      rollup: ^1.20.0 || ^2.0.0
+    dependencies:
+      '@rollup/pluginutils': 4.2.1
+      debug: 4.3.4
+      es-module-lexer: 0.9.3
+      esbuild: 0.14.39
+      joycon: 3.1.1
+      jsonc-parser: 3.1.0
+      rollup: 2.77.0
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /rollup-plugin-userscript-metablock/0.3.1:

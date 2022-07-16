@@ -1,6 +1,8 @@
 {
   "extends": "@aidenlx/ts-config/tsconfig.json",
   "compilerOptions": {
+    "outDir": "dist",
+    "declaration": true,
     "baseUrl": "src",
     "lib": ["dom", "es5", "scripthost", "es2016", "dom.iterable"],
     "jsx": "react",

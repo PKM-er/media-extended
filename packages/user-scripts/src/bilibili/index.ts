@@ -1,3 +1,4 @@
+import { hookBilibiliControls } from "./controls";
 import findPlayer from "./find-player";
 
 declare global {
@@ -20,4 +21,6 @@ declare global {
 window.__ENABLE_WASM_PLAYER__ = false;
 window.__PLAYER_REF__ = {};
 
-findPlayer();
+findPlayer(() => {
+  hookBilibiliControls();
+});
