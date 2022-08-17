@@ -13,7 +13,7 @@ This plugin introduce some new features that enhance media (video/audio) playbac
   - [Caption/Subtitle support](https://github.com/aidenlx/media-extended/wiki/Caption-Subtitle-Support)
 - Notetaking
   - [Create timestamp link/media fragment](https://github.com/aidenlx/media-extended/wiki/Restrict-Play-Range)
-  - Dedicated media view binded to document to open media links
+  - Dedicated media view bound to document to open media links
   - [Get timestamp from existing media file](https://github.com/aidenlx/media-extended/wiki/Get-Timestamp)
   - [Take timestamp from audio recorder](https://github.com/aidenlx/media-extended/wiki/Audio-Recorder)
 
