@@ -8,6 +8,9 @@
   },
   "devDependencies": {
     "@mx/config": "workspace:*",
+    "@types/eslint": "~8.4.6",
+    "@types/react": "~17.0.8",
+    "@types/react-dom": "~17.0.11",
     "autoprefixer": "^10.4.16",
     "builtin-modules": "^3.3.0",
     "cross-env": "^7.0.3",
@@ -23,13 +26,11 @@
     "release-it": "^17.0.1",
     "semver": "^7.5.4",
     "tailwindcss": "^3.3.6",
-    "typescript": "~5.1.6",
-    "@types/react-dom": "~17.0.11",
-    "@types/react": "~17.0.8",
-    "@types/eslint": "~8.4.6"
+    "typescript": "~5.1.6"
   },
   "dependencies": {
     "clsx": "^1.2.1",
+    "monkey-around": "^2.3.0",
     "react": "npm:@preact/compat@~17.1.2",
     "react-dom": "npm:@preact/compat@~17.1.2"
   }

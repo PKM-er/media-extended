@@ -20,6 +20,9 @@ importers:
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
+      monkey-around:
+        specifier: ^2.3.0
+        version: 2.3.0
       react:
         specifier: npm:@preact/compat@~17.1.2
         version: /@preact/compat@17.1.2(preact@10.19.3)
@@ -4336,6 +4339,10 @@ packages:
   /moment@2.29.4:
     resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
     dev: true
+
+  /monkey-around@2.3.0:
+    resolution: {integrity: sha512-QWcCUWjqE/MCk9cXlSKZ1Qc486LD439xw/Ak8Nt6l2PuL9+yrc9TJakt7OHDuOqPRYY4nTWBAEFKn32PE/SfXA==}
+    dev: false
 
   /ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
