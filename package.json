@@ -1,8 +1,13 @@
 {
-  "name": "my-turborepo",
-  "description": "A barebones Turborepo example for working with Task Graphs.",
+  "name": "media-extended",
+  "description": "",
   "packageManager": "pnpm@8.11.0",
   "devDependencies": {
     "turbo": "latest"
+  },
+  "pnpm": {
+    "neverBuiltDependencies": [
+      "electron"
+    ]
   }
 }

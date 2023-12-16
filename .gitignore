@@ -8,11 +8,9 @@ node_modules
 # Turbo
 .turbo
 
-
-# Build Outputs
-output-file.txt
-a-different-file.txt
-
+# Output
+build
+dist
 
 # Debug
 npm-debug.log*
