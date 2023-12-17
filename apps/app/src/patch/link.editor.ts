@@ -1,16 +1,14 @@
-import "obsidian";
-
-import type MediaExtended from "@/mx-main";
 import { around } from "monkey-around";
-import { MarkdownEditView } from "obsidian";
-import { getInstancePrototype, getMarkdownViewInstance } from "./utils";
-import { LinkEvent } from "./event";
+import type { MarkdownEditView, Plugin } from "obsidian";
+
+import type { LinkEvent } from "./event";
+import { getInstancePrototype, getRunningViewInstance } from "./utils";
 
 declare module "obsidian" {
   interface MarkdownEditView {
     triggerClickableToken(
       token: { type: string; text: string; start: number; end: number },
-      newLeaf: boolean
+      newLeaf: boolean,
     ): void;
   }
   interface MarkdownView {
@@ -20,13 +18,13 @@ declare module "obsidian" {
 }
 
 export default function patchEditorClick(
-  plugin: MediaExtended,
-  { onExternalLinkClick, onInternalLinkClick }: Partial<LinkEvent>
+  plugin: Plugin,
+  { onExternalLinkClick, onInternalLinkClick }: Partial<LinkEvent>,
 ) {
-  return getMarkdownViewInstance(plugin).then((view) => {
+  return getRunningViewInstance("markdown", plugin).then((view) => {
     if (!view.editMode) {
       console.error(
-        "MarkdownView.editMode is not available, cannot patch editor click"
+        "MarkdownView.editMode is not available, cannot patch editor click",
       );
       return;
     }
@@ -40,13 +38,13 @@ export default function patchEditorClick(
                 token.text,
                 this.file.path,
                 newLeaf,
-                fallback
+                fallback,
               );
             } else if ("external-link" === token.type && onExternalLinkClick) {
               onExternalLinkClick(token.text, newLeaf, fallback);
             } else fallback();
           },
-      })
+      }),
     );
     console.debug("editor click patched");
   });

@@ -7,7 +7,6 @@
     "lint": "eslint src/ --ext .ts,.tsx --fix"
   },
   "devDependencies": {
-    "@mx/config": "workspace:*",
     "@types/eslint": "~8.4.6",
     "@types/react": "~17.0.8",
     "@types/react-dom": "~17.0.11",
@@ -17,8 +16,9 @@
     "electron": "^25.0.0",
     "esbuild": "^0.19.9",
     "esbuild-style-plugin": "^1.6.3",
-    "eslint": "~8.36.0",
+    "eslint": "~8.56.0",
     "jszip": "^3.10.1",
+    "@mx/config": "workspace:*",
     "obsidian": "~1.4.11",
     "postcss": "^8.4.32",
     "postcss-discard": "^2.0.0",

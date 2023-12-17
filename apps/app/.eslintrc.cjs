@@ -4,13 +4,13 @@
  */
 
 // Workaround for https://github.com/eslint/eslint/issues/3458 (re-export of @rushstack/eslint-patch)
-require("@aidenlx/eslint-config/patch/modern-module-resolution");
+require("@mx/config/patch/modern-module-resolution");
 
-const { getDefaultIgnorePatterns } = require("@aidenlx/eslint-config/helpers");
+const { getDefaultIgnorePatterns } = require("@mx/config/helpers");
 
 const typescriptOptions = {
   tsconfigRootDir: __dirname,
-  project: "tsconfig/Users/aidenlx/repo/obsidian-zotero/app/obsidian/tsconfig.json.json",
+  project: "tsconfig.json",
 };
 
 /**
@@ -25,11 +25,11 @@ module.exports = {
   },
   ignorePatterns: [...getDefaultIgnorePatterns()],
   extends: [
-    "@aidenlx/eslint-config/typescript",
-    "@aidenlx/eslint-config/regexp",
+    "./node_modules/@mx/config/src/bases/typescript.js",
+    "./node_modules/@mx/config/src/bases/regexp.js",
     // Apply prettier and disable incompatible rules
-    "@aidenlx/eslint-config/prettier",
-    "@aidenlx/eslint-config/react",
+    "./node_modules/@mx/config/src/bases/prettier.js",
+    "./node_modules/@mx/config/src/bases/react.js",
   ],
   rules: {
     "react/no-unknown-property": ["error", { ignore: ["aria-label-delay"] }],
@@ -41,19 +41,5 @@ module.exports = {
       typescript: typescriptOptions,
     },
   },
-  overrides: [
-    {
-      files: "src/worker-web/**/*.ts",
-      // excludedFiles: "src/worker/note-parser/**/*.ts",
-      parserOptions: {
-        tsconfigRootDir: "src/worker-web",
-      },
-    },
-    {
-      files: "src/worker-iframe/**/*.ts",
-      parserOptions: {
-        tsconfigRootDir: "src/worker-iframe",
-      },
-    },
-  ],
+  overrides: [],
 };

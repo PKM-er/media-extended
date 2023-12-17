@@ -1,13 +1,12 @@
-import type MediaExtended from "@/mx-main";
 import { around } from "monkey-around";
-import { Keymap, type PreviewEventHanlder } from "obsidian";
-import { MarkdownPreviewRenderer } from "obsidian";
-import { LinkEvent } from "./event";
+import type { Plugin, PreviewEventHanlder } from "obsidian";
+import { MarkdownPreviewRenderer, Keymap } from "obsidian";
+import type { LinkEvent } from "./event";
 import { getInstancePrototype } from "./utils";
 
 export default function patchPreviewClick(
-  plugin: MediaExtended,
-  events: Partial<LinkEvent>
+  plugin: Plugin,
+  events: Partial<LinkEvent>,
 ) {
   const unloadPatchHook = around(
     MarkdownPreviewRenderer as MDPreviewRendererCtor,
@@ -19,7 +18,7 @@ export default function patchPreviewClick(
           console.debug("preview click patched");
           return next.call(this, _el, helper, ...args);
         },
-    }
+    },
   );
   plugin.register(unloadPatchHook);
 }
@@ -27,7 +26,7 @@ export default function patchPreviewClick(
 function patchPreviewEventHanlder(
   handler: PreviewEventHanlder,
   { onExternalLinkClick, onInternalLinkClick }: Partial<LinkEvent>,
-  plugin: MediaExtended
+  plugin: Plugin,
 ) {
   plugin.register(
     around(getInstancePrototype(handler), {
@@ -51,14 +50,12 @@ function patchPreviewEventHanlder(
             linktext,
             sourcePath,
             paneCreateType !== false,
-            fallback
+            fallback,
           );
         },
-    })
+    }),
   );
 }
-
-import "obsidian";
 
 declare module "obsidian" {
   class PreviewEventHanlder {
@@ -66,27 +63,27 @@ declare module "obsidian" {
     onInternalLinkDrag(
       evt: MouseEvent,
       delegateTarget: HTMLElement,
-      linktext: string
+      linktext: string,
     ): void;
     onInternalLinkClick(
       evt: MouseEvent,
       delegateTarget: HTMLElement,
-      linktext: string
+      linktext: string,
     ): void;
     onInternalLinkRightClick(
       evt: MouseEvent,
       delegateTarget: HTMLElement,
-      linktext: string
+      linktext: string,
     ): void;
     onExternalLinkClick(
       evt: MouseEvent,
       delegateTarget: HTMLElement,
-      href: string
+      href: string,
     ): void;
     onInternalLinkMouseover(
       evt: MouseEvent,
       delegateTarget: HTMLElement,
-      href: string
+      href: string,
     ): void;
     onTagClick(evt: MouseEvent, delegateTarget: HTMLElement, tag: string): void;
     info?: MarkdownView | MarkdownFileInfo;
@@ -97,11 +94,11 @@ type MDPreviewRendererCtor = typeof MarkdownPreviewRenderer & {
   registerDomEvents(
     el: HTMLElement,
     helper: PreviewEventHanlder,
-    isBelongTo: (el: HTMLElement) => boolean
+    isBelongTo: (el: HTMLElement) => boolean,
   ): void;
   belongsToMe(
     target: HTMLElement,
     el: HTMLElement,
-    isBelongTo: (el: HTMLElement) => boolean
+    isBelongTo: (el: HTMLElement) => boolean,
   ): boolean;
 };
