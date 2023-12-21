@@ -2,10 +2,19 @@
 module.exports = {
   content: [
     "./src/components/**/*.{ts,tsx}",
-    "./src/comp.{ts,tsx}",
-    "./src/mx-main.ts"
+    "./src/media-view/**/*.{ts,tsx}",
   ],
   darkMode: ["class", ".theme-dark"],
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@vidstack/react/tailwind.cjs')({
+      prefix: 'media',
+    }),
+    customVariants,
+  ],
   theme: {
     fontSize: {
       xs: "var(--font-ui-smaller)",
@@ -61,10 +70,26 @@ module.exports = {
         normal: "var(--line-height)",
         tight: "var(--line-height-tight)",
       },
+      height: {
+        'slider-track': 'var(--slider-track-height)',
+        'slider-thumb': 'var(--slider-thumb-height)',
+        'slider-thumb-sm': 'calc(var(--slider-thumb-height) * 0.75)',
+      },
+      borderRadius: {
+        'slider-thumb': 'var(--slider-thumb-radius)',
+      },
+      borderWidth: {
+        'width-slider-thumb': 'var(--slider-thumb-border-width)',
+      },
+      width: {
+        'slider-thumb': 'var(--slider-thumb-width)',
+        'slider-thumb-sm': 'calc(var(--slider-thumb-width) * 0.75)',
+      },
       colors: {
         primary: "var(--background-primary)",
         "primary-alt": "var(--background-primary-alt)",
         secondary: "var(--background-secondary)",
+        "secondary-alt": "var(--background-secondary-alt)",
         "text-highlight": "var(--text-highlight-bg)",
         "text-highlight-active": "var(--text-highlight-bg-active)",
         "mod-hover": "var(--background-modifier-hover)",
@@ -95,6 +120,8 @@ module.exports = {
         "ia-accent-hsl": "var(--interactive-accent-hsl)",
         "ia-accent": "var(--interactive-accent)",
         "ia-accent-hover": "var(--interactive-accent-hover)",
+        "slider-track": "var(--slider-track-background)",
+        'slider-thumb': 'var(--thumb-border-color)',
       },
       keyframes: {
         "accordion-down": {
@@ -113,3 +140,11 @@ module.exports = {
     },
   },
 };
+
+function customVariants({ addVariant, matchVariant }) {
+  // Strict version of `.group` to help with nesting.
+  matchVariant('parent-data', (value) => `.parent[data-${value}] > &`);
+
+  addVariant('hocus', ['&:hover', '&:focus-visible']);
+  addVariant('group-hocus', ['.group:hover &', '.group:focus-visible &']);
+}

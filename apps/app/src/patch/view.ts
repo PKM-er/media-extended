@@ -1,18 +1,15 @@
 import type { Plugin, ViewCreator } from "obsidian";
-import { MediaFileExtensions } from "./utils";
 
 export default function injectMediaView(
   this: Plugin,
   viewType: string,
   viewCreator: ViewCreator,
+  extensions: string[],
 ) {
   const { app } = this;
   this.registerView(viewType, viewCreator);
-  const targetExtensions = (["video", "audio"] as const).flatMap(
-    (type) => MediaFileExtensions[type],
-  );
-  this.register(unregisterExistingViewExt(targetExtensions));
-  this.registerExtensions(targetExtensions, viewType);
+  this.register(unregisterExistingViewExt(extensions));
+  this.registerExtensions(extensions, viewType);
 
   function unregisterExistingViewExt(exts: string[]) {
     const viewTypeBackup: { ext: string; type: string | undefined }[] =

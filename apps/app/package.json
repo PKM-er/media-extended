@@ -7,9 +7,10 @@
     "lint": "eslint src/ --ext .ts,.tsx --fix"
   },
   "devDependencies": {
+    "@mx/config": "workspace:*",
     "@types/eslint": "~8.4.6",
-    "@types/react": "~17.0.8",
-    "@types/react-dom": "~17.0.11",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.16",
     "builtin-modules": "^3.3.0",
     "cross-env": "^7.0.3",
@@ -18,7 +19,6 @@
     "esbuild-style-plugin": "^1.6.3",
     "eslint": "~8.56.0",
     "jszip": "^3.10.1",
-    "@mx/config": "workspace:*",
     "obsidian": "~1.4.11",
     "postcss": "^8.4.32",
     "postcss-discard": "^2.0.0",
@@ -26,12 +26,21 @@
     "release-it": "^17.0.1",
     "semver": "^7.5.4",
     "tailwindcss": "^3.3.6",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "~5.1.6"
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.0.5",
+    "@radix-ui/react-slider": "^1.1.2",
+    "@radix-ui/react-tooltip": "^1.0.6",
+    "@vidstack/react": "^1.9.8",
+    "ahooks": "^3.7.8",
     "clsx": "^1.2.1",
     "monkey-around": "^2.3.0",
-    "react": "npm:@preact/compat@~17.1.2",
-    "react-dom": "npm:@preact/compat@~17.1.2"
+    "nanoevents": "^9.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "tailwind-merge": "^2.1.0",
+    "zustand": "^4.4.7"
   }
 }

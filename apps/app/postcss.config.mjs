@@ -1,4 +1,5 @@
 import tailwindcss from "tailwindcss";
+import tailwindcssNesting from "tailwindcss/nesting/index.js";
 import autoprefixer from "autoprefixer";
 import discard from "postcss-discard";
 import prefixSelector from "postcss-prefix-selector";
@@ -20,6 +21,7 @@ const prefix = prefixSelector({
 export default {
   plugins: [
     tailwindcss({ config: "./tailwind.config.cjs" }),
+    tailwindcssNesting({}),
     autoprefixer({}),
     discard({
       rule: ["html", "body"],

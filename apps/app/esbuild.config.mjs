@@ -6,6 +6,7 @@ import { readFileSync } from "fs";
 import { join, resolve } from "path";
 import semverPrerelease from "semver/functions/prerelease.js";
 import NODE_BULTIIN from "builtin-modules";
+import { readFile } from "fs/promises";
 
 function isPreRelease() {
   const myPackage = JSON.parse(readFileSync("./package.json", "utf-8"));
@@ -80,6 +81,22 @@ const opts = {
       postcssConfigFile: resolve("./postcss.config.mjs"),
     }),
     obPlugin({ beta: isPreRelease() }),
+    {
+      name: "vidstack-loader",
+      setup: (build) => {
+        // esbuild plugin that replace any "VIDEO_LOADER, AUDIO_LOADER" with "AUDIO_LOADER, VIDEO_LOADER" in any file starts with "vidstack-" and ends with ".js"
+        build.onLoad({ filter: /\/vidstack-.*\.js$/ }, async (args) => {
+          const contents = await readFile(args.path, "utf8");
+          return {
+            contents: contents.replaceAll(
+              /VIDEO_LOADER, AUDIO_LOADER/g,
+              "AUDIO_LOADER, VIDEO_LOADER"
+            ),
+            loader: "js",
+          };
+        })
+      }
+    }
   ],
 };
 
