@@ -19,6 +19,7 @@ export function Player() {
   useHandleWindowMigration(playerRef);
 
   const viewType = useViewTypeDetect(playerRef);
+  const title = useMediaViewStore((s) => s.title);
 
   if (!src) return null;
   return (
@@ -29,6 +30,7 @@ export function Player() {
       )}
       src={src}
       playsinline
+      title={title || viewType}
       viewType={viewType}
       ref={playerRef}
     >

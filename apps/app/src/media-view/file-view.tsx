@@ -40,7 +40,7 @@ abstract class MediaFileView
 
   async onLoadFile(file: TFile): Promise<void> {
     const src = this.app.vault.getResourcePath(file);
-    this.store.setState({ source: { src } });
+    this.store.setState({ source: { src }, title: file.name });
   }
   abstract canAcceptExtension(extension: string): boolean;
 

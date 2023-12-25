@@ -15,6 +15,7 @@ export interface MediaViewState {
       }
     | undefined;
   hash: string;
+  title: string;
   lastStateRef: React.MutableRefObject<LastState | null>;
 }
 
@@ -23,6 +24,7 @@ export function createMediaViewStore() {
     playerRef: createRef<MediaPlayerInstance>(),
     source: undefined,
     hash: "",
+    title: "",
     lastStateRef: createRef<LastState>(),
   }));
 }

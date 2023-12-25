@@ -21,7 +21,7 @@ export class MediaFileEmbed
   ) {
     super();
     this.store = createMediaViewStore();
-    this.store.setState({ hash: subpath });
+    this.store.setState({ hash: subpath, title: file.name });
     const { containerEl } = info;
     containerEl.addClasses(["mx", "mx-media-embed", "custom"]);
     function isEditButton(target: EventTarget | null): boolean {
