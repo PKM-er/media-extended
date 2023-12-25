@@ -39,6 +39,7 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
             <Menus.Captions offset={popupOffset} tooltipOffset={popupOffset} />
             <Buttons.PIP />
             <Buttons.Fullscreen />
+            <Buttons.EditorEdit />
           </Controls.Group>
         </Tooltip.Provider>
       </Controls.Root>

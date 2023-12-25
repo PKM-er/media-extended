@@ -32,7 +32,10 @@ export type MediaViewStoreApi = ReturnType<typeof createMediaViewStore>;
 export const MediaViewContext = createContext<{
   store: MediaViewStoreApi;
   plugin: MediaExtended;
+  embed: boolean;
 }>(null as any);
+
+export const useIsEmbed = () => useContext(MediaViewContext).embed;
 
 export function useMediaViewStore<U>(
   selector: (state: MediaViewState) => U,

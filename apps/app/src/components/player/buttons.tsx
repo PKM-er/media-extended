@@ -1,3 +1,5 @@
+import "./buttons.global.css";
+
 import {
   CaptionButton,
   FullscreenButton,
@@ -21,7 +23,9 @@ import {
   FullscreenIcon,
   FastForwardIcon,
   RewindIcon,
+  EditIcon,
 } from "@/components/icon";
+import { useIsEmbed } from "../context";
 
 export const buttonClass =
   "group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden";
@@ -128,3 +132,23 @@ export function Fullscreen() {
     </FullscreenButton>
   );
 }
+
+export function EditorEdit() {
+  const isEmbed = useIsEmbed();
+  if (!isEmbed) return null;
+  return (
+    // let live preview editor handle this
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      onClick={() => void 0}
+      data-lp-edit
+      aria-label="Edit in editor"
+    >
+      <EditIcon className="w-7 h-7" />
+    </button>
+  );
+}
+
+export const dataProps = {
+  livePreviewEmbedEdit: "lpEdit",
+};

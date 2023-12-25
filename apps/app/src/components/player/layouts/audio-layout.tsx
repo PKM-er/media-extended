@@ -34,6 +34,7 @@ export function AudioLayout({ thumbnails }: VideoLayoutProps) {
             <TimeGroup />
             <Title />
             <div className="flex-1" />
+            <Buttons.EditorEdit />
           </Controls.Group>
         </Tooltip.Provider>
       </Controls.Root>

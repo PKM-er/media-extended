@@ -3,8 +3,9 @@ import { Component } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
+import { dataProps } from "@/components/player/buttons";
 import type MxPlugin from "@/mx-main";
-import type { PlayerComponent } from "./base";
+import { type PlayerComponent } from "./base";
 
 export class MediaFileEmbed
   extends Component
@@ -23,7 +24,17 @@ export class MediaFileEmbed
     this.store.setState({ hash: subpath });
     const { containerEl } = info;
     containerEl.addClasses(["mx", "mx-media-embed", "custom"]);
-    containerEl.style.display = "contents";
+    function isEditButton(target: EventTarget | null): boolean {
+      if (!(target instanceof Element)) return false;
+      const button = target.closest("button");
+      if (!button) return false;
+      return Boolean(button.dataset[dataProps.livePreviewEmbedEdit]);
+    }
+    this.registerDomEvent(containerEl, "click", (evt) => {
+      // only allow edit button to propagate to lp click handler
+      if (!isEditButton(evt.target)) evt.stopImmediatePropagation();
+    });
+    // containerEl.style.display = "contents";
   }
 
   onload(): void {
@@ -31,7 +42,7 @@ export class MediaFileEmbed
     this.root = ReactDOM.createRoot(this.info.containerEl);
     this.root.render(
       <MediaViewContext.Provider
-        value={{ plugin: this.plugin, store: this.store }}
+        value={{ plugin: this.plugin, store: this.store, embed: true }}
       >
         <Player />
       </MediaViewContext.Provider>,

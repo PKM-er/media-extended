@@ -7,7 +7,10 @@ import prefixSelector from "postcss-prefix-selector";
 /** @type {import("postcss").Plugin} */
 const prefix = prefixSelector({
   prefix: ".mx",
-  transform: (prefix, selector, prefixedSelector, _filePath, _rule) => {
+  transform: (prefix, selector, prefixedSelector, filePath, _rule) => {
+    if (filePath.endsWith("global.css")) {
+      return selector;
+    }
     if (selector.includes(".theme-dark")) {
       return selector.replace(".theme-dark", `.theme-dark ${prefix}`);
     } else if (selector.includes(".mx-")) {
