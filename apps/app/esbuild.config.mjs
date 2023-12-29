@@ -3,7 +3,7 @@ import obPlugin from "./scripts/ob.esbuild.mjs";
 import { build, context } from "esbuild";
 import stylePlugin from "esbuild-style-plugin";
 import { readFileSync } from "fs";
-import { join, resolve } from "path";
+import { resolve, basename } from "path";
 import semverPrerelease from "semver/functions/prerelease.js";
 import NODE_BULTIIN from "builtin-modules";
 import { readFile } from "fs/promises";
@@ -48,6 +48,8 @@ const CM_BULTIIN = [
 
 const isProd = process.env?.BUILD === "production";
 
+const randomUid = Math.random().toString(36).slice(2);
+
 /** @type import("esbuild").BuildOptions */
 const opts = {
   bundle: true,
@@ -57,8 +59,9 @@ const opts = {
   minify: isProd,
   define: {
     "process.env.NODE_ENV": JSON.stringify(process.env.BUILD ?? ""),
+    "__DEV__": JSON.stringify(!isProd),
   },
-  logLevel: process.env.BUILD === "development" ? "info" : "silent",
+  logLevel: isProd ? "silent" : "info",
   external: [
     "obsidian",
     "electron",
@@ -81,6 +84,20 @@ const opts = {
       postcssConfigFile: resolve("./postcss.config.mjs"),
     }),
     obPlugin({ beta: isPreRelease() }),
+    inlineCodePlugin(
+      {
+        ...(isProd
+          ? {
+            define: {
+              // prevent global variable from being detected by website
+              "window.MX_MESSAGE": `window._${randomUid}`,
+              MX_MESSAGE: `_${randomUid}`,
+            },
+            drop: ["console"],
+          }
+          : {})
+      }
+    ),
     {
       name: "vidstack-loader",
       setup: (build) => {
@@ -94,9 +111,9 @@ const opts = {
             ),
             loader: "js",
           };
-        })
-      }
-    }
+        });
+      },
+    },
   ],
 };
 
@@ -117,4 +134,61 @@ if (!isProd) {
   }
 } else {
   await build(opts);
+}
+
+/**
+ *
+ * @param {Partial<import("esbuild").BuildOptions>} extraConfig
+ * @returns {import("esbuild").Plugin}
+ */
+function inlineCodePlugin(extraConfig) {
+  return {
+    name: "inline-code",
+    setup: (build) => {
+      const codePrefixPattern = new RegExp(`^inline:`),
+        namespace = "inline";
+      build.onResolve(
+        { filter: codePrefixPattern },
+        ({ path: workerPath, resolveDir }) => {
+          return {
+            path: resolve(
+              resolveDir,
+              workerPath.replace(codePrefixPattern, "")
+            ),
+            namespace,
+          };
+        }
+      );
+      build.onLoad(
+        { filter: /.*/, namespace },
+        async ({ path: workerPath }) => {
+          return {
+            contents: await buildWorker(workerPath, extraConfig),
+            loader: "text",
+          };
+        }
+      );
+      build.onEnd(() => console.log("inline code built"));
+    },
+  };
+}
+
+async function buildWorker(
+  workerPath,
+  { entryPoints, outfile, outdir, ...extraConfig }
+) {
+  const scriptName = basename(workerPath).replace(/\.[^.]*$/, ".js");
+
+  const result = await build({
+    entryPoints: [workerPath],
+    write: false, // write in memory
+    outfile: scriptName,
+    bundle: true,
+    minify: true,
+    format: "esm",
+    target: "es2022",
+    ...extraConfig,
+  });
+
+  return `(async function(){${new TextDecoder("utf-8").decode(result.outputFiles[0].contents)}})()`;
 }

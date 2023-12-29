@@ -60,8 +60,9 @@ export class MediaFileEmbed
   }
 
   onunload() {
-    super.onunload();
+    // unmount before detach from DOM
     this.root?.unmount();
     this.root = null;
+    super.onunload();
   }
 }

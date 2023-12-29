@@ -1,3 +1,4 @@
+import { around } from "monkey-around";
 import type { TFile, WorkspaceLeaf } from "obsidian";
 import { EditableFileView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
@@ -33,6 +34,20 @@ abstract class MediaFileView
         this.render();
       }),
     );
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+
+    // make sure to unmount the player before the leaf detach it from DOM
+    this.register(
+      around(this.leaf, {
+        detach: (next) =>
+          function (this: WorkspaceLeaf, ...args) {
+            self.root?.unmount();
+            self.root = null;
+            return next.call(this, ...args);
+          },
+      }),
+    );
   }
 
   abstract getViewType(): string;
@@ -65,10 +80,14 @@ abstract class MediaFileView
       </MediaViewContext.Provider>,
     );
   }
+
+  close() {
+    this.root?.unmount();
+    this.root = null;
+    // @ts-expect-error -- this would call leaf.detach()
+    return super.close();
+  }
   async onClose() {
-    // make sure media elements are cleared before unmounting
-    // to avoid browser from reusing already unmounted resources
-    // clearMediaSrc(this.contentEl);
     this.root?.unmount();
     this.root = null;
     return super.onClose();

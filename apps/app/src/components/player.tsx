@@ -1,12 +1,13 @@
 import "@vidstack/react/player/styles/base.css";
 
-import { MediaPlayer, MediaProvider, useMediaState } from "@vidstack/react";
+import { MediaPlayer, useMediaState } from "@vidstack/react";
 
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./fix-webm-audio";
 import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
+import { MediaProviderEnhanced } from "./provider";
 import { useHandleWindowMigration } from "./use-window-migration";
 
 export function Player() {
@@ -34,7 +35,7 @@ export function Player() {
       viewType={viewType}
       ref={playerRef}
     >
-      <MediaProvider />
+      <MediaProviderEnhanced />
       {actualViewType === "video" ? <VideoLayout /> : <AudioLayout />}
     </MediaPlayer>
   );
