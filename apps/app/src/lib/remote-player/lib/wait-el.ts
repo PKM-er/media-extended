@@ -1,6 +1,7 @@
 export function waitForSelector<T extends Element>(
   selector: string,
   el = document.body,
+  timeout = 10e3,
 ) {
   return new Promise<T>((resolve, reject) => {
     const element = el.querySelector<T>(selector);
@@ -14,14 +15,14 @@ export function waitForSelector<T extends Element>(
       if (element) {
         observer.disconnect();
         resolve(element);
-        window.clearTimeout(timeout);
+        window.clearTimeout(timeoutId);
       }
     });
 
-    const timeout = window.setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
       observer.disconnect();
       reject(new Error(`timeout waiting for ${selector}`));
-    }, 10e3);
+    }, timeout);
 
     observer.observe(el, {
       childList: true,

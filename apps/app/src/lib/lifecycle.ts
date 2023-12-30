@@ -1,24 +1,71 @@
-export abstract class LifeCycle {
-  #events: (() => void)[] = [];
+export class LifeCycle {
+  #events: (() => any)[] = [];
   #loaded = false;
-  load() {
+  async load() {
     if (this.#loaded) return;
     this.#loaded = true;
-    this.onload();
+    await this.onload();
   }
-  abstract onload(): void;
-  unload() {
+  async onload(): Promise<void> {
+    return;
+  }
+  async unload() {
     if (!this.#loaded) return;
     this.#loaded = false;
 
-    let unload: (() => void) | undefined;
+    let unload;
     while ((unload = this.#events.pop())) {
-      unload();
+      await unload();
     }
-    this.onunload();
+    await this.onunload();
   }
-  abstract onunload(): void;
-  register(e: () => void) {
+  async onunload(): Promise<void> {
+    return;
+  }
+  register(e: () => any) {
     this.#events.push(e);
+  }
+  registerInterval(e: () => void, interval: number) {
+    const id = setInterval(e, interval);
+    this.register(() => clearInterval(id));
+  }
+  /**
+   * Registers an DOM event to be detached when unloading
+   * @public
+   */
+  registerDomEvent<K extends keyof WindowEventMap>(
+    el: Window,
+    type: K,
+    callback: (this: HTMLElement, ev: WindowEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  /**
+   * Registers an DOM event to be detached when unloading
+   * @public
+   */
+  registerDomEvent<K extends keyof DocumentEventMap>(
+    el: Document,
+    type: K,
+    callback: (this: HTMLElement, ev: DocumentEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  /**
+   * Registers an DOM event to be detached when unloading
+   * @public
+   */
+  registerDomEvent<K extends keyof HTMLElementEventMap>(
+    el: HTMLElement,
+    type: K,
+    callback: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions,
+  ): void;
+  registerDomEvent(
+    el: Window | HTMLElement | Document,
+    type: string,
+    callback: (this: HTMLElement, ev: Event) => any,
+    options?: boolean | AddEventListenerOptions,
+  ) {
+    el.addEventListener(type, callback, options);
+    this.register(() => el.removeEventListener(type, callback, options));
   }
 }

@@ -1,11 +1,14 @@
-import type { CommRemote } from "../type";
-import { toSerilizableTimeRange } from "../utils/time-range";
+import { toSerilizableTimeRange } from "../lib/time-range";
+import type { MsgCtrlRemote } from "../type";
 
 /**
  * for cases where player is hooked after load event is fired
  * we need to manually trigger them to ensure the readyState is in sync
  */
-export function handleReadyState(player: HTMLMediaElement, port: CommRemote) {
+export function handleReadyState(
+  player: HTMLMediaElement,
+  port: MsgCtrlRemote,
+) {
   console.log("BIND", player.readyState);
   player.addEventListener("loadstart", onLoadStart);
   player.addEventListener("loadeddata", onLoadedData);

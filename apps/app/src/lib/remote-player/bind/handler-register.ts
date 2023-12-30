@@ -1,12 +1,16 @@
-import type { CommRemote } from "../type";
+import type { MsgCtrlRemote } from "../type";
 import {
   capitalize,
   mediaActionProps,
   mediaReadonlyStateProps,
-  mediaWritableStateProps, serializeMediaStatePropValue
+  mediaWritableStateProps,
+  serializeMediaStatePropValue,
 } from "../type";
 
-export function registerHandlers(port: CommRemote, player: HTMLMediaElement) {
+export function registerHandlers(
+  port: MsgCtrlRemote,
+  player: HTMLMediaElement,
+) {
   mediaReadonlyStateProps.forEach((prop) => {
     port.handle(`get${capitalize(prop)}`, () => ({
       value: serializeMediaStatePropValue(player[prop]),

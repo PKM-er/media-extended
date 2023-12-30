@@ -1,8 +1,12 @@
 import type { MediaErrorCode } from "@vidstack/react";
-import type { CommHandler, Nil } from "../comm/handler";
+import type { MessageController, Nil } from "../message";
 // import { enumerate } from "../must-include";
-import type { SerilizableTimeRanges } from "./utils/time-range";
-import { toSerilizableTimeRange, DummyTimeRanges } from "./utils/time-range";
+import type { SerilizableTimeRanges } from "./lib/time-range";
+import {
+  toSerilizableTimeRange,
+  DummyTimeRanges,
+  isSerilizableTimeRange,
+} from "./lib/time-range";
 
 // export const mediaEvents = enumerate<MediaEvent>()(
 //   "loadstart",
@@ -150,37 +154,41 @@ export type MediaEventPayloadMap = {
   };
 };
 
-export type CommRemote = CommHandler<
+export type MsgCtrlRemote = MessageController<
   {
     [K in MediaActionProps]: (...args: Parameters<HTMLMediaElement[K]>) => {
       value: Awaited<ReturnType<HTMLMediaElement[K]>>;
     };
   } & {
-    [K in (typeof mediaWritableStateProps)[number] as `set${Capitalize<K>}`]: (
+    [K in MediaWritableStateProps as `set${Capitalize<K>}`]: (
       val: HTMLMediaElement[K],
     ) => void;
   } & {
     [K in MediaStateProps as `get${Capitalize<K>}`]: () => {
       value: HTMLMediaElement[K];
     };
+  } & {
+    loadPlugin(code?: string): void;
   },
   Nil,
   Nil,
   Record<CustomEvent, void> & MediaEventPayloadMap
 >;
 
-export type CommLocal = CommHandler<
+export type MsgCtrlLocal = MessageController<
   Nil,
   {
     [K in MediaActionProps]: (
       ...args: Parameters<HTMLMediaElement[K]>
     ) => ReturnType<HTMLMediaElement[K]>;
   } & {
-    [K in (typeof mediaWritableStateProps)[number] as `set${Capitalize<K>}`]: (
+    [K in MediaWritableStateProps as `set${Capitalize<K>}`]: (
       val: HTMLMediaElement[K],
     ) => void;
   } & {
     [K in MediaStateProps as `get${Capitalize<K>}`]: () => HTMLMediaElement[K];
+  } & {
+    loadPlugin(code?: string): void;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap,
   Nil
@@ -206,11 +214,7 @@ export function serializeMediaStatePropValue(value: any) {
   }
   return value;
 }
-function isSerilizableTimeRange(
-  value: unknown,
-): value is SerilizableTimeRanges {
-  return (value as Record<string, unknown>).type === "TimeRanges";
-}
+
 export function deserializeMediaStatePropValue(v: unknown) {
   if (isSerilizableTimeRange(v)) {
     return new DummyTimeRanges(v.value);

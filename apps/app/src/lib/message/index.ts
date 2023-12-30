@@ -16,7 +16,7 @@ type ActionResult = {
   transfer?: Transferable[];
 } | void;
 
-interface CommHandlerEvents {
+interface MessageControllerEvents {
   resp: (id: string, value: any, err: InvokeRespMessage["error"]) => void;
   ready: () => void;
   [event: `send:${string}`]: (payload: EventPayload) => void;
@@ -31,7 +31,7 @@ export type EventPayload<T extends string = string, V = any> = {
   payload: V;
 };
 
-export class CommHandler<
+export class MessageController<
   InvokeHandlers extends Record<
     string,
     (...args: any[]) => ActionResult | PromiseLike<ActionResult>
@@ -64,7 +64,7 @@ export class CommHandler<
     string,
     (...args: any[]) => ActionResult | PromiseLike<ActionResult>
   > = Object.create(null);
-  private emitter = createEventEmitter<CommHandlerEvents>();
+  private emitter = createEventEmitter<MessageControllerEvents>();
 
   private onMessage(data: unknown) {
     if (data === PORT_READY_EVENT) {
@@ -171,7 +171,10 @@ export class CommHandler<
     const unload = this.emitter.once(`send:${event}`, callback);
     return unload;
   }
-  onReady(callback: () => void, { once = false }: { once?: boolean } = {}) {
+  onReady(
+    callback: () => void,
+    { once = false }: { once?: boolean; timeout?: number } = {},
+  ) {
     const unload = once
       ? this.emitter.once("ready", callback)
       : this.emitter.on("ready", callback);

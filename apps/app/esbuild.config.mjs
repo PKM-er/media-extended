@@ -86,16 +86,8 @@ const opts = {
     obPlugin({ beta: isPreRelease() }),
     inlineCodePlugin(
       {
-        ...(isProd
-          ? {
-            define: {
-              // prevent global variable from being detected by website
-              "window.MX_MESSAGE": `window._${randomUid}`,
-              MX_MESSAGE: `_${randomUid}`,
-            },
-            drop: ["console"],
-          }
-          : {})
+        external: ['media-extended'],
+        ...(isProd ? { drop: ["console"], } : {})
       }
     ),
     {
@@ -107,7 +99,7 @@ const opts = {
           return {
             contents: contents.replaceAll(
               /VIDEO_LOADER, AUDIO_LOADER/g,
-              "AUDIO_LOADER, VIDEO_LOADER"
+              "...customLoaders, AUDIO_LOADER, VIDEO_LOADER"
             ),
             loader: "js",
           };
@@ -162,13 +154,14 @@ function inlineCodePlugin(extraConfig) {
       build.onLoad(
         { filter: /.*/, namespace },
         async ({ path: workerPath }) => {
+          const code = await buildWorker(workerPath, extraConfig);
+          console.log("inline code built")
           return {
-            contents: await buildWorker(workerPath, extraConfig),
+            contents: code,
             loader: "text",
           };
         }
-      );
-      build.onEnd(() => console.log("inline code built"));
+      )
     },
   };
 }
@@ -185,10 +178,10 @@ async function buildWorker(
     outfile: scriptName,
     bundle: true,
     minify: true,
-    format: "esm",
+    format: "cjs",
     target: "es2022",
     ...extraConfig,
   });
 
-  return `(async function(){${new TextDecoder("utf-8").decode(result.outputFiles[0].contents)}})()`;
+  return result.outputFiles[0].text;
 }

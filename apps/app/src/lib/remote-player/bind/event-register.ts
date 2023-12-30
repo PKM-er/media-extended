@@ -1,8 +1,8 @@
 import type { MediaErrorCode } from "@vidstack/react";
-import type { CommRemote } from "../type";
-import { toSerilizableTimeRange } from "../utils/time-range";
+import { toSerilizableTimeRange } from "../lib/time-range";
+import type { MsgCtrlRemote } from "../type";
 
-export function registerEvents(player: HTMLMediaElement, port: CommRemote) {
+export function registerEvents(player: HTMLMediaElement, port: MsgCtrlRemote) {
   player.addEventListener("abort", () => {
     port.send("abort", void 0);
   });

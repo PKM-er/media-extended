@@ -6,7 +6,7 @@ import { useDisposalBin } from "maverick.js/std";
 
 // import { RAFLoop } from "../../foundation/observers/raf-loop";
 // import { getNumberOfDecimalPlaces } from "../../utils/number";
-import type { EventPayload } from "../comm/handler";
+import type { EventPayload } from "../message";
 import type { WebiviewMediaProvider } from "./provider";
 import { deserializeMediaStatePropValue, type MediaEventMap } from "./type";
 

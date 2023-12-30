@@ -14,6 +14,11 @@ export function toSerilizableTimeRange(
     value: result,
   };
 }
+export function isSerilizableTimeRange(
+  value: unknown,
+): value is SerilizableTimeRanges {
+  return (value as Record<string, unknown>).type === "TimeRanges";
+}
 export class DummyTimeRanges implements TimeRanges {
   constructor(private ranges: [number, number][]) {}
   get length() {
