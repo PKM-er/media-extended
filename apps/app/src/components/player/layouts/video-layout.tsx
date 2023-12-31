@@ -38,6 +38,7 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
             <div className="flex-1" />
             <Menus.Captions offset={popupOffset} tooltipOffset={popupOffset} />
             <Buttons.PIP />
+            <Buttons.Screenshot />
             <Buttons.Fullscreen />
             <Buttons.EditorEdit />
           </Controls.Group>

@@ -4,12 +4,16 @@ import {
   CaptionButton,
   FullscreenButton,
   isTrackCaptionKind,
+  isVideoProvider,
   MuteButton,
   PIPButton,
   PlayButton,
   SeekButton,
+  useMediaProvider,
   useMediaState,
 } from "@vidstack/react";
+import { Platform } from "obsidian";
+import { useEffect, useState } from "react";
 import {
   PlayIcon,
   PauseIcon,
@@ -24,8 +28,11 @@ import {
   FastForwardIcon,
   RewindIcon,
   EditIcon,
+  ImageDownIcon,
 } from "@/components/icon";
-import { useIsEmbed } from "../context";
+import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
+import { captureScreenshot } from "@/lib/screenshot";
+import { useIsEmbed, useScreenshot } from "../context";
 
 export const buttonClass =
   "group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden";
@@ -141,7 +148,7 @@ export function EditorEdit() {
     <button
       className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
       onClick={() => void 0}
-      data-lp-edit
+      {...{ [dataLpEdit]: true }}
       aria-label="Edit in editor"
     >
       <EditIcon className="w-7 h-7" />
@@ -149,6 +156,44 @@ export function EditorEdit() {
   );
 }
 
-export const dataProps = {
-  livePreviewEmbedEdit: "lpEdit",
-};
+function canProviderScreenshot(provider: any) {
+  return isVideoProvider(provider) || provider instanceof WebiviewMediaProvider;
+}
+
+export function useScreenshotHanlder() {
+  const provider = useMediaProvider();
+  const [canScreenshot, updateCanScreenshot] = useState<boolean>(() =>
+    canProviderScreenshot(provider),
+  );
+  const onScreenshot = useScreenshot();
+  useEffect(() => {
+    updateCanScreenshot(canProviderScreenshot(provider));
+  }, [provider]);
+  if (!canScreenshot || !onScreenshot) return null;
+  return async () => {
+    const mimeType = Platform.isSafari ? "image/jpeg" : "image/webp";
+    if (isVideoProvider(provider)) {
+      onScreenshot(await captureScreenshot(provider.video, mimeType));
+    } else if (provider instanceof WebiviewMediaProvider) {
+      onScreenshot(await provider.media.methods.screenshot(mimeType));
+    } else {
+      throw new Error("Unsupported provider for screenshot");
+    }
+  };
+}
+
+export function Screenshot() {
+  const onScreenshot = useScreenshotHanlder();
+  if (!onScreenshot) return null;
+  return (
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      onClick={onScreenshot}
+      aria-label="Capture screenshot"
+    >
+      <ImageDownIcon className="w-7 h-7" />
+    </button>
+  );
+}
+
+export const dataLpEdit = "data-lp-edit";

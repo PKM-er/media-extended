@@ -1,12 +1,15 @@
 import { LifeCycle } from "@/lib/lifecycle";
 import { TimeoutError } from "@/lib/message";
-import bindMediaEl from "../bind";
-import type { MsgCtrlRemote } from "../type";
+import { registerEvents } from "../hook/event-register";
+import { registerHandlers } from "../hook/handler-register";
+import { handleReadyState } from "../hook/ready-state";
+import { fluentTimeUpdate } from "../hook/time-update";
+import { mountedEvent, type MsgCtrlRemote } from "../type";
 import { waitForSelector } from "./wait-el";
 import watchTitle from "./watch-title";
 
 export default class MediaPlugin extends LifeCycle {
-  constructor(protected controller: MsgCtrlRemote) {
+  constructor(public controller: MsgCtrlRemote) {
     super();
     this.register(() => controller.unload());
   }
@@ -31,8 +34,7 @@ export default class MediaPlugin extends LifeCycle {
   async onload() {
     this.register(watchTitle(this.controller));
     this.#media = await this.findMedia();
-    bindMediaEl(this.#media, this.controller);
-    this.controller.send("mx-mounted", void 0);
+    await this.hookMediaEl();
   }
 
   injectCss(css: string) {
@@ -58,6 +60,14 @@ export default class MediaPlugin extends LifeCycle {
       }, timeout);
     });
     window.clearTimeout(timeoutId);
+  }
+
+  async hookMediaEl() {
+    handleReadyState(this);
+    fluentTimeUpdate(this);
+    registerEvents(this);
+    registerHandlers(this);
+    this.controller.send(mountedEvent, void 0);
   }
 }
 

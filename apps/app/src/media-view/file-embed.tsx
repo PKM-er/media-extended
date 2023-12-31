@@ -3,7 +3,7 @@ import { Component } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
-import { dataProps } from "@/components/player/buttons";
+import { dataLpEdit } from "@/components/player/buttons";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
 
@@ -28,7 +28,7 @@ export class MediaFileEmbed
       if (!(target instanceof Element)) return false;
       const button = target.closest("button");
       if (!button) return false;
-      return Boolean(button.dataset[dataProps.livePreviewEmbedEdit]);
+      return button.hasAttribute(dataLpEdit);
     }
     this.registerDomEvent(containerEl, "click", (evt) => {
       // only allow edit button to propagate to lp click handler
@@ -42,7 +42,11 @@ export class MediaFileEmbed
     this.root = ReactDOM.createRoot(this.info.containerEl);
     this.root.render(
       <MediaViewContext.Provider
-        value={{ plugin: this.plugin, store: this.store, embed: true }}
+        value={{
+          plugin: this.plugin,
+          store: this.store,
+          embed: true,
+        }}
       >
         <Player />
       </MediaViewContext.Provider>,

@@ -1,6 +1,7 @@
 import type { MediaErrorCode } from "@vidstack/react";
 import type { MessageController, Nil } from "../message";
 // import { enumerate } from "../must-include";
+import type { ScreenshotInfo } from "../screenshot";
 import type { SerilizableTimeRanges } from "./lib/time-range";
 import {
   toSerilizableTimeRange,
@@ -169,6 +170,10 @@ export type MsgCtrlRemote = MessageController<
     };
   } & {
     loadPlugin(code?: string): void;
+    screenshot(type?: string): {
+      value: ScreenshotInfo;
+      transfer: Transferable[];
+    };
   },
   Nil,
   Nil,
@@ -189,6 +194,7 @@ export type MsgCtrlLocal = MessageController<
     [K in MediaStateProps as `get${Capitalize<K>}`]: () => HTMLMediaElement[K];
   } & {
     loadPlugin(code?: string): void;
+    screenshot(type?: string): ScreenshotInfo;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap,
   Nil

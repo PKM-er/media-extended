@@ -3,6 +3,7 @@ import type { App } from "obsidian";
 import { createContext, createRef, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
 import { createStore, useStore } from "zustand";
+import type { ScreenshotInfo } from "@/lib/screenshot";
 import type MediaExtended from "@/mx-main";
 import type { LastState } from "./use-window-migration";
 
@@ -35,9 +36,8 @@ export const MediaViewContext = createContext<{
   store: MediaViewStoreApi;
   plugin: MediaExtended;
   embed: boolean;
+  onScreenshot?: (info: ScreenshotInfo) => any;
 }>(null as any);
-
-export const useIsEmbed = () => useContext(MediaViewContext).embed;
 
 export function useMediaViewStore<U>(
   selector: (state: MediaViewState) => U,
@@ -51,6 +51,7 @@ export function useApp<U>(selector: (state: App) => U): U {
   return selector(useContext(MediaViewContext).plugin.app);
 }
 
-// export function usePlugin<U>(selector: (state: MediaExtended) => U): U {
-//   return selector(useContext(MediaViewContext).plugin);
-// }
+export function useScreenshot() {
+  return useContext(MediaViewContext).onScreenshot;
+}
+export const useIsEmbed = () => useContext(MediaViewContext).embed;

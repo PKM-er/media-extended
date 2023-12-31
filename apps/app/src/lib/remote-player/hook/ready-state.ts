@@ -1,20 +1,19 @@
+import type MediaPlugin from "../lib/plugin";
 import { toSerilizableTimeRange } from "../lib/time-range";
-import type { MsgCtrlRemote } from "../type";
 
 /**
  * for cases where player is hooked after load event is fired
  * we need to manually trigger them to ensure the readyState is in sync
  */
-export function handleReadyState(
-  player: HTMLMediaElement,
-  port: MsgCtrlRemote,
-) {
+export function handleReadyState(plugin: MediaPlugin) {
+  const player = plugin.media;
+  const port = plugin.controller;
   console.log("BIND", player.readyState);
-  player.addEventListener("loadstart", onLoadStart);
-  player.addEventListener("loadeddata", onLoadedData);
-  player.addEventListener("loadedmetadata", onLoadedMetadata);
-  player.addEventListener("canplay", onCanPlay);
-  player.addEventListener("canplaythrough", onCanPlayThrough);
+  plugin.registerDomEvent(player, "loadstart", onLoadStart);
+  plugin.registerDomEvent(player, "loadeddata", onLoadedData);
+  plugin.registerDomEvent(player, "loadedmetadata", onLoadedMetadata);
+  plugin.registerDomEvent(player, "canplay", onCanPlay);
+  plugin.registerDomEvent(player, "canplaythrough", onCanPlayThrough);
 
   if (player.readyState === 0) player.load();
   if (player.readyState >= 0) onLoadStart();

@@ -47,4 +47,5 @@ export const PlayIcon = makeIcon("play"),
   CircleIcon = makeIcon("circle"),
   FastForwardIcon = makeIcon("fast-forward"),
   RewindIcon = makeIcon("rewind"),
-  EditIcon = makeIcon("edit");
+  EditIcon = makeIcon("edit"),
+  ImageDownIcon = makeIcon("image-down");

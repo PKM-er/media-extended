@@ -1,18 +1,19 @@
+import type MediaPlugin from "../lib/plugin";
 import { RAFLoop } from "../lib/raf-loop";
 import { toSerilizableTimeRange } from "../lib/time-range";
-import type { MsgCtrlRemote } from "../type";
 
 /**
  * The `timeupdate` event fires surprisingly infrequently during playback, meaning your progress
  * bar (or whatever else is synced to the currentTime) moves in a choppy fashion. This helps
  * resolve that by retrieving time updates in a request animation frame loop.
  */
-export function fluentTimeUpdate(
-  player: HTMLMediaElement,
-  port: MsgCtrlRemote,
-) {
+export function fluentTimeUpdate(plugin: MediaPlugin) {
+  const player = plugin.media;
+  const port = plugin.controller;
   const _timeRAF = new RAFLoop(onTimeUpdate);
+  plugin.register(() => _timeRAF._stop());
   let _paused: boolean;
+  let current: number = player.currentTime;
   function onPauseUpdate() {
     if (_paused === player.paused) return;
     _paused = player.paused;
@@ -38,8 +39,10 @@ export function fluentTimeUpdate(
     onPauseUpdate();
   });
   function onTimeUpdate() {
+    if (current === player.currentTime) return;
+    current = player.currentTime;
     port.send("timeupdate", {
-      current: player.currentTime,
+      current,
       played: toSerilizableTimeRange(player.played),
     });
   }

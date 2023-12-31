@@ -74,7 +74,11 @@ abstract class MediaFileView
     this.root = ReactDOM.createRoot(this.contentEl);
     this.root.render(
       <MediaViewContext.Provider
-        value={{ plugin: this.plugin, store: this.store, embed: false }}
+        value={{
+          plugin: this.plugin,
+          store: this.store,
+          embed: false,
+        }}
       >
         <Player />
       </MediaViewContext.Provider>,
