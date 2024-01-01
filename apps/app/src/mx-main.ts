@@ -1,5 +1,6 @@
 import "@vidstack/react/player/styles/base.css";
 import "./style.css";
+import "./icons";
 
 import { Plugin } from "obsidian";
 import { MediaFileEmbed } from "./media-view/file-embed";
@@ -8,6 +9,10 @@ import {
   MEDIA_FILE_VIEW_TYPE,
   VideoFileView,
 } from "./media-view/file-view";
+import {
+  MEDIA_WEBPAGE_VIEW_TYPE,
+  MediaWebpageView,
+} from "./media-view/webpage-view";
 import injectMediaEmbed from "./patch/embed";
 import patchEditorClick from "./patch/link.editor";
 import fixLinkLabel from "./patch/link.label-fix";
@@ -39,6 +44,10 @@ export default class MxPlugin extends Plugin {
     );
     this.injectMediaEmbed(
       (info, file, subpath) => new MediaFileEmbed(info, file, subpath, this),
+    );
+    this.registerView(
+      MEDIA_WEBPAGE_VIEW_TYPE,
+      (leaf) => new MediaWebpageView(leaf, this),
     );
     this.fixLinkLabel();
   }

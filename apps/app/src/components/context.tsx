@@ -1,14 +1,16 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { App } from "obsidian";
-import { createContext, createRef, useContext } from "react";
+import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
 import { createStore, useStore } from "zustand";
+import noop from "@/lib/no-op";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import type MediaExtended from "@/mx-main";
-import type { LastState } from "./use-window-migration";
+import type { SupportedWebHost } from "@/web/match";
 
 export interface MediaViewState {
-  playerRef: React.RefObject<MediaPlayerInstance>;
+  player: MediaPlayerInstance | null;
+  playerRef: React.RefCallback<MediaPlayerInstance>;
   source:
     | {
         src: string;
@@ -17,16 +19,19 @@ export interface MediaViewState {
     | undefined;
   hash: string;
   title: string;
-  lastStateRef: React.MutableRefObject<LastState | null>;
+  webHost?: Exclude<SupportedWebHost, SupportedWebHost.Generic>;
+  updateWebHost: (webHost: SupportedWebHost) => void;
 }
 
 export function createMediaViewStore() {
-  return createStore<MediaViewState>(() => ({
-    playerRef: createRef<MediaPlayerInstance>(),
+  return createStore<MediaViewState>((set) => ({
+    player: null,
+    playerRef: (inst) => set({ player: inst }),
     source: undefined,
     hash: "",
     title: "",
-    lastStateRef: createRef<LastState>(),
+    updateWebHost: (webHost) =>
+      set({ webHost: webHost === "generic" ? undefined : webHost }),
   }));
 }
 
@@ -55,3 +60,29 @@ export function useScreenshot() {
   return useContext(MediaViewContext).onScreenshot;
 }
 export const useIsEmbed = () => useContext(MediaViewContext).embed;
+
+export function onPlayerMounted(
+  store: MediaViewStoreApi,
+  callback: (
+    player: MediaPlayerInstance,
+  ) => (() => void) | (() => void)[] | void,
+) {
+  let prevUnload = noop;
+  const unloads: (() => void)[] = [
+    () => prevUnload(),
+    store.subscribe((curr, prev) => {
+      if (curr.player === prev.player) return;
+      prevUnload();
+      if (!curr.player) return;
+      const unload = callback(curr.player);
+      if (!unload) {
+        prevUnload = noop;
+      } else if (Array.isArray(unload)) {
+        prevUnload = () => unload.forEach((u) => u());
+      } else {
+        prevUnload = unload;
+      }
+    }),
+  ];
+  return () => unloads.forEach((u) => u());
+}

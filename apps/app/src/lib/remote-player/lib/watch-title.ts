@@ -1,11 +1,12 @@
+import noop from "../../no-op";
 import type { MsgCtrlRemote } from "../type";
-import noOp from "./no-op";
 
 export default function watchTitle(port: MsgCtrlRemote) {
   const titleEl = document.querySelector("title");
   let prevTitle = document.title;
   if (titleEl) {
     const observer = new MutationObserver(() => {
+      console.log("title changed", document.title);
       if (prevTitle === document.title) return;
       port.send("titlechange", { title: document.title });
       prevTitle = document.title;
@@ -16,9 +17,12 @@ export default function watchTitle(port: MsgCtrlRemote) {
       childList: true,
     });
     console.log("watching title");
-    return () => observer.disconnect();
+    return () => {
+      console.log("unwatching title");
+      observer.disconnect();
+    };
   } else {
     console.log(`title el not found`);
-    return noOp;
+    return noop;
   }
 }

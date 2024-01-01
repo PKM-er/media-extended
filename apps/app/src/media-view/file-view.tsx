@@ -1,9 +1,9 @@
-import { around } from "monkey-around";
 import type { TFile, WorkspaceLeaf } from "obsidian";
 import { EditableFileView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
+import { handleWindowMigration } from "@/components/use-window-migration";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
 import type { PlayerComponent } from "./base";
@@ -29,23 +29,10 @@ abstract class MediaFileView
     this.store = createMediaViewStore();
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
+    handleWindowMigration.call(this, () => this.render());
     this.register(
       this.containerEl.onWindowMigrated(() => {
         this.render();
-      }),
-    );
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-
-    // make sure to unmount the player before the leaf detach it from DOM
-    this.register(
-      around(this.leaf, {
-        detach: (next) =>
-          function (this: WorkspaceLeaf, ...args) {
-            self.root?.unmount();
-            self.root = null;
-            return next.call(this, ...args);
-          },
       }),
     );
   }
@@ -85,12 +72,6 @@ abstract class MediaFileView
     );
   }
 
-  close() {
-    this.root?.unmount();
-    this.root = null;
-    // @ts-expect-error -- this would call leaf.detach()
-    return super.close();
-  }
   async onClose() {
     this.root?.unmount();
     this.root = null;

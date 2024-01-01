@@ -1,6 +1,5 @@
-import type { MediaPlayerInstance } from "@vidstack/react";
-import { useEffect } from "react";
-import { useMediaViewStore } from "./context";
+import type { PlayerComponent } from "@/media-view/base";
+import { onPlayerMounted } from "./context";
 
 export interface LastState {
   win: Window | undefined;
@@ -9,51 +8,36 @@ export interface LastState {
   paused: boolean;
 }
 
-// restore state during window migration
-export function useHandleWindowMigration(
-  playerRef: React.RefObject<MediaPlayerInstance>,
-) {
-  const lastStateRef = useMediaViewStore((s) => s.lastStateRef);
-  useEffect(
-    () =>
-      playerRef.current?.subscribe(({ currentTime, paused, playbackRate }) => {
+export function handleWindowMigration<
+  T extends PlayerComponent & { containerEl: HTMLElement },
+>(this: T, onWindowMigrated: (this: T) => void) {
+  let lastState: LastState | null = null;
+  this.register(
+    onPlayerMounted(this.store, (player) => [
+      player.subscribe(({ currentTime, paused, playbackRate }) => {
         if (currentTime === 0) return;
-        lastStateRef.current = {
-          win: playerRef.current?.el?.win,
+        lastState = {
+          win: player.el?.win,
           currentTime,
           paused,
           playbackRate,
         };
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerRef.current],
-  );
-  useEffect(
-    () =>
-      playerRef.current?.listen("can-play", (evt) => {
-        if (
-          !lastStateRef.current ||
-          lastStateRef.current?.win === evt.target.el?.win
-        )
-          return;
-        const { currentTime, paused, playbackRate } = lastStateRef.current;
+      player.listen("can-play", (evt) => {
+        if (!lastState || lastState.win === evt.target.el?.win) return;
+        const { currentTime, paused, playbackRate } = lastState;
         const player = evt.target;
         player.currentTime = currentTime;
         player.playbackRate = playbackRate;
         if (!paused) player.play(new Event("recover-state"));
-        lastStateRef.current = null;
+        lastState = null;
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerRef.current],
-  );
-  useEffect(
-    () =>
-      playerRef.current?.listen("source-change", (evt) => {
+      player.listen("source-change", (evt) => {
         // if during window migration, don't reset state
-        if (lastStateRef.current?.win !== evt.target.el?.win) return;
-        lastStateRef.current = null;
+        if (lastState?.win !== evt.target.el?.win) return;
+        lastState = null;
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerRef.current],
+    ]),
   );
+  this.register(this.containerEl.onWindowMigrated(onWindowMigrated));
 }

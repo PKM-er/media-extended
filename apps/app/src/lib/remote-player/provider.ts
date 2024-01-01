@@ -10,7 +10,7 @@ import init from "inline:./scripts/initialize";
 
 import { isString } from "maverick.js/std";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
-import { matchHost, type SupportedWebHost } from "@/web/match";
+import { matchHost, SupportedWebHost } from "@/web/match";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MessageController, TimeoutError } from "../message";
@@ -20,12 +20,15 @@ import type { MsgCtrlLocal } from "./type";
 
 const { createScope, onDispose } = Maverick;
 
+interface WebviewMediaSrc extends MediaSrc<string> {
+  host: SupportedWebHost;
+}
+
 export class WebiviewMediaProvider implements MediaProviderAdapter {
   readonly scope = createScope();
   protected $$PROVIDER_TYPE = "WEBVIEW";
 
-  protected _currentSrc: MediaSrc<string> | null = null;
-  protected _currentWebHost: SupportedWebHost = "generic";
+  protected _currentSrc: WebviewMediaSrc | null = null;
 
   protected _port = new MessageController() as MsgCtrlLocal;
 
@@ -61,9 +64,8 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   get currentSrc() {
     return this._currentSrc;
   }
-
-  get currentWebHost() {
-    return this._currentWebHost;
+  get currentWebHost(): SupportedWebHost {
+    return this._currentSrc?.host ?? SupportedWebHost.Generic;
   }
 
   setPlaybackRate(rate: number) {
@@ -136,12 +138,11 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   onDomReady = async (evt: Event) => {
     const webview = this._webview;
-    this._currentWebHost = matchHost(new URL(webview.src));
     new HTMLMediaEvents(this, this._ctx);
     this._updateTitle(evt);
     // prepare to recieve port, handle plugin load
     await evalInWebview(init, webview);
-    await this.loadPlugin(this._currentWebHost);
+    await this.loadPlugin(this.currentWebHost);
   };
 
   registerTitleChange() {
@@ -173,14 +174,14 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     });
   }
 
-  async loadSource({ src, type }: MediaSrc) {
-    if (!isString(src)) {
+  async loadSource({ src: _src, type }: MediaSrc) {
+    if (!isString(_src)) {
       throw new Error("Webview provider only supports string src.");
     }
-    this._currentSrc = { src, type };
-
+    const src = _src.replace(/^webview::/, "");
     const webview = this._webview;
-    webview.src = src.replace(/^webview::/, "");
+    this._currentSrc = { src, type, host: matchHost(src) };
+    webview.src = src;
     await this.untilPluginReady();
     console.log("vidstack player loaded");
   }

@@ -1,25 +1,37 @@
 import "@vidstack/react/player/styles/base.css";
 
+import type { MediaViewType } from "@vidstack/react";
 import { MediaPlayer, useMediaState } from "@vidstack/react";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./fix-webm-audio";
 import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
 import { MediaProviderEnhanced } from "./provider";
-import { useHandleWindowMigration } from "./use-window-migration";
+
+function HookLoader({
+  onViewTypeChange,
+}: {
+  onViewTypeChange: (viewType: "audio" | "unknown") => any;
+}) {
+  useViewTypeDetect(onViewTypeChange);
+  return <></>;
+}
+
+function PlayerLayout() {
+  const actualViewType = useMediaState("viewType");
+  if (actualViewType === "audio") return <AudioLayout />;
+  return <VideoLayout />;
+}
 
 export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
 
-  const actualViewType = useMediaState("viewType", playerRef);
-
   const src = useMediaViewStore((s) => s.source?.src);
 
-  useHandleWindowMigration(playerRef);
-
-  const viewType = useViewTypeDetect(playerRef);
+  const [viewType, setViewType] = useState<MediaViewType>("unknown");
   const title = useMediaViewStore((s) => s.title);
 
   if (!src) return null;
@@ -36,7 +48,8 @@ export function Player() {
       ref={playerRef}
     >
       <MediaProviderEnhanced />
-      {actualViewType === "video" ? <VideoLayout /> : <AudioLayout />}
+      <HookLoader onViewTypeChange={setViewType} />
+      <PlayerLayout />
     </MediaPlayer>
   );
 }
