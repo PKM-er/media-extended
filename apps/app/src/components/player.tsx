@@ -5,6 +5,7 @@ import { MediaPlayer, useMediaState } from "@vidstack/react";
 
 import { useState } from "react";
 import { useTempFrag } from "@/components/hook/use-temporal-frag";
+import { convertHashToProps } from "@/lib/hash/hash-prop";
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
@@ -24,8 +25,17 @@ function HookLoader({
 
 function PlayerLayout() {
   const actualViewType = useMediaState("viewType");
+  const { controls } = useHashProps();
+
   if (actualViewType === "audio") return <AudioLayout />;
+  if (!controls) return null;
   return <VideoLayout />;
+}
+
+function useHashProps() {
+  const hash = useMediaViewStore((s) => s.hash);
+  const props = convertHashToProps(hash);
+  return props;
 }
 
 export function Player() {
@@ -37,6 +47,7 @@ export function Player() {
 
   const [viewType, setViewType] = useState<MediaViewType>("unknown");
   const title = useMediaViewStore((s) => s.title);
+  const { controls, ...hashProps } = useHashProps();
 
   if (!src) return null;
   return (
@@ -51,6 +62,7 @@ export function Player() {
       title={title}
       viewType={viewType}
       ref={playerRef}
+      {...hashProps}
     >
       <MediaProviderEnhanced />
       <HookLoader onViewTypeChange={setViewType} />
