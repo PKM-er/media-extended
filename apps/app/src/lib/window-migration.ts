@@ -1,5 +1,5 @@
 import type { PlayerComponent } from "@/media-view/base";
-import { onPlayerMounted } from "./context";
+import { onPlayerMounted } from "../components/context";
 
 export interface LastState {
   win: Window | undefined;

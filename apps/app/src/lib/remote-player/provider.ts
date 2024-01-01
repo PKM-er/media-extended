@@ -181,8 +181,27 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     const src = _src.replace(/^webview::/, "");
     const webview = this._webview;
     this._currentSrc = { src, type, host: matchHost(src) };
-    webview.src = src;
-    await this.untilPluginReady();
+
+    const url = src ? new URL(src) : null;
+    const prevUrl = webview.src ? new URL(webview.src) : null;
+    if (!url) {
+      webview.src = "";
+      return;
+    }
+    if (
+      !(url.origin === prevUrl?.origin && url.pathname === prevUrl?.pathname)
+    ) {
+      webview.src = url.href;
+      await this.untilPluginReady();
+    }
+    // const frag = parseTempFrag(url.hash),
+    //   prevFrag = parseTempFrag(prevUrl?.hash);
+    // if (!isTempFragEqual(frag, prevFrag)) {
+    //   await this.media.methods.setTempFrag(frag);
+    //   if (frag && isTimestamp(frag)) {
+    //     this.media.methods.setCurrentTime(frag.start);
+    //   }
+    // }
     console.log("vidstack player loaded");
   }
 }

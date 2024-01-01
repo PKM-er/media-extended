@@ -3,7 +3,7 @@ import { EditableFileView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
-import { handleWindowMigration } from "@/components/use-window-migration";
+import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
 import type { PlayerComponent } from "./base";

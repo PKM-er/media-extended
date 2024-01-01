@@ -8,7 +8,7 @@ import {
   onPlayerMounted,
 } from "@/components/context";
 import { Player } from "@/components/player";
-import { handleWindowMigration } from "@/components/use-window-migration";
+import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { SupportedWebHost, matchHost, webHostDisplayName } from "@/web/match";
 import type { PlayerComponent } from "./base";
