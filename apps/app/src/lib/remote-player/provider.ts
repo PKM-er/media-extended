@@ -41,6 +41,10 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
       // this._webview.reload();
     });
     if (this.type === "webview") ctx.delegate._notify("provider-setup", this);
+    this.registerTitleChange();
+    onDispose(() => {
+      this._webview.removeEventListener("dom-ready", this.onDomReady);
+    });
   }
 
   get type() {
@@ -63,27 +67,27 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   }
 
   setPlaybackRate(rate: number) {
-    this._port?.methods.setPlaybackRate(rate);
+    this._port.methods.setPlaybackRate(rate);
   }
 
   async play() {
-    this._port?.methods.play();
+    this._port.methods.play();
   }
 
   async pause() {
-    this._port?.methods.pause();
+    this._port.methods.pause();
   }
 
   setMuted(muted: boolean) {
-    this._port?.methods.setMuted(muted);
+    this._port.methods.setMuted(muted);
   }
 
   setVolume(volume: number) {
-    this._port?.methods.setVolume(volume);
+    this._port.methods.setVolume(volume);
   }
 
   setCurrentTime(time: number) {
-    this._port?.methods.setCurrentTime(time);
+    this._port.methods.setCurrentTime(time);
   }
 
   private get _notify() {
@@ -100,52 +104,84 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     this._notify("title-change", finalTitle, _evt);
   }
 
-  async loadSource({ src, type }: MediaSrc) {
-    if (!isString(src)) {
-      throw new Error("Webview provider only supports string src.");
-    }
-    const webview = this._webview as WebviewTag & {
-      /**
-       * @see https://developer.chrome.com/docs/apps/reference/webviewTag?hl=zh-cn#type-ContentWindow
-       */
-      contentWindow: Window;
-    };
-    webview.src = src.replace(/^webview::/, "");
-    this._currentSrc = { src, type };
+  loadPlugin(host: SupportedWebHost) {
+    return new Promise<void>((resolve, reject) => {
+      const webview = this._webview as WebviewTag & {
+        /**
+         * @see https://developer.chrome.com/docs/apps/reference/webviewTag?hl=zh-cn#type-ContentWindow
+         */
+        contentWindow: Window;
+      };
+      // #region -- logic to handle plugin load
+      const unsub = this.media.onReady(
+        async () => {
+          console.log("PORT READY");
+          window.clearTimeout(timeoutId);
+          await this.media.methods.loadPlugin(plugins[host]);
+          resolve();
+        },
+        { once: true },
+      );
+      const timeoutId = setTimeout(() => {
+        unsub();
+        reject(new TimeoutError(GET_PORT_TIMEOUT));
+      }, GET_PORT_TIMEOUT);
+      // #endregion
+
+      const { port1: portLocal, port2: portRemote } = new MessageChannel();
+      this._port.load(portLocal);
+      webview.contentWindow.postMessage(PORT_MESSAGE, "*", [portRemote]);
+    });
+  }
+
+  onDomReady = async (evt: Event) => {
+    const webview = this._webview;
+    this._currentWebHost = matchHost(new URL(webview.src));
+    new HTMLMediaEvents(this, this._ctx);
+    this._updateTitle(evt);
+    // prepare to recieve port, handle plugin load
+    await evalInWebview(init, webview);
+    await this.loadPlugin(this._currentWebHost);
+  };
+
+  registerTitleChange() {
+    const webview = this._webview;
     onDispose(
       this._port.on("titlechange", ({ payload: { title } }) => {
         this._updateTitle("titlechange", title);
       }),
     );
-    await new Promise<void>((resolve, reject) => {
-      webview.addEventListener("dom-ready", async (evt) => {
-        this._currentWebHost = matchHost(new URL(webview.src));
-        new HTMLMediaEvents(this, this._ctx);
-        this._updateTitle(evt);
-        // initialize comm port, handle plugin load
-        await evalInWebview(init, webview);
-        const { port1: portLocal, port2: portRemote } = new MessageChannel();
-        this._port.load(portLocal);
-        const unsub = this._port.onReady(
-          async () => {
-            console.log("PORT READY");
-            window.clearTimeout(timeoutId);
-            await this.media.methods.loadPlugin(plugins[this.currentWebHost]);
-            resolve();
-          },
-          { once: true },
-        );
-        const timeoutId = setTimeout(() => {
-          unsub();
-          reject(new TimeoutError(GET_PORT_TIMEOUT));
-        }, GET_PORT_TIMEOUT);
-        webview.contentWindow.postMessage(PORT_MESSAGE, "*", [portRemote]);
-      });
-    });
-
-    webview.addEventListener("did-navigate", (evt) => {
+    const onDidNavigate = (evt: Event) => {
       this._updateTitle(evt);
+    };
+    webview.addEventListener("did-navigate", onDidNavigate);
+    onDispose(() => {
+      webview.removeEventListener("did-navigate", onDidNavigate);
     });
+  }
+
+  untilPluginReady() {
+    const webview = this._webview;
+    webview.removeEventListener("dom-ready", this.onDomReady);
+    return new Promise<void>((resolve, reject) => {
+      const onDomReady = (evt: Event) => {
+        this.onDomReady(evt).then(resolve).catch(reject);
+        webview.removeEventListener("dom-ready", onDomReady);
+        webview.addEventListener("dom-ready", this.onDomReady);
+      };
+      webview.addEventListener("dom-ready", onDomReady);
+    });
+  }
+
+  async loadSource({ src, type }: MediaSrc) {
+    if (!isString(src)) {
+      throw new Error("Webview provider only supports string src.");
+    }
+    this._currentSrc = { src, type };
+
+    const webview = this._webview;
+    webview.src = src.replace(/^webview::/, "");
+    await this.untilPluginReady();
     console.log("vidstack player loaded");
   }
 }

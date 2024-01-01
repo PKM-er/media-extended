@@ -10,12 +10,9 @@ export function registerEvents(plugin: MediaPlugin) {
   plugin.registerDomEvent(player, "error", handleError);
   plugin.registerDomEvent(player, "volumechange", handleVolumeChange);
   plugin.registerDomEvent(player, "durationchange", handleDurationChange);
-  plugin.registerDomEvent(player, "play", handlePlay);
   plugin.registerDomEvent(player, "progress", handleProgress);
   plugin.registerDomEvent(player, "stalled", handleStalled);
   plugin.registerDomEvent(player, "suspend", handleSuspend);
-  plugin.registerDomEvent(player, "pause", handlePause);
-  plugin.registerDomEvent(player, "playing", handlePlaying);
   plugin.registerDomEvent(player, "ratechange", handleRateChange);
   plugin.registerDomEvent(player, "seeked", handleSeeked);
   plugin.registerDomEvent(player, "seeking", handleSeeking);
@@ -53,10 +50,6 @@ export function registerEvents(plugin: MediaPlugin) {
     });
   }
 
-  function handlePlay() {
-    port.send("play", void 0);
-  }
-
   function handleProgress() {
     port.send("progress", {
       buffered: toSerilizableTimeRange(player.buffered),
@@ -72,16 +65,6 @@ export function registerEvents(plugin: MediaPlugin) {
 
   function handleSuspend() {
     port.send("suspend", void 0);
-  }
-
-  function handlePause() {
-    port.send("pause", {
-      readyState: player.readyState,
-    });
-  }
-
-  function handlePlaying() {
-    port.send("playing", void 0);
   }
 
   function handleRateChange() {

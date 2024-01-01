@@ -22,6 +22,29 @@ export function handleReadyState(plugin: MediaPlugin) {
   if (player.readyState >= 3) onCanPlay();
   if (player.readyState >= 4) onCanPlayThrough();
 
+  plugin.registerDomEvent(player, "play", handlePlay);
+  plugin.registerDomEvent(player, "pause", handlePause);
+  plugin.registerDomEvent(player, "playing", handlePlaying);
+
+  if (player.readyState >= 3 && !player.paused) {
+    handlePlay();
+    handlePlaying();
+  } else {
+    handlePause();
+  }
+
+  function handlePause() {
+    port.send("pause", {
+      readyState: player.readyState,
+    });
+  }
+  function handlePlaying() {
+    port.send("playing", void 0);
+  }
+  function handlePlay() {
+    port.send("play", void 0);
+  }
+
   function onLoadStart() {
     port.send("loadstart", {
       networkState: player.networkState,

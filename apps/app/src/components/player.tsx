@@ -27,11 +27,11 @@ export function Player() {
     <MediaPlayer
       className={cn(
         "w-full bg-slate-900 text-white font-sans overflow-hidden rounded-md ring-mod-border-focus data-[focus]:ring-2",
-        actualViewType === "video" ? "aspect-video" : "h-20 aspect-auto",
+        "data-[view-type=video]:aspect-video data-[view-type=audio]:h-20 data-[view-type=audio]:aspect-auto",
       )}
       src={src}
       playsinline
-      title={title || viewType}
+      title={title}
       viewType={viewType}
       ref={playerRef}
     >
