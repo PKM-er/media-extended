@@ -9,6 +9,7 @@ import {
   PIPButton,
   PlayButton,
   SeekButton,
+  useMediaPlayer,
   useMediaProvider,
   useMediaState,
 } from "@vidstack/react";
@@ -29,10 +30,11 @@ import {
   RewindIcon,
   EditIcon,
   ImageDownIcon,
+  PinIcon,
 } from "@/components/icon";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { captureScreenshot } from "@/lib/screenshot";
-import { useIsEmbed, useScreenshot } from "../context";
+import { useIsEmbed, useScreenshot, useTimestamp } from "../context";
 
 export const buttonClass =
   "group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden";
@@ -192,6 +194,23 @@ export function Screenshot() {
       aria-label="Capture screenshot"
     >
       <ImageDownIcon className="w-7 h-7" />
+    </button>
+  );
+}
+
+export function Timestamp() {
+  const onTimestamp = useTimestamp();
+  const player = useMediaPlayer();
+  if (!player || !onTimestamp) return null;
+  return (
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      onClick={() => {
+        onTimestamp(player.currentTime);
+      }}
+      aria-label="Take timestamp"
+    >
+      <PinIcon className="w-7 h-7" />
     </button>
   );
 }

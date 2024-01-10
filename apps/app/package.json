@@ -37,6 +37,7 @@
     "@vidstack/react": "npm:@aidenlx/vidstack-react@1.9.8-mod.10",
     "ahooks": "^3.7.8",
     "clsx": "^1.2.1",
+    "dayjs": "^1.11.10",
     "maverick.js": "0.41.2",
     "monkey-around": "^2.3.0",
     "nanoevents": "^9.0.0",

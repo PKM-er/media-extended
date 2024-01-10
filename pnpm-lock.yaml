@@ -35,6 +35,9 @@ importers:
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
       maverick.js:
         specifier: 0.41.2
         version: 0.41.2

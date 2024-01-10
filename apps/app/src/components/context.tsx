@@ -42,6 +42,7 @@ export const MediaViewContext = createContext<{
   plugin: MediaExtended;
   embed: boolean;
   onScreenshot?: (info: ScreenshotInfo) => any;
+  onTimestamp?: (timestamp: number) => any;
 }>(null as any);
 
 export function useMediaViewStore<U>(
@@ -63,6 +64,9 @@ export function useApp<U>(selector: (state: App) => U): U {
 
 export function useScreenshot() {
   return useContext(MediaViewContext).onScreenshot;
+}
+export function useTimestamp() {
+  return useContext(MediaViewContext).onTimestamp;
 }
 export const useIsEmbed = () => useContext(MediaViewContext).embed;
 
