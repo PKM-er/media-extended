@@ -24,9 +24,15 @@ export function setTempFrag(hash: string, store: MediaViewStoreApi) {
   const tf = parseTempFrag(hash);
   const player = store.getState().player;
   if (player && tf) {
-    if (isTimestamp(tf) || player.currentTime < tf.start) {
+    // allow 0.25s offset from end, in case delay in seeking
+    const allowedOffset = 0.25;
+    if (
+      isTimestamp(tf) ||
+      player.currentTime < tf.start ||
+      Math.abs(player.currentTime - tf.end) < allowedOffset
+    ) {
       player.currentTime = tf.start;
-    } else if (player.currentTime > tf.end) {
+    } else if (player.currentTime - allowedOffset > tf.end) {
       player.currentTime = tf.end;
     }
   }
