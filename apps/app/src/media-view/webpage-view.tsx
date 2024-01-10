@@ -90,7 +90,7 @@ export class MediaWebpageView extends ItemView implements PlayerComponent {
   getHost(): SupportedWebHost {
     const { source } = this.getState();
     if (!source) return SupportedWebHost.Generic;
-    return matchHost(source);
+    return matchHost(source)?.type ?? SupportedWebHost.Generic;
   }
   getDisplayText(): string {
     const title = this._title;

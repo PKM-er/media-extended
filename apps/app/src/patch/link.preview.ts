@@ -5,9 +5,11 @@ import type { LinkEvent } from "./event";
 import { getInstancePrototype } from "./utils";
 
 export default function patchPreviewClick(
-  plugin: Plugin,
+  this: Plugin,
   events: Partial<LinkEvent>,
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const plugin = this;
   const unloadPatchHook = around(
     MarkdownPreviewRenderer as MDPreviewRendererCtor,
     {

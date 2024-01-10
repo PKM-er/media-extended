@@ -18,9 +18,11 @@ declare module "obsidian" {
 }
 
 export default function patchEditorClick(
-  plugin: Plugin,
+  this: Plugin,
   { onExternalLinkClick, onInternalLinkClick }: Partial<LinkEvent>,
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const plugin = this;
   return getRunningViewInstance("markdown", plugin).then((view) => {
     if (!view.editMode) {
       console.error(

@@ -14,11 +14,13 @@ import {
   MediaWebpageView,
 } from "./media-view/webpage-view";
 import injectMediaEmbed from "./patch/embed";
+import type { LinkEvent } from "./patch/event";
 import patchEditorClick from "./patch/link.editor";
 import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/utils";
 import injectMediaView from "./patch/view";
+import { SupportedWebHost, matchHost } from "./web/match";
 
 export default class MxPlugin extends Plugin {
   async onload() {
@@ -49,6 +51,27 @@ export default class MxPlugin extends Plugin {
       MEDIA_WEBPAGE_VIEW_TYPE,
       (leaf) => new MediaWebpageView(leaf, this),
     );
+    const onExternalLinkClick: LinkEvent["onExternalLinkClick"] = async (
+      rawUrl,
+      newLeaf,
+      fallback,
+    ) => {
+      const matchResult = matchHost(rawUrl);
+      if (!matchResult || matchResult.type === SupportedWebHost.Generic) {
+        return fallback();
+      }
+      const leaf = this.app.workspace.getLeaf(newLeaf);
+      const { hash, url } = matchResult;
+      await leaf.setViewState(
+        {
+          type: MEDIA_WEBPAGE_VIEW_TYPE,
+          state: { source: url },
+        },
+        { subpath: hash },
+      );
+    };
+    this.patchEditorClick({ onExternalLinkClick });
+    this.patchPreviewClick({ onExternalLinkClick });
     this.fixLinkLabel();
   }
 }

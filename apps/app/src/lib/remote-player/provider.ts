@@ -180,7 +180,11 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     }
     const src = _src.replace(/^webview::/, "");
     const webview = this._webview;
-    this._currentSrc = { src, type, host: matchHost(src) };
+    this._currentSrc = {
+      src,
+      type,
+      host: matchHost(src)?.type ?? SupportedWebHost.Generic,
+    };
 
     const url = src ? new URL(src) : null;
     const prevUrl = webview.src ? new URL(webview.src) : null;
