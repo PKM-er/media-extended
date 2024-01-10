@@ -22,10 +22,12 @@ import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/utils";
 import injectMediaView from "./patch/view";
 import { SupportedWebHost, matchHost } from "./web/match";
+import { modifySession } from "./web/session";
 
 export default class MxPlugin extends Plugin {
   async onload() {
     this.loadPatches();
+    await this.modifySession();
   }
 
   injectMediaEmbed = injectMediaEmbed;
@@ -33,6 +35,7 @@ export default class MxPlugin extends Plugin {
   fixLinkLabel = fixLinkLabel;
   patchEditorClick = patchEditorClick;
   patchPreviewClick = patchPreviewClick;
+  modifySession = modifySession;
 
   private loadPatches() {
     this.injectMediaView(

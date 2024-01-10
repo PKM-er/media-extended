@@ -1,4 +1,4 @@
-import BilibiliPlugin from "inline:./host/bilibili";
+import BilibiliPlugin from "inline:./userscript/bilibili";
 import type { SupportedWebHost } from "./match";
 
 export const plugins = {

@@ -9,6 +9,8 @@ export default class BilibiliPlugin extends MediaPlugin {
   }
   async onload(): Promise<void> {
     await super.onload();
+    // disable auto play recommendation
+    localStorage.setItem("recommend_auto_play", "close");
     const player = document.querySelector<HTMLDivElement>("#bilibili-player");
     if (!player) {
       throw new Error("Bind failed: #bilibili-player not found");

@@ -6,6 +6,7 @@ import {
   type MediaProviderProps,
 } from "@vidstack/react";
 import { useCallback } from "react";
+import { partition } from "@/lib/remote-player/const";
 import { WebviewProviderLoader } from "@/lib/remote-player/loader";
 import { WebView } from "./webview";
 
@@ -26,6 +27,7 @@ export function MediaProviderEnhanced({
             <WebView
               aria-hidden
               // devtools
+              partition={partition}
               ref={(inst) => {
                 provider.load(inst);
               }}
