@@ -11,7 +11,7 @@ export const webHostDisplayName: Record<SupportedWebHost, string> = {
   [SupportedWebHost.Generic]: "Web",
 };
 
-function noHash(url: URL) {
+export function noHash(url: URL) {
   return url.hash ? url.href.slice(0, -url.hash.length) : url.href;
 }
 

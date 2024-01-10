@@ -1,81 +1,14 @@
-import { around } from "monkey-around";
-import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
-import { ItemView, Scope } from "obsidian";
-import ReactDOM from "react-dom/client";
-import {
-  createMediaViewStore,
-  MediaViewContext,
-  onPlayerMounted,
-} from "@/components/context";
-import { Player } from "@/components/player";
-import { handleWindowMigration } from "@/lib/window-migration";
-import type MediaExtended from "@/mx-main";
+import type { ViewStateResult } from "obsidian";
 import { SupportedWebHost, matchHost, webHostDisplayName } from "@/web/match";
-import { setTempFrag, type PlayerComponent } from "./base";
-
-declare module "obsidian" {
-  interface View {
-    titleEl: HTMLElement;
-  }
-  interface WorkspaceLeaf {
-    updateHeader(): void;
-  }
-  interface Workspace {
-    requestActiveLeafEvents(): boolean;
-  }
-}
+import type { MediaRemoteViewState } from "./base";
+import { MediaRemoteView } from "./base";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MEDIA_WEBPAGE_VIEW_TYPE = "mx-webpage";
 
-export interface MediaWebpageViewState {
-  source?: string;
-}
+export type MediaWebpageViewState = MediaRemoteViewState;
 
-export class MediaWebpageView extends ItemView implements PlayerComponent {
-  // no need to manage scope manually,
-  // as it's implicitly called and handled by the WorkspaceLeaf
-  store;
-  scope: Scope;
-  root: ReactDOM.Root | null = null;
-  private _title = "";
-
-  constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
-    super(leaf);
-    this.store = createMediaViewStore();
-    this.scope = new Scope(this.app.scope);
-    this.contentEl.addClasses(["mx", "custom"]);
-    // this.register(
-    //   this.containerEl.onWindowMigrated(() => {
-    //     this.render();
-    //   }),
-    // );
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-
-    // make sure to unmount the player before the leaf detach it from DOM
-    this.register(
-      around(this.leaf, {
-        detach: (next) =>
-          function (this: WorkspaceLeaf, ...args) {
-            self.root?.unmount();
-            self.root = null;
-            return next.call(this, ...args);
-          },
-      }),
-    );
-
-    handleWindowMigration.call(this, () => this.render());
-    this.register(
-      onPlayerMounted(this.store, (player) =>
-        player.subscribe(({ title }) => {
-          this._title = title;
-          this.updateTitle();
-        }),
-      ),
-    );
-  }
-
+export class MediaWebpageView extends MediaRemoteView {
   getViewType(): string {
     return MEDIA_WEBPAGE_VIEW_TYPE;
   }
@@ -114,56 +47,5 @@ export class MediaWebpageView extends ItemView implements PlayerComponent {
       ...state,
       source: fromStore.source?.src.replace(/^webview::/, ""),
     };
-  }
-  setEphemeralState(state: any): void {
-    const { subpath = "" } = state;
-    setTempFrag(subpath, this.store);
-    super.setEphemeralState(state);
-  }
-
-  protected async onOpen(): Promise<void> {
-    await super.onOpen();
-    this.render();
-  }
-
-  updateTitle() {
-    const newTitle = this.getDisplayText();
-    this.titleEl.setText(newTitle);
-
-    if (
-      // eslint-disable-next-line deprecation/deprecation
-      this.app.workspace.activeLeaf === this.leaf &&
-      this.app.workspace.requestActiveLeafEvents()
-    ) {
-      this.leaf.updateHeader();
-    }
-  }
-
-  render() {
-    this.root?.unmount();
-    this.root = ReactDOM.createRoot(this.contentEl);
-    this.root.render(
-      <MediaViewContext.Provider
-        value={{
-          plugin: this.plugin,
-          store: this.store,
-          embed: false,
-        }}
-      >
-        <Player />
-      </MediaViewContext.Provider>,
-    );
-  }
-
-  close() {
-    this.root?.unmount();
-    this.root = null;
-    // @ts-expect-error -- this would call leaf.detach()
-    return super.close();
-  }
-  async onClose() {
-    this.root?.unmount();
-    this.root = null;
-    return super.onClose();
   }
 }

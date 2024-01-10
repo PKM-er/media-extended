@@ -5,7 +5,13 @@ type PlayerProperties = "loop" | "muted" | "autoplay" | "controls";
 export const convertHashToProps = (
   hash: string | undefined,
 ): Partial<Record<PlayerProperties, boolean>> => {
-  if (!hash) return {};
+  if (!hash)
+    return {
+      loop: false,
+      muted: false,
+      autoplay: false,
+      controls: true,
+    };
   const query = new URLSearchParams(hash.replace(/^#+/, ""));
   return {
     loop: query.has("loop"),

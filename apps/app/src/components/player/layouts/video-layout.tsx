@@ -1,5 +1,5 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { Captions, Controls, Gesture, useMediaState } from "@vidstack/react";
+import { Captions, Controls, Gesture } from "@vidstack/react";
 
 import * as Buttons from "../buttons";
 import * as Menus from "../menus";
@@ -15,8 +15,6 @@ export interface VideoLayoutProps {
 }
 
 export function VideoLayout({ thumbnails }: VideoLayoutProps) {
-  const viewType = useMediaState("viewType");
-  if (viewType !== "video") return null;
   return (
     <>
       <Gestures />

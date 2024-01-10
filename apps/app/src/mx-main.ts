@@ -9,6 +9,12 @@ import {
   MEDIA_FILE_VIEW_TYPE,
   VideoFileView,
 } from "./media-view/file-view";
+import type { MediaEmbedViewState } from "./media-view/iframe-view";
+import {
+  MEDIA_EMBED_VIEW_TYPE,
+  MediaEmbedView,
+  isEmbedSrc,
+} from "./media-view/iframe-view";
 import type { MediaWebpageViewState } from "./media-view/webpage-view";
 import {
   MEDIA_WEBPAGE_VIEW_TYPE,
@@ -21,7 +27,7 @@ import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/utils";
 import injectMediaView from "./patch/view";
-import { SupportedWebHost, matchHost } from "./web/match";
+import { SupportedWebHost, matchHost, noHash } from "./web/match";
 import { modifySession } from "./web/session";
 
 export default class MxPlugin extends Plugin {
@@ -55,11 +61,46 @@ export default class MxPlugin extends Plugin {
       MEDIA_WEBPAGE_VIEW_TYPE,
       (leaf) => new MediaWebpageView(leaf, this),
     );
+    this.registerView(
+      MEDIA_EMBED_VIEW_TYPE,
+      (leaf) => new MediaEmbedView(leaf, this),
+    );
     const onExternalLinkClick: LinkEvent["onExternalLinkClick"] = async (
       rawUrl,
       newLeaf,
       fallback,
     ) => {
+      const isEmbed = isEmbedSrc(rawUrl);
+      if (isEmbed) {
+        try {
+          const url = new URL(rawUrl);
+          const noHashUrl = noHash(url);
+          const existingPlayerLeaves = this.app.workspace
+            .getLeavesOfType(MEDIA_EMBED_VIEW_TYPE)
+            .filter((l) => {
+              const { source } = l.view.getState() as MediaEmbedViewState;
+              return source && source === noHashUrl;
+            });
+          const { hash } = url;
+          if (existingPlayerLeaves.length > 0) {
+            const leaf = existingPlayerLeaves[0];
+            leaf.setEphemeralState({ subpath: hash });
+          } else {
+            const leaf = this.app.workspace.getLeaf(newLeaf);
+            await leaf.setViewState(
+              {
+                type: MEDIA_EMBED_VIEW_TYPE,
+                state: { source: noHashUrl },
+                active: true,
+              },
+              { subpath: hash },
+            );
+          }
+          return;
+        } catch {
+          // ignore
+        }
+      }
       const matchResult = matchHost(rawUrl);
       if (!matchResult || matchResult.type === SupportedWebHost.Generic) {
         return fallback();

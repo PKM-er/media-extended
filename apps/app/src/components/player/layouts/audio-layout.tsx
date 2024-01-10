@@ -1,5 +1,5 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { Controls, Gesture, useMediaState } from "@vidstack/react";
+import { Controls, Gesture } from "@vidstack/react";
 
 import * as Buttons from "../buttons";
 import * as Sliders from "../sliders";
@@ -13,9 +13,6 @@ export interface VideoLayoutProps {
 }
 
 export function AudioLayout({ thumbnails }: VideoLayoutProps) {
-  const viewType = useMediaState("viewType");
-  if (viewType !== "audio") return null;
-
   return (
     <>
       <Gestures />
