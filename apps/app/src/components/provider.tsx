@@ -25,7 +25,7 @@ export function MediaProviderEnhanced({
           return (
             <WebView
               aria-hidden
-              devtools
+              // devtools
               ref={(inst) => {
                 provider.load(inst);
               }}

@@ -6,7 +6,7 @@ import { Player } from "@/components/player";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
-import type { PlayerComponent } from "./base";
+import { setTempFrag, type PlayerComponent } from "./base";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MEDIA_FILE_VIEW_TYPE = {
@@ -48,7 +48,7 @@ abstract class MediaFileView
 
   setEphemeralState(state: any): void {
     const { subpath = "" } = state;
-    this.store.setState({ hash: subpath });
+    setTempFrag(subpath, this.store);
     super.setEphemeralState(state);
   }
 

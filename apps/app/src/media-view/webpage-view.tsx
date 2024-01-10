@@ -11,7 +11,7 @@ import { Player } from "@/components/player";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { SupportedWebHost, matchHost, webHostDisplayName } from "@/web/match";
-import type { PlayerComponent } from "./base";
+import { setTempFrag, type PlayerComponent } from "./base";
 
 declare module "obsidian" {
   interface View {
@@ -28,7 +28,7 @@ declare module "obsidian" {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MEDIA_WEBPAGE_VIEW_TYPE = "mx-webpage";
 
-interface MediaWebpageViewState {
+export interface MediaWebpageViewState {
   source?: string;
 }
 
@@ -117,7 +117,7 @@ export class MediaWebpageView extends ItemView implements PlayerComponent {
   }
   setEphemeralState(state: any): void {
     const { subpath = "" } = state;
-    this.store.setState({ hash: subpath });
+    setTempFrag(subpath, this.store);
     super.setEphemeralState(state);
   }
 

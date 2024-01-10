@@ -76,9 +76,6 @@ function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
         if (isTempFragEqual(newFrag, frag)) return;
         frag = newFrag;
         if (!frag) return;
-        if (isTimestamp(frag)) {
-          player.currentTime = frag.start;
-        }
       } catch {
         frag = null;
       }

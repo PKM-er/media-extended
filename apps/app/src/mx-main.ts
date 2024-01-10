@@ -9,6 +9,7 @@ import {
   MEDIA_FILE_VIEW_TYPE,
   VideoFileView,
 } from "./media-view/file-view";
+import type { MediaWebpageViewState } from "./media-view/webpage-view";
 import {
   MEDIA_WEBPAGE_VIEW_TYPE,
   MediaWebpageView,
@@ -60,15 +61,29 @@ export default class MxPlugin extends Plugin {
       if (!matchResult || matchResult.type === SupportedWebHost.Generic) {
         return fallback();
       }
-      const leaf = this.app.workspace.getLeaf(newLeaf);
-      const { hash, url } = matchResult;
-      await leaf.setViewState(
-        {
-          type: MEDIA_WEBPAGE_VIEW_TYPE,
-          state: { source: url },
-        },
-        { subpath: hash },
-      );
+      const existingPlayerLeaves = this.app.workspace
+        .getLeavesOfType(MEDIA_WEBPAGE_VIEW_TYPE)
+        .filter((l) => {
+          const { source } = l.view.getState() as MediaWebpageViewState;
+          const matched = matchHost(source);
+          return matched && matched.noHash === matchResult.noHash;
+        });
+      if (existingPlayerLeaves.length > 0) {
+        const leaf = existingPlayerLeaves[0];
+        const { hash } = matchResult;
+        leaf.setEphemeralState({ subpath: hash });
+      } else {
+        const leaf = this.app.workspace.getLeaf(newLeaf);
+        const { hash, url } = matchResult;
+        await leaf.setViewState(
+          {
+            type: MEDIA_WEBPAGE_VIEW_TYPE,
+            state: { source: url },
+            active: true,
+          },
+          { subpath: hash },
+        );
+      }
     };
     this.patchEditorClick({ onExternalLinkClick });
     this.patchPreviewClick({ onExternalLinkClick });

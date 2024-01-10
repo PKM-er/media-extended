@@ -11,10 +11,15 @@ export const webHostDisplayName: Record<SupportedWebHost, string> = {
   [SupportedWebHost.Generic]: "Web",
 };
 
+function noHash(url: URL) {
+  return url.hash ? url.href.slice(0, -url.hash.length) : url.href;
+}
+
 export function matchHost(link: string | undefined): {
   type: SupportedWebHost;
   url: string;
   hash: string;
+  noHash: string;
 } | null {
   if (!link) return null;
   try {
@@ -22,17 +27,20 @@ export function matchHost(link: string | undefined): {
     switch (true) {
       case url.hostname.endsWith(".bilibili.com"):
       case url.hostname === "b23.tv": {
-        let hash = url.hash;
-        const tempFrag = parseTempFrag(hash);
-        const time = getTimeFromBilibiliUrl(url);
+        const newURL = new URL(url);
+        const tempFrag = parseTempFrag(newURL.hash);
+        const time = getTimeFromBilibiliUrl(newURL);
+        if (time) {
+          newURL.searchParams.delete("t");
+        }
         if (!tempFrag && !Number.isNaN(time)) {
-          hash += `&t=${time}`;
-          url.searchParams.delete("t");
+          newURL.hash += `&t=${time}`;
         }
         return {
           type: SupportedWebHost.Bilibili,
-          url: url.href,
-          hash,
+          url: newURL.href,
+          hash: newURL.hash,
+          noHash: noHash(newURL),
         };
       }
       default:
@@ -40,6 +48,7 @@ export function matchHost(link: string | undefined): {
           type: SupportedWebHost.Generic,
           url: url.href,
           hash: url.hash,
+          noHash: noHash(url),
         };
     }
   } catch {
@@ -49,6 +58,7 @@ export function matchHost(link: string | undefined): {
     type: SupportedWebHost.Generic,
     url: link,
     hash: "",
+    noHash: link,
   };
 }
 
