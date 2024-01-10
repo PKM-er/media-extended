@@ -41,9 +41,7 @@ function useHashProps() {
 export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
 
-  const src = useMediaViewStore(({ source, hash }) =>
-    source?.src ? `${source.src}#${hash.replace(/^#+/, "")}` : undefined,
-  );
+  const src = useMediaViewStore(({ source }) => source?.src);
 
   const [viewType, setViewType] = useState<MediaViewType>("unknown");
   const title = useMediaViewStore((s) => s.title);

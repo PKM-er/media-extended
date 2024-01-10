@@ -1,28 +1,31 @@
 import { useMediaPlayer, type MediaPlayerInstance } from "@vidstack/react";
-import { isString } from "maverick.js/std";
 import { useEffect } from "react";
 import {
   isTempFragEqual,
   isTimestamp,
   parseTempFrag,
   type TempFragment,
-} from "../../lib/hash/temporal-frag";
+} from "@/lib/hash/temporal-frag";
+import type { MediaViewStoreApi } from "../context";
+import { useMediaViewStoreInst } from "../context";
 
 export function useTempFrag() {
   const player = useMediaPlayer();
+  const store = useMediaViewStoreInst();
   useEffect(() => {
     if (!player) return;
-    return handleTempFrag(player);
-  }, [player]);
+    return handleTempFrag(player, store);
+  }, [player, store]);
 }
 
-function handleTempFrag(player: MediaPlayerInstance) {
+function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
   let frag: TempFragment | null = null;
-  const prev: { currentTime: number; paused: boolean; loop: boolean } = {
+  const prev = {
     currentTime: player.state.currentTime,
     paused: player.state.paused,
     loop: player.state.loop,
   };
+  let seekingLock = false;
   const unloads = [
     player.subscribe(({ currentTime, paused, loop }) => {
       if (!frag || isTimestamp(frag)) return;
@@ -30,6 +33,11 @@ function handleTempFrag(player: MediaPlayerInstance) {
       // onPlay
       if (prev.paused !== paused && !paused) {
         if (currentTime > end || currentTime < start) {
+          // solve issue where player.currentTime is not updated in time
+          // and timeupdate event is fired with old currentTime
+          // for async state updates in remote player
+          // causing player to try to pause in case of loop=false and currentTime > end
+          seekingLock = true;
           player.currentTime = start;
         }
       }
@@ -39,6 +47,10 @@ function handleTempFrag(player: MediaPlayerInstance) {
           player.currentTime = start;
         } else if (currentTime > end) {
           if (!loop) {
+            if (seekingLock) {
+              seekingLock = false;
+              return;
+            }
             if (!paused) player.pause();
           } else {
             player.currentTime = start;
@@ -50,18 +62,33 @@ function handleTempFrag(player: MediaPlayerInstance) {
       }
       Object.assign(prev, { currentTime, paused, loop });
     }),
-    player.subscribe(({ currentSrc, duration }) => {
-      if (!isString(currentSrc.src)) {
-        frag = null;
-        return;
-      }
+    player.listen("can-play", () => {
+      if (!frag) return;
+      player.currentTime = frag.start;
+    }),
+    store.subscribe((curr, prev) => {
+      if (curr.hash === prev.hash) return;
       try {
-        const url = new URL(currentSrc.src);
-        const newFrag = limitRange(parseTempFrag(url.hash), duration);
+        const newFrag = limitRange(
+          parseTempFrag(curr.hash),
+          player.state.duration,
+        );
         if (isTempFragEqual(newFrag, frag)) return;
         frag = newFrag;
         if (!frag) return;
-        player.currentTime = frag.start;
+        if (isTimestamp(frag)) {
+          player.currentTime = frag.start;
+        }
+      } catch {
+        frag = null;
+      }
+    }),
+    player.subscribe(({ duration }) => {
+      const { hash } = store.getState();
+      try {
+        const newFrag = limitRange(parseTempFrag(hash), duration);
+        if (isTempFragEqual(newFrag, frag)) return;
+        frag = newFrag;
       } catch {
         frag = null;
       }

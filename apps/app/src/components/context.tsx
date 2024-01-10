@@ -52,6 +52,11 @@ export function useMediaViewStore<U>(
   return useStore(store, selector);
 }
 
+export function useMediaViewStoreInst() {
+  const { store } = useContext(MediaViewContext);
+  return store;
+}
+
 export function useApp<U>(selector: (state: App) => U): U {
   return selector(useContext(MediaViewContext).plugin.app);
 }

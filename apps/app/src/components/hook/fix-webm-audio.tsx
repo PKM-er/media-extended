@@ -1,6 +1,10 @@
 import { isVideoProvider, useMediaPlayer } from "@vidstack/react";
 import { useEffect } from "react";
 
+/**
+ * for webm audio files, videoHeight and videoWidth are 0.
+ * this hook detects if the file is audio or video and provide proper viewType
+ */
 export function useViewTypeDetect(
   onViewTypeChange: (viewType: "audio" | "unknown") => any,
 ) {
