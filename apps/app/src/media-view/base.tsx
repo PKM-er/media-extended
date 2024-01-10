@@ -14,7 +14,11 @@ export function setTempFrag(hash: string, store: MediaViewStoreApi) {
   store.setState({ hash });
   const tf = parseTempFrag(hash);
   const player = store.getState().player;
-  if (player && tf && isTimestamp(tf)) {
-    player.currentTime = tf.start;
+  if (player && tf) {
+    if (isTimestamp(tf) || player.currentTime < tf.start) {
+      player.currentTime = tf.start;
+    } else if (player.currentTime > tf.end) {
+      player.currentTime = tf.end;
+    }
   }
 }
