@@ -1,4 +1,4 @@
-import type { SupportedWebHost } from "./match";
+import type { SupportedWebHost } from "./match-webpage";
 
 export const titleParser: Record<SupportedWebHost, (title: string) => string> =
   {

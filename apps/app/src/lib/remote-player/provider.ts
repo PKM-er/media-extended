@@ -10,7 +10,7 @@ import init from "inline:./scripts/initialize";
 
 import { isString } from "maverick.js/std";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
-import { matchHostForWeb, SupportedWebHost } from "@/web/match";
+import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MessageController, TimeoutError } from "../message";

@@ -6,7 +6,7 @@ import { createStore, useStore } from "zustand";
 import noop from "@/lib/no-op";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import type MediaExtended from "@/mx-main";
-import type { SupportedWebHost } from "@/web/match";
+import type { SupportedWebHost } from "@/web/match-webpage";
 
 export interface MediaViewState {
   player: MediaPlayerInstance | null;

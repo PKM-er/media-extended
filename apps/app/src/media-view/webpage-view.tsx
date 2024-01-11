@@ -3,7 +3,7 @@ import {
   SupportedWebHost,
   matchHostForWeb,
   webHostDisplayName,
-} from "@/web/match";
+} from "@/web/match-webpage";
 import type { MediaRemoteViewState } from "./base";
 import { MediaRemoteView } from "./base";
 

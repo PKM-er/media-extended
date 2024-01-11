@@ -2,13 +2,15 @@ import {
   MEDIA_EMBED_VIEW_TYPE,
   type MediaEmbedViewState,
 } from "@/media-view/iframe-view";
+import { MEDIA_URL_VIEW_TYPE } from "@/media-view/url-view";
 import {
   MEDIA_WEBPAGE_VIEW_TYPE,
   type MediaWebpageViewState,
 } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
-import { matchHostForWeb, SupportedWebHost } from "@/web/match";
 import { matchHostForEmbed } from "@/web/match-embed";
+import { matchHostForUrl } from "@/web/match-url";
+import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 
 function parseUrl(url: string): {
   viewType: string;
@@ -16,6 +18,20 @@ function parseUrl(url: string): {
   hash: string;
   isSameSource: (src: string) => boolean;
 } | null {
+  const directlinkInfo = matchHostForUrl(url);
+
+  if (directlinkInfo) {
+    return {
+      viewType: MEDIA_URL_VIEW_TYPE[directlinkInfo.type],
+      source: directlinkInfo.url,
+      hash: directlinkInfo.hash,
+      isSameSource: (src) => {
+        const matched = matchHostForUrl(src);
+        return !!matched && matched.noHash === directlinkInfo.noHash;
+      },
+    };
+  }
+
   const embedInfo = matchHostForEmbed(url);
 
   if (embedInfo) {

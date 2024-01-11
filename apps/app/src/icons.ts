@@ -1,5 +1,5 @@
 import { addIcon } from "obsidian";
-import type { SupportedWebHost } from "./web/match";
+import type { SupportedWebHost } from "./web/match-webpage";
 
 const icons: Record<
   Exclude<SupportedWebHost, SupportedWebHost.Generic>,

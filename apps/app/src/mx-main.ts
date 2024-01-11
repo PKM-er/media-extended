@@ -16,6 +16,11 @@ import {
   MediaEmbedView,
 } from "./media-view/iframe-view";
 import {
+  AudioUrlView,
+  MEDIA_URL_VIEW_TYPE,
+  VideoUrlView,
+} from "./media-view/url-view";
+import {
   MEDIA_WEBPAGE_VIEW_TYPE,
   MediaWebpageView,
 } from "./media-view/webpage-view";
@@ -63,6 +68,14 @@ export default class MxPlugin extends Plugin {
     this.registerView(
       MEDIA_EMBED_VIEW_TYPE,
       (leaf) => new MediaEmbedView(leaf, this),
+    );
+    this.registerView(
+      MEDIA_URL_VIEW_TYPE.video,
+      (leaf) => new VideoUrlView(leaf, this),
+    );
+    this.registerView(
+      MEDIA_URL_VIEW_TYPE.audio,
+      (leaf) => new AudioUrlView(leaf, this),
     );
 
     this.patchEditorClick({
