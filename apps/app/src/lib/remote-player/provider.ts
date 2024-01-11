@@ -10,7 +10,7 @@ import init from "inline:./scripts/initialize";
 
 import { isString } from "maverick.js/std";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
-import { matchHost, SupportedWebHost } from "@/web/match";
+import { matchHostForWeb, SupportedWebHost } from "@/web/match";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MessageController, TimeoutError } from "../message";
@@ -183,7 +183,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     this._currentSrc = {
       src,
       type,
-      host: matchHost(src)?.type ?? SupportedWebHost.Generic,
+      host: matchHostForWeb(src)?.type ?? SupportedWebHost.Generic,
     };
 
     const url = src ? new URL(src) : null;

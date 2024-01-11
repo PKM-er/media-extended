@@ -1,5 +1,9 @@
 import type { ViewStateResult } from "obsidian";
-import { SupportedWebHost, matchHost, webHostDisplayName } from "@/web/match";
+import {
+  SupportedWebHost,
+  matchHostForWeb,
+  webHostDisplayName,
+} from "@/web/match";
 import type { MediaRemoteViewState } from "./base";
 import { MediaRemoteView } from "./base";
 
@@ -23,7 +27,7 @@ export class MediaWebpageView extends MediaRemoteView {
   getHost(): SupportedWebHost {
     const { source } = this.getState();
     if (!source) return SupportedWebHost.Generic;
-    return matchHost(source)?.type ?? SupportedWebHost.Generic;
+    return matchHostForWeb(source)?.type ?? SupportedWebHost.Generic;
   }
   getDisplayText(): string {
     const title = this._title;

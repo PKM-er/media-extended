@@ -35,6 +35,9 @@ export function setTempFrag(hash: string, store: MediaViewStoreApi) {
     } else if (player.currentTime - allowedOffset > tf.end) {
       player.currentTime = tf.end;
     }
+    if (isTimestamp(tf)) {
+      player.play(new Event("hashchange"));
+    }
   }
 }
 

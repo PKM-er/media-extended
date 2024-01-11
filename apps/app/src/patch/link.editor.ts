@@ -36,14 +36,30 @@ export default function patchEditorClick(
           function (this: MarkdownEditView, token, newLeaf, ...args) {
             const fallback = () => next.call(this, token, newLeaf, ...args);
             if ("internal-link" === token.type && onInternalLinkClick) {
-              onInternalLinkClick(
-                token.text,
-                this.file.path,
-                newLeaf,
-                fallback,
-              );
+              try {
+                onInternalLinkClick(
+                  token.text,
+                  this.file.path,
+                  newLeaf,
+                  fallback,
+                );
+              } catch (e) {
+                console.error(
+                  `onInternalLinkClick error in editor, fallback to default`,
+                  e,
+                );
+                fallback();
+              }
             } else if ("external-link" === token.type && onExternalLinkClick) {
-              onExternalLinkClick(token.text, newLeaf, fallback);
+              try {
+                onExternalLinkClick(token.text, newLeaf, fallback);
+              } catch (e) {
+                console.error(
+                  `onExternalLinkClick error in editor, fallback to default`,
+                  e,
+                );
+                fallback();
+              }
             } else fallback();
           },
       }),

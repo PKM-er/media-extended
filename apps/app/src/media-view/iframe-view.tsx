@@ -12,10 +12,6 @@ export const hostTitleMap: Record<string, string> = {
   "video/youtube": "YouTube",
 };
 
-export function isEmbedSrc(src: string) {
-  return src.includes("youtube") || src.includes("vimeo");
-}
-
 export class MediaEmbedView extends MediaRemoteView {
   async setState(
     state: MediaRemoteViewState,

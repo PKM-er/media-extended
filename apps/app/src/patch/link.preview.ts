@@ -38,7 +38,15 @@ function patchPreviewEventHanlder(
           if (!onExternalLinkClick) return fallback();
           evt.preventDefault();
           const paneCreateType = Keymap.isModEvent(evt);
-          onExternalLinkClick(link, paneCreateType !== false, fallback);
+          try {
+            onExternalLinkClick(link, paneCreateType !== false, fallback);
+          } catch (e) {
+            console.error(
+              `onExternalLinkClick error in preview, fallback to default`,
+              e,
+            );
+            fallback();
+          }
         },
       onInternalLinkClick: (next) =>
         function (this: PreviewEventHanlder, evt, target, linktext, ...args) {
@@ -48,12 +56,20 @@ function patchPreviewEventHanlder(
           evt.preventDefault();
           const paneCreateType = Keymap.isModEvent(evt);
           const sourcePath = this.info?.file?.path ?? "";
-          onInternalLinkClick(
-            linktext,
-            sourcePath,
-            paneCreateType !== false,
-            fallback,
-          );
+          try {
+            onInternalLinkClick(
+              linktext,
+              sourcePath,
+              paneCreateType !== false,
+              fallback,
+            );
+          } catch (e) {
+            console.error(
+              `onInternalLinkClick error in preview, fallback to default`,
+              e,
+            );
+            fallback();
+          }
         },
     }),
   );

@@ -10,8 +10,8 @@ import { setTempFrag, type PlayerComponent } from "./base";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const MEDIA_FILE_VIEW_TYPE = {
-  VIDEO: "mx-file-video",
-  AUDIO: "mx-file-audio",
+  video: "mx-file-video",
+  audio: "mx-file-audio",
 };
 
 abstract class MediaFileView
@@ -87,7 +87,7 @@ export class VideoFileView extends MediaFileView {
     return "file-video";
   }
   getViewType(): string {
-    return MEDIA_FILE_VIEW_TYPE.VIDEO;
+    return MEDIA_FILE_VIEW_TYPE.video;
   }
   canAcceptExtension(extension: string): boolean {
     return MediaFileExtensions.video.includes(extension);
@@ -99,7 +99,7 @@ export class AudioFileView extends MediaFileView {
     return "file-audio";
   }
   getViewType(): string {
-    return MEDIA_FILE_VIEW_TYPE.AUDIO;
+    return MEDIA_FILE_VIEW_TYPE.audio;
   }
   canAcceptExtension(extension: string): boolean {
     return MediaFileExtensions.audio.includes(extension);

@@ -1,4 +1,6 @@
-import { parseTempFrag } from "@/lib/hash/temporal-frag";
+import { updateHash } from "@/lib/hash/format";
+import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
+import { noHash, toURL } from "@/lib/url";
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export enum SupportedWebHost {
@@ -11,58 +13,59 @@ export const webHostDisplayName: Record<SupportedWebHost, string> = {
   [SupportedWebHost.Generic]: "Web",
 };
 
-export function noHash(url: URL) {
-  return url.hash ? url.href.slice(0, -url.hash.length) : url.href;
-}
-
-export function matchHost(link: string | undefined): {
+export function matchHostForWeb(link: string | undefined): {
   type: SupportedWebHost;
   url: string;
   hash: string;
   noHash: string;
 } | null {
   if (!link) return null;
-  try {
-    const url = new URL(link);
-    switch (true) {
-      case url.hostname.endsWith(".bilibili.com"):
-      case url.hostname === "b23.tv": {
-        const newURL = new URL(url);
-        const tempFrag = parseTempFrag(newURL.hash);
-        const time = getTimeFromBilibiliUrl(newURL);
-        if (time) {
-          newURL.searchParams.delete("t");
-        }
-        if (!tempFrag && !Number.isNaN(time)) {
-          newURL.hash += `&t=${time}`;
-        }
-        return {
-          type: SupportedWebHost.Bilibili,
-          url: newURL.href,
-          hash: newURL.hash,
-          noHash: noHash(newURL),
-        };
-      }
-      default:
-        return {
-          type: SupportedWebHost.Generic,
-          url: url.href,
-          hash: url.hash,
-          noHash: noHash(url),
-        };
-    }
-  } catch {
-    // ignore
+  const url = toURL(link);
+  if (!url) {
+    const [noHash, ..._hash] = link.split("#");
+    const hash = "#" + _hash.join("#");
+    return {
+      type: SupportedWebHost.Generic,
+      url: link,
+      hash,
+      noHash,
+    };
   }
-  return {
-    type: SupportedWebHost.Generic,
-    url: link,
-    hash: "",
-    noHash: link,
-  };
+  switch (true) {
+    case url.hostname.endsWith(".bilibili.com"):
+    case url.hostname === "b23.tv": {
+      const newURL = new URL(url);
+      let tempFrag = parseTempFrag(newURL.hash);
+      const time = parseTimeFromBilibiliUrl(newURL);
+      newURL.searchParams.delete("t");
+
+      if (!tempFrag && time > 0) {
+        tempFrag = { start: time, end: -1 };
+      }
+
+      if (tempFrag && isTimestamp(tempFrag)) {
+        newURL.searchParams.set("t", String(tempFrag.start));
+      }
+      updateHash(newURL, tempFrag);
+
+      return {
+        type: SupportedWebHost.Bilibili,
+        url: newURL.href,
+        hash: newURL.hash,
+        noHash: noHash(newURL),
+      };
+    }
+    default:
+      return {
+        type: SupportedWebHost.Generic,
+        url: url.href,
+        hash: url.hash,
+        noHash: noHash(url),
+      };
+  }
 }
 
-function getTimeFromBilibiliUrl(url: URL) {
+function parseTimeFromBilibiliUrl(url: URL) {
   const _time = url.searchParams.get("t");
   const time = _time ? Number(_time) : NaN;
   if (Number.isNaN(time)) return NaN;
