@@ -63,6 +63,7 @@ export abstract class MediaRemoteView
   store;
   scope: Scope;
   root: ReactDOM.Root | null = null;
+  navigation = true;
   protected _title = "";
   protected _sourceType = "";
 

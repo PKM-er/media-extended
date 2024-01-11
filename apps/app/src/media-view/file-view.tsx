@@ -19,6 +19,9 @@ abstract class MediaFileView
   implements PlayerComponent
 {
   allowNoFile = false;
+  // inherit from EditableFileView, no need to set explicitly
+  // navigation = true
+
   // no need to manage scope manually,
   // as it's implicitly called and handled by the WorkspaceLeaf
   store;

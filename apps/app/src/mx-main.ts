@@ -86,7 +86,9 @@ export default class MxPlugin extends Plugin {
             const leaf = existingPlayerLeaves[0];
             leaf.setEphemeralState({ subpath: hash });
           } else {
-            const leaf = this.app.workspace.getLeaf(newLeaf);
+            let leaf;
+            if (newLeaf) leaf = this.app.workspace.getLeaf("split", "vertical");
+            else leaf = this.app.workspace.getLeaf(false);
             await leaf.setViewState(
               {
                 type: MEDIA_EMBED_VIEW_TYPE,
@@ -117,8 +119,11 @@ export default class MxPlugin extends Plugin {
         const { hash } = matchResult;
         leaf.setEphemeralState({ subpath: hash });
       } else {
-        const leaf = this.app.workspace.getLeaf(newLeaf);
+        let leaf;
+        if (newLeaf) leaf = this.app.workspace.getLeaf("split", "vertical");
+        else leaf = this.app.workspace.getLeaf(false);
         const { hash, url } = matchResult;
+        // const view = await leaf.open(new MediaWebpageView(leaf, this));
         await leaf.setViewState(
           {
             type: MEDIA_WEBPAGE_VIEW_TYPE,
