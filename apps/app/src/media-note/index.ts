@@ -2,8 +2,12 @@ import type { CachedMetadata, TAbstractFile } from "obsidian";
 import { Notice, TFile, parseLinktext } from "obsidian";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/utils";
-import { openInOpenedPlayer, parseUrl } from "../link-click/external";
-import { toURL } from "../url";
+import {
+  openInLeaf,
+  openInOpenedPlayer,
+  parseUrl,
+} from "../lib/link-click/external";
+import { toURL } from "../lib/url";
 
 export const mediaSourceField = {
   generic: "media",
@@ -63,14 +67,7 @@ export function handleMediaNote(this: MxPlugin) {
         return;
       }
       if (openInOpenedPlayer(urlInfo, workspace)) return;
-      await leaf.setViewState(
-        {
-          type: urlInfo.viewType,
-          state: { source: urlInfo.source },
-          active: true,
-        },
-        { subpath: urlInfo.hash },
-      );
+      await openInLeaf(urlInfo, leaf);
     }
   }
   function getMediaInfo(

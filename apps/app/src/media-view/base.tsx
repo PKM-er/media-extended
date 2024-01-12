@@ -70,6 +70,7 @@ export abstract class MediaRemoteView
   protected _title = "";
   protected _sourceType = "";
 
+  protected _source: string | null = null;
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
     this.store = createMediaViewStore();

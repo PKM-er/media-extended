@@ -5,7 +5,7 @@ import "./icons";
 import { Plugin } from "obsidian";
 import { onExternalLinkClick } from "./lib/link-click/external";
 import { onInternalLinkClick } from "./lib/link-click/internal";
-import { handleMediaNote } from "./lib/media-note";
+import { handleMediaNote } from "./media-note";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import {
   AudioFileView,

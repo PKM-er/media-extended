@@ -1,4 +1,5 @@
 import type { ViewStateResult } from "obsidian";
+import { matchHostForEmbed } from "@/web/match-embed";
 import type { MediaRemoteViewState } from "./base";
 import { MediaRemoteView } from "./base";
 
@@ -18,16 +19,21 @@ export class MediaEmbedView extends MediaRemoteView {
     result: ViewStateResult,
   ): Promise<void> {
     if (typeof state.source === "string") {
-      this.store.setState({ source: { src: state.source } });
+      const urlInfo = matchHostForEmbed(state.source);
+      if (!urlInfo) {
+        console.warn("Invalid URL", state.source);
+        this._source = null;
+      } else {
+        this.store.setState({ source: { src: urlInfo.source.href } });
+      }
     }
     return super.setState(state, result);
   }
   getState(): MediaRemoteViewState {
-    const fromStore = this.store.getState();
     const state = super.getState();
     return {
       ...state,
-      source: fromStore.source?.src,
+      source: this._source,
     };
   }
   getDisplayText(): string {

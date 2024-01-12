@@ -40,16 +40,22 @@ export class MediaWebpageView extends MediaRemoteView {
     result: ViewStateResult,
   ): Promise<void> {
     if (typeof state.source === "string") {
-      this.store.setState({ source: { src: `webview::${state.source}` } });
+      const urlInfo = matchHostForWeb(state.source);
+      if (!urlInfo) {
+        console.warn("Invalid URL", state.source);
+        this._source = null;
+      } else {
+        this._source = state.source;
+        this.store.setState({ source: { src: `webview::${urlInfo.source}` } });
+      }
     }
     return super.setState(state, result);
   }
   getState(): MediaWebpageViewState {
-    const fromStore = this.store.getState();
     const state = super.getState();
     return {
       ...state,
-      source: fromStore.source?.src.replace(/^webview::/, ""),
+      source: this._source,
     };
   }
 }

@@ -1,6 +1,6 @@
 import { toTempFrag, updateHash } from "@/lib/hash/format";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
-import { noHash, toURL } from "@/lib/url";
+import { toURL } from "@/lib/url";
 
 export type SupportedEmbedHost = "vimeo" | "youtube";
 
@@ -25,24 +25,36 @@ function parseYoutubeTime(t: string | null): number {
 
 export function matchHostForEmbed(link: string | undefined): {
   type: SupportedEmbedHost;
-  url: string;
-  hash: string;
-  noHash: string;
+  source: URL;
+  // url used to compare if two embeds are the same
+  cleanUrl: URL;
 } | null {
   if (!link) return null;
   const url = toURL(link);
   if (!url) return null;
   switch (true) {
+    case url.hostname.contains("youtu.be"):
     case url.hostname.contains("youtube"): {
-      const newURL = new URL(url);
-      let tempFrag = parseTempFrag(newURL.hash);
-      const timestamp = parseYoutubeTime(newURL.searchParams.get("t")),
-        startTime = parseYoutubeTime(newURL.searchParams.get("start")),
-        endTime = parseYoutubeTime(newURL.searchParams.get("end"));
-      newURL.searchParams.delete("t");
-      newURL.searchParams.delete("start");
-      newURL.searchParams.delete("end");
+      let tempFrag = parseTempFrag(url.hash);
+      const timestamp = parseYoutubeTime(url.searchParams.get("t")),
+        startTime = parseYoutubeTime(url.searchParams.get("start")),
+        endTime = parseYoutubeTime(url.searchParams.get("end"));
 
+      const vid = url.hostname.contains("youtu.be")
+        ? url.pathname.slice(1)
+        : url.searchParams.get("v");
+
+      if (!vid) return null;
+
+      const cleanUrl = new URL("https://www.youtube.com/watch");
+      cleanUrl.search = new URLSearchParams({
+        v: vid,
+      }).toString();
+
+      const source = new URL(cleanUrl);
+      if (url.searchParams.has("list")) {
+        source.searchParams.set("list", url.searchParams.get("list")!);
+      }
       if (!tempFrag) {
         if (startTime > 0 && endTime > 0) {
           tempFrag = toTempFrag(startTime, endTime);
@@ -54,35 +66,36 @@ export function matchHostForEmbed(link: string | undefined): {
           tempFrag = { start: timestamp, end: -1 };
         }
       }
-
       // use native timestamp and range
       if (tempFrag) {
         if (isTimestamp(tempFrag)) {
-          newURL.searchParams.set("t", String(tempFrag.start));
+          source.searchParams.set("t", String(tempFrag.start));
         } else if (tempFrag.start > 0) {
-          newURL.searchParams.set("start", String(tempFrag.start));
+          source.searchParams.set("start", String(tempFrag.start));
         } else if (tempFrag.end > 0) {
-          newURL.searchParams.set("end", String(tempFrag.end));
+          source.searchParams.set("end", String(tempFrag.end));
         }
       }
-      updateHash(newURL, tempFrag);
+      updateHash(source, tempFrag);
 
       return {
         type: "youtube",
-        url: newURL.href,
-        hash: newURL.hash,
-        noHash: noHash(newURL),
+        source,
+        cleanUrl,
       };
     }
     case url.hostname.contains("vimeo"): {
-      const newURL = new URL(url);
-      const tempFrag = parseTempFrag(newURL.hash);
-      updateHash(newURL, tempFrag);
+      const cleanUrl = new URL(url);
+      cleanUrl.search = "";
+
+      const source = new URL(url);
+      const tempFrag = parseTempFrag(source.hash);
+      updateHash(source, tempFrag);
+
       return {
         type: "vimeo",
-        url: newURL.href,
-        hash: newURL.hash,
-        noHash: noHash(newURL),
+        cleanUrl,
+        source,
       };
     }
     default:
