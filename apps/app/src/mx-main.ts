@@ -5,6 +5,7 @@ import "./icons";
 import { Plugin } from "obsidian";
 import { onExternalLinkClick } from "./lib/link-click/external";
 import { onInternalLinkClick } from "./lib/link-click/internal";
+import { handleMediaNote } from "./lib/media-note";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import {
   AudioFileView,
@@ -36,8 +37,10 @@ export default class MxPlugin extends Plugin {
   async onload() {
     this.loadPatches();
     await this.modifySession();
+    this.handleMediaNote();
   }
 
+  handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;
   injectMediaView = injectMediaView;
   fixLinkLabel = fixLinkLabel;

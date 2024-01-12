@@ -49,7 +49,7 @@ export const MediaFileExtensions = {
   audio: ["mp3", "wav", "m4a", "3gp", "flac", "ogg", "oga", "opus"],
 };
 
-export function checkMediaType(ext: string) {
+export function checkMediaType(ext: string): MediaType | null {
   for (const type of Object.keys(
     MediaFileExtensions,
   ) as (keyof typeof MediaFileExtensions)[]) {
@@ -57,6 +57,8 @@ export function checkMediaType(ext: string) {
   }
   return null;
 }
+
+export type MediaType = keyof typeof MediaFileExtensions;
 
 declare module "obsidian" {
   interface MarkdownPreviewView {

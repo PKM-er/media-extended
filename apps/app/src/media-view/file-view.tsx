@@ -12,7 +12,7 @@ import { setTempFrag, type PlayerComponent } from "./base";
 export const MEDIA_FILE_VIEW_TYPE = {
   video: "mx-file-video",
   audio: "mx-file-audio",
-};
+} as const;
 
 abstract class MediaFileView
   extends EditableFileView

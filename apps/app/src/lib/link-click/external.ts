@@ -1,3 +1,4 @@
+import type { Workspace } from "obsidian";
 import {
   MEDIA_EMBED_VIEW_TYPE,
   type MediaEmbedViewState,
@@ -12,12 +13,13 @@ import { matchHostForEmbed } from "@/web/match-embed";
 import { matchHostForUrl } from "@/web/match-url";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 
-function parseUrl(url: string): {
+interface UrlInfo {
   viewType: string;
   source: string;
   hash: string;
   isSameSource: (src: string) => boolean;
-} | null {
+}
+export function parseUrl(url: string): UrlInfo | null {
   const directlinkInfo = matchHostForUrl(url);
 
   if (directlinkInfo) {
@@ -57,6 +59,24 @@ function parseUrl(url: string): {
   }
   return null;
 }
+
+export function openInOpenedPlayer(
+  { hash, isSameSource, viewType }: UrlInfo,
+  workspace: Workspace,
+) {
+  const opened = workspace.getLeavesOfType(viewType).filter((l) => {
+    const { source } = l.view.getState() as
+      | MediaEmbedViewState
+      | MediaWebpageViewState;
+    return source && isSameSource(source);
+  });
+  if (opened.length > 0) {
+    opened[0].setEphemeralState({ subpath: hash });
+    return true;
+  }
+  return false;
+}
+
 export async function onExternalLinkClick(
   this: MxPlugin,
   url: string,
@@ -71,18 +91,10 @@ export async function onExternalLinkClick(
     fallback();
     return;
   }
-  const { viewType, source, hash, isSameSource } = urlInfo;
+  const { viewType, source, hash } = urlInfo;
 
-  const opened = workspace.getLeavesOfType(viewType).filter((l) => {
-    const { source } = l.view.getState() as
-      | MediaEmbedViewState
-      | MediaWebpageViewState;
-    return source && isSameSource(source);
-  });
-  if (opened.length > 0 && !newLeaf) {
-    opened[0].setEphemeralState({ subpath: hash });
-    return;
-  }
+  if (!newLeaf && openInOpenedPlayer(urlInfo, workspace)) return;
+
   const leaf = newLeaf
     ? workspace.getLeaf("split", "vertical")
     : workspace.getLeaf(false);
