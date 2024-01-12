@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
 import { dataLpEdit } from "@/components/player/buttons";
+import { getTracks } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
 
@@ -53,13 +54,15 @@ export class MediaFileEmbed
     );
   }
 
-  loadFile() {
+  async loadFile() {
+    const textTracks = await getTracks(this.file, this.info.app.vault);
     this.store.setState({
       source: {
         src: this.info.app.vault.getResourcePath(this.file),
         // explicitly set type for webm files to trigger audio detection
         type: this.file.extension === "webm" ? "video/webm" : undefined,
       },
+      textTracks,
     });
   }
 

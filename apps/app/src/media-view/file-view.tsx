@@ -3,6 +3,7 @@ import { EditableFileView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
+import { getTracks } from "@/lib/subtitle";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
@@ -44,8 +45,10 @@ abstract class MediaFileView
   abstract getIcon(): string;
 
   async onLoadFile(file: TFile): Promise<void> {
+    const { vault } = this.app;
     const src = this.app.vault.getResourcePath(file);
-    this.store.setState({ source: { src }, title: file.name });
+    const textTracks = await getTracks(file, vault);
+    this.store.setState({ source: { src }, textTracks, title: file.name });
   }
   abstract canAcceptExtension(extension: string): boolean;
 

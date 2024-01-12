@@ -1,95 +1,31 @@
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import * as Tooltip from "@radix-ui/react-tooltip";
-import { useCaptionOptions, useMediaPlayer } from "@vidstack/react";
-import { CheckCircleIcon, CircleIcon, SubtitlesIcon } from "@/components/icon";
+import { useCaptionOptions, useMediaState } from "@vidstack/react";
+import { Menu } from "obsidian";
+import { SubtitlesIcon } from "@/components/icon";
 
-import { buttonClass } from "./buttons";
+export function Captions() {
+  const options = useCaptionOptions();
+  const tracks = useMediaState("textTracks");
 
-export interface MenuProps {
-  side?: DropdownMenu.MenuContentProps["side"];
-  align?: DropdownMenu.MenuContentProps["align"];
-  offset?: DropdownMenu.MenuContentProps["sideOffset"];
-  tooltipSide?: Tooltip.TooltipContentProps["side"];
-  tooltipAlign?: Tooltip.TooltipContentProps["align"];
-  tooltipOffset?: number;
-}
+  if (tracks.length === 0) return null;
 
-const tooltipClass =
-  "animate-out fade-out slide-out-to-bottom-2 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in data-[state=delayed-open]:slide-in-from-bottom-4 z-10 rounded-sm bg-black/90 px-2 py-0.5 text-sm font-medium text-white parent-data-[open]:hidden";
-
-// We can reuse this class for other menus.
-const menuClass =
-  "animate-out fade-out z-[9999] slide-in-from-bottom-4 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:slide-out-to-bottom-2 flex max-h-[400px] min-w-[260px] flex-col rounded-md border border-white/10 bg-black/95 p-2.5 font-sans text-[15px] font-medium outline-none backdrop-blur-sm duration-300";
-
-export function Captions({
-  side = "top",
-  align = "end",
-  offset = 0,
-  tooltipSide = "top",
-  tooltipAlign = "center",
-  tooltipOffset = 0,
-}: MenuProps) {
-  const player = useMediaPlayer(),
-    options = useCaptionOptions(),
-    hint = options.selectedTrack?.label ?? "Off";
   return (
-    <DropdownMenu.Root>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <DropdownMenu.Trigger
-            aria-label="Settings"
-            className={buttonClass}
-            disabled={options.disabled}
-          >
-            <SubtitlesIcon className="w-7 h-7" />
-          </DropdownMenu.Trigger>
-        </Tooltip.Trigger>
-        <Tooltip.Content
-          className={tooltipClass}
-          side={tooltipSide}
-          align={tooltipAlign}
-          sideOffset={tooltipOffset}
-        >
-          Captions
-        </Tooltip.Content>
-      </Tooltip.Root>
-      <DropdownMenu.Content
-        className={menuClass}
-        side={side}
-        align={align}
-        sideOffset={offset}
-        collisionBoundary={player?.el}
-      >
-        <DropdownMenu.Label className="flex items-center w-full px-1.5 mb-2 font-medium text-[15px]">
-          <SubtitlesIcon className="w-5 h-5 mr-1.5 translate-y-px" />
-          Captions
-          <span className="ml-auto text-sm text-white/50">{hint}</span>
-        </DropdownMenu.Label>
-        <DropdownMenu.RadioGroup
-          aria-label="Captions"
-          className="w-full flex flex-col"
-          value={options.selectedValue}
-        >
-          {options.map(({ label, value, select }) => (
-            <Radio value={value} onSelect={select} key={value}>
-              {label}
-            </Radio>
-          ))}
-        </DropdownMenu.RadioGroup>
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
-  );
-}
-
-function Radio({ children, ...props }: DropdownMenu.MenuRadioItemProps) {
-  return (
-    <DropdownMenu.RadioItem
-      className="ring-mod-border-focus group relative flex w-full cursor-pointer select-none items-center justify-start rounded-sm p-2.5 outline-none hocus:bg-white/10 data-[focus]:ring-2 text-sm"
-      {...props}
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      onClick={(evt) => {
+        const menu = new Menu();
+        // menu.addItem((item) =>
+        //   item.setIsLabel(true).setTitle("Caption " + hint),
+        // );
+        options.forEach(({ label, select, selected }) => {
+          menu.addItem((item) =>
+            item.setTitle(label).setChecked(selected).onClick(select),
+          );
+        });
+        menu.showAtMouseEvent(evt.nativeEvent);
+      }}
+      aria-label="Select Caption"
     >
-      <CircleIcon className="h-4 w-4 text-white group-data-[state=checked]:hidden" />
-      <CheckCircleIcon className="text-txt-accent hidden h-4 w-4 group-data-[state=checked]:block" />
-      <span className="ml-2">{children}</span>
-    </DropdownMenu.RadioItem>
+      <SubtitlesIcon className="w-7 h-7" />
+    </button>
   );
 }

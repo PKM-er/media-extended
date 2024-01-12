@@ -38,6 +38,7 @@
     "ahooks": "^3.7.8",
     "clsx": "^1.2.1",
     "dayjs": "^1.11.10",
+    "iso-639-1": "^3.1.0",
     "maverick.js": "0.41.2",
     "monkey-around": "^2.3.0",
     "nanoevents": "^9.0.0",

@@ -1,4 +1,4 @@
-import type { MediaPlayerInstance } from "@vidstack/react";
+import type { MediaPlayerInstance, TextTrackInit } from "@vidstack/react";
 import type { App } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
@@ -19,6 +19,7 @@ export interface MediaViewState {
     | undefined;
   hash: string;
   title: string;
+  textTracks: TextTrackInit[];
   webHost?: Exclude<SupportedWebHost, SupportedWebHost.Generic>;
   updateWebHost: (webHost: SupportedWebHost) => void;
 }
@@ -30,6 +31,7 @@ export function createMediaViewStore() {
     source: undefined,
     hash: "",
     title: "",
+    textTracks: [],
     updateWebHost: (webHost) =>
       set({ webHost: webHost === "generic" ? undefined : webHost }),
   }));

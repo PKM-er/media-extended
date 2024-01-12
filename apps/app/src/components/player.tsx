@@ -1,7 +1,7 @@
 import "@vidstack/react/player/styles/base.css";
 
 import type { MediaViewType } from "@vidstack/react";
-import { MediaPlayer, useMediaState } from "@vidstack/react";
+import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
 
 import { useState } from "react";
 import { useTempFrag } from "@/components/hook/use-temporal-frag";
@@ -42,6 +42,7 @@ export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
 
   const src = useMediaViewStore(({ source }) => source?.src);
+  const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
 
   const [viewType, setViewType] = useState<MediaViewType>("unknown");
   const title = useMediaViewStore((s) => s.title);
@@ -62,7 +63,11 @@ export function Player() {
       ref={playerRef}
       {...hashProps}
     >
-      <MediaProviderEnhanced />
+      <MediaProviderEnhanced>
+        {textTracks.map((props) => (
+          <Track {...props} key={props.language} />
+        ))}
+      </MediaProviderEnhanced>
       <HookLoader onViewTypeChange={setViewType} />
       <PlayerLayout />
     </MediaPlayer>
