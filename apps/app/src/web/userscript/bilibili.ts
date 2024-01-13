@@ -4,11 +4,28 @@ import { requireMx } from "./_require";
 const { waitForSelector, MediaPlugin } = requireMx();
 
 export default class BilibiliPlugin extends MediaPlugin {
+  preventAutoplay() {
+    function pause(evt: Event) {
+      if (evt.target instanceof HTMLMediaElement) {
+        evt.target.pause();
+      }
+      window.clearTimeout(timeoutId);
+    }
+    this.media.addEventListener("play", pause, { once: true });
+    const timeoutId = window.setTimeout(() => {
+      this.media.removeEventListener("play", pause);
+    }, 5e3);
+  }
+
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
   async onload(): Promise<void> {
     await super.onload();
+    this.untilMediaReady("loadeddata").then(() => {
+      this.preventAutoplay();
+    });
+    this.preventAutoplay();
     // disable auto play recommendation
     localStorage.setItem("recommend_auto_play", "close");
     const player = document.querySelector<HTMLDivElement>("#bilibili-player");
