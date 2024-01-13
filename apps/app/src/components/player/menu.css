@@ -1,0 +1,9 @@
+.mx-playback-prompt form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mx-playback-prompt button[type="submit"] {
+  align-self: flex-end;
+}

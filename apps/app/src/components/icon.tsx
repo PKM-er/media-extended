@@ -49,4 +49,5 @@ export const PlayIcon = makeIcon("play"),
   RewindIcon = makeIcon("rewind"),
   EditIcon = makeIcon("edit"),
   ImageDownIcon = makeIcon("image-down"),
-  PinIcon = makeIcon("pin");
+  PinIcon = makeIcon("pin"),
+  MoreIcon = makeIcon("more-horizontal");

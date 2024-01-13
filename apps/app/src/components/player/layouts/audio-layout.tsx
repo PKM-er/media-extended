@@ -2,6 +2,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { Controls, Gesture } from "@vidstack/react";
 
 import * as Buttons from "../buttons";
+import * as Menus from "../menus";
 import * as Sliders from "../sliders";
 import { TimeGroup } from "../time-group";
 import { Title } from "../title";
@@ -30,6 +31,7 @@ export function AudioLayout({ thumbnails }: VideoLayoutProps) {
             <Title />
             <div className="flex-1" />
             <Buttons.EditorEdit />
+            <Menus.MoreOptions />
           </Controls.Group>
         </Tooltip.Provider>
       </Controls.Root>

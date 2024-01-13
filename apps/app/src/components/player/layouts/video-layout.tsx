@@ -32,10 +32,10 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
             <Title />
             <div className="flex-1" />
             <Menus.Captions />
-            <Buttons.PIP />
             <Buttons.Screenshot />
             <Buttons.Fullscreen />
             <Buttons.EditorEdit />
+            <Menus.MoreOptions />
           </Controls.Group>
         </Tooltip.Provider>
       </Controls.Root>
