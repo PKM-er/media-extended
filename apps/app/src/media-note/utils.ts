@@ -6,9 +6,9 @@ import type {
   MarkdownView,
   Editor,
 } from "obsidian";
-import { openInLeaf, parseUrl } from "@/lib/link-click/external";
-import { openInOpenedPlayer } from "@/lib/link-click/opened";
 import { toURL } from "@/lib/url";
+import { openInLeaf, parseUrl } from "@/media-note/link-click/external";
+import { openInOpenedPlayer } from "@/media-note/link-click/opened";
 import { checkMediaType } from "@/patch/utils";
 
 export const mediaSourceField = {

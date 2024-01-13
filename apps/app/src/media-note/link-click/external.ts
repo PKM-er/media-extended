@@ -1,4 +1,5 @@
 import type { WorkspaceLeaf } from "obsidian";
+import { noHash } from "@/lib/url";
 import { MEDIA_EMBED_VIEW_TYPE } from "@/media-view/iframe-view";
 import type {
   MediaEmbedViewType,
@@ -15,7 +16,6 @@ import type MxPlugin from "@/mx-main";
 import { matchHostForEmbed } from "@/web/match-embed";
 import { matchHostForUrl } from "@/web/match-url";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
-import { noHash } from "../url";
 import { openInOpenedPlayer } from "./opened";
 
 export interface UrlMediaInfo {

@@ -3,9 +3,9 @@ import "./style.css";
 import "./icons";
 
 import { Plugin } from "obsidian";
-import { onExternalLinkClick } from "./lib/link-click/external";
-import { onInternalLinkClick } from "./lib/link-click/internal";
 import { handleMediaNote } from "./media-note";
+import { onExternalLinkClick } from "./media-note/link-click/external";
+import { onInternalLinkClick } from "./media-note/link-click/internal";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import {
   AudioFileView,
