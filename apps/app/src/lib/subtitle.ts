@@ -26,18 +26,15 @@ export async function getTracks(
 
   const byLang = groupBy(subtitles, (v) => v.language);
   const uniqueTracks: LocalTrack[] = [];
-  let hasDefaultLang = false;
+  const hasDefaultLang = byLang.has(defaultLang);
   byLang.forEach((tracks, lang) => {
-    // keep only one track for each lang
-    // prefer vtt over ass over srt
-    const isDefault = lang === defaultLang;
-    if (isDefault) {
-      hasDefaultLang = true;
-    }
     for (const fmt of supportedFormat) {
       const track = tracks.find((track) => track.type === fmt);
       if (track) {
-        uniqueTracks.push({ ...track, default: isDefault });
+        uniqueTracks.push({
+          ...track,
+          default: lang === defaultLang,
+        });
         return;
       }
     }
@@ -74,6 +71,7 @@ function groupBy<T, K>(array: T[], getKey: (item: T) => K): Map<K, T[]> {
 }
 
 interface LocalTrack {
+  id: string;
   kind: "subtitles";
   language?: string;
   src: TFile;
@@ -94,6 +92,7 @@ function toTrack(file: TFile, basename: string): LocalTrack | null {
     return {
       kind: "subtitles",
       src: file,
+      id: `${file.name}.unknown`,
       type: file.extension,
       label: "Unknown",
       default: false,
@@ -105,6 +104,7 @@ function toTrack(file: TFile, basename: string): LocalTrack | null {
   return {
     kind: "subtitles",
     language,
+    id: `${file.name}.${language}`,
     src: file,
     type: file.extension,
     label: iso.getNativeName(language) || language,

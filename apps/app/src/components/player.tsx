@@ -65,7 +65,7 @@ export function Player() {
     >
       <MediaProviderEnhanced>
         {textTracks.map((props) => (
-          <Track {...props} key={props.language} />
+          <Track {...props} key={props.id} />
         ))}
       </MediaProviderEnhanced>
       <HookLoader onViewTypeChange={setViewType} />
