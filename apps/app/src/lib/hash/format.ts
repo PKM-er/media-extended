@@ -4,6 +4,11 @@ import { isTimestamp, type TempFragment } from "./temporal-frag";
 
 dayjs.extend(duration);
 
+export function formatDuration(time: number) {
+  const duration = dayjs.duration(time, "seconds");
+  return "@" + duration.format("HH:mm:ss");
+}
+
 const fillZero = (time: number, fractionDigits = 2) => {
   let main: string, frac: string | undefined;
   if (Number.isInteger(time)) {

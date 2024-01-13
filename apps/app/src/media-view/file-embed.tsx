@@ -14,6 +14,7 @@ export class MediaFileEmbed
 {
   store;
   root: ReactDOM.Root | null = null;
+  public containerEl: HTMLElement;
   constructor(
     public info: EmbedInfo,
     public file: TFile,
@@ -21,6 +22,7 @@ export class MediaFileEmbed
     public plugin: MxPlugin,
   ) {
     super();
+    this.containerEl = info.containerEl;
     this.store = createMediaViewStore();
     this.store.setState({ hash: subpath, title: file.name });
     const { containerEl } = info;

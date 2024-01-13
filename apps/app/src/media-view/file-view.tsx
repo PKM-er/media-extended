@@ -5,6 +5,7 @@ import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import { getTracks } from "@/lib/subtitle";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { takeTimestampOnFile } from "@/media-note/timestamp";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
 import { setTempFrag, type PlayerComponent } from "./base";
@@ -43,6 +44,12 @@ abstract class MediaFileView
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
     handleWindowMigration.call(this, () => this.render());
+    this.addAction(
+      "star",
+      "Timestamp",
+      takeTimestampOnFile(this, (player) => player.file),
+    );
+
     this.register(
       this.containerEl.onWindowMigrated(() => {
         this.render();

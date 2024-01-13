@@ -11,11 +11,13 @@ import {
 import { Player } from "@/components/player";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { takeTimestampOnUrl } from "@/media-note/timestamp";
 import type MediaExtended from "@/mx-main";
 
 export interface PlayerComponent extends Component {
   plugin: MediaExtended;
   store: MediaViewStoreApi;
+  containerEl: HTMLElement;
   root: ReactDOM.Root | null;
 }
 
@@ -86,6 +88,9 @@ export abstract class MediaRemoteView
   protected _sourceType = "";
 
   protected _source: string | null = null;
+  get source(): string | null {
+    return this._source;
+  }
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
     this.store = createMediaViewStore();
@@ -98,6 +103,11 @@ export abstract class MediaRemoteView
     // );
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
+    this.addAction(
+      "star",
+      "Timestamp",
+      takeTimestampOnUrl(this, (player) => player._source),
+    );
 
     // make sure to unmount the player before the leaf detach it from DOM
     this.register(

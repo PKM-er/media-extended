@@ -1,5 +1,5 @@
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
-import { ItemView, Platform, Scope } from "obsidian";
+import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
@@ -7,6 +7,7 @@ import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
+import { matchHostForUrl } from "@/web/match-url";
 import { setTempFrag } from "./base";
 import type { MediaRemoteViewState, PlayerComponent } from "./base";
 
@@ -17,6 +18,12 @@ export const MEDIA_URL_VIEW_TYPE = {
 } as const;
 export type MediaUrlViewType =
   (typeof MEDIA_URL_VIEW_TYPE)[keyof typeof MEDIA_URL_VIEW_TYPE];
+
+const viewTypes = new Set(Object.values(MEDIA_URL_VIEW_TYPE));
+
+export function isMediaUrlViewType(type: string): type is MediaUrlViewType {
+  return viewTypes.has(type as any);
+}
 
 export type MediaUrlViewState = MediaRemoteViewState;
 
@@ -72,6 +79,10 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
   }
 
   protected _title: string | null = null;
+  protected _source: string | null = null;
+  get source(): string | null {
+    return this._source;
+  }
 
   async setState(
     state: MediaUrlViewState,
@@ -79,19 +90,26 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
   ): Promise<void> {
     if (typeof state.source === "string") {
       this._title = basenameFrom(state.source);
-      this.store.setState({
-        source: { src: fixFileUrl(state.source) },
-        title: this._title,
-      });
+      const info = matchHostForUrl(state.source);
+      this._source = state.source;
+      if (!info) {
+        this._source = null;
+        console.warn("Invalid URL", state.source);
+      } else {
+        this._source = state.source;
+        this.store.setState({
+          source: { src: info.source.href },
+          title: this._title,
+        });
+      }
     }
     return super.setState(state, result);
   }
   getState(): MediaUrlViewState {
-    const fromStore = this.store.getState();
     const state = super.getState();
     return {
       ...state,
-      source: revertFileUrl(fromStore.source?.src),
+      source: this._source,
     };
   }
 
@@ -136,26 +154,15 @@ export class AudioUrlView extends MediaUrlView {
   }
 }
 
-function fixFileUrl(url: string): string {
-  if (url.startsWith("file:///")) {
-    return (
-      Platform.resourcePathPrefix +
-      url.slice("file:///".length) +
-      "?" +
-      Date.now()
-    );
-  }
-  return url;
-}
-function revertFileUrl(url?: string): string | undefined {
-  if (!url) return url;
-  if (url.startsWith(Platform.resourcePathPrefix)) {
-    return (
-      "file:///" + url.slice(Platform.resourcePathPrefix.length).split("?")[0]
-    );
-  }
-  return url;
-}
+// function revertFileUrl(url?: string): string | undefined {
+//   if (!url) return url;
+//   if (url.startsWith(Platform.resourcePathPrefix)) {
+//     return (
+//       "file:///" + url.slice(Platform.resourcePathPrefix.length).split("?")[0]
+//     );
+//   }
+//   return url;
+// }
 
 function basenameFrom(src: string): string {
   const url = toURL(src);
