@@ -52,9 +52,18 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
   abstract getViewType(): string;
   abstract getIcon(): string;
 
+  initialEphemeralState = true;
+
   setEphemeralState(state: any): void {
-    const { subpath = "" } = state;
-    setTempFrag(subpath, this.store);
+    if ("subpath" in state) {
+      const { subpath } = state;
+      if (this.initialEphemeralState === true) {
+        setTempFrag(subpath, this.store, true);
+        this.initialEphemeralState = false;
+      } else {
+        setTempFrag(subpath, this.store);
+      }
+    }
     super.setEphemeralState(state);
   }
 

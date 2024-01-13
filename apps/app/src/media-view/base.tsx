@@ -1,3 +1,4 @@
+import type { MediaPlayerInstance } from "@vidstack/react";
 import { around } from "monkey-around";
 import type { Component, WorkspaceLeaf } from "obsidian";
 import { ItemView, Scope } from "obsidian";
@@ -21,11 +22,28 @@ export interface PlayerComponent extends Component {
   root: ReactDOM.Root | null;
 }
 
-export function setTempFrag(hash: string, store: MediaViewStoreApi) {
+export async function setTempFrag(
+  hash: string,
+  store: MediaViewStoreApi,
+  initial = false,
+) {
   store.setState({ hash });
   const tf = parseTempFrag(hash);
-  const player = store.getState().player;
-  if (!player || !tf) return;
+  if (!tf) return;
+  const player = await new Promise<MediaPlayerInstance>((resolve) => {
+    const player = store.getState().player;
+    if (player) resolve(player);
+    else {
+      const unsubscribe = store.subscribe(({ player }) => {
+        if (player) {
+          unsubscribe();
+          resolve(player);
+        }
+      });
+    }
+  });
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  let _newTime: number | null = null;
   // allow 0.25s offset from end, in case delay in seeking
   const allowedOffset = 0.25;
   if (
@@ -33,27 +51,43 @@ export function setTempFrag(hash: string, store: MediaViewStoreApi) {
     player.currentTime < tf.start ||
     Math.abs(player.currentTime - tf.end) < allowedOffset
   ) {
-    player.currentTime = tf.start;
+    _newTime = tf.start;
   } else if (player.currentTime - allowedOffset > tf.end) {
-    player.currentTime = tf.end;
+    _newTime = tf.end;
   }
-
-  // trying to fix youtube and vimeo autoplay on seek
-  if (
-    ["video/vimeo", "video/youtube"].includes(player.state.source.type) &&
-    !player.state.autoplay &&
-    // when first loaded, the provider is not yet available
-    !player.provider
-  ) {
-    const unload = player.listen("play", async () => {
-      setTimeout(() => {
+  if (_newTime !== null) {
+    const newTime = _newTime;
+    if (!player.state.canPlay) {
+      // trying to fix youtube and vimeo autoplay on seek
+      if (
+        ["video/vimeo", "video/youtube"].includes(player.state.source.type) &&
+        !player.state.autoplay
+      ) {
+        await Promise.race([
+          waitFor(player, "can-play"),
+          waitFor(player, "canplay"),
+        ]);
+        player.play();
+        await waitFor(player, "play");
+        await Promise.race([
+          waitFor(player, "time-update"),
+          waitFor(player, "timeupdate"),
+        ]);
         player.pause();
-      }, 200);
-      unload();
-    });
+        player.currentTime = newTime;
+      } else {
+        await Promise.race([
+          waitFor(player, "can-play"),
+          waitFor(player, "canplay"),
+        ]);
+        player.currentTime = newTime;
+      }
+    } else {
+      player.currentTime = newTime;
+    }
   }
 
-  if (isTimestamp(tf) && player.provider) {
+  if (isTimestamp(tf) && player.state.canPlay && !initial) {
     player.play(new Event("hashchange"));
   }
 }
@@ -137,9 +171,18 @@ export abstract class MediaRemoteView
   abstract getIcon(): string;
   abstract getDisplayText(): string;
 
+  initialEphemeralState = true;
+
   setEphemeralState(state: any): void {
-    const { subpath = "" } = state;
-    setTempFrag(subpath, this.store);
+    if ("subpath" in state) {
+      const { subpath } = state;
+      if (this.initialEphemeralState === true) {
+        setTempFrag(subpath, this.store, true);
+        this.initialEphemeralState = false;
+      } else {
+        setTempFrag(subpath, this.store);
+      }
+    }
     super.setEphemeralState(state);
   }
 
@@ -188,4 +231,21 @@ export abstract class MediaRemoteView
     this.root = null;
     return super.onClose();
   }
+}
+
+function waitFor(
+  player: MediaPlayerInstance,
+  event: "time-update" | "play" | "can-play" | "canplay" | "timeupdate",
+) {
+  return new Promise<void>((resolve) => {
+    const timeout = window.setTimeout(() => {
+      resolve();
+      unload();
+    }, 5e3);
+    const unload = player.listen(event, () => {
+      resolve();
+      window.clearTimeout(timeout);
+      unload();
+    });
+  });
 }

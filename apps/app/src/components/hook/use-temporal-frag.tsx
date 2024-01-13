@@ -62,10 +62,6 @@ function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
       }
       Object.assign(prev, { currentTime, paused, loop });
     }),
-    player.listen("can-play", () => {
-      if (!frag) return;
-      player.currentTime = frag.start;
-    }),
     store.subscribe((curr, prev) => {
       if (curr.hash === prev.hash) return;
       try {
