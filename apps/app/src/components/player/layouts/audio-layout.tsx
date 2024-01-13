@@ -6,8 +6,6 @@ import * as Sliders from "../sliders";
 import { TimeGroup } from "../time-group";
 import { Title } from "../title";
 
-// Offset tooltips/menus/slider previews in the lower controls group so they're clearly visible.
-
 export interface VideoLayoutProps {
   thumbnails?: string;
 }

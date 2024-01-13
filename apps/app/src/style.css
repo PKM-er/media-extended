@@ -47,7 +47,7 @@ svg.svg-icon {
 * free to ignore them and style the captions as desired, but we don't recommend it unless the
 * captions file contains no cue settings. Otherwise, you might be breaking accessibility.
 */
-.mx-captions :global([data-part="cue-display"]) {
+.mx-captions [data-part="cue-display"] {
   position: absolute;
   direction: ltr;
   overflow: visible;
@@ -67,7 +67,7 @@ svg.svg-icon {
   min-height: min-content;
 }
 
-.mx-captions :global([data-part="cue"]) {
+.mx-captions [data-part="cue"] {
   display: inline-block;
   contain: content;
   border-radius: 2px;
@@ -81,6 +81,6 @@ svg.svg-icon {
   text-shadow: var(--cue-text-shadow);
 }
 
-.mx-captions :global([data-part="cue-display"][data-vertical] [data-part="cue"]) {
+.mx-captions [data-part="cue-display"][data-vertical] [data-part="cue"] {
   padding: var(--cue-padding-x) var(--cue-padding-y);
 }
