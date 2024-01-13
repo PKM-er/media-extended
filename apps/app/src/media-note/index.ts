@@ -1,12 +1,9 @@
 import type { CachedMetadata, TAbstractFile } from "obsidian";
 import { Notice, TFile, parseLinktext } from "obsidian";
+import { openInOpenedPlayer } from "@/lib/link-click/opened";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/utils";
-import {
-  openInLeaf,
-  openInOpenedPlayer,
-  parseUrl,
-} from "../lib/link-click/external";
+import { openInLeaf, parseUrl } from "../lib/link-click/external";
 import { toURL } from "../lib/url";
 
 export const mediaSourceField = {

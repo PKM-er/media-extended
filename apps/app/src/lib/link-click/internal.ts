@@ -1,9 +1,24 @@
-import type { TFile, Workspace } from "obsidian";
+import type { TFile } from "obsidian";
 import { parseLinktext } from "obsidian";
-import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/file-view";
+import {
+  MEDIA_FILE_VIEW_TYPE,
+  isMediaFileViewType,
+  type MediaFileViewType,
+} from "@/media-view/file-view";
 import type MxPlugin from "@/mx-main";
-import type { MediaType } from "@/patch/utils";
 import { checkMediaType } from "@/patch/utils";
+import { openInOpenedPlayer } from "./opened";
+
+export interface FileMediaInfo {
+  viewType: MediaFileViewType;
+  file: TFile;
+  hash: string;
+}
+
+export function isFileMediaInfo(info: unknown): info is FileMediaInfo {
+  return isMediaFileViewType((info as FileMediaInfo).viewType);
+}
+
 export function onInternalLinkClick(
   this: MxPlugin,
   linktext: string,
@@ -21,26 +36,16 @@ export function onInternalLinkClick(
   }
   if (
     !newLeaf &&
-    openInOpenedPlayer({ file: linkFile, subpath, mediaType }, workspace)
+    openInOpenedPlayer(
+      {
+        file: linkFile,
+        hash: subpath,
+        viewType: MEDIA_FILE_VIEW_TYPE[mediaType],
+      },
+      workspace,
+    )
   ) {
     return;
   }
   fallback();
-}
-
-export function openInOpenedPlayer(
-  linkInfo: { file: TFile; subpath: string; mediaType: MediaType },
-  workspace: Workspace,
-) {
-  const opened = workspace
-    .getLeavesOfType(MEDIA_FILE_VIEW_TYPE[linkInfo.mediaType])
-    .filter((l) => {
-      const { file: filePath } = l.view.getState() as { file: string };
-      return filePath === linkInfo.file.path;
-    });
-  if (opened.length > 0) {
-    opened[0].setEphemeralState({ subpath: linkInfo.subpath });
-    return true;
-  }
-  return false;
 }

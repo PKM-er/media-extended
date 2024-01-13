@@ -4,7 +4,8 @@ import type { MediaRemoteViewState } from "./base";
 import { MediaRemoteView } from "./base";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export const MEDIA_EMBED_VIEW_TYPE = "mx-embed";
+export const MEDIA_EMBED_VIEW_TYPE = "mx-embed" as const;
+export type MediaEmbedViewType = typeof MEDIA_EMBED_VIEW_TYPE;
 
 export type MediaEmbedViewState = MediaRemoteViewState;
 

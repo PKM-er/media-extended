@@ -14,7 +14,9 @@ import type { MediaRemoteViewState, PlayerComponent } from "./base";
 export const MEDIA_URL_VIEW_TYPE = {
   video: "mx-url-video",
   audio: "mx-url-audio",
-};
+} as const;
+export type MediaUrlViewType =
+  (typeof MEDIA_URL_VIEW_TYPE)[keyof typeof MEDIA_URL_VIEW_TYPE];
 
 export type MediaUrlViewState = MediaRemoteViewState;
 

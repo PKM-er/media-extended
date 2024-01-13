@@ -1,27 +1,31 @@
-import type { Workspace, WorkspaceLeaf } from "obsidian";
-import {
-  MEDIA_EMBED_VIEW_TYPE,
-  type MediaEmbedViewState,
+import type { WorkspaceLeaf } from "obsidian";
+import { MEDIA_EMBED_VIEW_TYPE } from "@/media-view/iframe-view";
+import type {
+  MediaEmbedViewType,
+  MediaEmbedViewState,
 } from "@/media-view/iframe-view";
+import type { MediaUrlViewType } from "@/media-view/url-view";
 import { MEDIA_URL_VIEW_TYPE } from "@/media-view/url-view";
-import {
-  MEDIA_WEBPAGE_VIEW_TYPE,
-  type MediaWebpageViewState,
+import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/webpage-view";
+import type {
+  MediaWebpageViewType,
+  MediaWebpageViewState,
 } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
 import { matchHostForEmbed } from "@/web/match-embed";
 import { matchHostForUrl } from "@/web/match-url";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 import { noHash } from "../url";
+import { openInOpenedPlayer } from "./opened";
 
-interface UrlInfo {
-  viewType: string;
+export interface UrlMediaInfo {
+  viewType: MediaUrlViewType | MediaEmbedViewType | MediaWebpageViewType;
   source: URL;
   original: string;
   hash: string;
   isSameSource: (src: string) => boolean;
 }
-export function parseUrl(url: string): UrlInfo | null {
+export function parseUrl(url: string): UrlMediaInfo | null {
   const directlinkInfo = matchHostForUrl(url);
 
   if (directlinkInfo) {
@@ -75,23 +79,6 @@ export function parseUrl(url: string): UrlInfo | null {
   return null;
 }
 
-export function openInOpenedPlayer(
-  { hash, isSameSource, viewType }: UrlInfo,
-  workspace: Workspace,
-) {
-  const opened = workspace.getLeavesOfType(viewType).filter((l) => {
-    const { source } = l.view.getState() as
-      | MediaEmbedViewState
-      | MediaWebpageViewState;
-    return source && isSameSource(source);
-  });
-  if (opened.length > 0) {
-    opened[0].setEphemeralState({ subpath: hash });
-    return true;
-  }
-  return false;
-}
-
 export async function onExternalLinkClick(
   this: MxPlugin,
   url: string,
@@ -115,7 +102,7 @@ export async function onExternalLinkClick(
   await openInLeaf(urlInfo, leaf);
 }
 
-export async function openInLeaf(info: UrlInfo, leaf: WorkspaceLeaf) {
+export async function openInLeaf(info: UrlMediaInfo, leaf: WorkspaceLeaf) {
   const state: MediaEmbedViewState | MediaWebpageViewState = {
     source: info.original,
   };

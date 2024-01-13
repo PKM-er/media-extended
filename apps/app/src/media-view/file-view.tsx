@@ -15,6 +15,15 @@ export const MEDIA_FILE_VIEW_TYPE = {
   audio: "mx-file-audio",
 } as const;
 
+const viewTypes = new Set(Object.values(MEDIA_FILE_VIEW_TYPE));
+
+export type MediaFileViewType =
+  (typeof MEDIA_FILE_VIEW_TYPE)[keyof typeof MEDIA_FILE_VIEW_TYPE];
+
+export function isMediaFileViewType(type: string): type is MediaFileViewType {
+  return viewTypes.has(type as any);
+}
+
 abstract class MediaFileView
   extends EditableFileView
   implements PlayerComponent

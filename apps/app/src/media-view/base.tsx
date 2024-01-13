@@ -19,24 +19,31 @@ export interface PlayerComponent extends Component {
   root: ReactDOM.Root | null;
 }
 
-export function setTempFrag(hash: string, store: MediaViewStoreApi) {
+export function setTempFrag(
+  hash: string,
+  store: MediaViewStoreApi,
+  playAfterSeek = false,
+) {
   store.setState({ hash });
   const tf = parseTempFrag(hash);
   const player = store.getState().player;
-  if (player && tf) {
-    // allow 0.25s offset from end, in case delay in seeking
-    const allowedOffset = 0.25;
-    if (
-      isTimestamp(tf) ||
-      player.currentTime < tf.start ||
-      Math.abs(player.currentTime - tf.end) < allowedOffset
-    ) {
-      player.currentTime = tf.start;
-    } else if (player.currentTime - allowedOffset > tf.end) {
-      player.currentTime = tf.end;
-    }
-    if (isTimestamp(tf)) {
-      player.play(new Event("hashchange"));
+  if (!player || !tf) return;
+  // allow 0.25s offset from end, in case delay in seeking
+  const allowedOffset = 0.25;
+  if (
+    isTimestamp(tf) ||
+    player.currentTime < tf.start ||
+    Math.abs(player.currentTime - tf.end) < allowedOffset
+  ) {
+    player.currentTime = tf.start;
+  } else if (player.currentTime - allowedOffset > tf.end) {
+    player.currentTime = tf.end;
+  }
+
+  if (isTimestamp(tf)) {
+    const evt = new Event("hashchange");
+    if (playAfterSeek) {
+      player.play(evt);
     }
   }
 }
