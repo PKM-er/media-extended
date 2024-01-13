@@ -33,7 +33,7 @@ export function takeTimestampOnUrl<T extends PlayerComponent>(
     const time = player.currentTime;
     const existingMediaNotes = mediaNoteFinder.url(source);
     const title =
-      player.title ??
+      player.state.title ??
       sourceUrl.hostname + decodeURI(sourceUrl.pathname).replaceAll("/", "_");
 
     const { editor } = await openMarkdownView(
