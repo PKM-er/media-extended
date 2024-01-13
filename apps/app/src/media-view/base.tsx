@@ -19,11 +19,7 @@ export interface PlayerComponent extends Component {
   root: ReactDOM.Root | null;
 }
 
-export function setTempFrag(
-  hash: string,
-  store: MediaViewStoreApi,
-  playAfterSeek = false,
-) {
+export function setTempFrag(hash: string, store: MediaViewStoreApi) {
   store.setState({ hash });
   const tf = parseTempFrag(hash);
   const player = store.getState().player;
@@ -40,11 +36,23 @@ export function setTempFrag(
     player.currentTime = tf.end;
   }
 
-  if (isTimestamp(tf)) {
-    const evt = new Event("hashchange");
-    if (playAfterSeek) {
-      player.play(evt);
-    }
+  // trying to fix youtube and vimeo autoplay on seek
+  if (
+    ["video/vimeo", "video/youtube"].includes(player.state.source.type) &&
+    !player.state.autoplay &&
+    // when first loaded, the provider is not yet available
+    !player.provider
+  ) {
+    const unload = player.listen("play", async () => {
+      setTimeout(() => {
+        player.pause();
+      }, 200);
+      unload();
+    });
+  }
+
+  if (isTimestamp(tf) && player.provider) {
+    player.play(new Event("hashchange"));
   }
 }
 

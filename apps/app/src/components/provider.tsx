@@ -26,6 +26,7 @@ export function MediaProviderEnhanced({
           return (
             <WebView
               aria-hidden
+              webpreferences="autoplayPolicy=user-gesture-required"
               // devtools
               partition={partition}
               ref={(inst) => {
