@@ -1,37 +1,32 @@
 import { Notice } from "obsidian";
-import type { Editor, TFile } from "obsidian";
+import type { Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
-import { noHash, toURL } from "@/lib/url";
+import { noHash } from "@/lib/url";
 import type { PlayerComponent } from "@/media-view/base";
-import { checkMediaType } from "@/patch/utils";
-import { noteUtils } from "./utils";
+import type { FileMediaInfo } from "./manager/file-info";
+import type { UrlMediaInfo } from "./manager/url-info";
+import { openMarkdownView } from "./utils";
 
 export function takeTimestampOnUrl<T extends PlayerComponent>(
   playerComponent: T,
-  getSource: (player: T) => string | null,
+  getSource: (player: T) => UrlMediaInfo | null,
 ) {
-  const { mediaNoteFinder, openMarkdownView } = noteUtils(
-    playerComponent.plugin.app,
-  );
   return async function takeTimestamp() {
     const player = playerComponent.store.getState().player;
     if (!player) {
       new Notice("Player not initialized");
       return;
     }
-    const source = getSource(playerComponent);
-    if (!source) {
+    const mediaInfo = getSource(playerComponent);
+    if (!mediaInfo) {
       new Notice("No media is opened");
       return;
     }
-    const sourceUrl = toURL(source);
-    if (!sourceUrl) {
-      new Notice("Invalid URL: " + source);
-      return;
-    }
+    const sourceUrl = mediaInfo.source;
 
     const time = player.currentTime;
-    const existingMediaNotes = mediaNoteFinder.url(source);
+    const existingMediaNotes =
+      playerComponent.plugin.mediaNote.findNotes(mediaInfo);
     const title =
       player.state.title ??
       sourceUrl.hostname + decodeURI(sourceUrl.pathname).replaceAll("/", "_");
@@ -41,6 +36,7 @@ export function takeTimestampOnUrl<T extends PlayerComponent>(
       title,
       () => ({ media: noHash(sourceUrl) }),
       "",
+      playerComponent.plugin.app,
     );
 
     if (time > 0) {
@@ -55,11 +51,8 @@ export function takeTimestampOnUrl<T extends PlayerComponent>(
 
 export function takeTimestampOnFile<T extends PlayerComponent>(
   playerComponent: T,
-  getSource: (player: T) => TFile | null,
+  getSource: (player: T) => FileMediaInfo | null,
 ) {
-  const { mediaNoteFinder, openMarkdownView } = noteUtils(
-    playerComponent.plugin.app,
-  );
   const { metadataCache, fileManager } = playerComponent.plugin.app;
   return async function takeTimestamp() {
     const player = playerComponent.store.getState().player;
@@ -67,34 +60,33 @@ export function takeTimestampOnFile<T extends PlayerComponent>(
       new Notice("Player not initialized");
       return;
     }
-    const source = getSource(playerComponent);
-    if (!source) {
+    const mediaInfo = getSource(playerComponent);
+    if (!mediaInfo) {
       new Notice("No media file is opened");
       return;
     }
-    const mediaType = checkMediaType(source.extension);
-    if (!mediaType) {
-      new Notice("media file format not supported");
-      return;
-    }
+
+    const { file, type: mediaType } = mediaInfo;
 
     const time = player.currentTime;
-    const existingMediaNotes = mediaNoteFinder.local(source);
-    const title = player.title ?? source.basename;
+    const existingMediaNotes =
+      playerComponent.plugin.mediaNote.findNotes(mediaInfo);
+    const title = player.title ?? file.basename;
 
     const view = await openMarkdownView(
       existingMediaNotes,
       title,
       (newNotePath) => ({
-        [mediaType]: `[[${metadataCache.fileToLinktext(source, newNotePath)}]]`,
+        [mediaType]: `[[${metadataCache.fileToLinktext(file, newNotePath)}]]`,
       }),
-      source.path,
+      file.path,
+      playerComponent.plugin.app,
     );
 
     if (time > 0) {
       const hash = toTempFragString({ start: time, end: -1 })!;
       const link = fileManager.generateMarkdownLink(
-        source,
+        file,
         view.file.path,
         "#" + hash,
         formatDuration(time),

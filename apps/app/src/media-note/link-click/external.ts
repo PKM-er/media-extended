@@ -1,83 +1,10 @@
 import type { WorkspaceLeaf } from "obsidian";
-import { noHash } from "@/lib/url";
-import { MEDIA_EMBED_VIEW_TYPE } from "@/media-view/iframe-view";
-import type {
-  MediaEmbedViewType,
-  MediaEmbedViewState,
-} from "@/media-view/iframe-view";
-import type { MediaUrlViewType } from "@/media-view/url-view";
-import { MEDIA_URL_VIEW_TYPE } from "@/media-view/url-view";
-import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/webpage-view";
-import type {
-  MediaWebpageViewType,
-  MediaWebpageViewState,
-} from "@/media-view/webpage-view";
+import type { MediaEmbedViewState } from "@/media-view/iframe-view";
+import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
-import { matchHostForEmbed } from "@/web/match-embed";
-import { matchHostForUrl } from "@/web/match-url";
-import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
+import type { UrlMediaInfo } from "../manager/url-info";
+import { parseUrl } from "../manager/url-info";
 import { openInOpenedPlayer } from "./opened";
-
-export interface UrlMediaInfo {
-  viewType: MediaUrlViewType | MediaEmbedViewType | MediaWebpageViewType;
-  source: URL;
-  original: string;
-  hash: string;
-  isSameSource: (src: string) => boolean;
-}
-export function parseUrl(url: string): UrlMediaInfo | null {
-  const directlinkInfo = matchHostForUrl(url);
-
-  if (directlinkInfo) {
-    return {
-      viewType: MEDIA_URL_VIEW_TYPE[directlinkInfo.type],
-      source: directlinkInfo.source,
-      original: url,
-      hash: directlinkInfo.source.hash,
-      isSameSource: (src) => {
-        const matched = matchHostForUrl(src);
-        return (
-          !!matched &&
-          noHash(matched.cleanUrl) === noHash(directlinkInfo.cleanUrl)
-        );
-      },
-    };
-  }
-
-  const embedInfo = matchHostForEmbed(url);
-
-  if (embedInfo) {
-    return {
-      viewType: MEDIA_EMBED_VIEW_TYPE,
-      source: embedInfo.source,
-      original: url,
-      hash: embedInfo.source.hash,
-      isSameSource: (src) => {
-        const matched = matchHostForEmbed(src);
-        return (
-          !!matched && noHash(matched.cleanUrl) === noHash(embedInfo.cleanUrl)
-        );
-      },
-    };
-  }
-
-  const webpageInfo = matchHostForWeb(url);
-  if (webpageInfo && webpageInfo.type !== SupportedWebHost.Generic) {
-    return {
-      viewType: MEDIA_WEBPAGE_VIEW_TYPE,
-      source: webpageInfo.source,
-      original: url,
-      hash: webpageInfo.source.hash,
-      isSameSource: (src) => {
-        const matched = matchHostForWeb(src);
-        return (
-          !!matched && noHash(matched.cleanUrl) === noHash(webpageInfo.cleanUrl)
-        );
-      },
-    };
-  }
-  return null;
-}
 
 export async function onExternalLinkClick(
   this: MxPlugin,

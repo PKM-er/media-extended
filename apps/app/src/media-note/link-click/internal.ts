@@ -1,23 +1,8 @@
-import type { TFile } from "obsidian";
 import { parseLinktext } from "obsidian";
-import {
-  MEDIA_FILE_VIEW_TYPE,
-  isMediaFileViewType,
-  type MediaFileViewType,
-} from "@/media-view/file-view";
+import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/file-view";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/utils";
 import { openInOpenedPlayer } from "./opened";
-
-export interface FileMediaInfo {
-  viewType: MediaFileViewType;
-  file: TFile;
-  hash: string;
-}
-
-export function isFileMediaInfo(info: unknown): info is FileMediaInfo {
-  return isMediaFileViewType((info as FileMediaInfo).viewType);
-}
 
 export function onInternalLinkClick(
   this: MxPlugin,
@@ -34,17 +19,13 @@ export function onInternalLinkClick(
     fallback();
     return;
   }
-  if (
-    !newLeaf &&
-    openInOpenedPlayer(
-      {
-        file: linkFile,
-        hash: subpath,
-        viewType: MEDIA_FILE_VIEW_TYPE[mediaType],
-      },
-      workspace,
-    )
-  ) {
+  const mediaInfo = {
+    file: linkFile,
+    hash: subpath,
+    type: mediaType,
+    viewType: MEDIA_FILE_VIEW_TYPE[mediaType],
+  };
+  if (!newLeaf && openInOpenedPlayer(mediaInfo, workspace)) {
     return;
   }
   fallback();

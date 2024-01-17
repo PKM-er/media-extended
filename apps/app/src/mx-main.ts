@@ -6,6 +6,7 @@ import { Plugin } from "obsidian";
 import { handleMediaNote } from "./media-note";
 import { onExternalLinkClick } from "./media-note/link-click/external";
 import { onInternalLinkClick } from "./media-note/link-click/internal";
+import { MediaNoteManager } from "./media-note/manager";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import {
   AudioFileView,
@@ -40,6 +41,7 @@ export default class MxPlugin extends Plugin {
     this.handleMediaNote();
   }
 
+  mediaNote = this.addChild(new MediaNoteManager(this.app));
   handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;
   injectMediaView = injectMediaView;

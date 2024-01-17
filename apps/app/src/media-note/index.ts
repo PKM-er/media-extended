@@ -1,4 +1,4 @@
-import type { TFile } from "obsidian";
+import { TFile } from "obsidian";
 import type { AudioFileView, VideoFileView } from "@/media-view/file-view";
 import { isMediaFileViewType } from "@/media-view/file-view";
 import type { MediaEmbedView } from "@/media-view/iframe-view";
@@ -8,22 +8,23 @@ import { isMediaUrlViewType } from "@/media-view/url-view";
 import type { MediaWebpageView } from "@/media-view/webpage-view";
 import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
+import { parseUrl } from "./manager/url-info";
 import { takeTimestampOnFile, takeTimestampOnUrl } from "./timestamp";
-import { noteUtils } from "./utils";
+import { openMedia } from "./utils";
 
 export function handleMediaNote(this: MxPlugin) {
-  const { openMedia, getMediaInfo } = noteUtils(this.app);
   const { workspace } = this.app;
   this.registerEvent(
     this.app.workspace.on("file-menu", (menu, file, _source, _leaf) => {
-      const mediaInfo = getMediaInfo(file);
+      if (!(file instanceof TFile)) return;
+      const mediaInfo = this.mediaNote.findMedia(file);
       if (!mediaInfo) return;
       menu.addItem((item) =>
         item
           .setSection("view")
           .setIcon("play")
           .setTitle("Open linked media")
-          .onClick(() => openMedia(mediaInfo, file as TFile)),
+          .onClick(() => openMedia(mediaInfo, this.app)),
       );
     }),
   );
@@ -39,9 +40,9 @@ export function handleMediaNote(this: MxPlugin) {
       const viewType = view.getViewType();
       if (isMediaFileViewType(viewType)) {
         if (checking) return true;
-        const takeTimestamp = takeTimestampOnFile(
-          view as VideoFileView | AudioFileView,
-          (player) => player.file,
+        const fileView = view as VideoFileView | AudioFileView;
+        const takeTimestamp = takeTimestampOnFile(fileView, () =>
+          fileView.getMediaInfo(),
         );
         takeTimestamp();
       } else if (
@@ -56,7 +57,7 @@ export function handleMediaNote(this: MxPlugin) {
             | AudioUrlView
             | MediaWebpageView
             | MediaEmbedView,
-          (player) => player.source,
+          (player) => parseUrl(player.source),
         );
         takeTimestamp();
       }

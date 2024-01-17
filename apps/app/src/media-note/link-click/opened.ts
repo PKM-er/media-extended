@@ -2,8 +2,9 @@ import type { Workspace, WorkspaceLeaf } from "obsidian";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaUrlViewState } from "@/media-view/url-view";
 import type { MediaWebpageViewState } from "@/media-view/webpage-view";
-import type { UrlMediaInfo } from "./external";
-import { isFileMediaInfo, type FileMediaInfo } from "./internal";
+import type { MediaInfo } from "../manager";
+import { isFileMediaInfo, type FileMediaInfo } from "../manager/file-info";
+import type { UrlMediaInfo } from "../manager/url-info";
 
 function filterFileLeaf(leaf: WorkspaceLeaf, info: FileMediaInfo) {
   const { file: filePath } = leaf.view.getState() as { file: string };
@@ -18,10 +19,7 @@ function filterUrlLeaf(leaf: WorkspaceLeaf, info: UrlMediaInfo) {
   return source && info.isSameSource(source);
 }
 
-export function getLeavesOfMedia(
-  info: UrlMediaInfo | FileMediaInfo,
-  workspace: Workspace,
-) {
+export function getLeavesOfMedia(info: MediaInfo, workspace: Workspace) {
   return workspace.getLeavesOfType(info.viewType).filter((leaf) => {
     if (isFileMediaInfo(info)) {
       return filterFileLeaf(leaf, info);
@@ -36,7 +34,7 @@ export function updateHash(hash: string, leaf: WorkspaceLeaf) {
 }
 
 export function openInOpenedPlayer(
-  info: FileMediaInfo | UrlMediaInfo,
+  info: MediaInfo,
   workspace: Workspace,
 ): boolean {
   const opened = getLeavesOfMedia(info, workspace);

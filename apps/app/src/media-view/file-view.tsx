@@ -5,6 +5,7 @@ import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import { getTracks } from "@/lib/subtitle";
 import { handleWindowMigration } from "@/lib/window-migration";
+import type { FileMediaInfo } from "@/media-note/manager/file-info";
 import { takeTimestampOnFile } from "@/media-note/timestamp";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
@@ -47,7 +48,7 @@ abstract class MediaFileView
     this.addAction(
       "star",
       "Timestamp",
-      takeTimestampOnFile(this, (player) => player.file),
+      takeTimestampOnFile(this, () => this.getMediaInfo()),
     );
 
     this.register(
@@ -57,8 +58,9 @@ abstract class MediaFileView
     );
   }
 
-  abstract getViewType(): string;
+  abstract getViewType(): MediaFileViewType;
   abstract getIcon(): string;
+  abstract getMediaInfo(): FileMediaInfo | null;
 
   async onLoadFile(file: TFile): Promise<void> {
     const { vault } = this.app;
@@ -113,7 +115,16 @@ export class VideoFileView extends MediaFileView {
   getIcon(): string {
     return "file-video";
   }
-  getViewType(): string {
+  getMediaInfo(): FileMediaInfo | null {
+    if (!this.file) return null;
+    return {
+      type: "video",
+      file: this.file,
+      hash: this.getEphemeralState().subpath,
+      viewType: this.getViewType(),
+    };
+  }
+  getViewType() {
     return MEDIA_FILE_VIEW_TYPE.video;
   }
   canAcceptExtension(extension: string): boolean {
@@ -125,8 +136,17 @@ export class AudioFileView extends MediaFileView {
   getIcon(): string {
     return "file-audio";
   }
-  getViewType(): string {
+  getViewType() {
     return MEDIA_FILE_VIEW_TYPE.audio;
+  }
+  getMediaInfo(): FileMediaInfo | null {
+    if (!this.file) return null;
+    return {
+      type: "audio",
+      file: this.file,
+      hash: this.getEphemeralState().subpath,
+      viewType: this.getViewType(),
+    };
   }
   canAcceptExtension(extension: string): boolean {
     return MediaFileExtensions.audio.includes(extension);

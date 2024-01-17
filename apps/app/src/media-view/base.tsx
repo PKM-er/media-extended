@@ -12,6 +12,7 @@ import {
 import { Player } from "@/components/player";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { parseUrl } from "@/media-note/manager/url-info";
 import { takeTimestampOnUrl } from "@/media-note/timestamp";
 import type MediaExtended from "@/mx-main";
 
@@ -140,7 +141,7 @@ export abstract class MediaRemoteView
     this.addAction(
       "star",
       "Timestamp",
-      takeTimestampOnUrl(this, (player) => player._source),
+      takeTimestampOnUrl(this, (player) => parseUrl(player._source)),
     );
 
     // make sure to unmount the player before the leaf detach it from DOM
