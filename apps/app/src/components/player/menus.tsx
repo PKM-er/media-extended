@@ -10,6 +10,7 @@ import type { MenuItem } from "obsidian";
 import { Menu } from "obsidian";
 import { MoreIcon, SubtitlesIcon } from "@/components/icon";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
+import { dataLpPassthrough } from "./buttons";
 import { PlaybackSpeedPrompt } from "./prompt";
 
 export function Captions() {
@@ -21,6 +22,7 @@ export function Captions() {
   return (
     <button
       className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      {...{ [dataLpPassthrough]: true }}
       onClick={(evt) => {
         const menu = new Menu();
         // menu.addItem((item) =>
@@ -32,6 +34,7 @@ export function Captions() {
           );
         });
         menu.showAtMouseEvent(evt.nativeEvent);
+        evt.nativeEvent.stopImmediatePropagation();
       }}
       aria-label="Select Caption"
     >
@@ -55,7 +58,9 @@ export function MoreOptions() {
   return (
     <button
       className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      {...{ [dataLpPassthrough]: true }}
       onClick={(evt) => {
+        console.log("!");
         const menu = new Menu();
         const isVideo = player.state.viewType === "video";
         const isWebview = player.provider instanceof WebiviewMediaProvider;
@@ -79,6 +84,7 @@ export function MoreOptions() {
         }
         menu.addItem((item) => speedMenu(item, player));
         menu.showAtMouseEvent(evt.nativeEvent);
+        evt.nativeEvent.stopImmediatePropagation();
       }}
       aria-label="More options"
     >

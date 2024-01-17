@@ -3,7 +3,7 @@ import { Component } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
-import { dataLpEdit } from "@/components/player/buttons";
+import { dataLpPassthrough } from "@/components/player/buttons";
 import { getTracks } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
@@ -31,7 +31,7 @@ export class MediaFileEmbed
       if (!(target instanceof Element)) return false;
       const button = target.closest("button");
       if (!button) return false;
-      return button.hasAttribute(dataLpEdit);
+      return button.hasAttribute(dataLpPassthrough);
     }
     this.registerDomEvent(containerEl, "click", (evt) => {
       // only allow edit button to propagate to lp click handler

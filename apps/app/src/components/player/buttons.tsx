@@ -34,6 +34,7 @@ import {
 } from "@/components/icon";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { captureScreenshot } from "@/lib/screenshot";
+import { cn } from "@/lib/utils";
 import { useIsEmbed, useScreenshot, useTimestamp } from "../context";
 
 export const buttonClass =
@@ -148,9 +149,12 @@ export function EditorEdit() {
   return (
     // let live preview editor handle this
     <button
-      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      className={cn(
+        "mx-lp-edit",
+        "group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden",
+      )}
       onClick={() => void 0}
-      {...{ [dataLpEdit]: true }}
+      {...{ [dataLpPassthrough]: true }}
       aria-label="Edit in editor"
     >
       <EditIcon className="w-7 h-7" />
@@ -215,4 +219,4 @@ export function Timestamp() {
   );
 }
 
-export const dataLpEdit = "data-lp-edit";
+export const dataLpPassthrough = "data-lp-pass-through";
