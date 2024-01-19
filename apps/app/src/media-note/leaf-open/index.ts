@@ -92,8 +92,8 @@ export class LeafOpener {
   async openNote(
     mediaInfo: MediaInfo,
     newNoteInfo: NewNoteInfo,
-    newLeaf?: PaneType | boolean,
-    direction?: SplitDirection,
+    newLeaf: PaneType | boolean = "split",
+    direction: SplitDirection = "vertical",
   ): Promise<{ file: TFile; editor: Editor }> {
     const notes = this.plugin.mediaNote.findNotes(mediaInfo);
     if (!newLeaf) {
