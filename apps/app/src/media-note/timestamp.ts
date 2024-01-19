@@ -3,8 +3,8 @@ import type { Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import { noHash } from "@/lib/url";
 import type { PlayerComponent } from "@/media-view/base";
-import type { FileMediaInfo } from "./manager/file-info";
-import type { UrlMediaInfo } from "./manager/url-info";
+import type { FileMediaInfo } from "./note-index/file-info";
+import type { UrlMediaInfo } from "./note-index/url-info";
 
 export function takeTimestampOnUrl<T extends PlayerComponent>(
   playerComponent: T,

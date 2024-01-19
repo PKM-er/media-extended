@@ -12,9 +12,9 @@ import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaUrlViewState } from "@/media-view/url-view";
 import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
-import type { MediaInfo } from "../manager";
-import { isFileMediaInfo } from "../manager/file-info";
-import type { UrlMediaInfo } from "../manager/url-info";
+import type { MediaInfo } from "../note-index";
+import { isFileMediaInfo } from "../note-index/file-info";
+import type { UrlMediaInfo } from "../note-index/url-info";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
 
 interface NewNoteInfo {

@@ -5,9 +5,11 @@ import "./icons";
 import { Plugin } from "obsidian";
 import { handleMediaNote } from "./media-note";
 import { LeafOpener } from "./media-note/leaf-open";
-import { onExternalLinkClick } from "./media-note/link-click/external";
-import { onInternalLinkClick } from "./media-note/link-click/internal";
-import { MediaNoteManager } from "./media-note/manager";
+import {
+  onExternalLinkClick,
+  onInternalLinkClick,
+} from "./media-note/link-click";
+import { MediaNoteIndex } from "./media-note/note-index";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
@@ -23,7 +25,7 @@ import injectMediaEmbed from "./patch/embed";
 import patchEditorClick from "./patch/link.editor";
 import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
-import { MediaFileExtensions } from "./patch/utils";
+import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
 import { modifySession } from "./web/session";
 
@@ -34,7 +36,7 @@ export default class MxPlugin extends Plugin {
     this.handleMediaNote();
   }
 
-  mediaNote = this.addChild(new MediaNoteManager(this.app));
+  mediaNote = this.addChild(new MediaNoteIndex(this.app));
   leafOpener = new LeafOpener(this);
   handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;

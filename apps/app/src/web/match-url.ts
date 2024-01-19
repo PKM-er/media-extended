@@ -1,6 +1,6 @@
 import { Platform } from "obsidian";
 import { toURL } from "@/lib/url";
-import { checkMediaType } from "@/patch/utils";
+import { checkMediaType } from "@/patch/media-type";
 
 export function matchHostForUrl(link: string | undefined): {
   type: "audio" | "video";

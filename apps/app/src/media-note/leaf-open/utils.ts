@@ -3,8 +3,8 @@ import { AudioFileView, VideoFileView } from "@/media-view/file-view";
 import { MediaEmbedView } from "@/media-view/iframe-view";
 import { VideoUrlView, AudioUrlView } from "@/media-view/url-view";
 import { MediaWebpageView } from "@/media-view/webpage-view";
-import { type FileMediaInfo } from "../manager/file-info";
-import type { UrlMediaInfo } from "../manager/url-info";
+import { type FileMediaInfo } from "../note-index/file-info";
+import type { UrlMediaInfo } from "../note-index/url-info";
 
 export function filterFileLeaf(
   leaf: WorkspaceLeaf,

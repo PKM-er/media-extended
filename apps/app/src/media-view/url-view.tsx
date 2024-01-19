@@ -6,7 +6,7 @@ import { Player } from "@/components/player";
 import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
-import { MediaFileExtensions } from "@/patch/utils";
+import { MediaFileExtensions } from "@/patch/media-type";
 import { matchHostForUrl } from "@/web/match-url";
 import { setTempFrag } from "./base";
 import type { MediaRemoteViewState, PlayerComponent } from "./base";

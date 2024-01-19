@@ -1,9 +1,11 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 
+import type { MediaType } from "@/patch/media-type";
+
 export const MEDIA_URL_VIEW_TYPE = {
   video: "mx-url-video",
   audio: "mx-url-audio",
-} as const;
+} satisfies Record<MediaType, string>;
 export type MediaUrlViewType =
   (typeof MEDIA_URL_VIEW_TYPE)[keyof typeof MEDIA_URL_VIEW_TYPE];
 const urlViewTypes = new Set(Object.values(MEDIA_URL_VIEW_TYPE));
@@ -24,7 +26,7 @@ export type MediaWebpageViewType = typeof MEDIA_WEBPAGE_VIEW_TYPE;
 export const MEDIA_FILE_VIEW_TYPE = {
   video: "mx-file-video",
   audio: "mx-file-audio",
-} as const;
+} satisfies Record<MediaType, string>;
 
 const fileViewTypes = new Set(Object.values(MEDIA_FILE_VIEW_TYPE));
 

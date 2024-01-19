@@ -1,7 +1,7 @@
 import type { TFile } from "obsidian";
 import type { MediaFileViewType } from "@/media-view/view-type";
 import { isMediaFileViewType } from "@/media-view/view-type";
-import type { MediaType } from "@/patch/utils";
+import type { MediaType } from "@/patch/media-type";
 
 export interface FileMediaInfo {
   viewType: MediaFileViewType;

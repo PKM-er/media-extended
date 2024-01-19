@@ -10,7 +10,7 @@ import {
 } from "@/media-view/view-type";
 import type { MediaWebpageView } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
-import { parseUrl } from "./manager/url-info";
+import { parseUrl } from "./note-index/url-info";
 import { takeTimestampOnFile, takeTimestampOnUrl } from "./timestamp";
 
 export function handleMediaNote(this: MxPlugin) {

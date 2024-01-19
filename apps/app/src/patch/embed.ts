@@ -1,5 +1,6 @@
 import type { EmbedCreator, Plugin } from "obsidian";
-import { MediaFileExtensions, reloadMarkdownPreview } from "./utils";
+import { MediaFileExtensions } from "./media-type";
+import { reloadMarkdownPreview } from "./utils";
 
 export default function injectMediaEmbed(
   this: Plugin,
