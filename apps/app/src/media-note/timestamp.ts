@@ -5,7 +5,6 @@ import { noHash } from "@/lib/url";
 import type { PlayerComponent } from "@/media-view/base";
 import type { FileMediaInfo } from "./manager/file-info";
 import type { UrlMediaInfo } from "./manager/url-info";
-import { openMarkdownView } from "./utils";
 
 export function takeTimestampOnUrl<T extends PlayerComponent>(
   playerComponent: T,
@@ -25,18 +24,16 @@ export function takeTimestampOnUrl<T extends PlayerComponent>(
     const sourceUrl = mediaInfo.source;
 
     const time = player.currentTime;
-    const existingMediaNotes =
-      playerComponent.plugin.mediaNote.findNotes(mediaInfo);
     const title =
       player.state.title ??
       sourceUrl.hostname + decodeURI(sourceUrl.pathname).replaceAll("/", "_");
 
-    const { editor } = await openMarkdownView(
-      existingMediaNotes,
-      title,
-      () => ({ media: noHash(sourceUrl) }),
-      "",
-      playerComponent.plugin.app,
+    const { editor } = await playerComponent.plugin.leafOpener.openNote(
+      mediaInfo,
+      {
+        title,
+        fm: () => ({ media: noHash(sourceUrl) }),
+      },
     );
 
     if (time > 0) {
@@ -69,29 +66,26 @@ export function takeTimestampOnFile<T extends PlayerComponent>(
     const { file, type: mediaType } = mediaInfo;
 
     const time = player.currentTime;
-    const existingMediaNotes =
-      playerComponent.plugin.mediaNote.findNotes(mediaInfo);
     const title = player.title ?? file.basename;
 
-    const view = await openMarkdownView(
-      existingMediaNotes,
-      title,
-      (newNotePath) => ({
-        [mediaType]: `[[${metadataCache.fileToLinktext(file, newNotePath)}]]`,
-      }),
-      file.path,
-      playerComponent.plugin.app,
-    );
+    const { file: newNote, editor } =
+      await playerComponent.plugin.leafOpener.openNote(mediaInfo, {
+        title,
+        fm: (newNotePath) => ({
+          [mediaType]: `[[${metadataCache.fileToLinktext(file, newNotePath)}]]`,
+        }),
+        sourcePath: file.path,
+      });
 
     if (time > 0) {
       const hash = toTempFragString({ start: time, end: -1 })!;
       const link = fileManager.generateMarkdownLink(
         file,
-        view.file.path,
+        newNote.path,
         "#" + hash,
         formatDuration(time),
       );
-      insertTimestamp(link.replace(/^!/, ""), view.editor, () =>
+      insertTimestamp(link.replace(/^!/, ""), editor, () =>
         playerComponent.containerEl.focus(),
       );
     } else {

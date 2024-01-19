@@ -33,13 +33,13 @@ function patchPreviewEventHanlder(
   plugin.register(
     around(getInstancePrototype(handler), {
       onExternalLinkClick: (next) =>
-        function (this: PreviewEventHanlder, evt, target, link, ...args) {
+        async function (this: PreviewEventHanlder, evt, target, link, ...args) {
           const fallback = () => next.call(this, evt, target, link, ...args);
           if (!onExternalLinkClick) return fallback();
           evt.preventDefault();
           const paneCreateType = Keymap.isModEvent(evt);
           try {
-            onExternalLinkClick(link, paneCreateType !== false, fallback);
+            await onExternalLinkClick(link, paneCreateType !== false, fallback);
           } catch (e) {
             console.error(
               `onExternalLinkClick error in preview, fallback to default`,
@@ -49,7 +49,13 @@ function patchPreviewEventHanlder(
           }
         },
       onInternalLinkClick: (next) =>
-        function (this: PreviewEventHanlder, evt, target, linktext, ...args) {
+        async function (
+          this: PreviewEventHanlder,
+          evt,
+          target,
+          linktext,
+          ...args
+        ) {
           const fallback = () =>
             next.call(this, evt, target, linktext, ...args);
           if (!onInternalLinkClick) return fallback();
@@ -57,7 +63,7 @@ function patchPreviewEventHanlder(
           const paneCreateType = Keymap.isModEvent(evt);
           const sourcePath = this.info?.file?.path ?? "";
           try {
-            onInternalLinkClick(
+            await onInternalLinkClick(
               linktext,
               sourcePath,
               paneCreateType !== false,

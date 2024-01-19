@@ -33,11 +33,11 @@ export default function patchEditorClick(
     plugin.register(
       around(getInstancePrototype(view.editMode), {
         triggerClickableToken: (next) =>
-          function (this: MarkdownEditView, token, newLeaf, ...args) {
+          async function (this: MarkdownEditView, token, newLeaf, ...args) {
             const fallback = () => next.call(this, token, newLeaf, ...args);
             if ("internal-link" === token.type && onInternalLinkClick) {
               try {
-                onInternalLinkClick(
+                await onInternalLinkClick(
                   token.text,
                   this.file.path,
                   newLeaf,
@@ -52,7 +52,7 @@ export default function patchEditorClick(
               }
             } else if ("external-link" === token.type && onExternalLinkClick) {
               try {
-                onExternalLinkClick(token.text, newLeaf, fallback);
+                await onExternalLinkClick(token.text, newLeaf, fallback);
               } catch (e) {
                 console.error(
                   `onExternalLinkClick error in editor, fallback to default`,

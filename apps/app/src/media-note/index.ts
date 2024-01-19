@@ -10,7 +10,6 @@ import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
 import { parseUrl } from "./manager/url-info";
 import { takeTimestampOnFile, takeTimestampOnUrl } from "./timestamp";
-import { openMedia } from "./utils";
 
 export function handleMediaNote(this: MxPlugin) {
   const { workspace } = this.app;
@@ -24,7 +23,7 @@ export function handleMediaNote(this: MxPlugin) {
           .setSection("view")
           .setIcon("play")
           .setTitle("Open linked media")
-          .onClick(() => openMedia(mediaInfo, this.app)),
+          .onClick(() => this.leafOpener.openMedia(mediaInfo)),
       );
     }),
   );
