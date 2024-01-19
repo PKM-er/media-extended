@@ -10,21 +10,8 @@ import { takeTimestampOnFile } from "@/media-note/timestamp";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/utils";
 import { setTempFrag, type PlayerComponent } from "./base";
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const MEDIA_FILE_VIEW_TYPE = {
-  video: "mx-file-video",
-  audio: "mx-file-audio",
-} as const;
-
-const viewTypes = new Set(Object.values(MEDIA_FILE_VIEW_TYPE));
-
-export type MediaFileViewType =
-  (typeof MEDIA_FILE_VIEW_TYPE)[keyof typeof MEDIA_FILE_VIEW_TYPE];
-
-export function isMediaFileViewType(type: string): type is MediaFileViewType {
-  return viewTypes.has(type as any);
-}
+import type { MediaFileViewType } from "./view-type";
+import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
 abstract class MediaFileView
   extends EditableFileView

@@ -9,24 +9,16 @@ import { onExternalLinkClick } from "./media-note/link-click/external";
 import { onInternalLinkClick } from "./media-note/link-click/internal";
 import { MediaNoteManager } from "./media-note/manager";
 import { MediaFileEmbed } from "./media-view/file-embed";
+import { AudioFileView, VideoFileView } from "./media-view/file-view";
+import { MediaEmbedView } from "./media-view/iframe-view";
+import { AudioUrlView, VideoUrlView } from "./media-view/url-view";
 import {
-  AudioFileView,
   MEDIA_FILE_VIEW_TYPE,
-  VideoFileView,
-} from "./media-view/file-view";
-import {
-  MEDIA_EMBED_VIEW_TYPE,
-  MediaEmbedView,
-} from "./media-view/iframe-view";
-import {
-  AudioUrlView,
-  MEDIA_URL_VIEW_TYPE,
-  VideoUrlView,
-} from "./media-view/url-view";
-import {
   MEDIA_WEBPAGE_VIEW_TYPE,
-  MediaWebpageView,
-} from "./media-view/webpage-view";
+  MEDIA_EMBED_VIEW_TYPE,
+  MEDIA_URL_VIEW_TYPE,
+} from "./media-view/view-type";
+import { MediaWebpageView } from "./media-view/webpage-view";
 import injectMediaEmbed from "./patch/embed";
 import patchEditorClick from "./patch/link.editor";
 import fixLinkLabel from "./patch/link.label-fix";

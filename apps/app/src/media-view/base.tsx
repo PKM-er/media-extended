@@ -3,7 +3,7 @@ import { around } from "monkey-around";
 import type { Component, WorkspaceLeaf } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
-import { type MediaViewStoreApi } from "@/components/context";
+import type { MediaViewStoreApi } from "@/components/context";
 import {
   createMediaViewStore,
   MediaViewContext,

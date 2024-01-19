@@ -6,10 +6,7 @@ import {
 } from "@/web/match-webpage";
 import type { MediaRemoteViewState } from "./base";
 import { MediaRemoteView } from "./base";
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const MEDIA_WEBPAGE_VIEW_TYPE = "mx-webpage" as const;
-export type MediaWebpageViewType = typeof MEDIA_WEBPAGE_VIEW_TYPE;
+import { MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
 
 export type MediaWebpageViewState = MediaRemoteViewState;
 

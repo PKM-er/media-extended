@@ -55,6 +55,7 @@ const opts = {
   bundle: true,
   platform: "browser",
   format: "cjs",
+  target: "es6",
   mainFields: ["browser", "module", "main"],
   minify: isProd,
   define: {
@@ -90,22 +91,6 @@ const opts = {
         ...(isProd ? { drop: ["console"], } : {})
       }
     ),
-    {
-      name: "vidstack-loader",
-      setup: (build) => {
-        // esbuild plugin that replace any "VIDEO_LOADER, AUDIO_LOADER" with "AUDIO_LOADER, VIDEO_LOADER" in any file starts with "vidstack-" and ends with ".js"
-        build.onLoad({ filter: /\/vidstack-.*\.js$/ }, async (args) => {
-          const contents = await readFile(args.path, "utf8");
-          return {
-            contents: contents.replaceAll(
-              /VIDEO_LOADER, AUDIO_LOADER/g,
-              "...customLoaders, AUDIO_LOADER, VIDEO_LOADER"
-            ),
-            loader: "js",
-          };
-        });
-      },
-    },
   ],
 };
 

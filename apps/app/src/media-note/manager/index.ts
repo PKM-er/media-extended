@@ -1,7 +1,7 @@
 import { Component, TFolder, TFile, parseLinktext } from "obsidian";
 import type { MetadataCache, App, Vault, CachedMetadata } from "obsidian";
 import { toURL } from "@/lib/url";
-import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/file-view";
+import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import { checkMediaType } from "@/patch/utils";
 import { isFileMediaInfo, type FileMediaInfo } from "./file-info";
 import { parseUrl, type UrlMediaInfo } from "./url-info";

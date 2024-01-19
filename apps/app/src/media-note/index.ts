@@ -1,12 +1,14 @@
 import { TFile } from "obsidian";
 import type { AudioFileView, VideoFileView } from "@/media-view/file-view";
-import { isMediaFileViewType } from "@/media-view/file-view";
 import type { MediaEmbedView } from "@/media-view/iframe-view";
-import { MEDIA_EMBED_VIEW_TYPE } from "@/media-view/iframe-view";
 import type { AudioUrlView, VideoUrlView } from "@/media-view/url-view";
-import { isMediaUrlViewType } from "@/media-view/url-view";
+import {
+  isMediaFileViewType,
+  isMediaUrlViewType,
+  MEDIA_EMBED_VIEW_TYPE,
+  MEDIA_WEBPAGE_VIEW_TYPE,
+} from "@/media-view/view-type";
 import type { MediaWebpageView } from "@/media-view/webpage-view";
-import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
 import { parseUrl } from "./manager/url-info";
 import { takeTimestampOnFile, takeTimestampOnUrl } from "./timestamp";

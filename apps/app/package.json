@@ -16,7 +16,7 @@
     "builtin-modules": "^3.3.0",
     "cross-env": "^7.0.3",
     "electron": "^25.9.8",
-    "esbuild": "^0.19.9",
+    "esbuild": "^0.19.11",
     "esbuild-style-plugin": "^1.6.3",
     "eslint": "~8.56.0",
     "jszip": "^3.10.1",

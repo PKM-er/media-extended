@@ -10,20 +10,7 @@ import { MediaFileExtensions } from "@/patch/utils";
 import { matchHostForUrl } from "@/web/match-url";
 import { setTempFrag } from "./base";
 import type { MediaRemoteViewState, PlayerComponent } from "./base";
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const MEDIA_URL_VIEW_TYPE = {
-  video: "mx-url-video",
-  audio: "mx-url-audio",
-} as const;
-export type MediaUrlViewType =
-  (typeof MEDIA_URL_VIEW_TYPE)[keyof typeof MEDIA_URL_VIEW_TYPE];
-
-const viewTypes = new Set(Object.values(MEDIA_URL_VIEW_TYPE));
-
-export function isMediaUrlViewType(type: string): type is MediaUrlViewType {
-  return viewTypes.has(type as any);
-}
+import { MEDIA_URL_VIEW_TYPE } from "./view-type";
 
 export type MediaUrlViewState = MediaRemoteViewState;
 

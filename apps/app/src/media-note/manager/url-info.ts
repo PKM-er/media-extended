@@ -1,10 +1,14 @@
 import { noHash } from "@/lib/url";
-import { MEDIA_EMBED_VIEW_TYPE } from "@/media-view/iframe-view";
-import type { MediaEmbedViewType } from "@/media-view/iframe-view";
-import type { MediaUrlViewType } from "@/media-view/url-view";
-import { MEDIA_URL_VIEW_TYPE } from "@/media-view/url-view";
-import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/webpage-view";
-import type { MediaWebpageViewType } from "@/media-view/webpage-view";
+import type {
+  MediaUrlViewType,
+  MediaEmbedViewType,
+  MediaWebpageViewType,
+} from "@/media-view/view-type";
+import {
+  MEDIA_URL_VIEW_TYPE,
+  MEDIA_EMBED_VIEW_TYPE,
+  MEDIA_WEBPAGE_VIEW_TYPE,
+} from "@/media-view/view-type";
 import { matchHostForEmbed } from "@/web/match-embed";
 import { matchHostForUrl } from "@/web/match-url";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";

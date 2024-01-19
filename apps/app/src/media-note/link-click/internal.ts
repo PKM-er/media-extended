@@ -1,5 +1,5 @@
 import { parseLinktext } from "obsidian";
-import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/file-view";
+import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/utils";
 
