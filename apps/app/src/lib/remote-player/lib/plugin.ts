@@ -37,7 +37,7 @@ export default class MediaPlugin extends LifeCycle {
     await this.hookMediaEl();
   }
 
-  injectCss(css: string) {
+  injectStyle(css: string) {
     const style = document.createElement("style");
     style.textContent = css;
     document.head.appendChild(style);

@@ -1,5 +1,5 @@
 import { Platform } from "obsidian";
-import { partition } from "@/lib/remote-player/const";
+import { getPartition } from "@/lib/remote-player/const";
 import type MxPlugin from "@/mx-main";
 import { modifyBilibiliSession } from "./bilibili";
 
@@ -8,7 +8,7 @@ export async function modifySession(this: MxPlugin) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const remote = require("@electron/remote");
   const session = (remote.session as typeof Electron.Session).fromPartition(
-    partition,
+    getPartition(this.app.appId),
   );
   await modifyBilibiliSession(session);
 }

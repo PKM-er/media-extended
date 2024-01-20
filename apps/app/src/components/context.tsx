@@ -60,8 +60,12 @@ export function useMediaViewStoreInst() {
   return store;
 }
 
-export function useApp<U>(selector: (state: App) => U): U {
-  return selector(useContext(MediaViewContext).plugin.app);
+export function useApp(): App;
+export function useApp<U>(selector: (state: App) => U): U;
+export function useApp<U>(selector?: (state: App) => U): U | App {
+  const app = useContext(MediaViewContext).plugin.app;
+  if (!selector) return app;
+  return selector(app);
 }
 
 export function useScreenshot() {

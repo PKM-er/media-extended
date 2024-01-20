@@ -6,14 +6,16 @@ import {
   type MediaProviderProps,
 } from "@vidstack/react";
 import { useCallback } from "react";
-import { partition } from "@/lib/remote-player/const";
+import { getPartition } from "@/lib/remote-player/const";
 import { WebviewProviderLoader } from "@/lib/remote-player/loader";
+import { useApp } from "./context";
 import { WebView } from "./webview";
 
 export function MediaProviderEnhanced({
   loaders,
   ...props
 }: Omit<MediaProviderProps, "buildMediaEl">) {
+  const appId = useApp((x) => x.appId);
   return (
     <MediaProvider
       loaders={[WebviewProviderLoader, ...(loaders ?? [])]}
@@ -28,14 +30,14 @@ export function MediaProviderEnhanced({
               aria-hidden
               webpreferences="autoplayPolicy=user-gesture-required"
               // devtools
-              partition={partition}
+              partition={getPartition(appId)}
               ref={(inst) => {
                 provider.load(inst);
               }}
             />
           );
         },
-        [],
+        [appId],
       )}
       {...props}
     />
