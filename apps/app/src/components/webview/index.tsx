@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useMergeRefs } from "use-callback-ref";
 import { cn } from "@/lib/utils";
+import { getUserAgent } from "@/web/ua";
 import { useEvents, type WebviewEventProps } from "./events";
 
 export type WebviewElement = WebviewTag & {
@@ -101,7 +102,7 @@ function useUserAgent(
   const userAgent = useMemo(() => {
     const ua = propValue ?? navigator.userAgent;
     // hide electron/obsidian in case website consider it as a bot
-    return ua.replaceAll(/(?:Electron|obsidian)\/\S+ ?/g, "");
+    return getUserAgent(ua);
   }, [propValue]);
   useEffect(() => {
     if (!ref.current || !domReady || userAgent === ref.current.useragent)
