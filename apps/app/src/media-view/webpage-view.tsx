@@ -44,7 +44,9 @@ export class MediaWebpageView extends MediaRemoteView {
         this._source = null;
       } else {
         this._source = state.source;
-        this.store.setState({ source: { src: `webview::${urlInfo.source}` } });
+        this.store.setState({
+          source: { src: `webview::${btoa(urlInfo.source.href)}` },
+        });
       }
     }
     return super.setState(state, result);

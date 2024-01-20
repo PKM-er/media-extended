@@ -40,6 +40,21 @@ export function parseUrl(url: string | null): UrlMediaInfo | null {
     };
   }
 
+  const webpageInfo = matchHostForWeb(url);
+  if (webpageInfo && webpageInfo.type !== SupportedWebHost.Generic) {
+    return {
+      viewType: MEDIA_WEBPAGE_VIEW_TYPE,
+      source: webpageInfo.source,
+      original: url,
+      hash: webpageInfo.source.hash,
+      isSameSource: (src) => {
+        const matched = matchHostForWeb(src);
+        return (
+          !!matched && noHash(matched.cleanUrl) === noHash(webpageInfo.cleanUrl)
+        );
+      },
+    };
+  }
   const embedInfo = matchHostForEmbed(url);
 
   if (embedInfo) {
@@ -52,22 +67,6 @@ export function parseUrl(url: string | null): UrlMediaInfo | null {
         const matched = matchHostForEmbed(src);
         return (
           !!matched && noHash(matched.cleanUrl) === noHash(embedInfo.cleanUrl)
-        );
-      },
-    };
-  }
-
-  const webpageInfo = matchHostForWeb(url);
-  if (webpageInfo && webpageInfo.type !== SupportedWebHost.Generic) {
-    return {
-      viewType: MEDIA_WEBPAGE_VIEW_TYPE,
-      source: webpageInfo.source,
-      original: url,
-      hash: webpageInfo.source.hash,
-      isSameSource: (src) => {
-        const matched = matchHostForWeb(src);
-        return (
-          !!matched && noHash(matched.cleanUrl) === noHash(webpageInfo.cleanUrl)
         );
       },
     };

@@ -178,7 +178,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     if (!isString(_src)) {
       throw new Error("Webview provider only supports string src.");
     }
-    const src = _src.replace(/^webview::/, "");
+    const src = atob(_src.replace(/^webview::/, ""));
     const webview = this._webview;
     this._currentSrc = {
       src,

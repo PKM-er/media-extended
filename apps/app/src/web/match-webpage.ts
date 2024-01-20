@@ -1,15 +1,18 @@
 import { updateHash } from "@/lib/hash/format";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { toURL } from "@/lib/url";
+import { matchYouTube } from "./url-match/yt";
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export enum SupportedWebHost {
   Bilibili = "bilibili",
+  YouTube = "youtube",
   Generic = "generic",
 }
 
 export const webHostDisplayName: Record<SupportedWebHost, string> = {
   [SupportedWebHost.Bilibili]: "Bilibili",
+  [SupportedWebHost.YouTube]: "YouTube",
   [SupportedWebHost.Generic]: "Web",
 };
 
@@ -19,8 +22,9 @@ export function matchHostForWeb(link: string | undefined): {
   cleanUrl: URL;
 } | null {
   if (!link) return null;
-  const url = toURL(link);
-  if (!url) return null;
+  const _url = toURL(link);
+  if (!_url) return null;
+  const url = _url;
   switch (true) {
     case url.hostname.endsWith(".bilibili.com"):
     case url.hostname === "b23.tv": {
@@ -48,6 +52,15 @@ export function matchHostForWeb(link: string | undefined): {
         type: SupportedWebHost.Bilibili,
         source,
         cleanUrl,
+      };
+    }
+    case url.hostname.contains("youtu.be"):
+    case url.hostname.contains("youtube"): {
+      const result = matchYouTube(url);
+      if (!result) return null;
+      return {
+        type: SupportedWebHost.YouTube,
+        ...result,
       };
     }
     default:
