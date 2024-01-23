@@ -1,11 +1,17 @@
 import "@vidstack/react/player/styles/base.css";
 
 import type { MediaViewType } from "@vidstack/react";
-import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
+import {
+  MediaPlayer,
+  Track,
+  useMediaProvider,
+  useMediaState,
+} from "@vidstack/react";
 
 import { useState } from "react";
 import { useTempFrag } from "@/components/hook/use-temporal-frag";
 import { convertHashToProps } from "@/lib/hash/hash-prop";
+import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
@@ -25,7 +31,14 @@ function HookLoader({
 
 function PlayerLayout() {
   const actualViewType = useMediaState("viewType");
-  const { controls } = useHashProps();
+  const { controls: controlsHash } = useHashProps();
+  const controlsExternal = useMediaViewStore((s) => s.controls);
+  const controlsDefault = true;
+
+  const controls =
+    controlsExternal === undefined && controlsHash === undefined
+      ? controlsDefault
+      : controlsExternal || controlsHash;
 
   if (actualViewType === "audio") return <AudioLayout />;
   if (!controls) return null;

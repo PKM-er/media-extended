@@ -19,6 +19,7 @@ export interface MediaViewState {
     | undefined;
   hash: string;
   title: string;
+  controls?: boolean;
   textTracks: TextTrackInit[];
   webHost?: Exclude<SupportedWebHost, SupportedWebHost.Generic>;
   updateWebHost: (webHost: SupportedWebHost) => void;
