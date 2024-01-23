@@ -103,7 +103,7 @@ function speedLabel(speed: number) {
 function customSpeedLabel(speed: number) {
   const customSpeedLabel = new DocumentFragment();
   customSpeedLabel.appendText("Custom");
-  if (speedOptions.includes(speed)) {
+  if (!speedOptions.includes(speed)) {
     customSpeedLabel.appendText(" ");
     customSpeedLabel.createEl("code", { text: `(${speed}x)` });
   } else {
