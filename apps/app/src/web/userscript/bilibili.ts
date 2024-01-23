@@ -70,14 +70,19 @@ export default class BilibiliPlugin extends MediaPlugin {
   }
 
   async enterWebFullscreen() {
-    if (this.isWebFullscreen()) return;
+    if (this.isWebFullscreen()) {
+      console.log("Already in web fullscreen");
+      return;
+    }
     const fsButton = await waitForSelector<HTMLDivElement>(
-      "div.bpx-player-ctrl-btn.bpx-player-ctrl-web",
+      ".bpx-player-ctrl-web",
       this.player,
     );
+    console.log("Clicking fullscreen button");
     fsButton.click();
     // wait for playerEl to have class mode-webscreen
     await this.untilWebFullscreen();
+    console.log("Entered web fullscreen");
   }
 
   async untilWebFullscreen() {

@@ -9,8 +9,8 @@ import {
   useState,
 } from "react";
 import { useMergeRefs } from "use-callback-ref";
+import { getUserAgent } from "@/lib/remote-player/ua";
 import { cn } from "@/lib/utils";
-import { getUserAgent } from "@/web/ua";
 import { useEvents, type WebviewEventProps } from "./events";
 
 export type WebviewElement = WebviewTag & {

@@ -9,6 +9,7 @@ import type { WebviewTag } from "electron";
 import init from "inline:./scripts/initialize";
 
 import { isString } from "maverick.js/std";
+import type { WebviewElement } from "@/components/webview";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 import { plugins } from "@/web/plugin";
@@ -108,12 +109,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   loadPlugin(host: SupportedWebHost) {
     return new Promise<void>((resolve, reject) => {
-      const webview = this._webview as WebviewTag & {
-        /**
-         * @see https://developer.chrome.com/docs/apps/reference/webviewTag?hl=zh-cn#type-ContentWindow
-         */
-        contentWindow: Window;
-      };
+      const webview = this._webview as WebviewElement;
       // #region -- logic to handle plugin load
       const unsub = this.media.onReady(
         async () => {

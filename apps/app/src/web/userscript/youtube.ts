@@ -35,6 +35,9 @@ html, body {
 .mx-parent video {
   object-fit: contain !important;
 }
+.html5-endscreen {
+  opacity: 0 !important;
+}
 `;
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -55,7 +58,7 @@ export default class BilibiliPlugin extends MediaPlugin {
     }
     this.#app = app;
     await Promise.all([
-      this.untilMediaReady("canplay"),
+      this.untilMediaReady("canplay").then(() => this.disableAutoPlay()),
       this.enterWebFullscreen(),
     ]);
   }
@@ -66,6 +69,42 @@ export default class BilibiliPlugin extends MediaPlugin {
       throw new Error("Get player before load");
     }
     return this.#app;
+  }
+
+  async disableAutoPlay() {
+    console.log("Disabling autoplay...");
+    const autoPlayButtonSelector =
+      'button.ytp-button[data-tooltip-target-id="ytp-autonav-toggle-button"]';
+    const autoPlayButton = this.app.querySelector<HTMLButtonElement>(
+      autoPlayButtonSelector,
+    );
+
+    if (!autoPlayButton) {
+      throw new Error("Autoplay button not found");
+    }
+
+    const label = autoPlayButton.querySelector(".ytp-autonav-toggle-button");
+    if (!label) {
+      throw new Error("Autoplay button label not found");
+    }
+
+    const isAutoPlayEnabled = () =>
+      label.getAttribute("aria-checked") === "true";
+
+    if (isAutoPlayEnabled()) {
+      console.log("Autoplay is enabled, disabling...");
+      autoPlayButton.click();
+      await new Promise<void>((resolve) => {
+        const observer = new MutationObserver(() => {
+          if (!isAutoPlayEnabled()) {
+            observer.disconnect();
+            resolve();
+          }
+        });
+        console.log("Waiting for autoplay to be disabled...");
+        observer.observe(label, { attributes: true });
+      });
+    }
   }
 
   async enterWebFullscreen() {

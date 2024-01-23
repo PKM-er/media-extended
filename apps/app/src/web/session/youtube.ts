@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { requestUrl } from "obsidian";
-import { getUserAgent } from "../ua";
+import { getUserAgent } from "@/lib/remote-player/ua";
 
 // interface TokenCache {
 //   token: string;

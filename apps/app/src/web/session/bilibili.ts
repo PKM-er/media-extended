@@ -2,7 +2,7 @@
 import type { RequestUrlParam } from "obsidian";
 import { Platform, requestUrl } from "obsidian";
 import { getPartition } from "@/lib/remote-player/const";
-import { getUserAgent } from "../ua";
+import { getUserAgent } from "@/lib/remote-player/ua";
 
 export async function modifyBilibiliSession(session: Electron.Session) {
   // default to 1080p resolution
