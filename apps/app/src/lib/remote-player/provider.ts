@@ -9,6 +9,7 @@ import type { WebviewTag } from "electron";
 import init from "inline:./scripts/initialize";
 
 import { isString } from "maverick.js/std";
+import { Notice } from "obsidian";
 import type { WebviewElement } from "@/components/webview";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
@@ -132,8 +133,26 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     });
   }
 
+  handlePlayReady() {
+    const playReady = new Promise<void>((resolve) => {
+      const cancel = this._port.once("mx-play-ready", () => {
+        resolve();
+        window.clearTimeout(timeoutId);
+      });
+      const timeoutId = window.setTimeout(() => {
+        cancel();
+        resolve();
+        new Notice("Play ready timeout");
+      }, 10e3);
+    });
+    playReady.then(() => {
+      this.togglePlayReady(true);
+    });
+  }
+
   onDomReady = async (evt: Event) => {
     const webview = this._webview;
+    this.handlePlayReady();
     new HTMLMediaEvents(this, this._ctx);
     this._updateTitle(evt);
     // prepare to recieve port, handle plugin load
@@ -151,14 +170,28 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     const onDidNavigate = (evt: Event) => {
       this._updateTitle(evt);
     };
-    webview.addEventListener("did-navigate", onDidNavigate);
     onDispose(() => {
       webview.removeEventListener("did-navigate", onDidNavigate);
     });
   }
 
+  togglePlayReady(toggle?: boolean) {
+    if (typeof toggle === "undefined") {
+      toggle = !("playReady" in this._webview.dataset);
+    }
+    if (toggle) {
+      this._webview.dataset.playReady = "";
+    } else {
+      delete this._webview.dataset.playReady;
+    }
+  }
+
+  revokePlayReady?: () => void;
+
   untilPluginReady() {
     const webview = this._webview;
+    this.togglePlayReady(false);
+    this.revokePlayReady?.();
     webview.removeEventListener("dom-ready", this.onDomReady);
     return new Promise<void>((resolve, reject) => {
       const onDomReady = (evt: Event) => {
@@ -167,6 +200,9 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
         webview.addEventListener("dom-ready", this.onDomReady);
       };
       webview.addEventListener("dom-ready", onDomReady);
+      this.revokePlayReady = this._port.on("mx-play-ready", () => {
+        this.togglePlayReady(true);
+      });
     });
   }
 

@@ -28,6 +28,7 @@ export function MediaProviderEnhanced({
           return (
             <WebView
               aria-hidden
+              className="data-[play-ready]:opacity-100 opacity-0 transition-opacity"
               webpreferences="autoplayPolicy=user-gesture-required"
               // devtools
               partition={getPartition(appId)}
