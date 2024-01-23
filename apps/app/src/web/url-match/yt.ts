@@ -54,12 +54,21 @@ export function matchYouTube(url: URL) {
   }
   // use native timestamp and range
   if (tempFrag) {
+    const ytStart = toYoutubeTime(tempFrag.start),
+      ytEnd = toYoutubeTime(tempFrag.end);
     if (isTimestamp(tempFrag)) {
-      source.searchParams.set("t", String(tempFrag.start));
-    } else if (tempFrag.start > 0) {
-      source.searchParams.set("start", String(tempFrag.start));
-    } else if (tempFrag.end > 0) {
-      source.searchParams.set("end", String(tempFrag.end));
+      source.searchParams.set("t", ytStart);
+    } else {
+      if (tempFrag.start > 0 && tempFrag.end > 0 && ytStart === ytEnd) {
+        source.searchParams.set("t", ytStart);
+      } else {
+        if (tempFrag.start > 0) {
+          source.searchParams.set("start", ytStart);
+        }
+        if (tempFrag.end > 0) {
+          source.searchParams.set("end", ytEnd);
+        }
+      }
     }
   }
   updateHash(source, tempFrag);
@@ -68,4 +77,8 @@ export function matchYouTube(url: URL) {
     source,
     cleanUrl,
   };
+}
+
+function toYoutubeTime(time: number) {
+  return time.toFixed(0);
 }

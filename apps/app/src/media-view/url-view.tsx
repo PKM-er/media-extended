@@ -1,10 +1,12 @@
-import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
+import type { Menu, ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
+import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
+import { parseUrl } from "@/media-note/note-index/url-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import { matchHostForUrl } from "@/web/match-url";
@@ -38,6 +40,21 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
 
   abstract getViewType(): string;
   abstract getIcon(): string;
+
+  onPaneMenu(menu: Menu, _source: string): void {
+    let urlInfo: UrlMediaInfo | null;
+    if (this.source && (urlInfo = parseUrl(this.source))) {
+      const url = urlInfo.source;
+      menu.addItem((item) =>
+        item
+          .setTitle("Open in browser")
+          .setIcon("globe")
+          .onClick(() => {
+            window.open(url);
+          }),
+      );
+    }
+  }
 
   initialEphemeralState = true;
 

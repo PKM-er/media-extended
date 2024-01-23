@@ -1,4 +1,6 @@
 import type { Menu, ViewStateResult } from "obsidian";
+import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
+import { parseUrl } from "@/media-note/note-index/url-info";
 import {
   SupportedWebHost,
   matchHostForWeb,
@@ -45,6 +47,19 @@ export class MediaWebpageView extends MediaRemoteView {
           this.store.getState().toggleControls(!controls);
         });
     });
+
+    let urlInfo: UrlMediaInfo | null;
+    if (this.source && (urlInfo = parseUrl(this.source))) {
+      const url = urlInfo.source;
+      menu.addItem((item) =>
+        item
+          .setTitle("Open in browser")
+          .setIcon("globe")
+          .onClick(() => {
+            window.open(url);
+          }),
+      );
+    }
   }
 
   async setState(
