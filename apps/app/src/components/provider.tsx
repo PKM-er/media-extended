@@ -8,7 +8,9 @@ import {
 import { useCallback } from "react";
 import { getPartition } from "@/lib/remote-player/const";
 import { WebviewProviderLoader } from "@/lib/remote-player/loader";
+import { cn } from "@/lib/utils";
 import { useApp } from "./context";
+import { useControls } from "./hook/use-hash";
 import { WebView } from "./webview";
 
 export function MediaProviderEnhanced({
@@ -16,6 +18,7 @@ export function MediaProviderEnhanced({
   ...props
 }: Omit<MediaProviderProps, "buildMediaEl">) {
   const appId = useApp((x) => x.appId);
+  const controls = useControls();
   return (
     <MediaProvider
       loaders={[WebviewProviderLoader, ...(loaders ?? [])]}
@@ -28,9 +31,12 @@ export function MediaProviderEnhanced({
           return (
             <WebView
               aria-hidden
-              className="data-[play-ready]:opacity-100 opacity-0 transition-opacity"
+              className={cn(
+                "data-[play-ready]:opacity-100 opacity-0 transition-opacity",
+                controls && "pointer-events-none",
+              )}
               webpreferences="autoplayPolicy=user-gesture-required"
-              // devtools
+              devtools
               partition={getPartition(appId)}
               ref={(inst) => {
                 provider.load(inst);
@@ -38,7 +44,7 @@ export function MediaProviderEnhanced({
             />
           );
         },
-        [appId],
+        [appId, controls],
       )}
       {...props}
     />

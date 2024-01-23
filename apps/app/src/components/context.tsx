@@ -4,6 +4,7 @@ import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
 import { createStore, useStore } from "zustand";
 import noop from "@/lib/no-op";
+import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import type MediaExtended from "@/mx-main";
 import type { SupportedWebHost } from "@/web/match-webpage";
@@ -20,18 +21,26 @@ export interface MediaViewState {
   hash: string;
   title: string;
   controls?: boolean;
+  toggleControls: (showCustom: boolean) => void;
   textTracks: TextTrackInit[];
   webHost?: Exclude<SupportedWebHost, SupportedWebHost.Generic>;
   updateWebHost: (webHost: SupportedWebHost) => void;
 }
 
 export function createMediaViewStore() {
-  return createStore<MediaViewState>((set) => ({
+  return createStore<MediaViewState>((set, get) => ({
     player: null,
     playerRef: (inst) => set({ player: inst }),
     source: undefined,
     hash: "",
     title: "",
+    toggleControls(showCustom) {
+      const { player } = get();
+      set({ controls: showCustom });
+      if (player && player.provider instanceof WebiviewMediaProvider) {
+        player.provider.media.send("mx-toggle-controls", !showCustom);
+      }
+    },
     textTracks: [],
     updateWebHost: (webHost) =>
       set({ webHost: webHost === "generic" ? undefined : webHost }),

@@ -1,4 +1,4 @@
-import type { ViewStateResult } from "obsidian";
+import type { Menu, ViewStateResult } from "obsidian";
 import {
   SupportedWebHost,
   matchHostForWeb,
@@ -31,6 +31,20 @@ export class MediaWebpageView extends MediaRemoteView {
     const title = this._title;
     if (!title) return "Webpage";
     return `${title} - ${webHostDisplayName[this.getHost()]}`;
+  }
+
+  onPaneMenu(menu: Menu, _source: string): void {
+    const controls = this.store.getState().controls ?? true;
+    menu.addItem((item) => {
+      item
+        .setTitle(
+          controls ? "Show website native controls" : "Hide website controls",
+        )
+        .setIcon("sliders-horizontal")
+        .onClick(() => {
+          this.store.getState().toggleControls(!controls);
+        });
+    });
   }
 
   async setState(

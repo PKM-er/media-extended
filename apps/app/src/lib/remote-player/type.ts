@@ -176,7 +176,10 @@ export type MsgCtrlRemote = MessageController<
     };
   },
   Nil,
-  Nil,
+  {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    "mx-toggle-controls": boolean;
+  },
   Record<CustomEvent, void> & MediaEventPayloadMap
 >;
 
@@ -197,7 +200,10 @@ export type MsgCtrlLocal = MessageController<
     screenshot(type?: string): ScreenshotInfo;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap,
-  Nil
+  {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    "mx-toggle-controls": boolean;
+  }
 >;
 
 export type MediaStateProps =

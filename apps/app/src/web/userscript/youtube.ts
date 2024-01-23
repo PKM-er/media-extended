@@ -35,8 +35,14 @@ html, body {
 .mx-parent video {
   object-fit: contain !important;
 }
-.html5-endscreen {
+ytd-app .html5-endscreen {
   opacity: 0 !important;
+}
+ytd-app .ytp-chrome-bottom {
+  opacity: 0 !important;
+}
+ytd-app .ytp-chrome-bottom.mx-show-controls {
+  opacity: 100 !important;
 }
 `;
 
@@ -58,7 +64,19 @@ export default class BilibiliPlugin extends MediaPlugin {
     }
     this.#app = app;
     await Promise.all([
-      this.untilMediaReady("canplay").then(() => this.disableAutoPlay()),
+      this.untilMediaReady("canplay").then(async () => {
+        this.register(
+          this.controller.on(
+            "mx-toggle-controls",
+            ({ payload: showWebsite }) => {
+              this.app
+                .querySelector(".ytp-chrome-bottom")
+                ?.classList.toggle("mx-show-controls", showWebsite);
+            },
+          ),
+        );
+        await this.disableAutoPlay();
+      }),
       this.enterWebFullscreen(),
     ]);
   }
