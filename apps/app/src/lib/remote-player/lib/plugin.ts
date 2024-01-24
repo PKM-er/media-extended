@@ -6,7 +6,6 @@ import { handleReadyState } from "../hook/ready-state";
 import { fluentTimeUpdate } from "../hook/time-update";
 import { mountedEvent, type MsgCtrlRemote } from "../type";
 import { waitForSelector } from "./wait-el";
-import watchTitle from "./watch-title";
 
 export default class MediaPlugin extends LifeCycle {
   constructor(public controller: MsgCtrlRemote) {
@@ -32,7 +31,6 @@ export default class MediaPlugin extends LifeCycle {
   }
 
   async onload() {
-    this.register(watchTitle(this.controller));
     this.#media = await this.findMedia();
     await this.hookMediaEl();
   }

@@ -162,16 +162,12 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   registerTitleChange() {
     const webview = this._webview;
-    onDispose(
-      this._port.on("titlechange", ({ payload: { title } }) => {
-        this._updateTitle("titlechange", title);
-      }),
-    );
-    const onDidNavigate = (evt: Event) => {
-      this._updateTitle(evt);
+    const onPageTitleUpdated = (evt: Electron.PageTitleUpdatedEvent) => {
+      this._updateTitle(evt, evt.title);
     };
+    webview.addEventListener("page-title-updated", onPageTitleUpdated);
     onDispose(() => {
-      webview.removeEventListener("did-navigate", onDidNavigate);
+      webview.removeEventListener("page-title-updated", onPageTitleUpdated);
     });
   }
 

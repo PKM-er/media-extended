@@ -150,9 +150,6 @@ export type MediaEventPayloadMap = {
   pause: {
     readyState: number;
   };
-  titlechange: {
-    title: string;
-  };
 };
 
 export type MsgCtrlRemote = MessageController<

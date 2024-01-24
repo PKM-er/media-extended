@@ -36,7 +36,7 @@ export function MediaProviderEnhanced({
                 controls && "pointer-events-none",
               )}
               webpreferences="autoplayPolicy=user-gesture-required"
-              devtools
+              // devtools
               partition={getPartition(appId)}
               ref={(inst) => {
                 provider.load(inst);
