@@ -7,6 +7,9 @@
     "lint": "eslint src/ --ext .ts,.tsx --fix"
   },
   "devDependencies": {
+    "@codemirror/language": "../../packages/cm-language",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0",
     "@electron/remote": "^2.1.1",
     "@mx/config": "workspace:*",
     "@types/eslint": "~8.4.6",

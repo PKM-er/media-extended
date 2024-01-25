@@ -22,6 +22,7 @@ import {
 } from "./media-view/view-type";
 import { MediaWebpageView } from "./media-view/webpage-view";
 import injectMediaEmbed from "./patch/embed";
+import setupEmbedWidget from "./patch/embed-widget";
 import patchEditorClick from "./patch/link.editor";
 import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
@@ -49,6 +50,7 @@ export default class MxPlugin extends Plugin {
   onInternalLinkClick = onInternalLinkClick.bind(this);
 
   private loadPatches() {
+    setupEmbedWidget(this);
     this.injectMediaView(
       MEDIA_FILE_VIEW_TYPE.audio,
       (leaf) => new AudioFileView(leaf, this),

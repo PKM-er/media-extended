@@ -16,6 +16,7 @@ import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MessageController, TimeoutError } from "../message";
+import { decodeWebpageUrl } from "./encode";
 import { HTMLMediaEvents } from "./html–media-events";
 import { evalInWebview } from "./lib/inline-eval";
 import type { MsgCtrlLocal } from "./type";
@@ -206,7 +207,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     if (!isString(_src)) {
       throw new Error("Webview provider only supports string src.");
     }
-    const src = atob(_src.replace(/^webview::/, ""));
+    const src = decodeWebpageUrl(_src);
     const webview = this._webview;
     this._currentSrc = {
       src,

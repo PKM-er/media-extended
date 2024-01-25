@@ -1,0 +1,3 @@
+[submodule "packages/cm-language"]
+	path = packages/cm-language
+	url = https://github.com/lishid/cm-language

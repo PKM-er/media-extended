@@ -1,4 +1,5 @@
 import type { Menu, ViewStateResult } from "obsidian";
+import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
 import { parseUrl } from "@/media-note/note-index/url-info";
 import {
@@ -74,7 +75,7 @@ export class MediaWebpageView extends MediaRemoteView {
       } else {
         this._source = state.source;
         this.store.setState({
-          source: { src: `webview::${btoa(urlInfo.source.href)}` },
+          source: { src: encodeWebpageUrl(urlInfo.source.href) },
         });
       }
     }
