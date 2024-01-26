@@ -1,7 +1,5 @@
-import type { Menu, ViewStateResult } from "obsidian";
+import type { ViewStateResult } from "obsidian";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
-import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import {
   SupportedWebHost,
   matchHostForWeb,
@@ -14,7 +12,7 @@ import { MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
 export type MediaWebpageViewState = MediaRemoteViewState;
 
 export class MediaWebpageView extends MediaRemoteView {
-  getViewType(): string {
+  getViewType() {
     return MEDIA_WEBPAGE_VIEW_TYPE;
   }
   getIcon(): string {
@@ -36,34 +34,6 @@ export class MediaWebpageView extends MediaRemoteView {
     return `${title} - ${webHostDisplayName[this.getHost()]}`;
   }
 
-  onPaneMenu(menu: Menu, _source: string): void {
-    super.onPaneMenu(menu, _source);
-    const controls = this.store.getState().controls ?? true;
-    menu.addItem((item) => {
-      item
-        .setTitle(
-          controls ? "Show website native controls" : "Hide website controls",
-        )
-        .setIcon("sliders-horizontal")
-        .onClick(() => {
-          this.store.getState().toggleControls(!controls);
-        });
-    });
-
-    let urlInfo: UrlMediaInfo | null;
-    if (this.source && (urlInfo = parseUrl(this.source))) {
-      const url = urlInfo.source;
-      menu.addItem((item) =>
-        item
-          .setTitle("Open in browser")
-          .setIcon("globe")
-          .onClick(() => {
-            window.open(url);
-          }),
-      );
-    }
-  }
-
   async setState(
     state: MediaWebpageViewState,
     result: ViewStateResult,
@@ -72,11 +42,13 @@ export class MediaWebpageView extends MediaRemoteView {
       const urlInfo = matchHostForWeb(state.source);
       if (!urlInfo) {
         console.warn("Invalid URL", state.source);
-        this._source = null;
       } else {
-        this._source = state.source;
         this.store.setState({
-          source: { src: encodeWebpageUrl(urlInfo.source.href) },
+          source: {
+            src: encodeWebpageUrl(urlInfo.source.href),
+            original: state.source,
+            viewType: this.getViewType(),
+          },
         });
       }
     }
@@ -86,7 +58,7 @@ export class MediaWebpageView extends MediaRemoteView {
     const state = super.getState();
     return {
       ...state,
-      source: this._source,
+      source: this.store.getState().source?.original,
     };
   }
 }

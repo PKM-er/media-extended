@@ -7,6 +7,7 @@ import { isFileMediaInfo, type FileMediaInfo } from "./file-info";
 import { parseUrl, type UrlMediaInfo } from "./url-info";
 
 export type MediaInfo = FileMediaInfo | UrlMediaInfo;
+export type MediaViewType = MediaInfo["viewType"];
 
 declare module "obsidian" {
   interface MetadataCache {

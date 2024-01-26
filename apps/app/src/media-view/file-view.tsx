@@ -1,4 +1,4 @@
-import type { TFile, WorkspaceLeaf } from "obsidian";
+import type { Menu, TFile, WorkspaceLeaf } from "obsidian";
 import { EditableFileView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
@@ -53,7 +53,26 @@ abstract class MediaFileView
     const { vault } = this.app;
     const src = this.app.vault.getResourcePath(file);
     const textTracks = await getTracks(file, vault);
-    this.store.setState({ source: { src }, textTracks, title: file.name });
+    this.store.setState({
+      source: { src, original: file.path, viewType: this.getViewType() },
+      textTracks,
+      title: file.name,
+    });
+  }
+  onPaneMenu(
+    menu: Menu,
+    menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
+  ): void {
+    super.onPaneMenu(menu, menuSource);
+    const { player, source, toggleControls, controls } = this.store.getState();
+    if (!player || !source) return;
+    this.app.workspace.trigger(
+      "mx-media-menu",
+      menu,
+      { controls, player, source, toggleControls },
+      menuSource,
+      this.leaf,
+    );
   }
   abstract canAcceptExtension(extension: string): boolean;
 

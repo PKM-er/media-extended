@@ -13,6 +13,7 @@ import { MediaNoteIndex } from "./media-note/note-index";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
+import registerMediaMenu from "./media-view/menu";
 import { AudioUrlView, VideoUrlView } from "./media-view/url-view";
 import {
   MEDIA_FILE_VIEW_TYPE,
@@ -33,6 +34,7 @@ import { modifySession } from "./web/session";
 export default class MxPlugin extends Plugin {
   async onload() {
     this.loadPatches();
+    this.registerMediaMenu();
     await this.modifySession();
     this.handleMediaNote();
   }
@@ -42,6 +44,7 @@ export default class MxPlugin extends Plugin {
   handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;
   injectMediaView = injectMediaView;
+  registerMediaMenu = registerMediaMenu;
   fixLinkLabel = fixLinkLabel;
   patchEditorClick = patchEditorClick;
   patchPreviewClick = patchPreviewClick;

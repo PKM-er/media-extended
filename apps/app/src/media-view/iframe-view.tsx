@@ -2,6 +2,7 @@ import type { ViewStateResult } from "obsidian";
 import { matchHostForEmbed } from "@/web/match-embed";
 import type { MediaRemoteViewState } from "./base";
 import { MediaRemoteView } from "./base";
+import type { MediaEmbedViewType } from "./view-type";
 import { MEDIA_EMBED_VIEW_TYPE } from "./view-type";
 
 export type MediaEmbedViewState = MediaRemoteViewState;
@@ -20,10 +21,14 @@ export class MediaEmbedView extends MediaRemoteView {
       const urlInfo = matchHostForEmbed(state.source);
       if (!urlInfo) {
         console.warn("Invalid URL", state.source);
-        this._source = null;
       } else {
-        this._source = state.source;
-        this.store.setState({ source: { src: urlInfo.source.href } });
+        this.store.setState({
+          source: {
+            src: urlInfo.source.href,
+            original: state.source,
+            viewType: this.getViewType(),
+          },
+        });
       }
     }
     return super.setState(state, result);
@@ -32,7 +37,7 @@ export class MediaEmbedView extends MediaRemoteView {
     const state = super.getState();
     return {
       ...state,
-      source: this._source,
+      source: this.store.getState().source?.original,
     };
   }
   getDisplayText(): string {
@@ -43,7 +48,7 @@ export class MediaEmbedView extends MediaRemoteView {
   getIcon(): string {
     return this._sourceType === "video/youtube" ? "youtube" : "video";
   }
-  getViewType(): string {
+  getViewType(): MediaEmbedViewType {
     return MEDIA_EMBED_VIEW_TYPE;
   }
 }

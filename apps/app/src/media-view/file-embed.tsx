@@ -6,7 +6,9 @@ import { Player } from "@/components/player";
 import { dataLpPassthrough } from "@/components/player/buttons";
 import { getTracks } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
+import { checkMediaType } from "@/patch/media-type";
 import { type PlayerComponent } from "./base";
+import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
 export class MediaFileEmbed
   extends Component
@@ -58,9 +60,14 @@ export class MediaFileEmbed
 
   async loadFile() {
     const textTracks = await getTracks(this.file, this.info.app.vault);
+    const mediaType = checkMediaType(this.file.extension);
+    if (!mediaType)
+      throw new Error(`Unknown media type ${this.file.extension}`);
     this.store.setState({
       source: {
         src: this.info.app.vault.getResourcePath(this.file),
+        original: this.file.path,
+        viewType: MEDIA_FILE_VIEW_TYPE[mediaType],
         // explicitly set type for webm files to trigger audio detection
         type: this.file.extension === "webm" ? "video/webm" : undefined,
       },

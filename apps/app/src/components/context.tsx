@@ -6,6 +6,7 @@ import { createStore, useStore } from "zustand";
 import noop from "@/lib/no-op";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
+import type { MediaInfo } from "@/media-note/note-index";
 import type MediaExtended from "@/mx-main";
 import type { SupportedWebHost } from "@/web/match-webpage";
 
@@ -15,6 +16,8 @@ export interface MediaViewState {
   source:
     | {
         src: string;
+        original: string;
+        viewType: MediaInfo["viewType"];
         type?: string;
       }
     | undefined;

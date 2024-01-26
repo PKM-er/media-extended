@@ -20,7 +20,7 @@ export interface UrlMediaInfo {
   hash: string;
   isSameSource: (src: string) => boolean;
 }
-export function parseUrl(url: string | null): UrlMediaInfo | null {
+export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
   if (!url) return null;
   const directlinkInfo = matchHostForUrl(url);
 

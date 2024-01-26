@@ -1,17 +1,16 @@
-import type { Menu, ViewStateResult, WorkspaceLeaf } from "obsidian";
+import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
-import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import { matchHostForUrl } from "@/web/match-url";
 import { setTempFrag } from "./base";
 import type { MediaRemoteViewState, PlayerComponent } from "./base";
+import type { MediaUrlViewType } from "./view-type";
 import { MEDIA_URL_VIEW_TYPE } from "./view-type";
 
 export type MediaUrlViewState = MediaRemoteViewState;
@@ -38,24 +37,8 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
     );
   }
 
-  abstract getViewType(): string;
+  abstract getViewType(): MediaUrlViewType;
   abstract getIcon(): string;
-
-  onPaneMenu(menu: Menu, _source: string): void {
-    super.onPaneMenu(menu, _source);
-    let urlInfo: UrlMediaInfo | null;
-    if (this.source && (urlInfo = parseUrl(this.source))) {
-      const url = urlInfo.source;
-      menu.addItem((item) =>
-        item
-          .setTitle("Open in browser")
-          .setIcon("globe")
-          .onClick(() => {
-            window.open(url);
-          }),
-      );
-    }
-  }
 
   initialEphemeralState = true;
 
@@ -93,10 +76,6 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
   }
 
   protected _title: string | null = null;
-  protected _source: string | null = null;
-  get source(): string | null {
-    return this._source;
-  }
 
   async setState(
     state: MediaUrlViewState,
@@ -105,14 +84,15 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
     if (typeof state.source === "string") {
       this._title = basenameFrom(state.source);
       const info = matchHostForUrl(state.source);
-      this._source = state.source;
       if (!info) {
-        this._source = null;
         console.warn("Invalid URL", state.source);
       } else {
-        this._source = state.source;
         this.store.setState({
-          source: { src: info.source.href },
+          source: {
+            src: info.source.href,
+            original: state.source,
+            viewType: this.getViewType(),
+          },
           title: this._title,
         });
       }
@@ -123,7 +103,7 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
     const state = super.getState();
     return {
       ...state,
-      source: this._source,
+      source: this.store.getState().source?.original,
     };
   }
 
@@ -138,7 +118,7 @@ export class VideoUrlView extends MediaUrlView {
   getIcon(): string {
     return "file-video";
   }
-  getViewType(): string {
+  getViewType() {
     return MEDIA_URL_VIEW_TYPE.video;
   }
   getDisplayText(): string {
@@ -160,7 +140,7 @@ export class AudioUrlView extends MediaUrlView {
     if (!title) return "Audio";
     return title;
   }
-  getViewType(): string {
+  getViewType() {
     return MEDIA_URL_VIEW_TYPE.audio;
   }
   canAcceptExtension(extension: string): boolean {

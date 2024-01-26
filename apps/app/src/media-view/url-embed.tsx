@@ -2,6 +2,7 @@ import { MarkdownRenderChild } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
+import type { MediaViewType } from "@/media-note/note-index";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
 
@@ -18,9 +19,15 @@ export class MediaRenderChild
     containerEl.addClasses(["mx", "custom", "mx-media-embed"]);
   }
 
-  update({ hash, src }: Partial<{ hash: string; src: string }>): void {
+  update({
+    hash,
+    source,
+  }: Partial<{
+    hash: string;
+    source: { src: string; original: string; viewType: MediaViewType };
+  }>): void {
     const hashFacet = hash ? { hash } : {};
-    const srcFacet = src ? { source: { src } } : {};
+    const srcFacet = source ? { source } : {};
     this.store.setState({ ...hashFacet, ...srcFacet });
   }
 

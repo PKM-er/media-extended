@@ -1,6 +1,6 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import { around } from "monkey-around";
-import type { Component, WorkspaceLeaf } from "obsidian";
+import type { Component, WorkspaceLeaf, Menu } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
@@ -122,10 +122,6 @@ export abstract class MediaRemoteView
   protected _title = "";
   protected _sourceType = "";
 
-  protected _source: string | null = null;
-  get source(): string | null {
-    return this._source;
-  }
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
     this.store = createMediaViewStore();
@@ -141,7 +137,9 @@ export abstract class MediaRemoteView
     this.addAction(
       "star",
       "Timestamp",
-      takeTimestampOnUrl(this, (player) => parseUrl(player._source)),
+      takeTimestampOnUrl(this, (player) =>
+        parseUrl(player.store.getState().source?.original),
+      ),
     );
 
     // make sure to unmount the player before the leaf detach it from DOM
@@ -173,6 +171,22 @@ export abstract class MediaRemoteView
   abstract getDisplayText(): string;
 
   initialEphemeralState = true;
+
+  onPaneMenu(
+    menu: Menu,
+    menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
+  ): void {
+    super.onPaneMenu(menu, menuSource);
+    const { player, source, toggleControls, controls } = this.store.getState();
+    if (!player || !source) return;
+    this.app.workspace.trigger(
+      "mx-media-menu",
+      menu,
+      { source, player, toggleControls, controls },
+      menuSource,
+      this.leaf,
+    );
+  }
 
   setEphemeralState(state: any): void {
     if ("subpath" in state) {
