@@ -2,22 +2,40 @@
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { Platform } from "obsidian";
+import { dataLpPassthrough } from "@/components/player/buttons";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { parseSizeSyntax } from "@/lib/size-syntax";
 import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MediaExtended from "@/mx-main";
 
+class UrlMediaRenderChild extends MediaRenderChild {
+  constructor(public containerEl: HTMLElement, public plugin: MediaExtended) {
+    super(containerEl, plugin);
+    containerEl.addClasses(["mx-external-media-embed"]);
+    function isEditButton(target: EventTarget | null): boolean {
+      if (!(target instanceof Element)) return false;
+      const button = target.closest("button");
+      if (!button) return false;
+      return button.hasAttribute(dataLpPassthrough);
+    }
+    this.registerDomEvent(containerEl, "click", (evt) => {
+      // only allow edit button to propagate to lp click handler
+      if (!isEditButton(evt.target)) evt.stopImmediatePropagation();
+    });
+  }
+}
+
 type ElementWithInfo = HTMLElement & {
   playerInfo?: {
     title: string;
     start: number;
     end: number;
-    child: MediaRenderChild;
+    child: UrlMediaRenderChild;
   } & UrlMediaInfo;
 };
 
-export abstract class UrlPlayerWidget extends WidgetType {
+abstract class UrlPlayerWidget extends WidgetType {
   setPos(dom: HTMLElement) {
     const info = (dom as ElementWithInfo).playerInfo;
     if (info) {
@@ -66,7 +84,7 @@ export abstract class UrlPlayerWidget extends WidgetType {
     super();
   }
 
-  setInfo(dom: HTMLElement, child: MediaRenderChild) {
+  setInfo(dom: HTMLElement, child: UrlMediaRenderChild) {
     (dom as ElementWithInfo).playerInfo = {
       title: this.title,
       start: this.start,
@@ -118,7 +136,7 @@ export abstract class UrlPlayerWidget extends WidgetType {
     //   "mousedown",
     //   (evt) => 0 === evt.button && view.hasFocus && evt.preventDefault(),
     // );
-    const child = new MediaRenderChild(container, this.plugin);
+    const child = new UrlMediaRenderChild(container, this.plugin);
     child.update(this.toInfoFacet(this.media));
     child.load();
     this.hookClickHandler(view, container);

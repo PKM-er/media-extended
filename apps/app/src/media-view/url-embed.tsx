@@ -2,7 +2,6 @@ import { MarkdownRenderChild } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
-import { dataLpPassthrough } from "@/components/player/buttons";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
 
@@ -16,22 +15,7 @@ export class MediaRenderChild
   constructor(public containerEl: HTMLElement, public plugin: MxPlugin) {
     super(containerEl);
     this.store = createMediaViewStore();
-    containerEl.addClasses([
-      "mx",
-      "custom",
-      "mx-media-embed",
-      "mx-external-link-embed",
-    ]);
-    function isEditButton(target: EventTarget | null): boolean {
-      if (!(target instanceof Element)) return false;
-      const button = target.closest("button");
-      if (!button) return false;
-      return button.hasAttribute(dataLpPassthrough);
-    }
-    this.registerDomEvent(containerEl, "click", (evt) => {
-      // only allow edit button to propagate to lp click handler
-      if (!isEditButton(evt.target)) evt.stopImmediatePropagation();
-    });
+    containerEl.addClasses(["mx", "custom", "mx-media-embed"]);
   }
 
   update({ hash, src }: Partial<{ hash: string; src: string }>): void {
