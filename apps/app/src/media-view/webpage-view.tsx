@@ -37,6 +37,7 @@ export class MediaWebpageView extends MediaRemoteView {
   }
 
   onPaneMenu(menu: Menu, _source: string): void {
+    super.onPaneMenu(menu, _source);
     const controls = this.store.getState().controls ?? true;
     menu.addItem((item) => {
       item

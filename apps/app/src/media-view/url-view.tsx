@@ -42,6 +42,7 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
   abstract getIcon(): string;
 
   onPaneMenu(menu: Menu, _source: string): void {
+    super.onPaneMenu(menu, _source);
     let urlInfo: UrlMediaInfo | null;
     if (this.source && (urlInfo = parseUrl(this.source))) {
       const url = urlInfo.source;
