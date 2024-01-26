@@ -3,12 +3,11 @@ import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
-import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import { matchHostForUrl } from "@/web/match-url";
-import { setTempFrag } from "./base";
+import { setTempFrag, titleFromUrl } from "./base";
 import type { MediaRemoteViewState, PlayerComponent } from "./base";
 import type { MediaUrlViewType } from "./view-type";
 import { MEDIA_URL_VIEW_TYPE } from "./view-type";
@@ -82,11 +81,11 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
     result: ViewStateResult,
   ): Promise<void> {
     if (typeof state.source === "string") {
-      this._title = basenameFrom(state.source);
       const info = matchHostForUrl(state.source);
       if (!info) {
         console.warn("Invalid URL", state.source);
       } else {
+        this._title = titleFromUrl(info.source.href);
         this.store.setState({
           source: {
             src: info.source.href,
@@ -157,14 +156,3 @@ export class AudioUrlView extends MediaUrlView {
 //   }
 //   return url;
 // }
-
-function basenameFrom(src: string): string {
-  const url = toURL(src);
-  if (!url) return "";
-  const { pathname } = url;
-  if (!pathname) return "";
-  const finalPath = pathname.split("/").pop();
-  if (!finalPath) return "";
-  // remove extension
-  return decodeURI(finalPath.split(".").slice(0, -1).join("."));
-}

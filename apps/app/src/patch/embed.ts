@@ -4,6 +4,7 @@ import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle } from "@/lib/size-syntax";
 import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
 import { parseUrl } from "@/media-note/note-index/url-info";
+import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MxPlugin from "@/mx-main";
 import { MediaFileExtensions } from "./media-type";
@@ -73,6 +74,7 @@ class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
         original: info.original,
         viewType: info.viewType,
       },
+      title: titleFromUrl(info.source.href),
     });
   }
 }

@@ -11,6 +11,7 @@ import {
 } from "@/components/context";
 import { Player } from "@/components/player";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
+import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
 import { parseUrl } from "@/media-note/note-index/url-info";
 import { takeTimestampOnUrl } from "@/media-note/timestamp";
@@ -263,4 +264,15 @@ function waitFor(
       unload();
     });
   });
+}
+
+export function titleFromUrl(src: string): string {
+  const url = toURL(src);
+  if (!url) return "";
+  const { pathname } = url;
+  if (!pathname) return "";
+  const finalPath = pathname.split("/").pop();
+  if (!finalPath) return "";
+  // remove extension
+  return decodeURI(finalPath.split(".").slice(0, -1).join("."));
 }

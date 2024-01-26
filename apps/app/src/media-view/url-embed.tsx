@@ -19,16 +19,14 @@ export class MediaRenderChild
     containerEl.addClasses(["mx", "custom", "mx-media-embed"]);
   }
 
-  update({
-    hash,
-    source,
-  }: Partial<{
-    hash: string;
-    source: { src: string; original: string; viewType: MediaViewType };
-  }>): void {
-    const hashFacet = hash ? { hash } : {};
-    const srcFacet = source ? { source } : {};
-    this.store.setState({ ...hashFacet, ...srcFacet });
+  update(
+    facet: Partial<{
+      hash: string;
+      title: string;
+      source: { src: string; original: string; viewType: MediaViewType };
+    }>,
+  ): void {
+    this.store.setState(facet);
   }
 
   onload(): void {

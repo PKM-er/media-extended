@@ -7,10 +7,11 @@ import { dataLpPassthrough } from "@/components/player/buttons";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { parseSizeSyntax } from "@/lib/size-syntax";
 import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
+import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MediaExtended from "@/mx-main";
 
-type InfoFacet = Partial<Pick<MediaViewState, "source" | "hash">>;
+type InfoFacet = Partial<Pick<MediaViewState, "source" | "hash" | "title">>;
 
 class UrlMediaRenderChild extends MediaRenderChild {
   constructor(public containerEl: HTMLElement, public plugin: MediaExtended) {
@@ -201,47 +202,30 @@ Object.defineProperty(UrlPlayerWidget.prototype, "estimatedHeight", {
   configurable: true,
 });
 
+function toInfoFacet(media: UrlMediaInfo) {
+  return {
+    hash: media.hash,
+    source: {
+      src: media.source.href,
+      original: media.original,
+      viewType: media.viewType,
+    },
+    title: titleFromUrl(media.source.href),
+  };
+}
+
 export class VideoUrlPlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: UrlMediaInfo): InfoFacet {
-    return {
-      hash: media.hash,
-      source: {
-        src: media.source.href,
-        original: media.original,
-        viewType: media.viewType,
-      },
-    };
-  }
+  toInfoFacet = toInfoFacet;
 }
-
 export class AudioUrlPlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: UrlMediaInfo): InfoFacet {
-    return {
-      hash: media.hash,
-      source: {
-        src: media.source.href,
-        original: media.original,
-        viewType: media.viewType,
-      },
-    };
-  }
+  toInfoFacet = toInfoFacet;
 }
-
 export class IframePlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: UrlMediaInfo): InfoFacet {
-    return {
-      hash: media.hash,
-      source: {
-        src: media.source.href,
-        original: media.original,
-        viewType: media.viewType,
-      },
-    };
-  }
+  toInfoFacet = toInfoFacet;
 }
 
 export class WebpagePlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: UrlMediaInfo): InfoFacet {
+  toInfoFacet(media: UrlMediaInfo) {
     return {
       hash: media.hash,
       source: {
@@ -249,6 +233,7 @@ export class WebpagePlayerWidget extends UrlPlayerWidget {
         original: media.original,
         viewType: media.viewType,
       },
+      title: titleFromUrl(media.source.href),
     };
   }
 }
