@@ -30,10 +30,13 @@ export function Captions() {
         // menu.addItem((item) =>
         //   item.setIsLabel(true).setTitle("Caption " + hint),
         // );
-        options.forEach(({ label, select, selected }) => {
-          menu.addItem((item) =>
-            item.setTitle(label).setChecked(selected).onClick(select),
-          );
+        options.forEach(({ label, select, selected }, idx, options) => {
+          menu.addItem((item) => {
+            if (options.length === 2 && label === "Unknown") {
+              label = "On";
+            }
+            item.setTitle(label).setChecked(selected).onClick(select);
+          });
         });
         menu.showAtMouseEvent(evt.nativeEvent);
         evt.nativeEvent.stopImmediatePropagation();
