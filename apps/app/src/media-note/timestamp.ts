@@ -66,7 +66,7 @@ export function takeTimestampOnFile<T extends PlayerComponent>(
     const { file, type: mediaType } = mediaInfo;
 
     const time = player.currentTime;
-    const title = player.title ?? file.basename;
+    const title = file.basename;
 
     const { file: newNote, editor } =
       await playerComponent.plugin.leafOpener.openNote(mediaInfo, {
