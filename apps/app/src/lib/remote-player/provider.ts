@@ -75,12 +75,23 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     this._port.methods.setPlaybackRate(rate);
   }
 
+  #interaction: Promise<void> | null = null;
+  // autoplay is set to require user gesture in webview,
+  // so if not explicitly triggered, play/pause will not work.
+  // since userscipt is not eval with "userGesture" being true,
+  // we need to trigger a user gesture before play/pause
+  async userGesture() {
+    await (this.#interaction ??= this.webview.executeJavaScript("1", true));
+  }
+
   async play() {
-    this._port.methods.play();
+    await this.userGesture();
+    await this._port.methods.play();
   }
 
   async pause() {
-    this._port.methods.pause();
+    await this.userGesture();
+    await this._port.methods.pause();
   }
 
   setMuted(muted: boolean) {

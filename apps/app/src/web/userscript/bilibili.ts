@@ -8,13 +8,18 @@ export default class BilibiliPlugin extends MediaPlugin {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
   async onload(): Promise<void> {
+    localStorage.setItem("recommend_auto_play", "close");
+    // disable autoplay
+    localStorage.setItem(
+      "bpx_player_profile",
+      JSON.stringify({ media: { autoplay: false } }),
+    );
     await super.onload();
     // this.untilMediaReady("loadeddata").then(() => {
     //   this.preventAutoplay();
     // });
     // this.preventAutoplay();
     // disable auto play recommendation
-    localStorage.setItem("recommend_auto_play", "close");
     const player = document.querySelector<HTMLDivElement>("#bilibili-player");
     if (!player) {
       throw new Error("Bind failed: #bilibili-player not found");
