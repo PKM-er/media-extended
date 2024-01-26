@@ -39,7 +39,7 @@ export const WebView = forwardRef<
 
   const [domReady, setIsDomReady] = useState(false);
   const restProps = useEvents(props, webviewRef);
-  useDevTools(devtools, webviewRef, domReady);
+  // useDevTools(devtools, webviewRef, domReady);
   useMuted(muted, webviewRef, domReady);
   const ua = useUserAgent(
     useragent ?? navigator.userAgent,
