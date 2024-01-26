@@ -14,10 +14,9 @@ export function webpageMenu(
 ) {
   if (
     !(player.provider instanceof WebiviewMediaProvider) ||
-    source === "player-menu-embed"
+    (source !== "player-menu-view" && source !== "more-options")
   )
     return;
-  console.log(source);
   menu.addItem((item) => {
     item
       .setTitle(

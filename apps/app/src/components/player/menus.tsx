@@ -60,11 +60,11 @@ export function MoreOptions() {
       {...{ [dataLpPassthrough]: true }}
       onClick={(evt) => {
         const menu = new Menu();
-        const { toggleControls, controls } = store.getState();
+        const { toggleControls, controls, hash } = store.getState();
         workspace.trigger(
           "mx-media-menu",
           menu,
-          { player, source, toggleControls, controls },
+          { player, source, toggleControls, controls, hash },
           isEmbed ? "player-menu-embed" : "player-menu-view",
         );
         menu.showAtMouseEvent(evt.nativeEvent);

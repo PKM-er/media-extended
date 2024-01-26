@@ -1,7 +1,9 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { MediaViewType } from "@/media-note/note-index";
+import { parseFileInfo } from "@/media-note/note-index/file-info";
+import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
-import "obsidian";
+import { isMediaFileViewType } from "../view-type";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";
 import { speedMenu } from "./speed";
@@ -15,6 +17,7 @@ export interface PlayerContext {
     viewType: MediaViewType;
     original: string;
   };
+  hash: string;
   controls: boolean | undefined;
   toggleControls: (showCustom: boolean) => void;
 }
@@ -63,8 +66,45 @@ export default function registerMediaMenu(this: MxPlugin) {
       } else {
         muteMenu(menu, ctx.player);
       }
+      if (source === "player-menu-embed") {
+        const mediaInfo = isMediaFileViewType(ctx.source.viewType)
+          ? parseFileInfo(ctx.source.original, ctx.hash, this.app.vault)
+          : parseUrl(ctx.source.original);
+        if (mediaInfo) {
+          menu
+            .addItem((item) =>
+              item
+                .setTitle("Open to the right")
+                .setIcon("separator-vertical")
+                .setSection("view")
+                .onClick(() => {
+                  this.leafOpener.openMedia(mediaInfo, "split");
+                }),
+            )
+            .addItem((item) =>
+              item
+                .setTitle("Open in new tab")
+                .setSection("view")
+                .setIcon("file-plus")
+                .onClick(() => {
+                  this.leafOpener.openMedia(mediaInfo, "tab");
+                }),
+            )
+            .addItem((item) =>
+              item
+                .setTitle("Open in new window")
+                .setSection("view")
+                .setIcon("maximize")
+                .onClick(() => {
+                  this.leafOpener.openMedia(mediaInfo, "window");
+                }),
+            );
+        }
+      }
       webpageMenu(menu, ctx, source);
-      urlMenu(menu, ctx);
+      if (source === "player-menu-embed" || source === "more-options") {
+        urlMenu(menu, ctx);
+      }
     }),
   );
 }

@@ -6,7 +6,7 @@ export function muteMenu(menu: Menu, player: MediaPlayerInstance) {
   menu.addItem((item) =>
     item
       .setSection("mx-player")
-      .setIcon(muted ? "volume-off" : "volume-up")
+      .setIcon(muted ? "volume-2" : "volume-x")
       .setTitle(muted ? "Unmute" : "Mute")
       .onClick(() => {
         player.muted = !muted;
