@@ -3,11 +3,21 @@ import { requireMx } from "./_require";
 
 const { waitForSelector, MediaPlugin } = requireMx();
 
+const css = `
+.bpx-player-control-wrap {
+    opacity: 0 !important;
+}
+.bpx-player-control-wrap.mx-show-controls {
+    opacity: 100 !important;
+}
+`;
+
 export default class BilibiliPlugin extends MediaPlugin {
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
   async onload(): Promise<void> {
+    this.injectStyle(css);
     localStorage.setItem("recommend_auto_play", "close");
     // disable autoplay
     localStorage.setItem(
@@ -26,8 +36,14 @@ export default class BilibiliPlugin extends MediaPlugin {
     }
     this.#player = player;
     await this.untilMediaReady("canplay");
-    await this.toggleDanmaku(false);
-    await this.enterWebFullscreen();
+    this.register(
+      this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
+        player
+          .querySelector(".bpx-player-control-wrap")
+          ?.classList.toggle("mx-show-controls", showWebsite);
+      }),
+    );
+    Promise.all([this.toggleDanmaku(false), this.enterWebFullscreen()]);
   }
 
   #player: HTMLDivElement | null = null;

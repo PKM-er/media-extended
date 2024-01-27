@@ -56,8 +56,8 @@ export default class BilibiliPlugin extends MediaPlugin {
     return waitForSelector<HTMLMediaElement>("#ytd-player video");
   }
   async onload(): Promise<void> {
-    await super.onload();
     this.injectStyle(css);
+    await super.onload();
     const app = document.querySelector<HTMLElement>("ytd-app");
     if (!app) {
       throw new Error("Bind failed: #ytd-app not found");
