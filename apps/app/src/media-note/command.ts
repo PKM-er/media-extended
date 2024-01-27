@@ -1,3 +1,4 @@
+import type { MediaPlayerInstance } from "@vidstack/react";
 import type { WorkspaceLeaf } from "obsidian";
 import type { AudioFileView, VideoFileView } from "@/media-view/file-view";
 import type { RemoteMediaView } from "@/media-view/view-type";
@@ -72,6 +73,109 @@ export function registerNoteCommands(plugin: MxPlugin) {
         editor,
       });
     },
+  });
+}
+
+interface Controls {
+  id: string;
+  label: string;
+  icon: string;
+  repeat?: boolean;
+  action: (media: MediaPlayerInstance) => void;
+}
+
+const commands: Controls[] = [
+  {
+    id: "play-or-pause",
+    label: "Play/pause",
+    icon: "play",
+    action: (media) => {
+      media.paused = !media.paused;
+    },
+  },
+  ...[5, 30].flatMap((sec): Controls[] => [
+    {
+      id: `forward-${sec}s`,
+      label: `Forward ${sec}s`,
+      icon: "forward",
+      action: (media) => {
+        media.currentTime += sec;
+      },
+      repeat: true,
+    },
+    {
+      id: `rewind-${sec}s`,
+      label: `Rewind ${sec}s`,
+      icon: "rewind",
+      action: (media) => {
+        media.currentTime -= sec;
+      },
+      repeat: true,
+    },
+  ]),
+  {
+    id: "mute-or-unmute",
+    label: "Mute/unmute",
+    icon: "volume-x",
+    action: (media) => {
+      media.muted = !media.muted;
+    },
+  },
+  {
+    id: "enter-fullscreen",
+    label: "Fullscreen",
+    icon: "expand",
+    action: (media) => {
+      media.enterFullscreen();
+    },
+  },
+  {
+    id: "exit-fullscreen",
+    label: "Exit Fullscreen",
+    icon: "expand",
+    action: (media) => {
+      media.exitFullscreen();
+    },
+  },
+];
+
+export function registerControlCommands(plugin: MxPlugin) {
+  const { workspace } = plugin.app;
+
+  commands.forEach(({ id, label, icon, action, repeat }) => {
+    plugin.addCommand({
+      id: `${id}-player`,
+      name: `${label} on current media`,
+      icon,
+      repeatable: repeat,
+      checkCallback: (checking) => {
+        // eslint-disable-next-line deprecation/deprecation
+        const mediaView = getMediaView(workspace.activeLeaf);
+        if (!mediaView) return false;
+        const player = mediaView.view.store.getState().player;
+        if (!player) return false;
+        if (checking) return true;
+        action(player);
+      },
+    });
+    plugin.addCommand({
+      id: `${id}-view`,
+      name: `${label} on linked media`,
+      icon,
+      repeatable: repeat,
+      editorCheckCallback: (checking, _, ctx) => {
+        if (!ctx.file) return false;
+        const mediaInfo = plugin.mediaNote.findMedia(ctx.file);
+        if (!mediaInfo) return false;
+        const opened = plugin.leafOpener.findExistingPlayer(mediaInfo);
+        const mediaView = getMediaView(opened);
+        if (!mediaView) return false;
+        const player = mediaView.view.store.getState().player;
+        if (!player) return false;
+        if (checking) return true;
+        action(player);
+      },
+    });
   });
 }
 
