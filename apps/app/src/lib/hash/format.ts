@@ -1,12 +1,10 @@
-import dayjs from "dayjs";
-import duration from "dayjs/plugin/duration";
+import { moment } from "obsidian";
 import { isTimestamp, type TempFragment } from "./temporal-frag";
 
-dayjs.extend(duration);
-
-export function formatDuration(time: number) {
-  const duration = dayjs.duration(time, "seconds");
-  return "@" + duration.format("HH:mm:ss");
+export function formatDuration(seconds: number) {
+  return moment
+    .utc(moment.duration({ seconds }).as("milliseconds"))
+    .format("HH:mm:ss");
 }
 
 const fillZero = (time: number, fractionDigits = 2) => {
@@ -65,7 +63,7 @@ function durationToTempFrag(durationInSecond: number): string {
     throw new Error("durationInSecond must be positive");
   }
   if (durationInSecond === Infinity) return "e";
-  const duration = dayjs.duration(durationInSecond, "seconds");
+  const duration = moment.duration(durationInSecond, "seconds");
 
   const hours = duration.hours(),
     minutes = duration.minutes(),
@@ -86,7 +84,7 @@ function durationToTempFrag(durationInSecond: number): string {
 export const secondToDuration = (_seconds: number | string) => {
   _seconds = +_seconds;
   if (Number.isNaN(_seconds)) return "NaN";
-  const duration = dayjs.duration(+_seconds, "seconds");
+  const duration = moment.duration(+_seconds, "seconds");
 
   const hours = duration.hours(),
     minutes = duration.minutes(),
