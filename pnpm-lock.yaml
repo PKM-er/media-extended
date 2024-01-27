@@ -38,15 +38,15 @@ importers:
       clsx:
         specifier: ^1.2.1
         version: 1.2.1
-      dayjs:
-        specifier: ^1.11.10
-        version: 1.11.10
       iso-639-1:
         specifier: ^3.1.0
         version: 3.1.0
       maverick.js:
         specifier: 0.41.2
         version: 0.41.2
+      mime:
+        specifier: ^4.0.1
+        version: 4.0.1
       monkey-around:
         specifier: ^2.3.0
         version: 2.3.0
@@ -5401,6 +5401,12 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
     dev: true
+
+  /mime@4.0.1:
+    resolution: {integrity: sha512-5lZ5tyrIfliMXzFtkYyekWbtRXObT9OWa8IwQ5uxTBDHucNNwniRqo0yInflj+iYi5CBa6qxadGzGarDfuEOxA==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dev: false
 
   /mimic-fn@2.1.0:
     resolution: {integrity: sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==}

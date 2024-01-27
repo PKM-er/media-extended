@@ -14,7 +14,8 @@ import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
 import { parseUrl } from "@/media-note/note-index/url-info";
-import { takeTimestampOnUrl } from "@/media-note/timestamp";
+import { saveScreenshot } from "@/media-note/timestamp/screenshot";
+import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import type MediaExtended from "@/mx-main";
 
 export interface PlayerComponent extends Component {
@@ -135,10 +136,13 @@ export abstract class MediaRemoteView
     // );
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    this.addAction(
-      "star",
-      "Timestamp",
-      takeTimestampOnUrl(this, (player) =>
+    this.addAction("star", "Timestamp", () =>
+      takeTimestamp(this, (player) =>
+        parseUrl(player.store.getState().source?.original),
+      ),
+    );
+    this.addAction("camera", "Screenshot", () =>
+      saveScreenshot(this, (player) =>
         parseUrl(player.store.getState().source?.original),
       ),
     );

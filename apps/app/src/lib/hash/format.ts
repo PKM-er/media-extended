@@ -2,9 +2,16 @@ import { moment } from "obsidian";
 import { isTimestamp, type TempFragment } from "./temporal-frag";
 
 export function formatDuration(seconds: number) {
+  if (seconds === 0) return "00:00:00";
   return moment
     .utc(moment.duration({ seconds }).as("milliseconds"))
     .format("HH:mm:ss");
+}
+
+export function toDurationISOString(duration: number) {
+  return duration === 0
+    ? "DT0S"
+    : moment.duration(duration, "seconds").toISOString();
 }
 
 const fillZero = (time: number, fractionDigits = 2) => {

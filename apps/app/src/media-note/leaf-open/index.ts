@@ -17,7 +17,7 @@ import { isFileMediaInfo } from "../note-index/file-info";
 import type { UrlMediaInfo } from "../note-index/url-info";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
 
-interface NewNoteInfo {
+export interface NewNoteInfo {
   title: string;
   fm: (newNotePath: string) => Record<string, any>;
   sourcePath?: string;

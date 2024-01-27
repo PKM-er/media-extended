@@ -6,7 +6,8 @@ import { Player } from "@/components/player";
 import { getTracks } from "@/lib/subtitle";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type { FileMediaInfo } from "@/media-note/note-index/file-info";
-import { takeTimestampOnFile } from "@/media-note/timestamp";
+import { saveScreenshot } from "@/media-note/timestamp/screenshot";
+import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import { setTempFrag, type PlayerComponent } from "./base";
@@ -32,10 +33,11 @@ abstract class MediaFileView
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
     handleWindowMigration.call(this, () => this.render());
-    this.addAction(
-      "star",
-      "Timestamp",
-      takeTimestampOnFile(this, () => this.getMediaInfo()),
+    this.addAction("star", "Timestamp", () =>
+      takeTimestamp(this, () => this.getMediaInfo()),
+    );
+    this.addAction("camera", "Screenshot", () =>
+      saveScreenshot(this, () => this.getMediaInfo()),
     );
 
     this.register(
@@ -64,12 +66,13 @@ abstract class MediaFileView
     menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
   ): void {
     super.onPaneMenu(menu, menuSource);
-    const { player, source, toggleControls, controls } = this.store.getState();
+    const { player, source, toggleControls, controls, hash } =
+      this.store.getState();
     if (!player || !source) return;
     this.app.workspace.trigger(
       "mx-media-menu",
       menu,
-      { controls, player, source, toggleControls },
+      { controls, player, source, toggleControls, hash },
       menuSource,
       this.leaf,
     );

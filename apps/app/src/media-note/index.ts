@@ -11,7 +11,8 @@ import {
 import type { MediaWebpageView } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
 import { parseUrl } from "./note-index/url-info";
-import { takeTimestampOnFile, takeTimestampOnUrl } from "./timestamp";
+import { saveScreenshot } from "./timestamp/screenshot";
+import { takeTimestamp } from "./timestamp/timestamp";
 
 export function handleMediaNote(this: MxPlugin) {
   const { workspace } = this.app;
@@ -42,25 +43,52 @@ export function handleMediaNote(this: MxPlugin) {
       if (isMediaFileViewType(viewType)) {
         if (checking) return true;
         const fileView = view as VideoFileView | AudioFileView;
-        const takeTimestamp = takeTimestampOnFile(fileView, () =>
-          fileView.getMediaInfo(),
-        );
-        takeTimestamp();
+        takeTimestamp(fileView, () => fileView.getMediaInfo());
       } else if (
         isMediaUrlViewType(viewType) ||
         MEDIA_EMBED_VIEW_TYPE === viewType ||
         MEDIA_WEBPAGE_VIEW_TYPE === viewType
       ) {
         if (checking) return true;
-        const takeTimestamp = takeTimestampOnUrl(
+        takeTimestamp(
           view as
             | VideoUrlView
             | AudioUrlView
             | MediaWebpageView
             | MediaEmbedView,
-          (player) => parseUrl(player.source),
+          (player) => parseUrl(player.store.getState().source?.original),
         );
-        takeTimestamp();
+      }
+    },
+  });
+  this.addCommand({
+    id: "save-screenshot-view",
+    name: "Save screenshot on current media",
+    icon: "camera",
+    checkCallback: (checking) => {
+      // eslint-disable-next-line deprecation/deprecation
+      const leaf = workspace.activeLeaf;
+      if (!leaf) return false;
+      const view = leaf.view;
+      const viewType = view.getViewType();
+      if (isMediaFileViewType(viewType)) {
+        if (checking) return true;
+        const fileView = view as VideoFileView | AudioFileView;
+        saveScreenshot(fileView, () => fileView.getMediaInfo());
+      } else if (
+        isMediaUrlViewType(viewType) ||
+        MEDIA_EMBED_VIEW_TYPE === viewType ||
+        MEDIA_WEBPAGE_VIEW_TYPE === viewType
+      ) {
+        if (checking) return true;
+        saveScreenshot(
+          view as
+            | VideoUrlView
+            | AudioUrlView
+            | MediaWebpageView
+            | MediaEmbedView,
+          (player) => parseUrl(player.store.getState().source?.original),
+        );
       }
     },
   });

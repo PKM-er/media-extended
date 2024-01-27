@@ -4,7 +4,6 @@ import {
   CaptionButton,
   FullscreenButton,
   isTrackCaptionKind,
-  isVideoProvider,
   MuteButton,
   PIPButton,
   PlayButton,
@@ -13,7 +12,6 @@ import {
   useMediaProvider,
   useMediaState,
 } from "@vidstack/react";
-import { Platform } from "obsidian";
 import { useEffect, useState } from "react";
 import {
   PlayIcon,
@@ -32,10 +30,9 @@ import {
   ImageDownIcon,
   PinIcon,
 } from "@/components/icon";
-import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { captureScreenshot } from "@/lib/screenshot";
 import { cn } from "@/lib/utils";
 import { useIsEmbed, useScreenshot, useTimestamp } from "../context";
+import { canProviderScreenshot, takeScreenshot } from "./screenshot";
 
 export const buttonClass =
   "group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden";
@@ -162,10 +159,6 @@ export function EditorEdit() {
   );
 }
 
-function canProviderScreenshot(provider: any) {
-  return isVideoProvider(provider) || provider instanceof WebiviewMediaProvider;
-}
-
 export function useScreenshotHanlder() {
   const provider = useMediaProvider();
   const [canScreenshot, updateCanScreenshot] = useState<boolean>(() =>
@@ -175,16 +168,9 @@ export function useScreenshotHanlder() {
   useEffect(() => {
     updateCanScreenshot(canProviderScreenshot(provider));
   }, [provider]);
-  if (!canScreenshot || !onScreenshot) return null;
+  if (!canScreenshot || !onScreenshot || !provider) return null;
   return async () => {
-    const mimeType = Platform.isSafari ? "image/jpeg" : "image/webp";
-    if (isVideoProvider(provider)) {
-      onScreenshot(await captureScreenshot(provider.video, mimeType));
-    } else if (provider instanceof WebiviewMediaProvider) {
-      onScreenshot(await provider.media.methods.screenshot(mimeType));
-    } else {
-      throw new Error("Unsupported provider for screenshot");
-    }
+    onScreenshot(await takeScreenshot(provider));
   };
 }
 
