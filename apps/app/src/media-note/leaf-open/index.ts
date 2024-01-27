@@ -69,10 +69,16 @@ export class LeafOpener {
     });
   }
 
+  findExistingPlayer(info: MediaInfo) {
+    const leaves = this.#getLeavesOfMedia(info);
+    if (leaves.length === 0) return null;
+    return leaves[0];
+  }
+
   #openInExistingPlayer(info: MediaInfo): boolean {
-    const opened = this.#getLeavesOfMedia(info);
-    if (opened.length > 0) {
-      updateHash(info.hash, opened[0]);
+    const opened = this.findExistingPlayer(info);
+    if (opened) {
+      updateHash(info.hash, opened);
       return true;
     }
     return false;

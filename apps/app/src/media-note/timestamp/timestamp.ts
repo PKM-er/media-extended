@@ -1,3 +1,4 @@
+import type { Editor, TFile } from "obsidian";
 import { Notice } from "obsidian";
 import type { PlayerComponent } from "@/media-view/base";
 import type { MediaInfo } from "../note-index";
@@ -10,6 +11,7 @@ import {
 export async function takeTimestamp<T extends PlayerComponent>(
   playerComponent: T,
   getSource: (player: T) => MediaInfo | null,
+  ctx?: { file: TFile; editor: Editor },
 ) {
   const player = playerComponent.store.getState().player;
   if (!player) {
@@ -23,10 +25,8 @@ export async function takeTimestamp<T extends PlayerComponent>(
   }
   const time = player.currentTime;
 
-  const { file: newNote, editor } = await openOrCreateMediaNote(
-    mediaInfo,
-    playerComponent,
-  );
+  const { file: newNote, editor } =
+    ctx ?? (await openOrCreateMediaNote(mediaInfo, playerComponent));
   const genTimestamp = createTimestampGen(time, mediaInfo, playerComponent);
 
   if (time > 0) {

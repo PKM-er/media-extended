@@ -1,4 +1,5 @@
 import mime from "mime";
+import type { Editor, TFile } from "obsidian";
 import { Notice } from "obsidian";
 import {
   canProviderScreenshot,
@@ -27,6 +28,7 @@ declare module "obsidian" {
 export async function saveScreenshot<T extends PlayerComponent>(
   playerComponent: T,
   getSource: (player: T) => MediaInfo | null,
+  ctx?: { file: TFile; editor: Editor },
 ) {
   const { fileManager, vault } = playerComponent.plugin.app;
   const player = playerComponent.store.getState().player;
@@ -56,10 +58,8 @@ export async function saveScreenshot<T extends PlayerComponent>(
   const screenshotName = title + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
 
-  const { file: newNote, editor } = await openOrCreateMediaNote(
-    mediaInfo,
-    playerComponent,
-  );
+  const { file: newNote, editor } =
+    ctx ?? (await openOrCreateMediaNote(mediaInfo, playerComponent));
   const screenshotPath = await vault.getAvailablePathForAttachments(
     screenshotName,
     ext,
