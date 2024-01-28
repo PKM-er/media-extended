@@ -19,8 +19,16 @@ function getParamFromHtml(html: string, key: string): string | null {
   return value;
 }
 
+export interface YoutubeToken {
+  apiKey: string;
+  serializedShareEntity: string;
+  visitorData: string;
+  sessionId: string;
+  clickTrackingParams: string;
+}
+
 // derive from https://github.com/lstrzepek/obsidian-yt-transcript
-export async function getYoutubeToken(url: string) {
+export async function getYoutubeToken(url: string): Promise<YoutubeToken> {
   const html = await requestUrl({ url, headers: getYoutubeHeader() }).then(
     (res) => res.text,
   );
@@ -34,7 +42,7 @@ export async function getYoutubeToken(url: string) {
     !apiKey ||
     !serializedShareEntity ||
     !visitorData ||
-    !sessionId ||
+    // !sessionId ||
     !clickTrackingParams
   ) {
     throw new Error("Failed to get youtube token");
@@ -44,7 +52,7 @@ export async function getYoutubeToken(url: string) {
     apiKey,
     serializedShareEntity,
     visitorData,
-    sessionId,
+    sessionId: sessionId ?? "",
     // youtu.be links have extra characters in clickTrackingParams
     // that are not supported with the youtubei api
     clickTrackingParams: decodeURI(clickTrackingParams.slice(0, 28)),
