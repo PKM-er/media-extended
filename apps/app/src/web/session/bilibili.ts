@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { RequestUrlParam } from "obsidian";
+import type { RequestUrlParam, RequestUrlResponse } from "obsidian";
 import { Platform, requestUrl } from "obsidian";
 import { getPartition } from "@/lib/remote-player/const";
 import { getUserAgent } from "@/lib/remote-player/ua";
@@ -17,19 +17,28 @@ export async function modifyBilibiliSession(session: Electron.Session) {
   });
 }
 
-export async function buildFetchForBilibili(appId: string) {
+export interface BilibiliFetch {
+  <R = any>(
+    url: string | URL,
+    {
+      requireLogin,
+      headers,
+      ...init
+    }?: Omit<RequestUrlParam, "url"> & { requireLogin?: boolean },
+  ): Promise<Omit<RequestUrlResponse, "json"> & { json: R }>;
+}
+
+export async function buildFetchForBilibili(
+  appId: string,
+): Promise<BilibiliFetch> {
   if (!Platform.isDesktopApp) throw new Error("Not desktop app");
   const session =
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require("@electron/remote").session as typeof Electron.Session;
   const cookies = session.fromPartition(getPartition(appId)).cookies;
   return async function bilibiliFetch(
-    url: string,
-    {
-      requireLogin,
-      headers,
-      ...init
-    }: Omit<RequestUrlParam, "url"> & { requireLogin?: boolean } = {},
+    url,
+    { requireLogin, headers, ...init } = {},
   ) {
     let biliHeaders;
     if (!requireLogin) {
@@ -40,7 +49,7 @@ export async function buildFetchForBilibili(appId: string) {
       biliHeaders = await getBilibiliHeader(token);
     }
     return requestUrl({
-      url,
+      url: typeof url === "string" ? url : url.toString(),
       headers: { ...headers, ...biliHeaders },
       ...init,
     });
