@@ -3,6 +3,7 @@ import "./style.css";
 import "./icons";
 
 import { Plugin } from "obsidian";
+import type { EventEmitter } from "./lib/emitter";
 import { handleMediaNote } from "./media-note";
 import { LeafOpener } from "./media-note/leaf-open";
 import {
@@ -30,6 +31,10 @@ import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
 import { modifySession } from "./web/session";
+import {
+  registerWebviewRequest,
+  type WebviewRequestEvents,
+} from "./web/transcript/bili-hack";
 
 export default class MxPlugin extends Plugin {
   async onload() {
@@ -39,6 +44,8 @@ export default class MxPlugin extends Plugin {
     this.handleMediaNote();
   }
 
+  reqEvents?: EventEmitter<WebviewRequestEvents>;
+  registerWebviewRequest = registerWebviewRequest;
   mediaNote = this.addChild(new MediaNoteIndex(this.app));
   leafOpener = new LeafOpener(this);
   handleMediaNote = handleMediaNote;
