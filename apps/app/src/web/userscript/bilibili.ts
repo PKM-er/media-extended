@@ -4,19 +4,27 @@ import { requireMx } from "./_require";
 const { waitForSelector, MediaPlugin } = requireMx();
 
 const css = `
-.bpx-player-control-wrap {
+#bilibili-player .bpx-player-control-wrap {
     opacity: 0 !important;
 }
-.bpx-player-control-wrap.mx-show-controls {
+#bilibili-player.mx-show-controls .bpx-player-control-wrap {
     opacity: 100 !important;
 }
 `;
+
+declare global {
+  // eslint-disable-next-line no-var
+  var player: any;
+}
 
 export default class BilibiliPlugin extends MediaPlugin {
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
   async onload(): Promise<void> {
+    this.controller.handle("bili_getManifest", () => {
+      return { value: window.player.getManifest() };
+    });
     this.injectStyle(css);
     localStorage.setItem("recommend_auto_play", "close");
     // disable autoplay
@@ -38,12 +46,10 @@ export default class BilibiliPlugin extends MediaPlugin {
     await this.untilMediaReady("canplay");
     this.register(
       this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
-        player
-          .querySelector(".bpx-player-control-wrap")
-          ?.classList.toggle("mx-show-controls", showWebsite);
+        player.classList.toggle("mx-show-controls", showWebsite);
       }),
     );
-    Promise.all([this.toggleDanmaku(false), this.enterWebFullscreen()]);
+    await Promise.all([this.toggleDanmaku(false), this.enterWebFullscreen()]);
   }
 
   #player: HTMLDivElement | null = null;
@@ -55,6 +61,17 @@ export default class BilibiliPlugin extends MediaPlugin {
   }
 
   async toggleDanmaku(val?: boolean) {
+    if (window.player) {
+      if (val === undefined) {
+        val = !window.player.danmaku.isOpen();
+      }
+      if (val) {
+        window.player.danmaku.open();
+      } else {
+        window.player.danmaku.close();
+      }
+      return;
+    }
     const danmakuSwitchEl = await waitForSelector<HTMLDivElement>(
       ".bui-danmaku-switch",
       this.player,

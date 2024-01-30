@@ -3,7 +3,6 @@ import "./style.css";
 import "./icons";
 
 import { Plugin } from "obsidian";
-import type { EventEmitter } from "./lib/emitter";
 import { handleMediaNote } from "./media-note";
 import { LeafOpener } from "./media-note/leaf-open";
 import {
@@ -30,11 +29,8 @@ import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
+import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
-import {
-  registerWebviewRequest,
-  type WebviewRequestEvents,
-} from "./web/transcript/bili-hack";
 
 export default class MxPlugin extends Plugin {
   async onload() {
@@ -44,9 +40,8 @@ export default class MxPlugin extends Plugin {
     this.handleMediaNote();
   }
 
-  reqEvents?: EventEmitter<WebviewRequestEvents>;
-  registerWebviewRequest = registerWebviewRequest;
   mediaNote = this.addChild(new MediaNoteIndex(this.app));
+  biliReq = this.addChild(new BilibiliRequestHacker(this));
   leafOpener = new LeafOpener(this);
   handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;

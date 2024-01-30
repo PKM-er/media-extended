@@ -85,13 +85,17 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   }
 
   async play() {
-    await this.userGesture();
-    await this._port.methods.play();
+    if (this.webview.isConnected) {
+      await this.userGesture();
+      await this._port.methods.play();
+    }
   }
 
   async pause() {
-    await this.userGesture();
-    await this._port.methods.pause();
+    if (this.webview.isConnected) {
+      await this.userGesture();
+      await this._port.methods.pause();
+    }
   }
 
   setMuted(muted: boolean) {
@@ -112,8 +116,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   private async _updateTitle(event: string | Event, title?: string) {
     const _evt = (event = typeof event === "string" ? new Event(event) : event);
-    const originalTitle =
-      title ?? (await this._webview.executeJavaScript("document.title"));
+    const originalTitle = title ?? this._webview.getTitle();
     const finalTitle = titleParser[this.currentWebHost](originalTitle);
     const current = this._ctx.$state.title();
     if (finalTitle === current) return;
@@ -126,7 +129,6 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
       // #region -- logic to handle plugin load
       const unsub = this.media.onReady(
         async () => {
-          console.log("PORT READY");
           window.clearTimeout(timeoutId);
           await this.media.methods.loadPlugin(plugins[host]);
           resolve();
@@ -246,6 +248,6 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     //     this.media.methods.setCurrentTime(frag.start);
     //   }
     // }
-    console.log("vidstack player loaded");
+    // console.log("vidstack player loaded");
   }
 }

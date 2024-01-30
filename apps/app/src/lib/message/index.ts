@@ -53,7 +53,6 @@ export class MessageController<
     port.addEventListener("message", onMessage);
     port.start();
     port.postMessage(PORT_READY_EVENT);
-    console.log("port ready");
   }
   unload() {
     this.port?.close();

@@ -2,7 +2,7 @@ import { syntaxTree, tokenClassNodeProp } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
 import type { WidgetType } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
-import { editorInfoField } from "obsidian";
+// import { editorInfoField } from "obsidian";
 import { parseUrl } from "@/media-note/note-index/url-info";
 import type MediaExtended from "@/mx-main";
 
@@ -17,10 +17,10 @@ const getPlayerDecos = (
   from?: number,
   to?: number,
 ) => {
-  const mdView = state.field(editorInfoField),
-    sourcePath = mdView.file?.path ?? "";
+  // const mdView = state.field(editorInfoField),
+  // sourcePath = mdView.file?.path ?? "";
 
-  if (!sourcePath) console.warn("missing sourcePath", mdView);
+  // if (!sourcePath) console.warn("missing sourcePath", mdView);
 
   const doc = state.doc;
   let isImgEmbed = !1,

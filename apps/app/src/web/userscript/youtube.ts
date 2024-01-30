@@ -1,21 +1,21 @@
 // hugely inspired by https://greasyfork.org/zh-CN/scripts/4870-maximize-video
 
 const css = `
-.mx-player {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  max-width: none;
-  max-height: none;
-  min-width: 0;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  z-index: 2147483647; /* Ensure it's on top of other elements */
-  background-color: #000;
-  transform: none;
+ytd-watch-flexy[theater] #movie_player {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 2147483647 !important; /* Ensure it's on top of other elements */
+  background-color: #000 !important;
+  transform: none !important;
 }
 .mx-parent {
   overflow: visible !important;
@@ -41,7 +41,7 @@ ytd-app .html5-endscreen {
 ytd-app .ytp-chrome-bottom {
   opacity: 0 !important;
 }
-ytd-app .ytp-chrome-bottom.mx-show-controls {
+ytd-app.mx-show-controls .ytp-chrome-bottom {
   opacity: 100 !important;
 }
 `;
@@ -63,20 +63,19 @@ export default class BilibiliPlugin extends MediaPlugin {
       throw new Error("Bind failed: #ytd-app not found");
     }
     this.#app = app;
+
     await Promise.all([
-      this.untilMediaReady("canplay").then(async () => {
+      this.untilMediaReady("canplay").then(() => {
         this.register(
           this.controller.on(
             "mx-toggle-controls",
             ({ payload: showWebsite }) => {
-              this.app
-                .querySelector(".ytp-chrome-bottom")
-                ?.classList.toggle("mx-show-controls", showWebsite);
+              this.app.classList.toggle("mx-show-controls", showWebsite);
             },
           ),
         );
-        await this.disableAutoPlay();
       }),
+      await this.disableAutoPlay(),
       this.enterWebFullscreen(),
     ]);
   }
@@ -126,27 +125,31 @@ export default class BilibiliPlugin extends MediaPlugin {
   }
 
   async enterWebFullscreen() {
-    const cinematicsModeSelector = "#player-theater-container #movie_player";
-    const isCinematicsMode = () =>
-      !!this.app.querySelector(cinematicsModeSelector);
-    if (isCinematicsMode()) {
-      const fsButton = await waitForSelector<HTMLButtonElement>(
-        "#movie_player .ytp-size-button",
-        this.app,
-      );
-      fsButton.click();
-      await waitForSelector(cinematicsModeSelector, this.app);
-    }
     const moviePlayer = await waitForSelector<HTMLDivElement>(
       "#movie_player",
       this.app,
     );
-    moviePlayer.classList.add("mx-player");
     for (const parent of parents(moviePlayer)) {
       parent.classList.add("mx-parent");
       if (getComputedStyle(parent).position == "fixed") {
         parent.classList.add("mx-absolute");
       }
+    }
+    console.log("added parent classes");
+
+    const isCinematicsMode = () =>
+      !!this.app.querySelector("ytd-watch-flexy[theater]");
+    if (!isCinematicsMode()) {
+      const fsButton = await waitForSelector<HTMLButtonElement>(
+        "#movie_player .ytp-size-button",
+        this.app,
+      );
+      console.log("Entering cinema mode");
+      do {
+        fsButton.click();
+        await sleep(200);
+      } while (!isCinematicsMode());
+      console.log("Entered cinema mode");
     }
     window.dispatchEvent(new Event("resize"));
   }
@@ -159,4 +162,8 @@ function* parents(element: HTMLElement, includeSelf = false) {
     element = element.parentElement;
     yield element;
   }
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

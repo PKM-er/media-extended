@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { MediaErrorCode } from "@vidstack/react";
+import type { BilibiliPlayerManifest } from "@/web/bili-api/base";
 import type { MessageController, Nil } from "../message";
 // import { enumerate } from "../must-include";
 import type { ScreenshotInfo } from "../screenshot";
@@ -152,6 +154,13 @@ export type MediaEventPayloadMap = {
   };
 };
 
+interface RemoteFetchResponse {
+  ab: ArrayBuffer;
+  type: string;
+  gzip: boolean;
+  respHeaders: Record<string, string>;
+}
+
 export type MsgCtrlRemote = MessageController<
   {
     [K in MediaActionProps]: (...args: Parameters<HTMLMediaElement[K]>) => {
@@ -170,6 +179,16 @@ export type MsgCtrlRemote = MessageController<
     screenshot(type?: string): {
       value: ScreenshotInfo;
       transfer: Transferable[];
+    };
+    fetch(
+      url: string,
+      init?: RequestInit & { gzip?: boolean },
+    ): {
+      value: RemoteFetchResponse;
+      transfer: Transferable[];
+    };
+    bili_getManifest(): {
+      value: BilibiliPlayerManifest;
     };
   },
   Nil,
@@ -195,6 +214,11 @@ export type MsgCtrlLocal = MessageController<
   } & {
     loadPlugin(code?: string): void;
     screenshot(type?: string): ScreenshotInfo;
+    fetch(
+      url: string,
+      init?: RequestInit & { gzip?: boolean },
+    ): Promise<RemoteFetchResponse>;
+    bili_getManifest(): Promise<BilibiliPlayerManifest>;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap,
   {

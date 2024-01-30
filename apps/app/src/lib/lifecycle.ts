@@ -5,6 +5,9 @@ export class LifeCycle {
     if (this.#loaded) return;
     this.#loaded = true;
     await this.onload();
+    for (const child of this.#children) {
+      await child.load();
+    }
   }
   async onload(): Promise<void> {
     return;
@@ -16,6 +19,10 @@ export class LifeCycle {
     let unload;
     while ((unload = this.#events.pop())) {
       await unload();
+    }
+    let child;
+    while ((child = this.#children.pop())) {
+      await child.unload();
     }
     await this.onunload();
   }
@@ -67,5 +74,23 @@ export class LifeCycle {
   ) {
     el.addEventListener(type, callback, options);
     this.register(() => el.removeEventListener(type, callback, options));
+  }
+
+  #children: LifeCycle[] = [];
+
+  async addChild<T extends LifeCycle>(child: T): Promise<T> {
+    this.#children.push(child);
+    if (this.#loaded) {
+      await child.load();
+    }
+    return child;
+  }
+  async removeChild<T extends LifeCycle>(child: T): Promise<T> {
+    const idx = this.#children.indexOf(child);
+    if (-1 !== idx) {
+      this.#children.splice(idx, 1);
+      child.unload();
+    }
+    return child;
   }
 }
