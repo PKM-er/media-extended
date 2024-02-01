@@ -1,6 +1,6 @@
 import type { Menu } from "obsidian";
-import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { PlayerContext } from ".";
+import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 
 export function webpageMenu(
   menu: Menu,
@@ -13,19 +13,20 @@ export function webpageMenu(
     | "more-options",
 ) {
   if (
-    !(player.provider instanceof WebiviewMediaProvider) ||
-    (source !== "player-menu-view" && source !== "more-options")
+    !(
+      player.provider instanceof WebiviewMediaProvider &&
+      source === "more-options"
+    )
   )
-    return;
-  menu.addItem((item) => {
-    item
-      .setTitle(
-        controls ? "Show website native controls" : "Hide website controls",
-      )
-      .setSection("mx-player")
-      .setIcon("sliders-horizontal")
-      .onClick(() => {
-        toggleControls(!controls);
-      });
-  });
+    menu.addItem((item) => {
+      item
+        .setTitle(
+          controls ? "Show website native controls" : "Hide website controls",
+        )
+        .setSection("mx-player")
+        .setIcon("sliders-horizontal")
+        .onClick(() => {
+          toggleControls(!controls);
+        });
+    });
 }
