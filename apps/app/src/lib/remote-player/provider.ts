@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Maverick } from "@vidstack/react";
 import type {
+  MediaContext,
   MediaProviderAdapter,
   MediaSetupContext,
   MediaSrc,
@@ -19,9 +20,11 @@ import { MessageController, TimeoutError } from "../message";
 import { decodeWebpageUrl } from "./encode";
 import { HTMLMediaEvents } from "./html–media-events";
 import { evalInWebview } from "./lib/inline-eval";
+import type { MediaPictureInPictureAdapter } from "./pip";
+import { WebpagePictureInPicture } from "./pip";
 import type { MsgCtrlLocal } from "./type";
 
-const { createScope, onDispose } = Maverick;
+const { createScope, onDispose, scoped } = Maverick;
 
 interface WebviewMediaSrc extends MediaSrc<string> {
   host: SupportedWebHost;
@@ -35,7 +38,17 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   protected _port = new MessageController() as MsgCtrlLocal;
 
-  constructor(protected _webview: WebviewTag) {}
+  pictureInPicture?: MediaPictureInPictureAdapter;
+  constructor(protected _webview: WebviewTag, ctx: MediaContext) {
+    scoped(() => {
+      this.pictureInPicture = new WebpagePictureInPicture(
+        this._port,
+        ctx,
+        // don't have whitelist, always require user gesture
+        () => this.userGesture(true),
+      );
+    }, this.scope);
+  }
 
   protected _ctx!: MediaSetupContext;
 
@@ -80,8 +93,12 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   // so if not explicitly triggered, play/pause will not work.
   // since userscipt is not eval with "userGesture" being true,
   // we need to trigger a user gesture before play/pause
-  async userGesture() {
-    await (this.#interaction ??= this.webview.executeJavaScript("1", true));
+  async userGesture(force = false) {
+    if (!force && this.#interaction) {
+      await this.#interaction;
+      return;
+    }
+    await (this.#interaction = this.webview.executeJavaScript("1", true));
   }
 
   async play() {

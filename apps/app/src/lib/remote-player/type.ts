@@ -87,6 +87,8 @@ export type MediaEventPayloadMap = {
   loadstart: {
     networkState: number;
   };
+  enterpictureinpicture: void;
+  leavepictureinpicture: void;
   abort: void;
   emptied: void;
   error: {
@@ -175,11 +177,15 @@ export type MsgCtrlRemote = MessageController<
       value: HTMLMediaElement[K];
     };
   } & {
+    pictureInPictureEnabled: () => { value: boolean };
+  } & {
     loadPlugin(code?: string): void;
     screenshot(type?: string): {
       value: ScreenshotInfo;
       transfer: Transferable[];
     };
+    requestPictureInPicture(): void;
+    exitPictureInPicture(): void;
     fetch(
       url: string,
       init?: RequestInit & { gzip?: boolean },
@@ -212,12 +218,16 @@ export type MsgCtrlLocal = MessageController<
   } & {
     [K in MediaStateProps as `get${Capitalize<K>}`]: () => HTMLMediaElement[K];
   } & {
+    pictureInPictureEnabled: () => boolean;
+  } & {
     loadPlugin(code?: string): void;
     screenshot(type?: string): ScreenshotInfo;
     fetch(
       url: string,
       init?: RequestInit & { gzip?: boolean },
     ): Promise<RemoteFetchResponse>;
+    requestPictureInPicture(): void;
+    exitPictureInPicture(): void;
     bili_getManifest(): Promise<BilibiliPlayerManifest>;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap,

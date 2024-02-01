@@ -18,6 +18,14 @@ export function registerEvents(plugin: MediaPlugin) {
   plugin.registerDomEvent(player, "seeking", handleSeeking);
   plugin.registerDomEvent(player, "ended", handleEnded);
   plugin.registerDomEvent(player, "waiting", handleWaiting);
+  if (player instanceof HTMLVideoElement) {
+    plugin.registerDomEvent(player, "enterpictureinpicture" as any, () =>
+      port.send("enterpictureinpicture", void 0),
+    );
+    plugin.registerDomEvent(player, "leavepictureinpicture" as any, () =>
+      port.send("leavepictureinpicture", void 0),
+    );
+  }
 
   function handleAbort() {
     port.send("abort", void 0);

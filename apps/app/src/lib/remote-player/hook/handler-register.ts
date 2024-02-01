@@ -17,6 +17,15 @@ export function registerHandlers(plugin: MediaPlugin) {
       value: serializeMediaStatePropValue(player[prop]),
     }));
   });
+  port.handle("pictureInPictureEnabled", () => {
+    return { value: document.pictureInPictureElement === player };
+  });
+  port.handle("requestPictureInPicture", () => {
+    if (player instanceof HTMLVideoElement) player.requestPictureInPicture();
+  });
+  port.handle("exitPictureInPicture", () => {
+    document.exitPictureInPicture();
+  });
   mediaWritableStateProps.forEach((prop) => {
     port.handle(`get${capitalize(prop)}`, () => ({
       value: serializeMediaStatePropValue(player[prop]),

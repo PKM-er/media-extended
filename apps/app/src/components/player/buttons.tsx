@@ -110,6 +110,8 @@ export function Caption() {
 
 export function PIP() {
   const isActive = useMediaState("pictureInPicture");
+  const can = useMediaState("canPictureInPicture");
+  if (!can) return null;
   return (
     <PIPButton
       className={buttonClass}

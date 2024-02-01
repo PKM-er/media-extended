@@ -1,4 +1,9 @@
-import type { MediaProviderLoader, MediaSrc, MediaType } from "@vidstack/react";
+import type {
+  MediaContext,
+  MediaProviderLoader,
+  MediaSrc,
+  MediaType,
+} from "@vidstack/react";
 import type { WebviewTag } from "electron";
 
 import { isString } from "maverick.js/std";
@@ -18,7 +23,7 @@ export class WebviewProviderLoader
     return "video";
   }
 
-  async load() {
-    return new WebiviewMediaProvider(this.target);
+  async load(ctx: MediaContext) {
+    return new WebiviewMediaProvider(this.target, ctx);
   }
 }

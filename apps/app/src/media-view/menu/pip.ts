@@ -1,12 +1,8 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { Menu } from "obsidian";
-import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 
 export function pipMenu(menu: Menu, player: MediaPlayerInstance) {
-  const isVideo = player.state.viewType === "video";
-  const isWebview = player.provider instanceof WebiviewMediaProvider;
-  // webview not support pip yet
-  if (!isVideo || isWebview) return;
+  if (!player.state.canPictureInPicture) return;
   if (!player.state.pictureInPicture) {
     menu.addItem((item) =>
       item
