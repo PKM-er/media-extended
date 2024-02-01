@@ -1,7 +1,9 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { Editor, WorkspaceLeaf, MarkdownFileInfo, App } from "obsidian";
-import { MarkdownView } from "obsidian";
+import { MarkdownView, Notice, debounce } from "obsidian";
 import type { AudioFileView, VideoFileView } from "@/media-view/file-view";
+import { PlaybackSpeedPrompt } from "@/media-view/menu/prompt";
+import { speedOptions } from "@/media-view/menu/speed";
 import type { RemoteMediaView } from "@/media-view/view-type";
 import {
   isMediaFileViewType,
@@ -62,14 +64,90 @@ const commands: Controls[] = [
       }
     },
   },
+  ...speed(),
 ];
+
+function speed(): Controls[] {
+  // reuse notice if user is spamming speed change
+  let notice: Notice | null = null;
+  const hide = debounce(() => notice?.hide(), 2e3, true);
+  function notify(message: string) {
+    if (!notice || notice.noticeEl.isConnected === false) {
+      notice = new Notice(message, 0);
+    } else {
+      notice.setMessage(message);
+    }
+    hide();
+  }
+  function notifyAllowDup(message: string) {
+    new Notice(message, 2e3);
+  }
+  return [
+    {
+      id: "reset-speed",
+      label: "Reset playback speed",
+      icon: "reset",
+      check: (media) => media.state.playbackRate !== 1,
+      action: (media) => {
+        media.playbackRate = 1;
+        notifyAllowDup("Speed reset to 1x");
+      },
+    },
+    {
+      id: "increase-speed",
+      label: "Increase playback speed",
+      icon: "arrow-up",
+      action: (media) => {
+        const curr = media.playbackRate;
+        if (curr >= speedOptions.last()!) {
+          notifyAllowDup("Cannot increase speed further");
+          return;
+        }
+        // find nearest speed option greater than current speed
+        const next = speedOptions.find((speed) => speed > curr)!;
+        media.playbackRate = next;
+        notify(`Speed increased to ${next}x`);
+      },
+    },
+    {
+      id: "decrease-speed",
+      label: "Decrease playback speed",
+      icon: "arrow-down",
+      action: (media) => {
+        const curr = media.playbackRate;
+        if (curr <= speedOptions.first()!) {
+          notifyAllowDup("Cannot decrease speed further");
+          return;
+        }
+        // find nearest speed option less than current speed
+        const prev = speedOptions
+          .slice()
+          .reverse()
+          .find((speed) => speed < curr)!;
+        media.playbackRate = prev;
+        notify(`Speed decreased to ${prev}x`);
+      },
+    },
+    {
+      id: "set-speed",
+      label: "Set playback speed",
+      icon: "gauge",
+      action: async (media) => {
+        const newSpeed = await PlaybackSpeedPrompt.run();
+        if (!newSpeed) return;
+        media.playbackRate = newSpeed;
+        notify(`Speed set to ${newSpeed}x`);
+      },
+    },
+  ];
+}
 
 export function registerNoteCommands(plugin: MxPlugin) {
   const { workspace } = plugin.app;
 
   plugin.addCommand({
     id: "take-timestamp",
-    name: "Take timstamp on active/current media",
+    name: "Take timstamp",
     icon: "star",
     checkCallback: checkCallbacks(
       (checking) => {
@@ -98,7 +176,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
 
   plugin.addCommand({
     id: "save-screenshot",
-    name: "Save screenshot on active/current media",
+    name: "Save screenshot",
     icon: "camera",
     checkCallback: checkCallbacks(
       (checking) => {
@@ -152,7 +230,7 @@ export function registerControlCommands(plugin: MxPlugin) {
     }
     plugin.addCommand({
       id,
-      name: `${label} on active/linked media`,
+      name: label,
       icon,
       repeatable: repeat,
       checkCallback: checkCallbacks(
