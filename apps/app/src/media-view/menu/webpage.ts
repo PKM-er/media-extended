@@ -1,6 +1,6 @@
 import type { Menu } from "obsidian";
-import type { PlayerContext } from ".";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
+import type { PlayerContext } from ".";
 
 export function webpageMenu(
   menu: Menu,
@@ -13,10 +13,8 @@ export function webpageMenu(
     | "more-options",
 ) {
   if (
-    !(
-      player.provider instanceof WebiviewMediaProvider &&
-      source === "more-options"
-    )
+    player.provider instanceof WebiviewMediaProvider &&
+    source === "more-options"
   )
     menu.addItem((item) => {
       item
