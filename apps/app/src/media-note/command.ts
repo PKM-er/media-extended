@@ -81,6 +81,7 @@ interface Controls {
   label: string;
   icon: string;
   repeat?: boolean;
+  check?: (media: MediaPlayerInstance) => boolean;
   action: (media: MediaPlayerInstance) => void;
 }
 
@@ -122,19 +123,16 @@ const commands: Controls[] = [
     },
   },
   {
-    id: "enter-fullscreen",
-    label: "Fullscreen",
+    id: "toggle-fullscreen",
+    label: "Enter/exit fullscreen",
     icon: "expand",
+    check: media => media.state.canFullscreen,
     action: (media) => {
-      media.enterFullscreen();
-    },
-  },
-  {
-    id: "exit-fullscreen",
-    label: "Exit Fullscreen",
-    icon: "expand",
-    action: (media) => {
-      media.exitFullscreen();
+      if (media.state.fullscreen) {
+        media.exitFullscreen();
+      } else {
+        media.enterFullscreen();
+      }
     },
   },
 ];
@@ -142,7 +140,7 @@ const commands: Controls[] = [
 export function registerControlCommands(plugin: MxPlugin) {
   const { workspace } = plugin.app;
 
-  commands.forEach(({ id, label, icon, action, repeat }) => {
+  commands.forEach(({ id, label, icon, action, repeat, check }) => {
     plugin.addCommand({
       id: `${id}-player`,
       name: `${label} on current media`,
@@ -172,6 +170,7 @@ export function registerControlCommands(plugin: MxPlugin) {
         if (!mediaView) return false;
         const player = mediaView.view.store.getState().player;
         if (!player) return false;
+        if (check && !check(player)) return false;
         if (checking) return true;
         action(player);
       },
