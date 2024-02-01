@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { MediaCanPlayDetail, MediaSetupContext } from "@vidstack/react";
+import type { MediaCanPlayDetail, MediaContext } from "@vidstack/react";
 import { Maverick } from "@vidstack/react";
 const { onDispose, peek } = Maverick;
 import { useDisposalBin } from "maverick.js/std";
@@ -40,7 +40,7 @@ export class HTMLMediaEvents {
 
   constructor(
     private _provider: WebiviewMediaProvider,
-    private _ctx: MediaSetupContext,
+    private _ctx: MediaContext,
   ) {
     this._attachInitialListeners();
     // handle RAF in remote

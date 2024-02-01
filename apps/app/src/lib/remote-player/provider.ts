@@ -3,7 +3,6 @@ import { Maverick } from "@vidstack/react";
 import type {
   MediaContext,
   MediaProviderAdapter,
-  MediaSetupContext,
   MediaSrc,
 } from "@vidstack/react";
 import type { WebviewTag } from "electron";
@@ -39,27 +38,25 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   protected _port = new MessageController() as MsgCtrlLocal;
 
   pictureInPicture?: MediaPictureInPictureAdapter;
-  constructor(protected _webview: WebviewTag, ctx: MediaContext) {
+  constructor(protected _webview: WebviewTag, protected _ctx: MediaContext) {
     scoped(() => {
       this.pictureInPicture = new WebpagePictureInPicture(
         this._port,
-        ctx,
+        _ctx,
         // don't have whitelist, always require user gesture
         () => this.userGesture(true),
       );
     }, this.scope);
   }
 
-  protected _ctx!: MediaSetupContext;
-
-  setup(ctx: MediaSetupContext) {
-    this._ctx = ctx;
+  setup() {
     onDispose(() => {
       // Dispose of media.
       this._webview.src = "";
       // this._webview.reload();
     });
-    if (this.type === "webview") ctx.delegate._notify("provider-setup", this);
+    if (this.type === "webview")
+      this._ctx.delegate._notify("provider-setup", this);
     this.registerTitleChange();
     onDispose(() => {
       this._webview.removeEventListener("dom-ready", this.onDomReady);

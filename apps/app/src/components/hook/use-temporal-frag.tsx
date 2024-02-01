@@ -9,7 +9,7 @@ import {
 import type { MediaViewStoreApi } from "../context";
 import { useMediaViewStoreInst } from "../context";
 
-export function useTempFrag() {
+export function useTempFragHandler() {
   const player = useMediaPlayer();
   const store = useMediaViewStoreInst();
   useEffect(() => {

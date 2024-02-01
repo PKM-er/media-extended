@@ -4,7 +4,7 @@ import type { MediaViewType } from "@vidstack/react";
 import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
 
 import { useState } from "react";
-import { useTempFrag } from "@/components/hook/use-temporal-frag";
+import { useTempFragHandler } from "@/components/hook/use-temporal-frag";
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
@@ -19,7 +19,7 @@ function HookLoader({
   onViewTypeChange: (viewType: "audio" | "unknown") => any;
 }) {
   useViewTypeDetect(onViewTypeChange);
-  useTempFrag();
+  useTempFragHandler();
   return <></>;
 }
 
@@ -51,7 +51,7 @@ export function Player() {
         "data-[view-type=video]:aspect-video data-[view-type=audio]:h-20 data-[view-type=audio]:aspect-auto",
       )}
       src={src}
-      playsinline
+      playsInline
       title={title}
       viewType={viewType}
       ref={playerRef}

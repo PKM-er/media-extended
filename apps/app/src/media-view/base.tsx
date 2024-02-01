@@ -60,33 +60,15 @@ export async function setTempFrag(
   }
   if (_newTime !== null) {
     const newTime = _newTime;
-    if (!player.state.canPlay) {
-      // trying to fix youtube and vimeo autoplay on seek
-      if (
-        ["video/vimeo", "video/youtube"].includes(player.state.source.type) &&
-        !player.state.autoplay
-      ) {
-        await Promise.race([
-          waitFor(player, "can-play"),
-          waitFor(player, "canplay"),
-        ]);
-        player.play();
-        await waitFor(player, "play");
-        await Promise.race([
-          waitFor(player, "time-update"),
-          waitFor(player, "timeupdate"),
-        ]);
-        player.pause();
-        player.currentTime = newTime;
-      } else {
-        await Promise.race([
-          waitFor(player, "can-play"),
-          waitFor(player, "canplay"),
-        ]);
-        player.currentTime = newTime;
-      }
-    } else {
-      player.currentTime = newTime;
+    player.currentTime = newTime;
+    // trying to fix youtube iframe autoplay on initial seek
+    if (
+      !player.state.canPlay &&
+      ["video/youtube"].includes(player.state.source.type) &&
+      !player.state.autoPlay
+    ) {
+      await waitFor(player, "seeked");
+      await player.pause();
     }
   }
 
@@ -256,7 +238,14 @@ export abstract class MediaRemoteView
 
 function waitFor(
   player: MediaPlayerInstance,
-  event: "time-update" | "play" | "can-play" | "canplay" | "timeupdate",
+  event:
+    | "time-update"
+    | "play"
+    | "can-play"
+    | "canplay"
+    | "timeupdate"
+    | "seeking"
+    | "seeked",
 ) {
   return new Promise<void>((resolve) => {
     const timeout = window.setTimeout(() => {

@@ -13,6 +13,7 @@ import { WebiviewMediaProvider } from "./provider";
 export class WebviewProviderLoader
   implements MediaProviderLoader<WebiviewMediaProvider>
 {
+  readonly name = "webview";
   target!: WebviewTag;
 
   canPlay({ src }: MediaSrc) {
