@@ -5,7 +5,7 @@ export async function cacheBilibiliTranscripts(
   port: MsgCtrlLocal,
   plugin: MxPlugin,
 ): Promise<{
-  subtitles: { id: number; md5: string; lan: string; lanDesc: string }[];
+  subtitles: { id: number; lan: string; lanDesc: string }[];
   aid: number;
   bvid: string;
   cid: number;
