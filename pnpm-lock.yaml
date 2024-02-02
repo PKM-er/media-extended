@@ -27,8 +27,8 @@ importers:
         specifier: ^1.0.6
         version: 1.0.7(@types/react-dom@18.2.18)(@types/react@18.2.48)(react-dom@18.2.0)(react@18.2.0)
       '@vidstack/react':
-        specifier: npm:@aidenlx/vidstack-react@1.10.3-mod.3
-        version: /@aidenlx/vidstack-react@1.10.3-mod.3(@types/react@18.2.48)(react@18.2.0)
+        specifier: npm:@aidenlx/vidstack-react@1.10.3-mod.4
+        version: /@aidenlx/vidstack-react@1.10.3-mod.4(@types/react@18.2.48)(react@18.2.0)
       ahooks:
         specifier: ^3.7.8
         version: 3.7.8(react@18.2.0)
@@ -279,8 +279,8 @@ packages:
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
     engines: {node: '>=0.10.0'}
 
-  /@aidenlx/vidstack-react@1.10.3-mod.3(@types/react@18.2.48)(react@18.2.0):
-    resolution: {integrity: sha512-70MC+Sfy8tL9kk9hHlChVdupTI7bZ0U9z23d2f91IvYqy8jGRIp7Ig5ck0/la1+V77rHVODYT9IQuUULj/RWSw==}
+  /@aidenlx/vidstack-react@1.10.3-mod.4(@types/react@18.2.48)(react@18.2.0):
+    resolution: {integrity: sha512-99zpjyH38GPBA7/aci263Rss6SBB5r0vkZ+skZWTQlbHzRho+ETlinKs82+gSA9mwpZwj9EmCAovLbMy3aErXw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@types/react': ^18.0.0
