@@ -1,0 +1,4 @@
+.cm-line .mx-external-media-embed ~ img[data-mx-error],
+.cm-content .mx-external-media-embed ~ img[data-mx-error] {
+  display: none;
+}

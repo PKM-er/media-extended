@@ -7,6 +7,7 @@ import { parseUrl } from "@/media-note/note-index/url-info";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MxPlugin from "@/mx-main";
+import setupEmbedWidget from "./embed-widget";
 import { MediaFileExtensions } from "./media-type";
 import { reloadMarkdownPreview } from "./utils";
 
@@ -16,6 +17,7 @@ export default function injectMediaEmbed(
 ) {
   injectFileMediaEmbed.call(this, embedCreator);
   injectUrlMediaEmbed.call(this);
+  setupEmbedWidget(this);
 }
 
 function injectFileMediaEmbed(this: Plugin, embedCreator: EmbedCreator) {
