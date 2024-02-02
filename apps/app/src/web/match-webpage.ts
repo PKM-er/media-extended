@@ -10,9 +10,26 @@ export enum SupportedWebHost {
   Generic = "generic",
 }
 
-export const webHostDisplayName: Record<SupportedWebHost, string> = {
+export type SupportedWebHostNoGeneric = Exclude<
+  SupportedWebHost,
+  SupportedWebHost.Generic
+>;
+
+export const webHostDisplayNameNoGeneric: Record<
+  SupportedWebHostNoGeneric,
+  string
+> = {
   [SupportedWebHost.Bilibili]: "Bilibili",
   [SupportedWebHost.YouTube]: "YouTube",
+};
+
+export const webHostUrl: Record<SupportedWebHostNoGeneric, string> = {
+  [SupportedWebHost.Bilibili]: "https://www.bilibili.com",
+  [SupportedWebHost.YouTube]: "https://www.youtube.com",
+};
+
+export const webHostDisplayName: Record<SupportedWebHost, string> = {
+  ...webHostDisplayNameNoGeneric,
   [SupportedWebHost.Generic]: "Web",
 };
 
