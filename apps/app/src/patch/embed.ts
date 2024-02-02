@@ -86,6 +86,20 @@ function injectUrlMediaEmbed(this: MxPlugin) {
     for (const img of el.querySelectorAll("img")) {
       const info = extractSourceFromImg(img);
       if (!info) continue;
+      replace(this, info, img);
+    }
+    for (const iframe of el.querySelectorAll<HTMLIFrameElement>(
+      'iframe[src*="youtube.com/embed/"]',
+    )) {
+      const sourceText = ctx.getSectionInfo(iframe)?.text;
+      const info =
+        extractSourceFromMarkdown(sourceText) ??
+        extractSourceFromIframe(iframe);
+      if (!info) continue;
+      replace(this, info, iframe);
+    }
+
+    function replace(plguin: MxPlugin, info: EmbedSource, target: HTMLElement) {
       const { title, original } = info;
       const newWarpper = createSpan({
         cls: ["media-embed", "external-embed", "is-loaded"],
@@ -94,18 +108,18 @@ function injectUrlMediaEmbed(this: MxPlugin) {
           alt: title,
         },
       });
-      img.replaceWith(newWarpper);
-      ctx.addChild(new UrlEmbedMarkdownRenderChild(info, newWarpper, this));
+      target.replaceWith(newWarpper);
+      ctx.addChild(new UrlEmbedMarkdownRenderChild(info, newWarpper, plguin));
     }
   });
 }
 
-interface ImgSource extends UrlMediaInfo {
+interface EmbedSource extends UrlMediaInfo {
   title: string;
   size: Size | null;
 }
 
-function extractSourceFromImg(img: HTMLImageElement): ImgSource | null {
+function extractSourceFromImg(img: HTMLImageElement): EmbedSource | null {
   const linkTitle = img.alt,
     srcText = img.src;
 
@@ -114,4 +128,27 @@ function extractSourceFromImg(img: HTMLImageElement): ImgSource | null {
 
   const [title, size] = parseSizeFromLinkTitle(linkTitle);
   return { ...src, title, size };
+}
+
+function extractSourceFromMarkdown(
+  md: string | null | undefined,
+): EmbedSource | null {
+  if (!md) return null;
+  const match = md.match(/!\[(?<alt>[^\]]*)\]\((?<src>[^)]+)\)/);
+  if (!match) return null;
+  const { alt: linkTitle, src: srcText } = match.groups!;
+  const src = parseUrl(srcText);
+  if (!src) return null;
+  const [title, size] = parseSizeFromLinkTitle(linkTitle);
+  return { ...src, title, size };
+}
+
+function extractSourceFromIframe(
+  iframe: HTMLIFrameElement,
+): EmbedSource | null {
+  console.warn("cannot get source text of iframe, use src instead");
+  const srcText = iframe.src;
+  const src = parseUrl(srcText);
+  if (!src) return null;
+  return { ...src, title: titleFromUrl(srcText), size: null };
 }
