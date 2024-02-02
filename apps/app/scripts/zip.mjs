@@ -9,6 +9,6 @@ for (const filename of assets) {
 }
 await pipeline(
   zip.generateNodeStream({ type: "nodebuffer", streamFiles: true }),
-  createWriteStream(join("dist", "zotlit.zip")),
+  createWriteStream(join("dist", "media-extended.zip")),
 );
-console.log("zotlit.zip written.");
+console.log("build.zip written.");
