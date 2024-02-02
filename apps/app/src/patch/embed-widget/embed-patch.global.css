@@ -1,0 +1,8 @@
+.cm-content .mx-external-media-embed ~ img[data-mx-error] {
+  display: none;
+}
+
+.cm-content :not(.mx-external-media-embed) iframe[src*="youtube.com/embed/"],
+.cm-content iframe[src*="youtube.com/embed/"] {
+  display: none !important;
+}

@@ -1,7 +1,7 @@
 import { around } from "monkey-around";
 import type { Plugin } from "obsidian";
 import type MediaExtended from "@/mx-main";
-import "./hide-err-img.global.css";
+import "./embed-patch.global.css";
 
 import defineStatefulDecoration from "./state";
 
