@@ -55,7 +55,7 @@ const opts = {
   bundle: true,
   platform: "browser",
   format: "cjs",
-  target: "es6",
+  target: "es2020",
   mainFields: ["browser", "module", "main"],
   minify: isProd,
   define: {

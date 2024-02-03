@@ -1,7 +1,7 @@
 import type { MediaVolumeChange } from "@vidstack/react";
 import { useCallback, useState } from "react";
 import { convertHashToProps } from "@/lib/hash/hash-prop";
-import { useMediaViewStore } from "../context";
+import { useMediaViewStore, useSettings } from "../context";
 
 export function useControls() {
   const { controls: controlsHash } = useHashProps();
@@ -20,8 +20,9 @@ export function useControls() {
 export function useHashProps() {
   const hash = useMediaViewStore((s) => s.hash);
   const { volume: init, ...props } = convertHashToProps(hash);
+  const defaultVolume = useSettings((s) => s.defaultVolume / 100);
 
-  const [volume, setVolume] = useState(init ?? 1);
+  const [volume, setVolume] = useState(init ?? defaultVolume);
   return {
     ...props,
     volume,

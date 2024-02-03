@@ -29,17 +29,27 @@ import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
+import { createSettingsStore } from "./settings";
+import { MxSettingTabs } from "./settings/tab";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import "./login/modal";
 
 export default class MxPlugin extends Plugin {
+  settings = createSettingsStore(this);
+
   async onload() {
+    this.addSettingTab(new MxSettingTabs(this));
+    await this.loadSettings();
+    this.initLogin();
     this.loadPatches();
     this.registerMediaMenu();
-    await this.modifySession();
     this.handleMediaNote();
-    this.initLogin();
+    await this.modifySession();
+  }
+
+  async loadSettings() {
+    await this.settings.getState().load();
   }
 
   mediaNote = this.addChild(new MediaNoteIndex(this.app));

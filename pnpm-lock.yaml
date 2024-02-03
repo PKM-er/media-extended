@@ -32,6 +32,9 @@ importers:
       ahooks:
         specifier: ^3.7.8
         version: 3.7.8(react@18.2.0)
+      arktype:
+        specifier: 1.0.29-alpha
+        version: 1.0.29-alpha
       assert-never:
         specifier: ^1.2.1
         version: 1.2.1
@@ -2578,6 +2581,10 @@ packages:
     resolution: {integrity: sha512-b0P0sZPKtyu8HkeRAfCq0IfURZK+SuwMjY1UXGBU27wpAiTwQAIlq56IbIO+ytk/JjS1fMR14ee5WBBfKi5J6A==}
     dependencies:
       dequal: 2.0.3
+    dev: false
+
+  /arktype@1.0.29-alpha:
+    resolution: {integrity: sha512-glMLgVhIQRSkR3tymiS+POAcWVJH09sfrgic0jHnyFL8BlhHAJZX2BzdImU9zYr1y9NBqy+U93ZNrRTHXsKRDw==}
     dev: false
 
   /array-buffer-byte-length@1.0.0:

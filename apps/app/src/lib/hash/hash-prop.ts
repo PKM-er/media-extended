@@ -21,8 +21,8 @@ export const convertHashToProps = (hash: string | undefined) => {
 
 function parseVolume(volume: string | null): number | undefined {
   if (!volume) return;
-  const parsed = parseFloat(volume);
-  if (!(!isNaN(parsed) && parsed >= 0 && parsed <= 1)) return;
+  const parsed = parseInt(volume, 10);
+  if (!(!isNaN(parsed) && parsed >= 0 && parsed <= 100)) return;
 
-  return parsed;
+  return parsed / 100;
 }

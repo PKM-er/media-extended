@@ -8,6 +8,7 @@ import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import type { MediaInfo } from "@/media-note/note-index";
 import type MediaExtended from "@/mx-main";
+import type { MxSettings } from "@/settings";
 import type { SupportedWebHost } from "@/web/match-webpage";
 
 export interface MediaViewState {
@@ -66,6 +67,14 @@ export function useMediaViewStore<U>(
   const { store } = useContext(MediaViewContext);
   // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
   return useStore(store, selector);
+}
+
+export function useSettings<U>(selector: (state: MxSettings) => U): U {
+  const {
+    plugin: { settings },
+  } = useContext(MediaViewContext);
+  // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
+  return useStore(settings, selector);
 }
 
 export function useMediaViewStoreInst() {

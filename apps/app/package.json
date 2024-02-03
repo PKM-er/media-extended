@@ -40,6 +40,7 @@
     "@radix-ui/react-tooltip": "^1.0.6",
     "@vidstack/react": "npm:@aidenlx/vidstack-react@1.10.3-mod.4",
     "ahooks": "^3.7.8",
+    "arktype": "1.0.29-alpha",
     "assert-never": "^1.2.1",
     "clsx": "^1.2.1",
     "idb": "^8.0.0",
