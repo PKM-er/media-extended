@@ -1,3 +1,4 @@
+import filenamify from "filenamify/browser";
 import mime from "mime";
 import type { Editor, TFile } from "obsidian";
 import { Notice } from "obsidian";
@@ -48,7 +49,8 @@ export async function saveScreenshot<T extends PlayerComponent>(
   }
 
   const title = mediaTitle(mediaInfo, player.state);
-  const screenshotName = title + toDurationISOString(time);
+  const screenshotName =
+    filenamify(title, { replacement: "_" }) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
 
   const screenshotPath = await vault.getAvailablePathForAttachments(
