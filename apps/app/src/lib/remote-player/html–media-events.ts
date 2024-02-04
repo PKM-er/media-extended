@@ -184,6 +184,7 @@ export class HTMLMediaEvents {
   }
 
   private _onLoadedData(event: Event) {
+    this._provider.media.methods.setVolume(this._ctx.$state.volume());
     this._notify("loaded-data", undefined, new Event(event.type));
   }
 
