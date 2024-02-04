@@ -7,6 +7,7 @@ import {
 } from "@vidstack/react";
 import { Menu } from "obsidian";
 import { MoreIcon, SubtitlesIcon } from "@/components/icon";
+import { showAtButton } from "@/lib/menu";
 import {
   useApp,
   useIsEmbed,
@@ -38,7 +39,7 @@ export function Captions() {
             item.setTitle(label).setChecked(selected).onClick(select);
           });
         });
-        menu.showAtMouseEvent(evt.nativeEvent);
+        showAtButton(evt.nativeEvent, menu);
         evt.nativeEvent.stopImmediatePropagation();
       }}
       aria-label="Select Caption"
@@ -79,7 +80,7 @@ export function MoreOptions() {
           },
           isEmbed ? "player-menu-embed" : "player-menu-view",
         );
-        menu.showAtMouseEvent(evt.nativeEvent);
+        showAtButton(evt.nativeEvent, menu);
         evt.nativeEvent.stopImmediatePropagation();
       }}
       aria-label="More options"

@@ -8,6 +8,7 @@ import {
   DropdownComponent,
 } from "obsidian";
 import "./modal.global.less";
+import { showAtButton } from "@/lib/menu";
 import { getPartition } from "@/lib/remote-player/const";
 import { webHostDisplayNameNoGeneric, webHostUrl } from "@/web/match-webpage";
 import type { SupportedWebHostNoGeneric } from "@/web/match-webpage";
@@ -93,8 +94,7 @@ export class LoginModal extends Modal {
     .onClick((e) => {
       const menu = new Menu();
       this.onMoreOptions(menu);
-      const bounding = (e.target as HTMLElement).getBoundingClientRect();
-      menu.showAtPosition({ x: bounding.right, y: bounding.bottom });
+      showAtButton(e, menu);
     });
 
   buildWelcome() {

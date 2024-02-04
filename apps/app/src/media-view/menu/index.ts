@@ -56,9 +56,6 @@ declare module "obsidian" {
       leaf?: WorkspaceLeaf,
     ): void;
   }
-  interface MenuItem {
-    setSubmenu(): Menu;
-  }
 }
 
 export default function registerMediaMenu(this: MxPlugin) {
