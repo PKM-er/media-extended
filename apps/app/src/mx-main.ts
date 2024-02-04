@@ -31,6 +31,7 @@ import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
 import { createSettingsStore } from "./settings";
 import { MxSettingTabs } from "./settings/tab";
+import { initSwitcher } from "./switcher";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import "./login/modal";
@@ -46,6 +47,7 @@ export default class MxPlugin extends Plugin {
     this.registerMediaMenu();
     this.handleMediaNote();
     await this.modifySession();
+    initSwitcher(this);
   }
 
   async loadSettings() {

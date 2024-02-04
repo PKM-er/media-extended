@@ -6,7 +6,6 @@ import { PlaybackSpeedPrompt } from "@/media-view/menu/prompt";
 import { speedOptions } from "@/media-view/menu/speed";
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
-import { MediaSwitcherModal } from "@/switcher";
 import { isMediaLeaf } from "./leaf-open";
 import type { MediaInfo } from "./note-index";
 import { saveScreenshot } from "./timestamp/screenshot";
@@ -142,12 +141,6 @@ function speed(): Controls[] {
 }
 
 export function registerNoteCommands(plugin: MxPlugin) {
-  plugin.addCommand({
-    id: "open-media-url",
-    name: "Open media from URL",
-    icon: "link",
-    callback: () => new MediaSwitcherModal(plugin).open(),
-  });
   addMediaViewCommand(
     {
       id: "take-timestamp",
