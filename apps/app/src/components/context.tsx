@@ -15,6 +15,7 @@ export interface TransformConfig {
   rotate: "90" | "180" | "270";
   flipHorizontal: boolean;
   flipVertical: boolean;
+  zoom: number;
 }
 
 export interface MediaViewState {
@@ -58,7 +59,13 @@ export function createMediaViewStore() {
             newState.transform.flipVertical &&
             newState.transform.rotate === "180"
           ) {
-            return { transform: null };
+            // reset to default
+            newState.transform = {
+              ...newState.transform,
+              flipHorizontal: false,
+              flipVertical: false,
+              rotate: undefined,
+            };
           }
           return newState;
         });
