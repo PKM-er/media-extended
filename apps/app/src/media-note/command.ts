@@ -186,6 +186,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
             .then((l) => l.view);
         } else {
           if (checking) return true;
+          plugin.app.workspace.revealLeaf(view.leaf);
           _view = Promise.resolve(view);
         }
         _view.then((v) => action(v, ctx));
