@@ -59,13 +59,28 @@ abstract class MediaFileView
     menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
   ): void {
     super.onPaneMenu(menu, menuSource);
-    const { player, source, toggleControls, controls, hash } =
-      this.store.getState();
+    const {
+      player,
+      source,
+      toggleControls,
+      controls,
+      hash,
+      transform,
+      setTransform,
+    } = this.store.getState();
     if (!player || !source) return;
     this.app.workspace.trigger(
       "mx-media-menu",
       menu,
-      { controls, player, source, toggleControls, hash },
+      {
+        controls,
+        player,
+        source,
+        toggleControls,
+        hash,
+        setTransform,
+        transform,
+      },
       menuSource,
       this.leaf,
     );

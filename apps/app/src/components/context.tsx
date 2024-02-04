@@ -11,6 +11,12 @@ import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings";
 import type { SupportedWebHost } from "@/web/match-webpage";
 
+export interface TransformConfig {
+  rotate: "90" | "180" | "270";
+  flipHorizontal: boolean;
+  flipVertical: boolean;
+}
+
 export interface MediaViewState {
   player: MediaPlayerInstance | null;
   playerRef: React.RefCallback<MediaPlayerInstance>;
@@ -24,6 +30,8 @@ export interface MediaViewState {
     | undefined;
   hash: string;
   title: string;
+  transform: Partial<TransformConfig> | null;
+  setTransform: (transform: Partial<TransformConfig> | null) => void;
   controls?: boolean;
   toggleControls: (showCustom: boolean) => void;
   textTracks: TextTrackInit[];
@@ -38,6 +46,24 @@ export function createMediaViewStore() {
     source: undefined,
     hash: "",
     title: "",
+    transform: null,
+    setTransform: (transform: Partial<TransformConfig> | null) => {
+      if (!transform) {
+        set({ transform: null });
+      } else {
+        set((prev) => {
+          const newState = { transform: { ...prev.transform, ...transform } };
+          if (
+            newState.transform.flipHorizontal &&
+            newState.transform.flipVertical &&
+            newState.transform.rotate === "180"
+          ) {
+            return { transform: null };
+          }
+          return newState;
+        });
+      }
+    },
     toggleControls(showCustom) {
       const { player } = get();
       set({ controls: showCustom });

@@ -158,13 +158,28 @@ export abstract class MediaRemoteView
     menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
   ): void {
     super.onPaneMenu(menu, menuSource);
-    const { player, source, toggleControls, controls, hash } =
-      this.store.getState();
+    const {
+      player,
+      source,
+      toggleControls,
+      controls,
+      hash,
+      setTransform,
+      transform,
+    } = this.store.getState();
     if (!player || !source) return;
     this.app.workspace.trigger(
       "mx-media-menu",
       menu,
-      { source, player, toggleControls, controls, hash },
+      {
+        source,
+        player,
+        toggleControls,
+        controls,
+        hash,
+        setTransform,
+        transform,
+      },
       menuSource,
       this.leaf,
     );

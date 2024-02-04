@@ -1,4 +1,5 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
+import type { MediaViewState } from "@/components/context";
 import { parseFileInfo } from "@/media-note/note-index/file-info";
 import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
@@ -7,6 +8,7 @@ import { isMediaFileViewType } from "../view-type";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";
 import { speedMenu } from "./speed";
+import { transformMenu } from "./transform";
 import { urlMenu } from "./url";
 import { webpageMenu } from "./webpage";
 
@@ -17,6 +19,8 @@ export interface PlayerContext {
     viewType: MediaViewType;
     original: string;
   };
+  setTransform: MediaViewState["setTransform"];
+  transform: MediaViewState["transform"];
   hash: string;
   controls: boolean | undefined;
   toggleControls: (showCustom: boolean) => void;
@@ -62,7 +66,10 @@ export default function registerMediaMenu(this: MxPlugin) {
     this.app.workspace.on("mx-media-menu", (menu, ctx, source) => {
       if (source !== "sidebar-context-menu" && source !== "tab-header") {
         menu.addItem((item) => speedMenu(item, ctx.player));
-        pipMenu(menu, ctx.player);
+        if (ctx.player.state.viewType === "video") {
+          menu.addItem((item) => transformMenu(item, ctx));
+          pipMenu(menu, ctx.player);
+        }
       } else {
         muteMenu(menu, ctx.player);
       }
