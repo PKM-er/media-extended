@@ -2,7 +2,8 @@ import "@vidstack/react/player/styles/base.css";
 import "./style.css";
 import "./icons";
 
-import { Plugin } from "obsidian";
+import type { PaneType, SplitDirection } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import { initLogin } from "./login";
 import { handleMediaNote } from "./media-note";
 import { LeafOpener } from "./media-note/leaf-open";
@@ -11,6 +12,7 @@ import {
   onInternalLinkClick,
 } from "./media-note/link-click";
 import { MediaNoteIndex } from "./media-note/note-index";
+import { parseUrl } from "./media-note/note-index/url-info";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
@@ -38,6 +40,21 @@ import "./login/modal";
 
 export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
+
+  api = {
+    openUrl: async (
+      url: string,
+      newLeaf?: PaneType,
+      direction?: SplitDirection,
+    ) => {
+      const urlInfo = parseUrl(url);
+      if (!urlInfo) {
+        new Notice("Provider not yet supported");
+        return;
+      }
+      await this.leafOpener.openMedia(urlInfo, newLeaf as "split", direction);
+    },
+  };
 
   async onload() {
     this.addSettingTab(new MxSettingTabs(this));
