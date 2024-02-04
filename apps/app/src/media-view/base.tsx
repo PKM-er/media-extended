@@ -13,15 +13,18 @@ import { Player } from "@/components/player";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { toURL } from "@/lib/url";
 import { handleWindowMigration } from "@/lib/window-migration";
+import type { MediaInfo } from "@/media-note/note-index";
 import { parseUrl } from "@/media-note/note-index/url-info";
 import { saveScreenshot } from "@/media-note/timestamp/screenshot";
 import { takeTimestamp } from "@/media-note/timestamp/timestamp";
+import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
 
 export interface PlayerComponent extends Component {
   plugin: MediaExtended;
   store: MediaViewStoreApi;
   containerEl: HTMLElement;
+  getMediaInfo(): MediaInfo | null;
   root: ReactDOM.Root | null;
 }
 
@@ -83,6 +86,7 @@ declare module "obsidian" {
   }
   interface WorkspaceLeaf {
     updateHeader(): void;
+    containerEl: HTMLElement;
   }
   interface Workspace {
     requestActiveLeafEvents(): boolean;
@@ -106,28 +110,17 @@ export abstract class MediaRemoteView
   protected _title = "";
   protected _sourceType = "";
 
+  getMediaInfo() {
+    return parseUrl(this.store.getState().source?.original);
+  }
+
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
     this.store = createMediaViewStore();
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
-    // this.register(
-    //   this.containerEl.onWindowMigrated(() => {
-    //     this.render();
-    //   }),
-    // );
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-    this.addAction("star", "Timestamp", () =>
-      takeTimestamp(this, (player) =>
-        parseUrl(player.store.getState().source?.original),
-      ),
-    );
-    this.addAction("camera", "Screenshot", () =>
-      saveScreenshot(this, (player) =>
-        parseUrl(player.store.getState().source?.original),
-      ),
-    );
 
     // make sure to unmount the player before the leaf detach it from DOM
     this.register(
@@ -151,6 +144,7 @@ export abstract class MediaRemoteView
         }),
       ),
     );
+    addAction(this);
   }
 
   abstract getViewType(): string;
@@ -269,4 +263,21 @@ export function titleFromUrl(src: string): string {
   if (!finalPath) return "";
   // remove extension
   return decodeURI(finalPath.split(".").slice(0, -1).join("."));
+}
+
+export function addAction(player: PlayerComponent & ItemView) {
+  player.addAction("star", "Timestamp", () => {
+    const info = player.getMediaInfo();
+    if (!info) return;
+    openOrCreateMediaNote(info, player).then((ctx) =>
+      takeTimestamp(player, ctx),
+    );
+  });
+  player.addAction("camera", "Screenshot", () => {
+    const info = player.getMediaInfo();
+    if (!info) return;
+    openOrCreateMediaNote(info, player).then((ctx) =>
+      saveScreenshot(player, ctx),
+    );
+  });
 }

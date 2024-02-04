@@ -54,7 +54,7 @@ export default class MxPlugin extends Plugin {
 
   mediaNote = this.addChild(new MediaNoteIndex(this.app));
   biliReq = this.addChild(new BilibiliRequestHacker(this));
-  leafOpener = new LeafOpener(this);
+  leafOpener = this.addChild(new LeafOpener(this));
   handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;
   injectMediaView = injectMediaView;

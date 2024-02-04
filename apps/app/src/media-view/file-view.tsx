@@ -6,11 +6,9 @@ import { Player } from "@/components/player";
 import { getTracks } from "@/lib/subtitle";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type { FileMediaInfo } from "@/media-note/note-index/file-info";
-import { saveScreenshot } from "@/media-note/timestamp/screenshot";
-import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
-import { setTempFrag, type PlayerComponent } from "./base";
+import { setTempFrag, type PlayerComponent, addAction } from "./base";
 import type { MediaFileViewType } from "./view-type";
 import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
@@ -33,12 +31,7 @@ abstract class MediaFileView
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
     handleWindowMigration.call(this, () => this.render());
-    this.addAction("star", "Timestamp", () =>
-      takeTimestamp(this, () => this.getMediaInfo()),
-    );
-    this.addAction("camera", "Screenshot", () =>
-      saveScreenshot(this, () => this.getMediaInfo()),
-    );
+    addAction(this);
 
     this.register(
       this.containerEl.onWindowMigrated(() => {

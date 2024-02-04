@@ -1,6 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 
 import type { MediaType } from "@/patch/media-type";
+import type { AudioFileView, VideoFileView } from "./file-view";
 import type { MediaEmbedView } from "./iframe-view";
 import type { VideoUrlView, AudioUrlView } from "./url-view";
 import type { MediaWebpageView } from "./webpage-view";
@@ -50,8 +51,20 @@ export function isRemoteMediaViewType(
   );
 }
 
+export type MediaView = VideoFileView | AudioFileView | RemoteMediaView;
+
 export type RemoteMediaView =
   | VideoUrlView
   | AudioUrlView
   | MediaWebpageView
   | MediaEmbedView;
+
+export type MediaViewType =
+  | MediaFileViewType
+  | MediaUrlViewType
+  | MediaEmbedViewType
+  | MediaWebpageViewType;
+
+export function isMediaViewType(type: string): type is MediaViewType {
+  return isMediaFileViewType(type) || isRemoteMediaViewType(type);
+}

@@ -1,18 +1,16 @@
+/* eslint-disable deprecation/deprecation */
 import type { MediaPlayerInstance } from "@vidstack/react";
-import type { Editor, WorkspaceLeaf, MarkdownFileInfo, App } from "obsidian";
+import type { Editor, MarkdownFileInfo, App, Command, TFile } from "obsidian";
 import { MarkdownView, Notice, debounce } from "obsidian";
-import type { AudioFileView, VideoFileView } from "@/media-view/file-view";
 import { PlaybackSpeedPrompt } from "@/media-view/menu/prompt";
 import { speedOptions } from "@/media-view/menu/speed";
-import type { RemoteMediaView } from "@/media-view/view-type";
-import {
-  isMediaFileViewType,
-  isRemoteMediaViewType,
-} from "@/media-view/view-type";
+import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
-import { parseUrl } from "./note-index/url-info";
+import { isMediaLeaf } from "./leaf-open";
+import type { MediaInfo } from "./note-index";
 import { saveScreenshot } from "./timestamp/screenshot";
 import { takeTimestamp } from "./timestamp/timestamp";
+import { openOrCreateMediaNote } from "./timestamp/utils";
 
 const commands: Controls[] = [
   {
@@ -143,65 +141,57 @@ function speed(): Controls[] {
 }
 
 export function registerNoteCommands(plugin: MxPlugin) {
-  const { workspace } = plugin.app;
+  addMediaViewCommand(
+    {
+      id: "take-timestamp",
+      name: "Take timstamp",
+      icon: "star",
+      ...logic(takeTimestamp),
+    },
+    plugin,
+  );
+  addMediaViewCommand(
+    {
+      id: "save-screenshot",
+      name: "Save screenshot",
+      icon: "camera",
+      ...logic(saveScreenshot),
+    },
+    plugin,
+  );
 
-  plugin.addCommand({
-    id: "take-timestamp",
-    name: "Take timstamp",
-    icon: "star",
-    checkCallback: checkCallbacks(
-      (checking) => {
-        // eslint-disable-next-line deprecation/deprecation
-        const mediaView = getMediaView(workspace.activeLeaf);
-        if (!mediaView) return false;
-        if (checking) return true;
-        takeTimestamp(mediaView.view, mediaView.getInfo);
+  function logic(
+    action: (
+      playerComponent: MediaView,
+      ctx: {
+        file: TFile;
+        editor: Editor;
       },
-      (checking, editor, ctx) => {
-        if (!ctx.file) return false;
-        const mediaInfo = plugin.mediaNote.findMedia(ctx.file);
+    ) => any,
+  ): MediaViewCallback {
+    return {
+      playerCheckCallback: (checking, view) => {
+        const mediaInfo = view.getMediaInfo();
         if (!mediaInfo) return false;
-        const opened = plugin.leafOpener.findExistingPlayer(mediaInfo);
-        const mediaView = getMediaView(opened);
-        if (!mediaView) return false;
         if (checking) return true;
-        takeTimestamp(mediaView.view, mediaView.getInfo, {
-          file: ctx.file,
-          editor,
-        });
+        openOrCreateMediaNote(mediaInfo, view).then((ctx) => action(view, ctx));
       },
-      plugin.app,
-    ),
-  });
-
-  plugin.addCommand({
-    id: "save-screenshot",
-    name: "Save screenshot",
-    icon: "camera",
-    checkCallback: checkCallbacks(
-      (checking) => {
-        // eslint-disable-next-line deprecation/deprecation
-        const mediaView = getMediaView(workspace.activeLeaf);
-        if (!mediaView) return false;
-        if (checking) return true;
-        saveScreenshot(mediaView.view, mediaView.getInfo);
+      noteCheckCallback: (checking, view, { isMediaNote, ...ctx }) => {
+        let _view: Promise<MediaView>;
+        if (!view) {
+          if (!isMediaNote) return false;
+          if (checking) return true;
+          _view = plugin.leafOpener
+            .openMedia(isMediaNote, "split")
+            .then((l) => l.view);
+        } else {
+          if (checking) return true;
+          _view = Promise.resolve(view);
+        }
+        _view.then((v) => action(v, ctx));
       },
-      (checking, editor, ctx) => {
-        if (!ctx.file) return false;
-        const mediaInfo = plugin.mediaNote.findMedia(ctx.file);
-        if (!mediaInfo) return false;
-        const opened = plugin.leafOpener.findExistingPlayer(mediaInfo);
-        const mediaView = getMediaView(opened);
-        if (!mediaView) return false;
-        if (checking) return true;
-        saveScreenshot(mediaView.view, mediaView.getInfo, {
-          file: ctx.file,
-          editor,
-        });
-      },
-      plugin.app,
-    ),
-  });
+    };
+  }
 }
 
 interface Controls {
@@ -214,65 +204,33 @@ interface Controls {
 }
 
 export function registerControlCommands(plugin: MxPlugin) {
-  const { workspace } = plugin.app;
-
-  commands.forEach(({ id, label, icon, action: _action, repeat, check }) => {
-    function action(
-      checking: boolean,
-      mediaView: ReturnType<typeof getMediaView>,
-    ) {
-      if (!mediaView) return false;
-      const player = mediaView.view.store.getState().player;
-      if (!player) return false;
-      if (check && !check(player)) return false;
-      if (checking) return true;
-      _action(player);
-    }
-    plugin.addCommand({
-      id,
-      name: label,
-      icon,
-      repeatable: repeat,
-      checkCallback: checkCallbacks(
-        (checking) => {
-          // eslint-disable-next-line deprecation/deprecation
-          const mediaView = getMediaView(workspace.activeLeaf);
-          return action(checking, mediaView);
+  commands.forEach(({ id, label, icon, action, repeat, check }) => {
+    addMediaViewCommand(
+      {
+        id,
+        name: label,
+        icon,
+        repeatable: repeat,
+        playerCheckCallback: (checking, view) => {
+          if (!view) return false;
+          const player = view.store.getState().player;
+          if (!player) return false;
+          if (check && !check(player)) return false;
+          if (checking) return true;
+          action(player);
         },
-        (checking, _, ctx) => {
-          if (!ctx.file) return false;
-          const mediaInfo = plugin.mediaNote.findMedia(ctx.file);
-          if (!mediaInfo) return false;
-          const opened = plugin.leafOpener.findExistingPlayer(mediaInfo);
-          const mediaView = getMediaView(opened);
-          return action(checking, mediaView);
+        noteCheckCallback(checking, view) {
+          if (!view) return false;
+          const player = view.store.getState().player;
+          if (!player) return false;
+          if (check && !check(player)) return false;
+          if (checking) return true;
+          action(player);
         },
-        plugin.app,
-      ),
-    });
+      },
+      plugin,
+    );
   });
-}
-
-function getMediaView(leaf: WorkspaceLeaf | null) {
-  const view = leaf?.view;
-  if (!view) return null;
-  const viewType = view.getViewType();
-  if (isMediaFileViewType(viewType)) {
-    const fileView = view as VideoFileView | AudioFileView;
-    return {
-      type: viewType,
-      view: fileView,
-      getInfo: () => fileView.getMediaInfo(),
-    };
-  } else if (isRemoteMediaViewType(viewType)) {
-    const remoteView = view as RemoteMediaView;
-    return {
-      type: viewType,
-      view: remoteView,
-      getInfo: () => parseUrl(remoteView.store.getState().source?.original),
-    };
-  }
-  return null;
 }
 
 function checkCallbacks(
@@ -292,7 +250,60 @@ function checkCallbacks(
       if (activeEditor instanceof MarkdownView) {
         if ((activeEditor as any).inlineTitleEl.isActiveElement()) return;
       }
-      onEditor(checking, activeEditor.editor!, activeEditor);
+      return onEditor(checking, activeEditor.editor!, activeEditor);
     }
   };
+}
+
+interface MediaViewCallback {
+  playerCheckCallback: (checking: boolean, view: MediaView) => boolean | void;
+  noteCheckCallback: (
+    checking: boolean,
+    view: MediaView | undefined,
+    noteCtx: {
+      file: TFile;
+      editor: Editor;
+      isMediaNote: MediaInfo | undefined;
+    },
+  ) => boolean | void;
+}
+
+function addMediaViewCommand(
+  {
+    playerCheckCallback,
+    noteCheckCallback,
+    ...command
+  }: Omit<
+    Command,
+    "callback" | "checkCallback" | "editorCheckCallback" | "editorCallback"
+  > &
+    Partial<MediaViewCallback>,
+  plugin: MxPlugin,
+): Command {
+  const { app } = plugin;
+  return plugin.addCommand({
+    ...command,
+    checkCallback: checkCallbacks(
+      (checking) => {
+        if (!playerCheckCallback) return false;
+        if (!isMediaLeaf(app.workspace.activeLeaf)) return false;
+        if (checking) return true;
+        return playerCheckCallback(checking, app.workspace.activeLeaf.view);
+      },
+      (checking, editor, ctx) => {
+        if (!noteCheckCallback) return false;
+        if (!ctx.file) return false;
+        const mediaInfo = plugin.mediaNote.findMedia(ctx.file);
+        const mediaLeaf = plugin.leafOpener.detectActiveMediaLeaf(
+          app.workspace.activeLeaf,
+        );
+        return noteCheckCallback(checking, mediaLeaf?.view, {
+          isMediaNote: mediaInfo,
+          file: ctx.file,
+          editor,
+        });
+      },
+      app,
+    ),
+  });
 }

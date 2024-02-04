@@ -7,13 +7,7 @@ import {
 } from "@/components/player/screenshot";
 import { formatDuration, toDurationISOString } from "@/lib/hash/format";
 import type { PlayerComponent } from "@/media-view/base";
-import type { MediaInfo } from "../note-index";
-import {
-  createTimestampGen,
-  insertTimestamp,
-  mediaTitle,
-  openOrCreateMediaNote,
-} from "./utils";
+import { createTimestampGen, insertTimestamp, mediaTitle } from "./utils";
 
 declare module "obsidian" {
   interface Vault {
@@ -27,8 +21,7 @@ declare module "obsidian" {
 
 export async function saveScreenshot<T extends PlayerComponent>(
   playerComponent: T,
-  getSource: (player: T) => MediaInfo | null,
-  ctx?: { file: TFile; editor: Editor },
+  { file: newNote, editor }: { file: TFile; editor: Editor },
 ) {
   const { fileManager, vault } = playerComponent.plugin.app;
   const player = playerComponent.store.getState().player;
@@ -36,7 +29,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
     new Notice("Player not initialized");
     return;
   }
-  const mediaInfo = getSource(playerComponent);
+  const mediaInfo = playerComponent.getMediaInfo();
   if (!mediaInfo) {
     new Notice("No media is opened");
     return;
@@ -58,8 +51,6 @@ export async function saveScreenshot<T extends PlayerComponent>(
   const screenshotName = title + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
 
-  const { file: newNote, editor } =
-    ctx ?? (await openOrCreateMediaNote(mediaInfo, playerComponent));
   const screenshotPath = await vault.getAvailablePathForAttachments(
     screenshotName,
     ext,

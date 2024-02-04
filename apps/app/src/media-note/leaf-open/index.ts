@@ -1,21 +1,32 @@
 /* eslint-disable deprecation/deprecation */
 import type {
-  PaneType,
   App,
-  SplitDirection,
-  WorkspaceLeaf,
-  TFile,
-  MarkdownView,
   Editor,
+  PaneType,
+  SplitDirection,
+  TFile,
+  Workspace,
+  WorkspaceLeaf,
 } from "obsidian";
+import { Component, MarkdownView } from "obsidian";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaUrlViewState } from "@/media-view/url-view";
+import type { MediaView } from "@/media-view/view-type";
+import { isMediaViewType } from "@/media-view/view-type";
 import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
 import type { MediaInfo } from "../note-index";
 import { isFileMediaInfo } from "../note-index/file-info";
 import type { UrlMediaInfo } from "../note-index/url-info";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
+import "./active.global.less";
+
+declare module "obsidian" {
+  interface WorkspaceLeaf {
+    activeTime: number;
+    tabHeaderEl: HTMLDivElement;
+  }
+}
 
 export interface NewNoteInfo {
   title: string;
@@ -23,29 +34,93 @@ export interface NewNoteInfo {
   sourcePath?: string;
 }
 
-export class LeafOpener {
+const mediaLeafActiveClass = "mx-media-active";
+
+export class LeafOpener extends Component {
   app: App;
   constructor(public plugin: MxPlugin) {
+    super();
     this.app = plugin.app;
+  }
+
+  activeMediaLeaf: MediaLeaf | null = null;
+
+  onload(): void {
+    const workspace = this.app.workspace;
+    workspace.onLayoutReady(() => {
+      this.onActiveLeafChange(workspace.activeLeaf);
+    });
+    this.registerEvent(
+      workspace.on("active-leaf-change", (leaf) => {
+        this.onActiveLeafChange(leaf);
+      }),
+    );
+  }
+  onunload(): void {
+    this.applyActiveMediaLeaf(null);
+  }
+
+  get workspace() {
+    return this.app.workspace;
+  }
+
+  onActiveLeafChange(nowLeaf: WorkspaceLeaf | null) {
+    const newActiveMediaLeaf = this.detectActiveMediaLeaf(nowLeaf);
+    if (this.activeMediaLeaf === newActiveMediaLeaf) return;
+    this.applyActiveMediaLeaf(newActiveMediaLeaf);
+  }
+
+  applyActiveMediaLeaf(leaf: MediaLeaf | null) {
+    this.activeMediaLeaf?.tabHeaderEl.removeClass(mediaLeafActiveClass);
+    this.activeMediaLeaf?.containerEl.removeClass(mediaLeafActiveClass);
+    leaf?.tabHeaderEl.addClass(mediaLeafActiveClass);
+    leaf?.containerEl.addClass(mediaLeafActiveClass);
+    this.activeMediaLeaf = leaf;
+  }
+
+  detectActiveMediaLeaf(active: WorkspaceLeaf | null): MediaLeaf | null {
+    const fallback = () => getAllMediaLeaves(this.workspace).at(0) ?? null;
+    if (!active) return fallback();
+    if (isMediaLeaf(active)) return active;
+
+    if (active.view instanceof MarkdownView && active.view.file) {
+      const { mediaNote } = this.plugin;
+      const mediaInfo = mediaNote.findMedia(active.view.file);
+      if (mediaInfo) {
+        // if the note is a media note, only accept corresponding media leaves
+        // don't use the latest media leaf as fallback
+        const leaf = this.findExistingPlayer(mediaInfo);
+        return leaf;
+      }
+    }
+    // for other cases like non-media note, use the latest media leaf as fallback
+    return fallback();
+  }
+
+  findExistingPlayer(info: MediaInfo) {
+    const leaves = getMediaLeavesOf(info, this.workspace);
+    if (leaves.length === 0) return null;
+    return leaves[0];
   }
 
   async openMedia(
     mediaInfo: MediaInfo,
     newLeaf?: "split",
     direction?: SplitDirection,
-  ): Promise<void>;
+  ): Promise<MediaLeaf>;
   async openMedia(
     mediaInfo: MediaInfo,
     newLeaf?: PaneType | boolean,
-  ): Promise<void>;
+  ): Promise<MediaLeaf>;
   async openMedia(
     mediaInfo: MediaInfo,
     newLeaf?: PaneType | boolean,
     direction?: SplitDirection,
-  ): Promise<void> {
+  ): Promise<MediaLeaf> {
     const { workspace } = this.app;
-    if (!newLeaf && this.#openInExistingPlayer(mediaInfo)) {
-      return;
+    if (!newLeaf) {
+      const existing = this.#openInExistingPlayer(mediaInfo);
+      if (existing) return existing;
     }
     const leaf = workspace.getLeaf(newLeaf as any, direction);
     if (isFileMediaInfo(mediaInfo)) {
@@ -55,33 +130,16 @@ export class LeafOpener {
     } else {
       await openInLeaf(mediaInfo, leaf);
     }
+    return leaf as MediaLeaf;
   }
 
-  #getLeavesOfMedia(info: MediaInfo) {
-    const { workspace } = this.app;
-
-    return workspace.getLeavesOfType(info.viewType).filter((leaf) => {
-      if (isFileMediaInfo(info)) {
-        return filterFileLeaf(leaf, info);
-      } else {
-        return filterUrlLeaf(leaf, info);
-      }
-    });
-  }
-
-  findExistingPlayer(info: MediaInfo) {
-    const leaves = this.#getLeavesOfMedia(info);
-    if (leaves.length === 0) return null;
-    return leaves[0];
-  }
-
-  #openInExistingPlayer(info: MediaInfo): boolean {
+  #openInExistingPlayer(info: MediaInfo): MediaLeaf | null {
     const opened = this.findExistingPlayer(info);
     if (opened) {
       updateHash(info.hash, opened);
-      return true;
+      return opened;
     }
-    return false;
+    return null;
   }
 
   async openNote(
@@ -153,9 +211,46 @@ export class LeafOpener {
   }
 }
 
+export type MediaLeaf = WorkspaceLeaf & { view: MediaView };
+
+/**
+ * @returns all media leaves in the workspace, sorted by active time
+ */
+function getAllMediaLeaves(workspace: Workspace) {
+  const leaves: WorkspaceLeaf[] = [];
+  workspace.iterateAllLeaves((leaf) => {
+    if (isMediaViewType(leaf.view.getViewType())) {
+      leaves.push(leaf);
+    }
+  });
+  leaves.sort(byActiveTime);
+  return leaves as MediaLeaf[];
+}
+
+function getMediaLeavesOf(info: MediaInfo, workspace: Workspace) {
+  const leaves = workspace.getLeavesOfType(info.viewType).filter((leaf) => {
+    if (isFileMediaInfo(info)) {
+      return filterFileLeaf(leaf, info);
+    } else {
+      return filterUrlLeaf(leaf, info);
+    }
+  });
+  leaves.sort(byActiveTime);
+  return leaves as MediaLeaf[];
+}
+
+export function isMediaLeaf(leaf: WorkspaceLeaf | null): leaf is MediaLeaf {
+  return !!leaf && isMediaViewType(leaf.view.getViewType());
+}
+
+function byActiveTime(a: WorkspaceLeaf, b: WorkspaceLeaf) {
+  return b.activeTime - a.activeTime;
+}
+
 function updateHash(hash: string, leaf: WorkspaceLeaf) {
   leaf.setEphemeralState({ subpath: hash });
 }
+
 async function openInLeaf(info: UrlMediaInfo, leaf: WorkspaceLeaf) {
   const state: MediaEmbedViewState | MediaWebpageViewState | MediaUrlViewState =
     { source: info.original };

@@ -2,9 +2,10 @@ import { MarkdownRenderChild } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
-import type { MediaViewType } from "@/media-note/note-index";
+import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
+import type { MediaViewType } from "./view-type";
 
 export class MediaRenderChild
   extends MarkdownRenderChild
@@ -17,6 +18,10 @@ export class MediaRenderChild
     super(containerEl);
     this.store = createMediaViewStore();
     containerEl.addClasses(["mx", "custom", "mx-media-embed"]);
+  }
+
+  getMediaInfo() {
+    return parseUrl(this.store.getState().source?.original);
   }
 
   update(

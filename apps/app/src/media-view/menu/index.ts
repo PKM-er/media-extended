@@ -1,8 +1,8 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
-import type { MediaViewType } from "@/media-note/note-index";
 import { parseFileInfo } from "@/media-note/note-index/file-info";
 import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
+import type { MediaViewType } from "../view-type";
 import { isMediaFileViewType } from "../view-type";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";

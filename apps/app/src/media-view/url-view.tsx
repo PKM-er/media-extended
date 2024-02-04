@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { parseUrl } from "@/media-note/note-index/url-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import { matchHostForUrl } from "@/web/match-url";
@@ -34,6 +35,10 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
         this.render();
       }),
     );
+  }
+
+  getMediaInfo() {
+    return parseUrl(this.store.getState().source?.original);
   }
 
   abstract getViewType(): MediaUrlViewType;

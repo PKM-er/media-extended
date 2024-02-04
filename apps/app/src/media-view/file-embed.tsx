@@ -5,6 +5,7 @@ import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
 import { dataLpPassthrough } from "@/components/player/buttons";
 import { getTracks } from "@/lib/subtitle";
+import type { FileMediaInfo } from "@/media-note/note-index/file-info";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
 import { type PlayerComponent } from "./base";
@@ -40,6 +41,18 @@ export class MediaFileEmbed
       if (!isEditButton(evt.target)) evt.stopImmediatePropagation();
     });
     // containerEl.style.display = "contents";
+  }
+
+  getMediaInfo(): FileMediaInfo | null {
+    if (!this.file) return null;
+    const type = checkMediaType(this.file.extension);
+    if (!type) return null;
+    return {
+      type,
+      file: this.file,
+      hash: this.subpath,
+      viewType: MEDIA_FILE_VIEW_TYPE[type],
+    };
   }
 
   onload(): void {
