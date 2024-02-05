@@ -8,7 +8,7 @@ import type {
   Workspace,
   WorkspaceLeaf,
 } from "obsidian";
-import { Component, MarkdownView } from "obsidian";
+import { Component, MarkdownView, debounce } from "obsidian";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaUrlViewState } from "@/media-view/url-view";
 import type { MediaView } from "@/media-view/view-type";
@@ -48,11 +48,16 @@ export class LeafOpener extends Component {
   onload(): void {
     const workspace = this.app.workspace;
     workspace.onLayoutReady(() => {
-      this.onActiveLeafChange(workspace.activeLeaf);
+      this.onLeafUpdate();
     });
     this.registerEvent(
       workspace.on("active-leaf-change", (leaf) => {
-        this.onActiveLeafChange(leaf);
+        this.onLeafUpdate(leaf);
+      }),
+    );
+    this.registerEvent(
+      workspace.on("layout-change", () => {
+        this.onLeafUpdate();
       }),
     );
   }
@@ -63,6 +68,11 @@ export class LeafOpener extends Component {
   get workspace() {
     return this.app.workspace;
   }
+
+  onLeafUpdate = debounce((nowLeaf?: WorkspaceLeaf | null) => {
+    nowLeaf = nowLeaf ?? this.workspace.activeLeaf;
+    this.onActiveLeafChange(nowLeaf);
+  }, 200);
 
   onActiveLeafChange(nowLeaf: WorkspaceLeaf | null) {
     const newActiveMediaLeaf = this.detectActiveMediaLeaf(nowLeaf);
