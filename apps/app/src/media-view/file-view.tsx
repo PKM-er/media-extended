@@ -30,14 +30,12 @@ abstract class MediaFileView
     this.store = createMediaViewStore();
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
-    handleWindowMigration.call(this, () => this.render());
     addAction(this);
+  }
+  handleWindowMigration = handleWindowMigration;
 
-    this.register(
-      this.containerEl.onWindowMigrated(() => {
-        this.render();
-      }),
-    );
+  onload(): void {
+    this.handleWindowMigration(() => this.render());
   }
 
   abstract getViewType(): MediaFileViewType;

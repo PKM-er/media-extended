@@ -12,6 +12,10 @@ import { MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
 export type MediaWebpageViewState = MediaRemoteViewState;
 
 export class MediaWebpageView extends MediaRemoteView {
+  onload(): void {
+    super.onload();
+    this.registerRemoteTitleChange();
+  }
   getViewType() {
     return MEDIA_WEBPAGE_VIEW_TYPE;
   }

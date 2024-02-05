@@ -119,9 +119,13 @@ export abstract class MediaRemoteView
     this.store = createMediaViewStore();
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
+    addAction(this);
+  }
+
+  onload(): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
-
+    super.onload();
     // make sure to unmount the player before the leaf detach it from DOM
     this.register(
       around(this.leaf, {
@@ -133,8 +137,12 @@ export abstract class MediaRemoteView
           },
       }),
     );
+    this.handleWindowMigration(() => this.render());
+  }
 
-    handleWindowMigration.call(this, () => this.render());
+  handleWindowMigration = handleWindowMigration;
+
+  registerRemoteTitleChange() {
     this.register(
       onPlayerMounted(this.store, (player) =>
         player.subscribe(({ title, source }) => {
@@ -144,7 +152,6 @@ export abstract class MediaRemoteView
         }),
       ),
     );
-    addAction(this);
   }
 
   abstract getViewType(): string;

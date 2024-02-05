@@ -13,6 +13,10 @@ export const hostTitleMap: Record<string, string> = {
 };
 
 export class MediaEmbedView extends MediaRemoteView {
+  onload(): void {
+    super.onload();
+    this.registerRemoteTitleChange();
+  }
   async setState(
     state: MediaRemoteViewState,
     result: ViewStateResult,
