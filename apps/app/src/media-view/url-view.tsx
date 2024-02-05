@@ -8,7 +8,7 @@ import { parseUrl } from "@/media-note/note-index/url-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import { matchHostForUrl } from "@/web/match-url";
-import { setTempFrag, titleFromUrl } from "./base";
+import { addAction, setTempFrag, titleFromUrl } from "./base";
 import type { MediaRemoteViewState, PlayerComponent } from "./base";
 import type { MediaUrlViewType } from "./view-type";
 import { MEDIA_URL_VIEW_TYPE } from "./view-type";
@@ -30,6 +30,7 @@ abstract class MediaUrlView extends ItemView implements PlayerComponent {
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
     handleWindowMigration.call(this, () => this.render());
+    addAction(this);
     this.register(
       this.containerEl.onWindowMigrated(() => {
         this.render();
