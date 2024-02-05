@@ -1,5 +1,6 @@
 import { toTempFrag, updateHash } from "@/lib/hash/format";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
+import { noHashUrl } from "@/lib/url";
 
 function parseYoutubeTime(t: string | null): number {
   if (!t) return NaN;
@@ -32,7 +33,7 @@ export function matchYouTube(url: URL) {
 
   if (!vid) return null;
 
-  const cleanUrl = new URL("https://www.youtube.com/watch");
+  const cleanUrl = noHashUrl("https://www.youtube.com/watch");
   cleanUrl.search = new URLSearchParams({
     v: vid,
   }).toString();

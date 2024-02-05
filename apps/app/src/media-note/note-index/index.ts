@@ -206,6 +206,6 @@ function mediaInfoToString(info: MediaInfo) {
   if (isFileMediaInfo(info)) {
     return `file:${info.file.path}`;
   } else {
-    return `url:${info.original}`;
+    return `url:${info.cleanUrl}`;
   }
 }

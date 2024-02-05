@@ -171,7 +171,12 @@ export class LeafOpener extends Component {
   ): Promise<{ file: TFile; editor: Editor }> {
     const notes = this.plugin.mediaNote.findNotes(mediaInfo);
     const opened = this.#getOpenedNote(notes);
-    if (opened) return opened;
+    if (opened) {
+      if (opened.getMode() !== "source") {
+        await opened.setState({ mode: "source" }, { history: false });
+      }
+      return opened;
+    }
 
     let targetNote: TFile;
     if (notes.length === 0) {
@@ -186,14 +191,14 @@ export class LeafOpener extends Component {
     }
 
     const leaf = this.app.workspace.getLeaf(newLeaf as any, direction);
-    await leaf.openFile(targetNote);
+    await leaf.openFile(targetNote, { state: { mode: "source" } });
     return {
       file: targetNote,
       editor: (leaf.view as MarkdownView).editor,
     };
   }
 
-  #getOpenedNote(notes: TFile[]): { file: TFile; editor: Editor } | null {
+  #getOpenedNote(notes: TFile[]): (MarkdownView & { file: TFile }) | null {
     const { workspace } = this.app;
     const opened = workspace.getLeavesOfType("markdown").filter((leaf) => {
       const filePath = (leaf.view as MarkdownView).file?.path;
@@ -204,7 +209,7 @@ export class LeafOpener extends Component {
       opened.find((leaf) => leaf === workspace.activeLeaf) ??
       opened.sort((a, b) => sortByMtime(a.view.file, b.view.file)).at(0)!
     ).view;
-    return { file: view.file, editor: view.editor };
+    return view;
   }
   async #createNewNote(
     filename: string,

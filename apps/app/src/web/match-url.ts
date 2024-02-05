@@ -1,5 +1,5 @@
 import { Platform } from "obsidian";
-import { toURL } from "@/lib/url";
+import { noHashUrl, toURL } from "@/lib/url";
 import { checkMediaType } from "@/patch/media-type";
 
 const allowedProtocols = new Set(["https:", "http:", "app:", "file:"]);
@@ -18,7 +18,7 @@ export function matchHostForUrl(link: string | undefined): {
   const mediaType = checkMediaType(ext);
   if (!mediaType) return null;
 
-  const cleanUrl = new URL(src);
+  const cleanUrl = noHashUrl(src);
   cleanUrl.searchParams.sort();
   return {
     type: mediaType,

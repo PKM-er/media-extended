@@ -1,6 +1,6 @@
 import { updateHash } from "@/lib/hash/format";
 import { parseTempFrag } from "@/lib/hash/temporal-frag";
-import { toURL } from "@/lib/url";
+import { noHashUrl, toURL } from "@/lib/url";
 import { matchYouTube } from "./url-match/yt";
 
 export type SupportedEmbedHost = "vimeo" | "youtube";
@@ -25,7 +25,7 @@ export function matchHostForEmbed(link: string | undefined): {
       };
     }
     case url.hostname.contains("vimeo"): {
-      const cleanUrl = new URL(url);
+      const cleanUrl = noHashUrl(url);
       cleanUrl.search = "";
 
       const source = new URL(url);

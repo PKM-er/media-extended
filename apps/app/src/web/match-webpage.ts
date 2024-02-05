@@ -1,6 +1,6 @@
 import { updateHash } from "@/lib/hash/format";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
-import { toURL } from "@/lib/url";
+import { noHashUrl, toURL } from "@/lib/url";
 import { matchYouTube } from "./url-match/yt";
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -48,7 +48,7 @@ export function matchHostForWeb(link: string | undefined): {
       let tempFrag = parseTempFrag(url.hash);
       const time = parseTimeFromBilibiliUrl(url);
 
-      const cleanUrl = new URL(url);
+      const cleanUrl = noHashUrl(url);
       cleanUrl.searchParams.forEach((val, key, params) => {
         if (key === "p" && val !== "1") return;
         params.delete(key);
