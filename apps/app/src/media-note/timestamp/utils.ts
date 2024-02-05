@@ -57,7 +57,7 @@ export function openOrCreateMediaNote(
       sourcePath: file.path,
     });
   } else {
-    const sourceUrl = mediaInfo.source;
+    const sourceUrl = mediaInfo.cleanUrl;
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
       title: urlTitle(mediaInfo, player.state),
       fm: () => ({ media: noHash(sourceUrl) }),
@@ -82,7 +82,7 @@ export function createTimestampGen(
         .generateMarkdownLink(file, newNotePath, hash, duration)
         .replace(/^!/, "");
   } else {
-    const sourceUrl = mediaInfo.source;
+    const sourceUrl = mediaInfo.cleanUrl;
     return () => `[${duration}](${noHash(sourceUrl)}${hash})`;
   }
 }

@@ -18,8 +18,10 @@ export interface UrlMediaInfo {
   source: URL;
   original: string;
   hash: string;
+  cleanUrl: URL;
   isSameSource: (src: string) => boolean;
 }
+
 export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
   if (!url) return null;
   const directlinkInfo = matchHostForUrl(url);
@@ -30,6 +32,7 @@ export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
       source: directlinkInfo.source,
       original: url,
       hash: directlinkInfo.source.hash,
+      cleanUrl: directlinkInfo.cleanUrl,
       isSameSource: (src) => {
         const matched = matchHostForUrl(src);
         return (
@@ -47,6 +50,7 @@ export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
       source: webpageInfo.source,
       original: url,
       hash: webpageInfo.source.hash,
+      cleanUrl: webpageInfo.cleanUrl,
       isSameSource: (src) => {
         const matched = matchHostForWeb(src);
         return (
@@ -63,6 +67,7 @@ export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
       source: embedInfo.source,
       original: url,
       hash: embedInfo.source.hash,
+      cleanUrl: embedInfo.cleanUrl,
       isSameSource: (src) => {
         const matched = matchHostForEmbed(src);
         return (
