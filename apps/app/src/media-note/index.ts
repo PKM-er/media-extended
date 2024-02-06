@@ -14,7 +14,7 @@ export function handleMediaNote(this: MxPlugin) {
           .setSection("view")
           .setIcon("play")
           .setTitle("Open linked media")
-          .onClick(() => this.leafOpener.openMedia(mediaInfo)),
+          .onClick(() => this.leafOpener.openMedia(mediaInfo, "split")),
       );
     }),
   );

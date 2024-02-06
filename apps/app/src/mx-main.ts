@@ -26,6 +26,7 @@ import {
 } from "./media-view/view-type";
 import { MediaWebpageView } from "./media-view/webpage-view";
 import injectMediaEmbed from "./patch/embed";
+import patchMediaNoteLinktextOpen from "./patch/link.default";
 import patchEditorClick from "./patch/link.editor";
 import patchInlineUrl from "./patch/link.inline-field";
 import fixLinkLabel from "./patch/link.label-fix";
@@ -83,6 +84,7 @@ export default class MxPlugin extends Plugin {
   patchEditorClick = patchEditorClick;
   patchPreviewClick = patchPreviewClick;
   patchInlineUrl = patchInlineUrl;
+  patchMediaNoteLinktextOpen = patchMediaNoteLinktextOpen;
   modifySession = modifySession;
   onExternalLinkClick = onExternalLinkClick.bind(this);
   onInternalLinkClick = onInternalLinkClick.bind(this);
@@ -129,5 +131,6 @@ export default class MxPlugin extends Plugin {
     });
     this.fixLinkLabel();
     this.patchInlineUrl();
+    this.patchMediaNoteLinktextOpen();
   }
 }
