@@ -1,6 +1,6 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import { around } from "monkey-around";
-import type { Component, WorkspaceLeaf, Menu } from "obsidian";
+import type { Component, WorkspaceLeaf, Menu, View } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
@@ -165,31 +165,7 @@ export abstract class MediaRemoteView
     menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
   ): void {
     super.onPaneMenu(menu, menuSource);
-    const {
-      player,
-      source,
-      toggleControls,
-      controls,
-      hash,
-      setTransform,
-      transform,
-    } = this.store.getState();
-    if (!player || !source) return;
-    this.app.workspace.trigger(
-      "mx-media-menu",
-      menu,
-      {
-        source,
-        player,
-        toggleControls,
-        controls,
-        hash,
-        setTransform,
-        transform,
-      },
-      menuSource,
-      this.leaf,
-    );
+    onPaneMenu.call(this, menu, menuSource);
   }
 
   setEphemeralState(state: any): void {
@@ -302,4 +278,28 @@ export function addAction(player: PlayerComponent & ItemView) {
       saveScreenshot(player, ctx),
     );
   });
+}
+
+export function onPaneMenu(
+  this: PlayerComponent & View,
+  menu: Menu,
+  menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
+) {
+  const {
+    player,
+    source,
+    toggleControls,
+    controls,
+    hash,
+    setTransform,
+    transform,
+  } = this.store.getState();
+  if (!player || !source) return;
+  this.plugin.app.workspace.trigger(
+    "mx-media-menu",
+    menu,
+    { source, player, toggleControls, controls, hash, setTransform, transform },
+    menuSource,
+    this.leaf,
+  );
 }

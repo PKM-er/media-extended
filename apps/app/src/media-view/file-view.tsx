@@ -8,7 +8,12 @@ import { handleWindowMigration } from "@/lib/window-migration";
 import type { FileMediaInfo } from "@/media-note/note-index/file-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
-import { setTempFrag, type PlayerComponent, addAction } from "./base";
+import {
+  setTempFrag,
+  type PlayerComponent,
+  addAction,
+  onPaneMenu,
+} from "./base";
 import type { MediaFileViewType } from "./view-type";
 import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
@@ -57,31 +62,7 @@ abstract class MediaFileView
     menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
   ): void {
     super.onPaneMenu(menu, menuSource);
-    const {
-      player,
-      source,
-      toggleControls,
-      controls,
-      hash,
-      transform,
-      setTransform,
-    } = this.store.getState();
-    if (!player || !source) return;
-    this.app.workspace.trigger(
-      "mx-media-menu",
-      menu,
-      {
-        controls,
-        player,
-        source,
-        toggleControls,
-        hash,
-        setTransform,
-        transform,
-      },
-      menuSource,
-      this.leaf,
-    );
+    onPaneMenu.call(this, menu, menuSource);
   }
   abstract canAcceptExtension(extension: string): boolean;
 
