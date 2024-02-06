@@ -29,12 +29,15 @@ export function matchHostForUrl(link: string | undefined): {
 
 function fixFileUrl(url: URL): URL {
   if (url.protocol !== "file:") return url;
-  const fixed = new URL(url.pathname, Platform.resourcePathPrefix);
+  const fixed = new URL(
+    url.href.substring(url.origin.length),
+    Platform.resourcePathPrefix,
+  );
   fixed.search = Date.now().toString();
   return fixed;
 }
 
 function revertAppUrl(url: URL): URL {
   if (!url.href.startsWith(Platform.resourcePathPrefix)) return url;
-  return new URL(url.pathname, "file:///");
+  return new URL(url.href.substring(url.origin.length), "file:///");
 }
