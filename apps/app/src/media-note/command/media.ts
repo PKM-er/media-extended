@@ -1,18 +1,11 @@
-/* eslint-disable deprecation/deprecation */
 import type { MediaPlayerInstance } from "@vidstack/react";
-import type { Editor, MarkdownFileInfo, App, Command, TFile } from "obsidian";
-import { MarkdownView, Notice, debounce } from "obsidian";
+import { Notice, debounce } from "obsidian";
 import { PlaybackSpeedPrompt } from "@/media-view/menu/prompt";
 import { speedOptions } from "@/media-view/menu/speed";
-import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
-import { isMediaLeaf } from "./leaf-open";
-import type { MediaInfo } from "./note-index";
-import { saveScreenshot } from "./timestamp/screenshot";
-import { takeTimestamp } from "./timestamp/timestamp";
-import { openOrCreateMediaNote } from "./timestamp/utils";
+import { addMediaViewCommand } from "./utils";
 
-const commands: Controls[] = [
+const mediaCommands: Controls[] = [
   {
     id: "toggle-play",
     label: "Play/pause",
@@ -64,11 +57,10 @@ const commands: Controls[] = [
   },
   ...speed(),
 ];
-
 function speed(): Controls[] {
   // reuse notice if user is spamming speed change
   let notice: Notice | null = null;
-  const hide = debounce(() => notice?.hide(), 2e3, true);
+  const hide = debounce(() => notice?.hide(), 2000, true);
   function notify(message: string) {
     if (!notice || notice.noticeEl.isConnected === false) {
       notice = new Notice(message, 0);
@@ -78,7 +70,7 @@ function speed(): Controls[] {
     hide();
   }
   function notifyAllowDup(message: string) {
-    new Notice(message, 2e3);
+    new Notice(message, 2000);
   }
   return [
     {
@@ -139,62 +131,6 @@ function speed(): Controls[] {
     },
   ];
 }
-
-export function registerNoteCommands(plugin: MxPlugin) {
-  addMediaViewCommand(
-    {
-      id: "take-timestamp",
-      name: "Take timstamp",
-      icon: "star",
-      ...logic(takeTimestamp),
-    },
-    plugin,
-  );
-  addMediaViewCommand(
-    {
-      id: "save-screenshot",
-      name: "Save screenshot",
-      icon: "camera",
-      ...logic(saveScreenshot),
-    },
-    plugin,
-  );
-
-  function logic(
-    action: (
-      playerComponent: MediaView,
-      ctx: {
-        file: TFile;
-        editor: Editor;
-      },
-    ) => any,
-  ): MediaViewCallback {
-    return {
-      playerCheckCallback: (checking, view) => {
-        const mediaInfo = view.getMediaInfo();
-        if (!mediaInfo) return false;
-        if (checking) return true;
-        openOrCreateMediaNote(mediaInfo, view).then((ctx) => action(view, ctx));
-      },
-      noteCheckCallback: (checking, view, { isMediaNote, ...ctx }) => {
-        let _view: Promise<MediaView>;
-        if (!view) {
-          if (!isMediaNote) return false;
-          if (checking) return true;
-          _view = plugin.leafOpener
-            .openMedia(isMediaNote, "split")
-            .then((l) => l.view);
-        } else {
-          if (checking) return true;
-          plugin.app.workspace.revealLeaf(view.leaf);
-          _view = Promise.resolve(view);
-        }
-        _view.then((v) => action(v, ctx));
-      },
-    };
-  }
-}
-
 interface Controls {
   id: string;
   label: string;
@@ -205,7 +141,7 @@ interface Controls {
 }
 
 export function registerControlCommands(plugin: MxPlugin) {
-  commands.forEach(({ id, label, icon, action, repeat, check }) => {
+  mediaCommands.forEach(({ id, label, icon, action, repeat, check }) => {
     addMediaViewCommand(
       {
         id,
@@ -231,80 +167,5 @@ export function registerControlCommands(plugin: MxPlugin) {
       },
       plugin,
     );
-  });
-}
-
-function checkCallbacks(
-  onRegular: (checking: boolean) => boolean | void,
-  onEditor: (
-    checking: boolean,
-    editor: Editor,
-    ctx: MarkdownView | MarkdownFileInfo,
-  ) => boolean | void,
-  app: App,
-) {
-  return (checking: boolean): boolean | void => {
-    const activeEditor = app.workspace.activeEditor;
-    if (!activeEditor) return onRegular(checking);
-    // from app.js
-    if ((activeEditor as MarkdownView).getMode() !== "preview") {
-      if (activeEditor instanceof MarkdownView) {
-        if ((activeEditor as any).inlineTitleEl.isActiveElement()) return;
-      }
-      return onEditor(checking, activeEditor.editor!, activeEditor);
-    }
-  };
-}
-
-interface MediaViewCallback {
-  playerCheckCallback: (checking: boolean, view: MediaView) => boolean | void;
-  noteCheckCallback: (
-    checking: boolean,
-    view: MediaView | undefined,
-    noteCtx: {
-      file: TFile;
-      editor: Editor;
-      isMediaNote: MediaInfo | undefined;
-    },
-  ) => boolean | void;
-}
-
-function addMediaViewCommand(
-  {
-    playerCheckCallback,
-    noteCheckCallback,
-    ...command
-  }: Omit<
-    Command,
-    "callback" | "checkCallback" | "editorCheckCallback" | "editorCallback"
-  > &
-    Partial<MediaViewCallback>,
-  plugin: MxPlugin,
-): Command {
-  const { app } = plugin;
-  return plugin.addCommand({
-    ...command,
-    checkCallback: checkCallbacks(
-      (checking) => {
-        if (!playerCheckCallback) return false;
-        if (!isMediaLeaf(app.workspace.activeLeaf)) return false;
-        if (checking) return true;
-        return playerCheckCallback(checking, app.workspace.activeLeaf.view);
-      },
-      (checking, editor, ctx) => {
-        if (!noteCheckCallback) return false;
-        if (!ctx.file) return false;
-        const mediaInfo = plugin.mediaNote.findMedia(ctx.file);
-        const mediaLeaf = plugin.leafOpener.detectActiveMediaLeaf(
-          app.workspace.activeLeaf,
-        );
-        return noteCheckCallback(checking, mediaLeaf?.view, {
-          isMediaNote: mediaInfo,
-          file: ctx.file,
-          editor,
-        });
-      },
-      app,
-    ),
   });
 }

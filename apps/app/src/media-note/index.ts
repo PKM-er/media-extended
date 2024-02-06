@@ -1,6 +1,7 @@
 import { TFile } from "obsidian";
 import type MxPlugin from "@/mx-main";
-import { registerControlCommands, registerNoteCommands } from "./command";
+import { registerControlCommands } from "./command/media";
+import { registerNoteCommands } from "./command/note";
 
 export function handleMediaNote(this: MxPlugin) {
   this.registerEvent(
