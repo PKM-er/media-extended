@@ -162,20 +162,48 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   }
 
   handlePlayReady() {
+    const finishLoad = new Promise<void>((_resolve, _reject) => {
+      const resolve = () => {
+        _resolve();
+        this.webview.removeEventListener("did-fail-load", reject);
+      };
+      const reject = (evt: Electron.DidFailLoadEvent) => {
+        _reject(new WebviewLoadError(evt));
+        this.webview.removeEventListener("did-finish-load", resolve);
+      };
+      this.webview.addEventListener("did-finish-load", resolve, {
+        once: true,
+      } as any);
+      this.webview.addEventListener("did-fail-load", reject, {
+        once: true,
+      } as any);
+    });
+    let timeoutId: number;
+    const timeout = (ms: number) =>
+      new Promise<void>((_, reject) => {
+        timeoutId = window.setTimeout(() => reject(new TimeoutError(ms)), ms);
+      });
     const playReady = new Promise<void>((resolve) => {
-      const cancel = this._port.once("mx-play-ready", () => {
+      this._port.once("mx-play-ready", () => {
         resolve();
         window.clearTimeout(timeoutId);
       });
-      const timeoutId = window.setTimeout(() => {
-        cancel();
-        resolve();
-        new Notice("Play ready timeout");
-      }, 10e3);
     });
-    playReady.then(() => {
-      this.togglePlayReady(true);
-    });
+
+    finishLoad
+      .then(() => Promise.race([playReady, timeout(10e3)]))
+      .then(() => {
+        this.togglePlayReady(true);
+      })
+      .catch((err) => {
+        if (err instanceof TimeoutError) {
+          new Notice("Webview failed to load plugin in time");
+        } else if (err instanceof WebviewLoadError) {
+          new Notice("Webview failed to load website: " + err.message);
+        } else {
+          throw err;
+        }
+      });
   }
 
   onDomReady = async (evt: Event) => {
@@ -263,5 +291,11 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     //   }
     // }
     // console.log("vidstack player loaded");
+  }
+}
+
+class WebviewLoadError extends Error {
+  constructor(evt: Electron.DidFailLoadEvent) {
+    super(`${evt.errorCode}: ${evt.errorDescription}`);
   }
 }
