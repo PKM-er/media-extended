@@ -1,7 +1,10 @@
-import { Keymap, Platform, SuggestModal } from "obsidian";
+import { pathToFileURL } from "url";
+import mime from "mime";
+import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import { toURL } from "@/lib/url";
 import { parseUrl, type UrlMediaInfo } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
+import { mediaExtensions } from "@/patch/media-type";
 
 const avId = /^av(?<id>\d+)$/i;
 /**
@@ -76,10 +79,36 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
     return guessInfo;
   }
 
-  renderSuggestion(value: UrlMediaInfo, el: HTMLElement) {
-    el.setText(value.original);
+  onNoSuggestion(): void {
+    super.onNoSuggestion();
+    // @ts-ignore
+    this.chooser.setSuggestions([null]);
   }
-  onChooseSuggestion(item: UrlMediaInfo, evt: MouseEvent | KeyboardEvent) {
+  renderSuggestion(value: UrlMediaInfo | null, el: HTMLElement) {
+    if (value) el.setText(value.original);
+    else {
+      el.setText("Open local file");
+    }
+  }
+  async onChooseSuggestion(
+    item: UrlMediaInfo | null,
+    evt: MouseEvent | KeyboardEvent,
+  ) {
+    if (!item) {
+      const mediaFile = await pickFile(mediaExtensions);
+      if (!mediaFile) return;
+      try {
+        const url = pathToFileURL(mediaFile);
+        item = parseUrl(url.href);
+      } catch (e) {
+        console.error("Failed to generate file url", e, mediaFile);
+        return;
+      }
+      if (!item) {
+        new Notice("Unsupported file type: " + mediaFile);
+        return;
+      }
+    }
     if (Keymap.isModifier(evt, "Mod") && Keymap.isModifier(evt, "Alt")) {
       this.plugin.leafOpener.openMedia(item, "split", "vertical");
     } else if (Keymap.isModifier(evt, "Mod")) {
@@ -88,4 +117,31 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
       this.plugin.leafOpener.openMedia(item);
     }
   }
+}
+
+function pickFile(exts: string[] = []) {
+  return new Promise<string | null>((resolve) => {
+    // open a file picker
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = exts
+      .flatMap((e) => {
+        const mimeType = mime.getType(e);
+        const ext = `.${e}`;
+        return mimeType ? [mimeType, ext] : [ext];
+      })
+      .join(",");
+    input.addEventListener(
+      "change",
+      () => {
+        if (!input.files || input.files.length === 0) {
+          resolve(null);
+        } else {
+          resolve(input.files[0].path);
+        }
+      },
+      { once: true },
+    );
+    input.click();
+  });
 }

@@ -13,4 +13,9 @@ export function checkMediaType(ext: string): MediaType | null {
   return null;
 }
 
+export const mediaExtensions = [
+  ...MediaFileExtensions.video,
+  ...MediaFileExtensions.audio,
+];
+
 export type MediaType = keyof typeof MediaFileExtensions;
