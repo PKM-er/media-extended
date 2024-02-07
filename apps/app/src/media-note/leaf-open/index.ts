@@ -26,6 +26,12 @@ declare module "obsidian" {
     activeTime: number;
     tabHeaderEl: HTMLDivElement;
   }
+  interface WorkspaceTabGroup {
+    children: WorkspaceLeaf[];
+  }
+  interface Workspace {
+    activeTabGroup: WorkspaceTabGroup | null;
+  }
 }
 
 export interface NewNoteInfo {
@@ -89,7 +95,16 @@ export class LeafOpener extends Component {
   }
 
   detectActiveMediaLeaf(active: WorkspaceLeaf | null): MediaLeaf | null {
-    const fallback = () => getAllMediaLeaves(this.workspace).at(0) ?? null;
+    const fallback = () => {
+      const leaves = getAllMediaLeaves(this.workspace);
+      const { activeTabGroup } = this.workspace;
+      const activeMediaLeaf =
+        (!active || !activeTabGroup
+          ? leaves
+          : leaves.filter((leaf) => !activeTabGroup.children.includes(leaf))
+        ).at(0) ?? null;
+      return activeMediaLeaf;
+    };
     if (!active) return fallback();
     if (isMediaLeaf(active)) return active;
 
