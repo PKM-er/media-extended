@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink" width="157" height="20" role="img" aria-label="media extended: latest">
+  <title>media extended: latest</title>
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect width="157" height="20" rx="3" fill="#fff"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect width="116" height="20" fill="#555"/>
+    <rect x="116" width="41" height="20" fill="#6c31e4"/>
+    <rect width="157" height="20" fill="url(#s)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
+    <image x="5" y="3" width="14" height="14" xlink:href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSJ3aGl0ZXNtb2tlIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+T2JzaWRpYW48L3RpdGxlPjxwYXRoIGQ9Ik0xOS4zNTUgMTguNTM4YTY4Ljk2NyA2OC45NTkgMCAwIDAgMS44NTgtMi45NTQuODEuODEgMCAwIDAtLjA2Mi0uOWMtLjUxNi0uNjg1LTEuNTA0LTIuMDc1LTIuMDQyLTMuMzYyLS41NTMtMS4zMjEtLjYzNi0zLjM3NS0uNjQtNC4zNzdhMS43MDcgMS43MDcgMCAwIDAtLjM1OC0xLjA1bC0zLjE5OC00LjA2NGEzLjc0NCAzLjc0NCAwIDAgMS0uMDc2LjU0M2MtLjEwNi41MDMtLjMwNyAxLjAwNC0uNTM2IDEuNS0uMTM0LjI5LS4yOS42LS40NDYuOTE0bC0uMzEuNjI2Yy0uNTE2IDEuMDY4LS45OTcgMi4yMjctMS4xMzIgMy41OS0uMTI0IDEuMjYuMDQ2IDIuNzMuODE1IDQuNDgxLjEyOC4wMTEuMjU3LjAyNS4zODYuMDQ0YTYuMzYzIDYuMzYzIDAgMCAxIDMuMzI2IDEuNTA1Yy45MTYuNzkgMS43NDQgMS45MjIgMi40MTUgMy41ek04LjE5OSAyMi41NjljLjA3My4wMTIuMTQ2LjAyLjIyLjAyLjc4LjAyNCAyLjA5NS4wOTIgMy4xNi4yOS44Ny4xNiAyLjU5My42NCA0LjAxIDEuMDU1IDEuMDgzLjMxNiAyLjE5OC0uNTQ4IDIuMzU1LTEuNjY0LjExNC0uODE0LjMzLTEuNzM1LjcyNS0yLjU4bC0uMDEuMDA1Yy0uNjctMS44Ny0xLjUyMi0zLjA3OC0yLjQxNi0zLjg0OWE1LjI5NSA1LjI5NSAwIDAgMC0yLjc3OC0xLjI1N2MtMS41NC0uMjE2LTIuOTUyLjE5LTMuODQuNDUuNTMyIDIuMjE4LjM2OCA0LjgyOS0xLjQyNSA3LjUzMXpNNS41MzMgOS45MzhjLS4wMjMuMS0uMDU2LjE5Ny0uMDk4LjI5TDIuODIgMTYuMDU5YTEuNjAyIDEuNjAyIDAgMCAwIC4zMTMgMS43NzJsNC4xMTYgNC4yNGMyLjEwMy0zLjEwMSAxLjc5Ni02LjAyLjgzNi04LjMtLjcyOC0xLjczLTEuODMyLTMuMDgxLTIuNTUtMy44MzF6TTkuMzIgMTQuMDFjLjYxNS0uMTgzIDEuNjA2LS40NjUgMi43NDUtLjUzNC0uNjgzLTEuNzI1LS44NDgtMy4yMzMtLjcxNi00LjU3Ny4xNTQtMS41NTIuNy0yLjg0NyAxLjIzNS0zLjk1LjExMy0uMjM1LjIyMy0uNDU0LjMyOC0uNjY0LjE0OS0uMjk3LjI4OC0uNTc3LjQxOS0uODYuMjE3LS40Ny4zNzktLjg4NS40Ni0xLjI3LjA4LS4zOC4wOC0uNzItLjAxNC0xLjA0My0uMDk1LS4zMjUtLjI5Ny0uNjc1LS42OC0xLjA2YTEuNiAxLjYgMCAwIDAtMS40NzUuMzZsLTQuOTUgNC40NTJhMS42MDIgMS42MDIgMCAwIDAtLjUxMy45NTJsLS40MjcgMi44M2MuNjcyLjU5IDIuMzI4IDIuMzE2IDMuMzM1IDQuNzExLjA5LjIxLjE3NS40My4yNTMuNjUzeiIvPjwvc3ZnPg=="/>
+    <text aria-hidden="true" x="675" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="890">media extended</text>
+    <text x="675" y="140" transform="scale(.1)" fill="#fff" textLength="890">media extended</text>
+    <text aria-hidden="true" x="1355" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="310">latest</text>
+    <text x="1355" y="140" transform="scale(.1)" fill="#fff" textLength="310">latest</text>
+  </g>
+</svg>

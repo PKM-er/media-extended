@@ -1,0 +1,14 @@
+---
+title: 安装
+---
+
+# 插件安装
+
+import { getSSGProps } from "@/components/install/obsidian/data";
+import ObsidianInstall from "@/components/install/obsidian/main.zh-CN";
+
+export const getStaticProps = () =>
+  getSSGProps().then((ssg) => ({ props: { ssg }, revalidate: 60 }));
+
+<ObsidianInstall />
+

@@ -1,0 +1,34 @@
+import { Callout, Steps } from "nextra/components";
+import { ObsidianInfo, ReleaseLink } from "./info";
+
+<ObsidianInfo channel="beta" />
+
+<Callout type="warning">
+  Beta版本尚未准备好投入日常使用，请务必在继续之前进行适当的备份。
+</Callout>
+
+您可以使用Beta Reviewers Auto-update Tester（BRAT）插件安装预发布版本的插件。
+
+<Steps>
+
+### 安装BRAT
+
+下载 [BRAT](https://obsidian.md/plugins?id=obsidian42-brat) 并启用它
+
+### 添加用于测试的Beta插件
+
+1. 打开命令面板并运行命令 `BRAT: Add a beta plugin for testing`
+
+> 如果您希望插件版本被冻结，请使用命令 `BRAT: Add a beta plugin with frozen version based on a release tag`。
+
+2. 将 `PKM-er/media-extended` 复制到弹出的模态框中
+
+3. 点击 `Add Plugin` -- 等待几秒钟，BRAT 将告诉您正在进行的操作
+
+### 启用Beta插件
+
+1. 在BRAT确认安装后，打开 `设置` > `社区插件`
+2. 刷新插件列表
+3. 找到刚刚安装的Beta插件并启用它。
+
+</Steps>

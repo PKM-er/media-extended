@@ -1,0 +1,44 @@
+import { Callout, Steps } from "nextra/components";
+import { ObsidianInfo, ReleaseLink } from "./info";
+
+<ObsidianInfo channel={["main", "beta"]} />
+
+<Callout type="warning">
+  不推荐使用此方法。只有在其他方法都有问题时，才尝试手动安装。
+</Callout>
+
+<Steps>
+
+### 下载
+
+从 GitHub Release 下载 `media-extended.zip`： <ReleaseLink />
+
+### 启用社区插件
+
+1. 打开 `设置` > `社区插件`
+2. 启用社区插件
+
+### 打开插件文件夹
+
+- 如果你之前没有安装过任何插件，你需要手动打开插件文件夹：`<vault>/.obsidian/plugins`
+- 如果你已经安装了其他插件，你可以使用 `已安装插件` 部分右侧的 `打开插件文件夹` 按钮
+
+<Callout>
+
+`.obsidian` 文件夹可能是隐藏的。在 macOS 上，你可以按下 `Command+Shift+Dot` 来在 Finder 中显示该文件夹。
+
+</Callout>
+
+### 创建插件文件夹
+
+创建一个名为 `media-extended` 的新文件夹，并将 `media-extended.zip` 中的文件放入该文件夹
+
+文件夹中应该有三个文件：`main.js`、`manifest.json` 和 `styles.css`
+
+### 刷新和启用
+
+1. 如果你安装过其他插件， 刷新插件列表；否则重新启动 Obsidian
+2. 打开 `设置` > `社区插件`，在列表中找到 `Media Extended`
+3. 启用插件
+
+</Steps>

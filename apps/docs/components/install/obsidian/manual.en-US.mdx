@@ -1,0 +1,45 @@
+import { Callout, Steps } from "nextra/components";
+import { ObsidianInfo, ReleaseLink } from "./info";
+
+<ObsidianInfo channel={["main", "beta"]} />
+
+<Callout type="warning">
+  This method is not recommended. Only try manual install if you have trouble
+  with all other methods.
+</Callout>
+
+<Steps>
+
+### Download
+
+Download `media-extended.zip` from GitHub Release: <ReleaseLink />
+
+### Enable community plugin
+
+1. Open `Settings` > `Community plugin`
+2. Turn on community plugin
+
+### Open plugin folder
+
+- If you haven't installed any plugin before, you need to open the plugin folder manually: `<vault>/.obsidian/plugins`
+- If you have installed other plugins, you can use `Open plugin folder` button on the right of the `Installed plugins` section
+
+<Callout>
+
+The `.obsidian` folder may be hidden. On macOS, you should be able to press `Command+Shift+Dot` to show the folder in Finder.
+
+</Callout>
+
+### Create plugin folder
+
+Create a new folder `media-extended` and put files from `media-extended.zip` into the folder
+
+There should be three files in the folder: `main.js`, `manifest.json` and `styles.css`
+
+### Reload & Enable
+
+1. Refresh the list of plugins or restart Obsidian if you have installed other plugins
+2. Open `Settings` > `Community plugin` and find `Media Extended` in the list
+3. Enable the plugin using toggle
+
+</Steps>
