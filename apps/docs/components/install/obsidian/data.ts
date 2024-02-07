@@ -14,12 +14,15 @@ export async function getSSGProps(): Promise<ObsidianInstallProps> {
       "https://raw.githubusercontent.com/PKM-er/media-extended/main/manifest.json",
       `https://raw.githubusercontent.com/PKM-er/media-extended/main/manifest-beta.json`,
     ].map(async (url): Promise<Record<string, any> | null> => {
-      try {
-        return await fetch(url).then((res) => res.json());
-      } catch (e) {
-        console.error(`Failed to fetch ${url}:`, e);
-        return null;
-      }
+        return await fetch(url).then((res) => {
+          if (!res.ok) {
+            if (res.status === 404) {
+              console.log(`${url}: Not found`);
+              return null;}
+            throw new Error(`Failed to fetch ${url}: ${res.status}`);
+          }
+          return res.json();
+        });
     })
   );
 
