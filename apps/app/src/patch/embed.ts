@@ -84,7 +84,7 @@ class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
 function injectUrlMediaEmbed(this: MxPlugin) {
   this.registerMarkdownPostProcessor((el, ctx) => {
     for (const img of el.querySelectorAll("img")) {
-      const info = extractSourceFromImg(img);
+      const info = extractSourceFromImg(img, this);
       if (!info) continue;
       replace(this, info, img);
     }
@@ -93,8 +93,8 @@ function injectUrlMediaEmbed(this: MxPlugin) {
     )) {
       const sourceText = ctx.getSectionInfo(iframe)?.text;
       const info =
-        extractSourceFromMarkdown(sourceText) ??
-        extractSourceFromIframe(iframe);
+        extractSourceFromMarkdown(sourceText, this) ??
+        extractSourceFromIframe(iframe, this);
       if (!info) continue;
       replace(this, info, iframe);
     }
@@ -119,11 +119,14 @@ interface EmbedSource extends UrlMediaInfo {
   size: Size | null;
 }
 
-function extractSourceFromImg(img: HTMLImageElement): EmbedSource | null {
+function extractSourceFromImg(
+  img: HTMLImageElement,
+  plugin: MxPlugin,
+): EmbedSource | null {
   const linkTitle = img.alt,
     srcText = img.src;
 
-  const src = parseUrl(srcText);
+  const src = parseUrl(srcText, plugin);
   if (!src) return null;
 
   const [title, size] = parseSizeFromLinkTitle(linkTitle);
@@ -132,12 +135,13 @@ function extractSourceFromImg(img: HTMLImageElement): EmbedSource | null {
 
 function extractSourceFromMarkdown(
   md: string | null | undefined,
+  plugin: MxPlugin,
 ): EmbedSource | null {
   if (!md) return null;
   const match = md.match(/!\[(?<alt>[^\]]*)\]\((?<src>[^)]+)\)/);
   if (!match) return null;
   const { alt: linkTitle, src: srcText } = match.groups!;
-  const src = parseUrl(srcText);
+  const src = parseUrl(srcText, plugin);
   if (!src) return null;
   const [title, size] = parseSizeFromLinkTitle(linkTitle);
   return { ...src, title, size };
@@ -145,10 +149,11 @@ function extractSourceFromMarkdown(
 
 function extractSourceFromIframe(
   iframe: HTMLIFrameElement,
+  plugin: MxPlugin,
 ): EmbedSource | null {
   console.warn("cannot get source text of iframe, use src instead");
   const srcText = iframe.src;
-  const src = parseUrl(srcText);
+  const src = parseUrl(srcText, plugin);
   if (!src) return null;
   return { ...src, title: titleFromUrl(srcText), size: null };
 }

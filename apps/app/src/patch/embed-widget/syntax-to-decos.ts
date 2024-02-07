@@ -54,7 +54,7 @@ const getPlayerDecos = (
         if (isMdFavorInternalLink(imgUrlText)) {
           return;
         }
-        const urlInfo = parseUrl(imgUrlText);
+        const urlInfo = parseUrl(imgUrlText, plugin);
         if (urlInfo) {
           const widget = new WidgetCtorMap[urlInfo.viewType](
             plugin,

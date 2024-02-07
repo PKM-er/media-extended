@@ -50,4 +50,6 @@ export const PlayIcon = makeIcon("play"),
   EditIcon = makeIcon("edit"),
   ImageDownIcon = makeIcon("image-down"),
   PinIcon = makeIcon("pin"),
-  MoreIcon = makeIcon("more-horizontal");
+  MoreIcon = makeIcon("more-horizontal"),
+  PlusIcon = makeIcon("plus"),
+  TrashIcon = makeIcon("trash");

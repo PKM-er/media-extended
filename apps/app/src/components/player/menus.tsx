@@ -13,6 +13,7 @@ import {
   useIsEmbed,
   useMediaViewStore,
   useMediaViewStoreInst,
+  usePlugin,
 } from "../context";
 import { dataLpPassthrough } from "./buttons";
 
@@ -52,6 +53,7 @@ export function Captions() {
 export function MoreOptions() {
   const player = useMediaPlayer();
   const workspace = useApp((app) => app.workspace);
+  const plugin = usePlugin();
   const isEmbed = useIsEmbed();
   const source = useMediaViewStore((state) => state.source);
   const store = useMediaViewStoreInst();
@@ -77,6 +79,7 @@ export function MoreOptions() {
             hash,
             setTransform,
             transform,
+            plugin,
           },
           isEmbed ? "player-menu-embed" : "player-menu-view",
         );

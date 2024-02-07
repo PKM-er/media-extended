@@ -10,8 +10,8 @@ declare module "obsidian" {
   }
 }
 
-export function showAtButton(evt: Event, menu: Menu) {
-  const target = evt.target;
+export function showAtButton(evt: Event | HTMLElement, menu: Menu) {
+  const target = evt instanceof HTMLElement ? evt : evt.target;
   if (!(target instanceof HTMLElement)) return;
   const rect = target.getBoundingClientRect();
   return menu.setParentElement(target).showAtPosition({

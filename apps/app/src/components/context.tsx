@@ -8,7 +8,7 @@ import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import type { MediaInfo } from "@/media-note/note-index";
 import type MediaExtended from "@/mx-main";
-import type { MxSettings } from "@/settings";
+import type { MxSettings } from "@/settings/def";
 import type { SupportedWebHost } from "@/web/match-webpage";
 
 export interface TransformConfig {
@@ -121,6 +121,9 @@ export function useApp<U>(selector?: (state: App) => U): U | App {
   const app = useContext(MediaViewContext).plugin.app;
   if (!selector) return app;
   return selector(app);
+}
+export function usePlugin() {
+  return useContext(MediaViewContext).plugin;
 }
 
 export function useScreenshot() {

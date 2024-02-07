@@ -1,6 +1,6 @@
 import { pathToFileURL } from "url";
-import mime from "mime";
 import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
+import { pickFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
 import { parseUrl, type UrlMediaInfo } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
@@ -70,9 +70,9 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
       }
     }
     const guessInfo = guess
-      .map((u) => parseUrl(u.href))
+      .map((u) => parseUrl(u.href, this.plugin))
       .filter((x): x is UrlMediaInfo => !!x);
-    const urlInfo = parseUrl(url?.href);
+    const urlInfo = parseUrl(url?.href, this.plugin);
     if (urlInfo) {
       return [urlInfo, ...guessInfo];
     }
@@ -99,7 +99,7 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
       if (!mediaFile) return;
       try {
         const url = pathToFileURL(mediaFile);
-        item = parseUrl(url.href);
+        item = parseUrl(url.href, this.plugin);
       } catch (e) {
         console.error("Failed to generate file url", e, mediaFile);
         return;
@@ -117,31 +117,4 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
       this.plugin.leafOpener.openMedia(item);
     }
   }
-}
-
-function pickFile(exts: string[] = []) {
-  return new Promise<string | null>((resolve) => {
-    // open a file picker
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = exts
-      .flatMap((e) => {
-        const mimeType = mime.getType(e);
-        const ext = `.${e}`;
-        return mimeType ? [mimeType, ext] : [ext];
-      })
-      .join(",");
-    input.addEventListener(
-      "change",
-      () => {
-        if (!input.files || input.files.length === 0) {
-          resolve(null);
-        } else {
-          resolve(input.files[0].path);
-        }
-      },
-      { once: true },
-    );
-    input.click();
-  });
 }

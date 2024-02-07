@@ -10,7 +10,7 @@ export async function onExternalLinkClick(
   newLeaf: boolean,
   fallback: () => void,
 ) {
-  const urlInfo = parseUrl(url);
+  const urlInfo = parseUrl(url, this);
   if (!urlInfo) {
     fallback();
     return;

@@ -15,7 +15,7 @@ abstract class MediaUrlView extends MediaRemoteView {
     result: ViewStateResult,
   ): Promise<void> {
     if (typeof state.source === "string") {
-      const info = matchHostForUrl(state.source);
+      const info = matchHostForUrl(state.source, this.plugin);
       if (!info) {
         console.warn("Invalid URL", state.source);
       } else {

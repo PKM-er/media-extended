@@ -54,7 +54,7 @@ export function registerProtocol(plugin: MxPlugin) {
     handleUrl(url);
   }
   function handleUrl(url: URL) {
-    const urlInfo = parseUrl(url.toString());
+    const urlInfo = parseUrl(url.toString(), plugin);
     if (!urlInfo) {
       new Notice("Not yet supported: " + url.href);
       return;

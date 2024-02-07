@@ -33,7 +33,7 @@ import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
-import { createSettingsStore } from "./settings";
+import { createSettingsStore } from "./settings/def";
 import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
 import { BilibiliRequestHacker } from "./web/bili-req";
@@ -49,7 +49,7 @@ export default class MxPlugin extends Plugin {
       newLeaf?: PaneType,
       direction?: SplitDirection,
     ) => {
-      const urlInfo = parseUrl(url);
+      const urlInfo = parseUrl(url, this);
       if (!urlInfo) {
         new Notice("Provider not yet supported");
         return;
@@ -73,7 +73,7 @@ export default class MxPlugin extends Plugin {
     await this.settings.getState().load();
   }
 
-  mediaNote = this.addChild(new MediaNoteIndex(this.app));
+  mediaNote = this.addChild(new MediaNoteIndex(this));
   biliReq = this.addChild(new BilibiliRequestHacker(this));
   leafOpener = this.addChild(new LeafOpener(this));
   handleMediaNote = handleMediaNote;

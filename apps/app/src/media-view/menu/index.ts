@@ -19,6 +19,7 @@ export interface PlayerContext {
     viewType: MediaViewType;
     original: string;
   };
+  plugin: MxPlugin;
   setTransform: MediaViewState["setTransform"];
   transform: MediaViewState["transform"];
   hash: string;
@@ -73,7 +74,7 @@ export default function registerMediaMenu(this: MxPlugin) {
       if (source === "player-menu-embed") {
         const mediaInfo = isMediaFileViewType(ctx.source.viewType)
           ? parseFileInfo(ctx.source.original, ctx.hash, this.app.vault)
-          : parseUrl(ctx.source.original);
+          : parseUrl(ctx.source.original, ctx.plugin);
         if (mediaInfo) {
           menu
             .addItem((item) =>

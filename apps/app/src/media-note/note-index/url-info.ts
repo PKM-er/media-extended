@@ -9,6 +9,7 @@ import {
   MEDIA_EMBED_VIEW_TYPE,
   MEDIA_WEBPAGE_VIEW_TYPE,
 } from "@/media-view/view-type";
+import type MxPlugin from "@/mx-main";
 import { matchHostForEmbed } from "@/web/match-embed";
 import { matchHostForUrl } from "@/web/match-url";
 import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
@@ -22,9 +23,12 @@ export interface UrlMediaInfo {
   isSameSource: (src: string) => boolean;
 }
 
-export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
+export function parseUrl(
+  url: string | null | undefined,
+  plugin: MxPlugin,
+): UrlMediaInfo | null {
   if (!url) return null;
-  const directlinkInfo = matchHostForUrl(url);
+  const directlinkInfo = matchHostForUrl(url, plugin);
 
   if (directlinkInfo) {
     return {
@@ -34,7 +38,7 @@ export function parseUrl(url: string | null | undefined): UrlMediaInfo | null {
       hash: directlinkInfo.source.hash,
       cleanUrl: directlinkInfo.cleanUrl,
       isSameSource: (src) => {
-        const matched = matchHostForUrl(src);
+        const matched = matchHostForUrl(src, plugin);
         return (
           !!matched &&
           noHash(matched.cleanUrl) === noHash(directlinkInfo.cleanUrl)

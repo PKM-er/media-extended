@@ -7,7 +7,7 @@ export default function patchInlineUrl(this: MxPlugin) {
   const clickHandler = (e: MouseEvent) => {
     if (!(e.target instanceof HTMLDivElement)) return;
     if (!e.target.matches(".metadata-link-inner.external-link")) return;
-    const urlInfo = parseUrl(e.target.textContent);
+    const urlInfo = parseUrl(e.target.textContent, this);
     if (!urlInfo) return;
     e.stopImmediatePropagation();
     this.leafOpener.openMedia(urlInfo, Keymap.isModEvent(e) ? true : "split");

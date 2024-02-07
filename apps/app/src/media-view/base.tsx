@@ -111,7 +111,7 @@ export abstract class MediaRemoteView
   protected _sourceType = "";
 
   getMediaInfo() {
-    return parseUrl(this.store.getState().source?.original);
+    return parseUrl(this.store.getState().source?.original, this.plugin);
   }
 
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
@@ -298,7 +298,16 @@ export function onPaneMenu(
   this.plugin.app.workspace.trigger(
     "mx-media-menu",
     menu,
-    { source, player, toggleControls, controls, hash, setTransform, transform },
+    {
+      source,
+      player,
+      toggleControls,
+      controls,
+      hash,
+      setTransform,
+      transform,
+      plugin: this.plugin,
+    },
     menuSource,
     this.leaf,
   );

@@ -21,7 +21,7 @@ export class MediaRenderChild
   }
 
   getMediaInfo() {
-    return parseUrl(this.store.getState().source?.original);
+    return parseUrl(this.store.getState().source?.original, this.plugin);
   }
 
   update(

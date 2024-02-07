@@ -1,7 +1,8 @@
 import { Component, TFolder, TFile, parseLinktext } from "obsidian";
-import type { MetadataCache, App, Vault, CachedMetadata } from "obsidian";
+import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
 import { toURL } from "@/lib/url";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
+import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
 import { isFileMediaInfo, type FileMediaInfo } from "./file-info";
 import { parseUrl, type UrlMediaInfo } from "./url-info";
@@ -17,8 +18,10 @@ declare module "obsidian" {
 }
 
 export class MediaNoteIndex extends Component {
-  constructor(public app: App) {
+  app;
+  constructor(public plugin: MxPlugin) {
     super();
+    this.app = plugin.app;
   }
 
   private noteToMediaIndex = new Map<string, MediaInfo>();
@@ -36,12 +39,17 @@ export class MediaNoteIndex extends Component {
   private onResolve() {
     this.noteToMediaIndex.clear();
     this.mediaToNoteIndex.clear();
-    for (const { file, mediaInfo } of iterateMediaNote(this.app)) {
+    const ctx = {
+      metadataCache: this.app.metadataCache,
+      vault: this.app.vault,
+      plugin: this.plugin,
+    };
+    for (const { file, mediaInfo } of iterateMediaNote(ctx)) {
       this.addMediaNote(mediaInfo, file);
     }
     this.registerEvent(
       this.app.metadataCache.on("changed", (file) => {
-        const mediaInfo = getMediaNoteMeta(file, this.app);
+        const mediaInfo = getMediaNoteMeta(file, ctx);
         if (!mediaInfo) return;
         this.addMediaNote(mediaInfo, file);
       }),
@@ -121,6 +129,7 @@ function* iterateFiles(folder: TFolder): IterableIterator<TFile> {
 function* iterateMediaNote(ctx: {
   metadataCache: MetadataCache;
   vault: Vault;
+  plugin: MxPlugin;
 }) {
   for (const file of iterateFiles(ctx.vault.getRoot())) {
     if (file.extension !== "md") continue;
@@ -155,11 +164,11 @@ export interface ExternalLinkField {
 
 function getMediaNoteMeta(
   file: TFile,
-  { metadataCache }: { metadataCache: MetadataCache },
+  { metadataCache, plugin }: { metadataCache: MetadataCache; plugin: MxPlugin },
 ): MediaInfo | null {
   const meta = metadataCache.getFileCache(file);
   if (!meta) return null;
-  const ctx = { metadataCache, sourcePath: file.path };
+  const ctx = { metadataCache, sourcePath: file.path, plugin };
 
   // prefer explicit typed media
   return (
@@ -172,7 +181,7 @@ function getMediaNoteMeta(
 function getField(
   key: MediaType,
   meta: CachedMetadata,
-  ctx: { metadataCache: MetadataCache; sourcePath: string },
+  ctx: { metadataCache: MetadataCache; sourcePath: string; plugin: MxPlugin },
 ): MediaInfo | null {
   const { frontmatter, frontmatterLinks } = meta;
   if (!frontmatter || !(key in frontmatter)) return null;
@@ -198,7 +207,7 @@ function getField(
   if (typeof content !== "string") return null;
   const url = toURL(content);
   if (!url) return null;
-  const urlInfo = parseUrl(url.href);
+  const urlInfo = parseUrl(url.href, ctx.plugin);
   return urlInfo;
 }
 
