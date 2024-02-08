@@ -3,9 +3,8 @@ import { EditableFileView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
-import { getTracks } from "@/lib/subtitle";
 import { handleWindowMigration } from "@/lib/window-migration";
-import type { FileMediaInfo } from "@/media-note/note-index/file-info";
+import type { FileMediaInfo } from "@/media-view/media-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
 import {
@@ -13,6 +12,7 @@ import {
   type PlayerComponent,
   addAction,
   onPaneMenu,
+  loadFile,
 } from "./base";
 import type { MediaFileViewType } from "./view-type";
 import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
@@ -37,10 +37,9 @@ abstract class MediaFileView
     this.contentEl.addClasses(["mx", "custom"]);
     addAction(this);
   }
-  handleWindowMigration = handleWindowMigration;
 
   onload(): void {
-    this.handleWindowMigration(() => this.render());
+    handleWindowMigration(this, () => this.render());
   }
 
   abstract getViewType(): MediaFileViewType;
@@ -48,21 +47,14 @@ abstract class MediaFileView
   abstract getMediaInfo(): FileMediaInfo | null;
 
   async onLoadFile(file: TFile): Promise<void> {
-    const { vault } = this.app;
-    const src = this.app.vault.getResourcePath(file);
-    const textTracks = await getTracks(file, vault);
-    this.store.setState({
-      source: { src, original: file.path, viewType: this.getViewType() },
-      textTracks,
-      title: file.name,
-    });
+    await loadFile(file, this);
   }
   onPaneMenu(
     menu: Menu,
     menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
   ): void {
     super.onPaneMenu(menu, menuSource);
-    onPaneMenu.call(this, menu, menuSource);
+    onPaneMenu(this, menu, menuSource);
   }
   abstract canAcceptExtension(extension: string): boolean;
 

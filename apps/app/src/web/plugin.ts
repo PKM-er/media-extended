@@ -1,9 +1,10 @@
 import BilibiliPlugin from "inline:./userscript/bilibili";
 import YouTubePlugin from "inline:./userscript/youtube";
-import type { SupportedWebHost } from "./match-webpage";
+import type { SupportedMediaHost } from "./url-match/supported";
 
 export const plugins = {
   bilibili: BilibiliPlugin,
   youtube: YouTubePlugin,
+  vimeo: undefined,
   generic: undefined,
-} satisfies Record<SupportedWebHost, string | undefined>;
+} satisfies Record<SupportedMediaHost, string | undefined>;

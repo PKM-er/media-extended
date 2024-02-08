@@ -1,13 +1,10 @@
 import { Component, TFolder, TFile, parseLinktext } from "obsidian";
 import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
-import { toURL } from "@/lib/url";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
-import { isFileMediaInfo, type FileMediaInfo } from "./file-info";
-import { parseUrl, type UrlMediaInfo } from "./url-info";
-
-export type MediaInfo = FileMediaInfo | UrlMediaInfo;
+import type { MediaInfo } from "../../media-view/media-info";
+import { isFileMediaInfo } from "../../media-view/media-info";
 
 declare module "obsidian" {
   interface MetadataCache {
@@ -205,16 +202,13 @@ function getField(
   }
   const content = frontmatter[key];
   if (typeof content !== "string") return null;
-  const url = toURL(content);
-  if (!url) return null;
-  const urlInfo = parseUrl(url.href, ctx.plugin);
-  return urlInfo;
+  return ctx.plugin.resolveUrl(content);
 }
 
 function mediaInfoToString(info: MediaInfo) {
   if (isFileMediaInfo(info)) {
     return `file:${info.file.path}`;
   } else {
-    return `url:${info.cleanUrl}`;
+    return `url:${info.cleaned}`;
   }
 }

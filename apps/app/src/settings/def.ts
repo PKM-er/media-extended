@@ -1,6 +1,7 @@
 import { Platform, debounce } from "obsidian";
 import { createStore } from "zustand";
 import { enumerate } from "@/lib/must-include";
+import { pick, omit } from "@/lib/pick";
 import type MxPlugin from "@/mx-main";
 
 type MxSettingValues = {
@@ -152,27 +153,4 @@ export function createSettingsStore(plugin: MxPlugin) {
       save(get());
     },
   }));
-}
-
-function pick<T extends Record<string, unknown>, K extends string>(
-  obj: T,
-  keys: K[],
-): Pick<T, K> {
-  const result = {} as Pick<T, K>;
-  for (const key of keys) {
-    if (key in obj) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
-}
-function omit<T extends Record<string, unknown>, K extends keyof T>(
-  obj: T,
-  keys: K[],
-): Omit<T, K> {
-  const result = { ...obj };
-  for (const key of keys) {
-    delete result[key];
-  }
-  return result;
 }

@@ -10,9 +10,13 @@ import {
 import "./modal.global.less";
 import { showAtButton } from "@/lib/menu";
 import { getPartition } from "@/lib/remote-player/const";
-import { webHostDisplayNameNoGeneric, webHostUrl } from "@/web/match-webpage";
-import type { SupportedWebHostNoGeneric } from "@/web/match-webpage";
 import { getSession, getWebContents } from "@/web/session/utils";
+import {
+  mediaHostDisplayName,
+  mediaHostUrl,
+  noGeneric,
+} from "@/web/url-match/supported";
+import type { SupportedHostNoGeneric } from "@/web/url-match/supported";
 
 export class LoginModal extends Modal {
   navEl = this.contentEl.insertAdjacentElement(
@@ -113,16 +117,17 @@ export class LoginModal extends Modal {
     methods.createEl("li").setText("Enter the site address in the address bar");
     const selectFrom = methods.createEl("li");
     selectFrom.setText("Select from a list of ");
+
     new DropdownComponent(selectFrom)
       .addOptions({
-        ...webHostDisplayNameNoGeneric,
+        ...noGeneric(mediaHostDisplayName),
         // eslint-disable-next-line @typescript-eslint/naming-convention
         ".": "supported websites...",
       })
       .setValue(".")
       .onChange((val) => {
-        if (val in webHostUrl) {
-          this.setUrl(webHostUrl[val as SupportedWebHostNoGeneric]);
+        if (val in mediaHostUrl) {
+          this.setUrl(mediaHostUrl[val as SupportedHostNoGeneric]);
         }
       });
   }

@@ -43,7 +43,7 @@ export function isMediaFileViewType(type: string): type is MediaFileViewType {
 
 export function isRemoteMediaViewType(
   type: string,
-): type is MediaUrlViewType | MediaEmbedViewType | MediaWebpageViewType {
+): type is RemoteMediaViewType {
   return (
     isMediaUrlViewType(type) ||
     MEDIA_EMBED_VIEW_TYPE === type ||
@@ -52,6 +52,11 @@ export function isRemoteMediaViewType(
 }
 
 export type MediaView = VideoFileView | AudioFileView | RemoteMediaView;
+
+export type RemoteMediaViewType =
+  | MediaUrlViewType
+  | MediaEmbedViewType
+  | MediaWebpageViewType;
 
 export type RemoteMediaView =
   | VideoUrlView

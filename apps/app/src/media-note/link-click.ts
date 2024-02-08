@@ -2,20 +2,20 @@ import { parseLinktext } from "obsidian";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
-import { parseUrl } from "./note-index/url-info";
+import { SupportedMediaHost } from "@/web/url-match/supported";
 
 export async function onExternalLinkClick(
   this: MxPlugin,
-  url: string,
+  link: string,
   newLeaf: boolean,
   fallback: () => void,
 ) {
-  const urlInfo = parseUrl(url, this);
-  if (!urlInfo) {
+  const url = this.resolveUrl(link);
+  if (!url || url.type === SupportedMediaHost.Generic) {
     fallback();
     return;
   }
-  await this.leafOpener.openMedia(urlInfo, newLeaf);
+  await this.leafOpener.openMedia(url, newLeaf);
 }
 
 export async function onInternalLinkClick(

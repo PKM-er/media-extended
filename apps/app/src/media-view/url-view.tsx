@@ -1,7 +1,8 @@
 import type { ViewStateResult } from "obsidian";
-import { matchHostForUrl } from "@/web/match-url";
-import { MediaRemoteView, titleFromUrl } from "./base";
-import type { MediaRemoteViewState } from "./base";
+import { MediaURL } from "@/web/url-match";
+import { titleFromUrl } from "./base";
+import { MediaRemoteView } from "./remote-view";
+import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";
 import { MEDIA_URL_VIEW_TYPE } from "./view-type";
 
@@ -14,18 +15,14 @@ abstract class MediaUrlView extends MediaRemoteView {
     state: MediaUrlViewState,
     result: ViewStateResult,
   ): Promise<void> {
-    if (typeof state.source === "string") {
-      const info = matchHostForUrl(state.source, this.plugin);
-      if (!info) {
+    if (typeof state.source === "string" || state.source instanceof URL) {
+      const url = MediaURL.create(state.source);
+      if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
-        this._title = titleFromUrl(info.source.href);
+        this._title = titleFromUrl(url.source.href);
         this.store.setState({
-          source: {
-            src: info.source.href,
-            original: state.source,
-            viewType: this.getViewType(),
-          },
+          source: { url },
           title: this._title,
         });
       }
@@ -33,10 +30,10 @@ abstract class MediaUrlView extends MediaRemoteView {
     return super.setState(state, result);
   }
   getState(): MediaUrlViewState {
-    const state = super.getState();
+    const state = super.getState() as MediaUrlViewState;
     return {
       ...state,
-      source: this.store.getState().source?.original,
+      source: this.store.getState().source?.url,
     };
   }
 }

@@ -1,7 +1,7 @@
 import type { ViewStateResult } from "obsidian";
-import { matchHostForEmbed } from "@/web/match-embed";
-import type { MediaRemoteViewState } from "./base";
-import { MediaRemoteView } from "./base";
+import { MediaURL } from "@/web/url-match";
+import type { MediaRemoteViewState } from "./remote-view";
+import { MediaRemoteView } from "./remote-view";
 import type { MediaEmbedViewType } from "./view-type";
 import { MEDIA_EMBED_VIEW_TYPE } from "./view-type";
 
@@ -21,27 +21,21 @@ export class MediaEmbedView extends MediaRemoteView {
     state: MediaRemoteViewState,
     result: ViewStateResult,
   ): Promise<void> {
-    if (typeof state.source === "string") {
-      const urlInfo = matchHostForEmbed(state.source);
-      if (!urlInfo) {
+    if (typeof state.source === "string" || state.source instanceof URL) {
+      const url = MediaURL.create(state.source);
+      if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
-        this.store.setState({
-          source: {
-            src: urlInfo.source.href,
-            original: state.source,
-            viewType: this.getViewType(),
-          },
-        });
+        this.store.setState({ source: { url } });
       }
     }
     return super.setState(state, result);
   }
   getState(): MediaRemoteViewState {
-    const state = super.getState();
+    const state = super.getState() as MediaRemoteViewState;
     return {
       ...state,
-      source: this.store.getState().source?.original,
+      source: this.store.getState().source?.url,
     };
   }
   getDisplayText(): string {

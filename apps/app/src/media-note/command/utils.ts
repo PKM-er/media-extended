@@ -1,10 +1,10 @@
 /* eslint-disable deprecation/deprecation */
 import type { Editor, MarkdownFileInfo, App, Command, TFile } from "obsidian";
 import { MarkdownView } from "obsidian";
+import type { MediaInfo } from "@/media-view/media-info";
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { isMediaLeaf } from "../leaf-open";
-import type { MediaInfo } from "../note-index";
 
 function checkCallbacks(
   onRegular: ((checking: boolean) => boolean | void) | undefined | false,

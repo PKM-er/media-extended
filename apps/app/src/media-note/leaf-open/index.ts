@@ -10,14 +10,15 @@ import type {
 } from "obsidian";
 import { Component, MarkdownView, debounce } from "obsidian";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
+import type { MediaInfo } from "@/media-view/media-info";
+import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaUrlViewState } from "@/media-view/url-view";
 import type { MediaView } from "@/media-view/view-type";
 import { isMediaViewType } from "@/media-view/view-type";
 import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
-import type { MediaInfo } from "../note-index";
-import { isFileMediaInfo } from "../note-index/file-info";
-import type { UrlMediaInfo } from "../note-index/url-info";
+import type { MediaURL } from "@/web/url-match";
+import { getSupportedViewType } from "@/web/url-match/view-type";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
 import "./active.global.less";
 
@@ -258,7 +259,8 @@ function getAllMediaLeaves(workspace: Workspace) {
 }
 
 function getMediaLeavesOf(info: MediaInfo, workspace: Workspace) {
-  const leaves = workspace.getLeavesOfType(info.viewType).filter((leaf) => {
+  const viewType = getSupportedViewType(info)[0];
+  const leaves = workspace.getLeavesOfType(viewType).filter((leaf) => {
     if (isFileMediaInfo(info)) {
       return filterFileLeaf(leaf, info);
     } else {
@@ -281,15 +283,16 @@ function updateHash(hash: string, leaf: WorkspaceLeaf) {
   leaf.setEphemeralState({ subpath: hash });
 }
 
-async function openInLeaf(info: UrlMediaInfo, leaf: WorkspaceLeaf) {
+async function openInLeaf(info: MediaURL, leaf: WorkspaceLeaf) {
   const state: MediaEmbedViewState | MediaWebpageViewState | MediaUrlViewState =
-    { source: info.original };
+    { source: info };
+  const viewType = getSupportedViewType(info)[0];
   await leaf.setViewState(
     {
-      type: info.viewType,
+      type: viewType,
       state,
       active: true,
     },
-    { subpath: info.hash },
+    { subpath: info.srcHash },
   );
 }

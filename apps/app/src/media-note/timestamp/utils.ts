@@ -3,9 +3,9 @@ import type { Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import { noHash } from "@/lib/url";
 import type { PlayerComponent } from "@/media-view/base";
-import type { MediaInfo } from "../note-index";
-import { isFileMediaInfo, type FileMediaInfo } from "../note-index/file-info";
-import type { UrlMediaInfo } from "../note-index/url-info";
+import { isFileMediaInfo } from "@/media-view/media-info";
+import type { MediaInfo, FileMediaInfo } from "@/media-view/media-info";
+import type { MediaURL } from "@/web/url-match";
 
 export function insertTimestamp(
   link: string,
@@ -25,7 +25,7 @@ function fileTitle(media: FileMediaInfo) {
   return media.file.basename;
 }
 
-function urlTitle({ source }: UrlMediaInfo, playerState: MediaState) {
+function urlTitle({ source }: MediaURL, playerState: MediaState) {
   return (
     playerState.title ??
     source.hostname + decodeURI(source.pathname).replaceAll("/", "_")
@@ -57,7 +57,7 @@ export function openOrCreateMediaNote(
       sourcePath: file.path,
     });
   } else {
-    const sourceUrl = mediaInfo.cleanUrl;
+    const sourceUrl = mediaInfo.cleaned;
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
       title: urlTitle(mediaInfo, player.state),
       fm: () => ({ media: noHash(sourceUrl) }),
@@ -82,7 +82,7 @@ export function createTimestampGen(
         .generateMarkdownLink(file, newNotePath, hash, duration)
         .replace(/^!/, "");
   } else {
-    const sourceUrl = mediaInfo.cleanUrl;
+    const sourceUrl = mediaInfo.cleaned;
     return () => `[${duration}](${noHash(sourceUrl)}${hash})`;
   }
 }

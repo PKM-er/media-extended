@@ -1,24 +1,17 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
-import { around } from "monkey-around";
-import type { Component, WorkspaceLeaf, Menu, View } from "obsidian";
-import { ItemView, Scope } from "obsidian";
-import ReactDOM from "react-dom/client";
+import type { Component, Menu, View, ItemView, TFile } from "obsidian";
+import type ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
-import {
-  createMediaViewStore,
-  MediaViewContext,
-  onPlayerMounted,
-} from "@/components/context";
-import { Player } from "@/components/player";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
+import { getTracks } from "@/lib/subtitle";
 import { toURL } from "@/lib/url";
-import { handleWindowMigration } from "@/lib/window-migration";
-import type { MediaInfo } from "@/media-note/note-index";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import { saveScreenshot } from "@/media-note/timestamp/screenshot";
 import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
+import { fromFile } from "@/web/url-match";
+import type { MediaInfo } from "./media-info";
+import type { MediaViewType } from "./view-type";
 
 export interface PlayerComponent extends Component {
   plugin: MediaExtended;
@@ -93,141 +86,6 @@ declare module "obsidian" {
   }
 }
 
-export interface MediaRemoteViewState {
-  source?: string;
-}
-
-export abstract class MediaRemoteView
-  extends ItemView
-  implements PlayerComponent
-{
-  // no need to manage scope manually,
-  // as it's implicitly called and handled by the WorkspaceLeaf
-  store;
-  scope: Scope;
-  root: ReactDOM.Root | null = null;
-  navigation = true;
-  protected _title = "";
-  protected _sourceType = "";
-
-  getMediaInfo() {
-    return parseUrl(this.store.getState().source?.original, this.plugin);
-  }
-
-  constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
-    super(leaf);
-    this.store = createMediaViewStore();
-    this.scope = new Scope(this.app.scope);
-    this.contentEl.addClasses(["mx", "custom"]);
-    addAction(this);
-  }
-
-  onload(): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    super.onload();
-    // make sure to unmount the player before the leaf detach it from DOM
-    this.register(
-      around(this.leaf, {
-        detach: (next) =>
-          function (this: WorkspaceLeaf, ...args) {
-            self.root?.unmount();
-            self.root = null;
-            return next.call(this, ...args);
-          },
-      }),
-    );
-    this.handleWindowMigration(() => this.render());
-  }
-
-  handleWindowMigration = handleWindowMigration;
-
-  registerRemoteTitleChange() {
-    this.register(
-      onPlayerMounted(this.store, (player) =>
-        player.subscribe(({ title, source }) => {
-          this._title = title;
-          this._sourceType = source.type;
-          this.updateTitle();
-        }),
-      ),
-    );
-  }
-
-  abstract getViewType(): string;
-  abstract getIcon(): string;
-  abstract getDisplayText(): string;
-
-  initialEphemeralState = true;
-
-  onPaneMenu(
-    menu: Menu,
-    menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
-  ): void {
-    super.onPaneMenu(menu, menuSource);
-    onPaneMenu.call(this, menu, menuSource);
-  }
-
-  setEphemeralState(state: any): void {
-    if ("subpath" in state) {
-      const { subpath } = state;
-      if (this.initialEphemeralState === true) {
-        setTempFrag(subpath, this.store, true);
-        this.initialEphemeralState = false;
-      } else {
-        setTempFrag(subpath, this.store);
-      }
-    }
-    super.setEphemeralState(state);
-  }
-
-  protected async onOpen(): Promise<void> {
-    await super.onOpen();
-    this.render();
-  }
-
-  updateTitle() {
-    const newTitle = this.getDisplayText();
-    this.titleEl.setText(newTitle);
-
-    if (
-      // eslint-disable-next-line deprecation/deprecation
-      this.app.workspace.activeLeaf === this.leaf &&
-      this.app.workspace.requestActiveLeafEvents()
-    ) {
-      this.leaf.updateHeader();
-    }
-  }
-
-  render() {
-    this.root?.unmount();
-    this.root = ReactDOM.createRoot(this.contentEl);
-    this.root.render(
-      <MediaViewContext.Provider
-        value={{
-          plugin: this.plugin,
-          store: this.store,
-          embed: false,
-        }}
-      >
-        <Player />
-      </MediaViewContext.Provider>,
-    );
-  }
-
-  close() {
-    this.root?.unmount();
-    this.root = null;
-    // @ts-expect-error -- this would call leaf.detach()
-    return super.close();
-  }
-  async onClose() {
-    this.root?.unmount();
-    this.root = null;
-    return super.onClose();
-  }
-}
-
 function waitFor(
   player: MediaPlayerInstance,
   event:
@@ -280,8 +138,12 @@ export function addAction(player: PlayerComponent & ItemView) {
   });
 }
 
-export function onPaneMenu(
-  this: PlayerComponent & View,
+export function onPaneMenu<
+  T extends PlayerComponent & {
+    getViewType(): MediaViewType;
+  } & View,
+>(
+  view: T,
   menu: Menu,
   menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
 ) {
@@ -293,22 +155,32 @@ export function onPaneMenu(
     hash,
     setTransform,
     transform,
-  } = this.store.getState();
+  } = view.store.getState();
   if (!player || !source) return;
-  this.plugin.app.workspace.trigger(
+  view.plugin.app.workspace.trigger(
     "mx-media-menu",
     menu,
     {
-      source,
+      source: source.url,
       player,
       toggleControls,
       controls,
       hash,
       setTransform,
       transform,
-      plugin: this.plugin,
+      plugin: view.plugin,
     },
     menuSource,
-    this.leaf,
+    view.leaf,
   );
+}
+
+export async function loadFile(file: TFile, player: PlayerComponent) {
+  const { vault } = player.plugin.app;
+  const textTracks = await getTracks(file, vault);
+  player.store.setState({
+    source: { url: fromFile(file, vault) },
+    textTracks,
+    title: file.name,
+  });
 }

@@ -3,8 +3,8 @@ import { around } from "monkey-around";
 import type { ObsidianProtocolData } from "obsidian";
 import { Notice } from "obsidian";
 import { toURL } from "@/lib/url";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
+import { MediaURL } from "@/web/url-match";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -54,9 +54,9 @@ export function registerProtocol(plugin: MxPlugin) {
     handleUrl(url);
   }
   function handleUrl(url: URL) {
-    const urlInfo = parseUrl(url.toString(), plugin);
+    const urlInfo = MediaURL.create(url);
     if (!urlInfo) {
-      new Notice("Not yet supported: " + url.href);
+      new Notice("Invail URL: " + url.href);
       return;
     }
     plugin.leafOpener.openMedia(urlInfo);

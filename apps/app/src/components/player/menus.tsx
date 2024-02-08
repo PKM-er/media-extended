@@ -55,7 +55,7 @@ export function MoreOptions() {
   const workspace = useApp((app) => app.workspace);
   const plugin = usePlugin();
   const isEmbed = useIsEmbed();
-  const source = useMediaViewStore((state) => state.source);
+  const source = useMediaViewStore((state) => state.source?.url);
   const store = useMediaViewStoreInst();
 
   if (!player || !source) return null;

@@ -184,13 +184,11 @@ export class HTMLMediaEvents {
   }
 
   private _onLoadedData(event: Event) {
-    this._provider.media.methods.setVolume(this._ctx.$state.volume());
     this._notify("loaded-data", undefined, new Event(event.type));
   }
 
   private _onLoadedMetadata(event: Event) {
     this._attachCanPlayListeners();
-
     this._notify("loaded-metadata", undefined, new Event(event.type));
   }
 
@@ -225,6 +223,7 @@ export class HTMLMediaEvents {
   }
 
   private _onCanPlay({ type, payload }: MediaEventMap["canplay"]) {
+    this._provider.media.methods.setVolume(this._ctx.$state.volume());
     const buffered = deserializeMediaStatePropValue(
       payload.buffered,
     ) as TimeRanges;

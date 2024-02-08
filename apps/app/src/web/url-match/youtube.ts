@@ -1,27 +1,10 @@
-import { toTempFrag, updateHash } from "@/lib/hash/format";
+import { toTempFrag, addTempFrag } from "@/lib/hash/format";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
+import type { URLResolver } from "./base";
+import { SupportedMediaHost } from "./supported";
 
-function parseYoutubeTime(t: string | null): number {
-  if (!t) return NaN;
-  // handle t=300
-  const timeDigitOnly = Number(t);
-  if (!Number.isNaN(timeDigitOnly)) {
-    return timeDigitOnly;
-  }
-  // handle t=1h30m20s or t=1h30m or t=30m20s or t=30m or t=11h
-  const patternWithNamedGroup =
-    /^(?:(?<h>\d+)h)?(?:(?<m>\d+)m)?(?:(?<s>\d+)s)?$/;
-  const match = t.match(patternWithNamedGroup);
-  if (!match) return NaN;
-  const { h, m, s } = match.groups!;
-  const hours = h ? Number(h) : 0;
-  const minutes = m ? Number(m) : 0;
-  const seconds = s ? Number(s) : 0;
-  return hours * 3600 + minutes * 60 + seconds;
-}
-
-export function matchYouTube(url: URL) {
+export const youtubeResolver: URLResolver = (url) => {
   let tempFrag = parseTempFrag(url.hash);
   const timestamp = parseYoutubeTime(url.searchParams.get("t")),
     startTime = parseYoutubeTime(url.searchParams.get("start")),
@@ -33,12 +16,12 @@ export function matchYouTube(url: URL) {
 
   if (!vid) return null;
 
-  const cleanUrl = noHashUrl("https://www.youtube.com/watch");
-  cleanUrl.search = new URLSearchParams({
+  const cleaned = noHashUrl("https://www.youtube.com/watch");
+  cleaned.search = new URLSearchParams({
     v: vid,
   }).toString();
 
-  const source = new URL(cleanUrl);
+  const source = new URL(cleaned);
   if (url.searchParams.has("list")) {
     source.searchParams.set("list", url.searchParams.get("list")!);
   }
@@ -72,14 +55,37 @@ export function matchYouTube(url: URL) {
       }
     }
   }
-  updateHash(source, tempFrag);
+
+  // add temp frag parsed from url to the source url
+  addTempFrag(source, tempFrag);
 
   return {
     source,
-    cleanUrl,
+    cleaned,
+    type: SupportedMediaHost.YouTube,
+    id: vid,
   };
-}
+};
 
 function toYoutubeTime(time: number) {
   return time.toFixed(0);
+}
+
+function parseYoutubeTime(t: string | null): number {
+  if (!t) return NaN;
+  // handle t=300
+  const timeDigitOnly = Number(t);
+  if (!Number.isNaN(timeDigitOnly)) {
+    return timeDigitOnly;
+  }
+  // handle t=1h30m20s or t=1h30m or t=30m20s or t=30m or t=11h
+  const patternWithNamedGroup =
+    /^(?:(?<h>\d+)h)?(?:(?<m>\d+)m)?(?:(?<s>\d+)s)?$/;
+  const match = t.match(patternWithNamedGroup);
+  if (!match) return NaN;
+  const { h, m, s } = match.groups!;
+  const hours = h ? Number(h) : 0;
+  const minutes = m ? Number(m) : 0;
+  const seconds = s ? Number(s) : 0;
+  return hours * 3600 + minutes * 60 + seconds;
 }

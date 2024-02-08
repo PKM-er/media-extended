@@ -5,6 +5,7 @@ import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
 
 import { useState } from "react";
 import { useTempFragHandler } from "@/components/hook/use-temporal-frag";
+import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
@@ -35,7 +36,14 @@ function PlayerLayout() {
 export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
 
-  const src = useMediaViewStore(({ source }) => source?.src);
+  const src = useMediaViewStore(({ source }) => {
+    if (!source) return;
+    if (source.enableWebview) {
+      // webview will create a new MediaURL instance
+      return encodeWebpageUrl(source.url.href);
+    }
+    return source.url.source.href;
+  });
   const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
 
   const [viewType, setViewType] = useState<MediaViewType>("unknown");

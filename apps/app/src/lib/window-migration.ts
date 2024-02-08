@@ -10,10 +10,10 @@ export interface LastState {
 
 export function handleWindowMigration<
   T extends PlayerComponent & { containerEl: HTMLElement },
->(this: T, onWindowMigrated: (this: T) => void) {
+>(player: T, onWindowMigrated: (player: T) => void) {
   let lastState: LastState | null = null;
-  this.register(
-    onPlayerMounted(this.store, (player) => [
+  player.register(
+    onPlayerMounted(player.store, (player) => [
       player.subscribe(({ currentTime, paused, playbackRate }) => {
         if (currentTime === 0) return;
         lastState = {
@@ -39,5 +39,7 @@ export function handleWindowMigration<
       }),
     ]),
   );
-  this.register(this.containerEl.onWindowMigrated(onWindowMigrated));
+  player.register(
+    player.containerEl.onWindowMigrated(() => onWindowMigrated(player)),
+  );
 }

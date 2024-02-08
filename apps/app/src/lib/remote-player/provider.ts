@@ -12,10 +12,12 @@ import { isString } from "maverick.js/std";
 import { Notice } from "obsidian";
 import type { WebviewElement } from "@/components/webview";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
-import { matchHostForWeb, SupportedWebHost } from "@/web/match-webpage";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
+import { MediaURL } from "@/web/url-match";
+import { SupportedMediaHost } from "@/web/url-match/supported";
 import { MessageController, TimeoutError } from "../message";
+import { noHash } from "../url";
 import { decodeWebpageUrl } from "./encode";
 import { HTMLMediaEvents } from "./html–media-events";
 import { evalInWebview } from "./lib/inline-eval";
@@ -26,7 +28,7 @@ import type { MsgCtrlLocal } from "./type";
 const { createScope, onDispose, scoped } = Maverick;
 
 interface WebviewMediaSrc extends MediaSrc<string> {
-  host: SupportedWebHost;
+  host: SupportedMediaHost;
 }
 
 export class WebiviewMediaProvider implements MediaProviderAdapter {
@@ -77,8 +79,8 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   get currentSrc() {
     return this._currentSrc;
   }
-  get currentWebHost(): SupportedWebHost {
-    return this._currentSrc?.host ?? SupportedWebHost.Generic;
+  get currentWebHost(): SupportedMediaHost {
+    return this._currentSrc?.host ?? SupportedMediaHost.Generic;
   }
 
   setPlaybackRate(rate: number) {
@@ -137,7 +139,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     this._notify("title-change", finalTitle, _evt);
   }
 
-  loadPlugin(host: SupportedWebHost) {
+  loadPlugin(host: SupportedMediaHost) {
     return new Promise<void>((resolve, reject) => {
       const webview = this._webview as WebviewElement;
       // #region -- logic to handle plugin load
@@ -262,35 +264,22 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     if (!isString(_src)) {
       throw new Error("Webview provider only supports string src.");
     }
-    const src = decodeWebpageUrl(_src);
+    const url = MediaURL.create(decodeWebpageUrl(_src));
     const webview = this._webview;
     this._currentSrc = {
-      src,
+      src: url?.source.href ?? "",
       type,
-      host: matchHostForWeb(src)?.type ?? SupportedWebHost.Generic,
+      host: url?.type ?? SupportedMediaHost.Generic,
     };
 
-    const url = src ? new URL(src) : null;
-    const prevUrl = webview.src ? new URL(webview.src) : null;
     if (!url) {
       webview.src = "";
       return;
     }
-    if (
-      !(url.origin === prevUrl?.origin && url.pathname === prevUrl?.pathname)
-    ) {
-      webview.src = url.href;
-      await this.untilPluginReady();
-    }
-    // const frag = parseTempFrag(url.hash),
-    //   prevFrag = parseTempFrag(prevUrl?.hash);
-    // if (!isTempFragEqual(frag, prevFrag)) {
-    //   await this.media.methods.setTempFrag(frag);
-    //   if (frag && isTimestamp(frag)) {
-    //     this.media.methods.setCurrentTime(frag.start);
-    //   }
-    // }
-    // console.log("vidstack player loaded");
+    const shouldReload =
+      !webview.src || noHash(url.source) !== noHash(webview.src);
+    webview.src = url.href;
+    if (shouldReload) await this.untilPluginReady();
   }
 }
 

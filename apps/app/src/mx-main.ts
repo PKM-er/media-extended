@@ -4,6 +4,7 @@ import "./icons";
 
 import type { PaneType, SplitDirection } from "obsidian";
 import { Notice, Plugin } from "obsidian";
+import { toURL } from "./lib/url";
 import { initLogin } from "./login";
 import { handleMediaNote } from "./media-note";
 import { LeafOpener } from "./media-note/leaf-open";
@@ -12,7 +13,6 @@ import {
   onInternalLinkClick,
 } from "./media-note/link-click";
 import { MediaNoteIndex } from "./media-note/note-index";
-import { parseUrl } from "./media-note/note-index/url-info";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
@@ -39,17 +39,28 @@ import { initSwitcher } from "./switcher";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import "./login/modal";
+import { MediaURL, resolveMxProtocol } from "./web/url-match";
 
 export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
 
+  resolveMxUrl(url: string | URL): URL | null {
+    return resolveMxProtocol(toURL(url), this.settings.getState());
+  }
+  resolveUrl(url: string | URL | null | undefined): MediaURL | null {
+    if (!url) return null;
+    const resolved = this.resolveMxUrl(url);
+    if (!resolved) return null;
+    const urlInfo = MediaURL.create(resolved);
+    return urlInfo;
+  }
   api = {
     openUrl: async (
       url: string,
       newLeaf?: PaneType,
       direction?: SplitDirection,
     ) => {
-      const urlInfo = parseUrl(url, this);
+      const urlInfo = this.resolveUrl(url);
       if (!urlInfo) {
         new Notice("Provider not yet supported");
         return;

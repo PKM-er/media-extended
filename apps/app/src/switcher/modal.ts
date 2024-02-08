@@ -2,9 +2,9 @@ import { pathToFileURL } from "url";
 import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import { pickFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
-import { parseUrl, type UrlMediaInfo } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
 import { mediaExtensions } from "@/patch/media-type";
+import { MediaURL } from "@/web/url-match";
 
 const avId = /^av(?<id>\d+)$/i;
 /**
@@ -14,7 +14,7 @@ const bvId = /^BV1(?<id>[1-9A-HJ-NP-Za-km-z]{9})$/;
 
 const youtubeId = /^[\w-]{11}$/;
 
-export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
+export class MediaSwitcherModal extends SuggestModal<MediaURL> {
   constructor(public plugin: MxPlugin) {
     super(plugin.app);
     this.setPlaceholder("Enter URL or media ID");
@@ -46,7 +46,7 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
     });
   }
 
-  getSuggestions(query: string): UrlMediaInfo[] {
+  getSuggestions(query: string): MediaURL[] {
     const url = toURL(query);
     const guess: URL[] = [];
     if (!url) {
@@ -70,9 +70,9 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
       }
     }
     const guessInfo = guess
-      .map((u) => parseUrl(u.href, this.plugin))
-      .filter((x): x is UrlMediaInfo => !!x);
-    const urlInfo = parseUrl(url?.href, this.plugin);
+      .map((u) => MediaURL.create(u.href))
+      .filter((x): x is MediaURL => !!x);
+    const urlInfo = this.plugin.resolveUrl(url?.href);
     if (urlInfo) {
       return [urlInfo, ...guessInfo];
     }
@@ -84,14 +84,14 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
     // @ts-ignore
     this.chooser.setSuggestions([null]);
   }
-  renderSuggestion(value: UrlMediaInfo | null, el: HTMLElement) {
-    if (value) el.setText(value.original);
+  renderSuggestion(value: MediaURL | null, el: HTMLElement) {
+    if (value) el.setText(value.href);
     else {
       el.setText("Open local file");
     }
   }
   async onChooseSuggestion(
-    item: UrlMediaInfo | null,
+    item: MediaURL | null,
     evt: MouseEvent | KeyboardEvent,
   ) {
     if (!item) {
@@ -99,12 +99,12 @@ export class MediaSwitcherModal extends SuggestModal<UrlMediaInfo> {
       if (!mediaFile) return;
       try {
         const url = pathToFileURL(mediaFile);
-        item = parseUrl(url.href, this.plugin);
+        item = new MediaURL(url.href);
       } catch (e) {
         console.error("Failed to generate file url", e, mediaFile);
         return;
       }
-      if (!item) {
+      if (!item.inferredType) {
         new Notice("Unsupported file type: " + mediaFile);
         return;
       }

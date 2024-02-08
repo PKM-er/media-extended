@@ -3,8 +3,8 @@ import { AudioFileView, VideoFileView } from "@/media-view/file-view";
 import { MediaEmbedView } from "@/media-view/iframe-view";
 import { VideoUrlView, AudioUrlView } from "@/media-view/url-view";
 import { MediaWebpageView } from "@/media-view/webpage-view";
-import { type FileMediaInfo } from "../note-index/file-info";
-import type { UrlMediaInfo } from "../note-index/url-info";
+import type { MediaURL } from "@/web/url-match";
+import { type FileMediaInfo } from "../../media-view/media-info";
 
 export function filterFileLeaf(
   leaf: WorkspaceLeaf,
@@ -19,10 +19,7 @@ export function filterFileLeaf(
   return filePath === info.file.path;
 }
 
-export function filterUrlLeaf(
-  leaf: WorkspaceLeaf,
-  info: UrlMediaInfo,
-): boolean {
+export function filterUrlLeaf(leaf: WorkspaceLeaf, info: MediaURL): boolean {
   if (
     !(
       leaf.view instanceof MediaEmbedView ||
@@ -34,7 +31,7 @@ export function filterUrlLeaf(
     return false;
   }
   const { source } = leaf.view.getState();
-  return !!source && info.isSameSource(source);
+  return info.compare(source);
 }
 
 export function sortByMtime(a: TFile, b: TFile) {

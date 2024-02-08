@@ -2,16 +2,13 @@
 import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { Platform } from "obsidian";
-import type { MediaViewState } from "@/components/context";
 import { dataLpPassthrough } from "@/components/player/buttons";
-import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { parseSizeSyntax } from "@/lib/size-syntax";
-import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
 import { titleFromUrl } from "@/media-view/base";
+import type { StateFacet } from "@/media-view/url-embed";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MediaExtended from "@/mx-main";
-
-type InfoFacet = Partial<Pick<MediaViewState, "source" | "hash" | "title">>;
+import type { MediaURL } from "@/web/url-match";
 
 class UrlMediaRenderChild extends MediaRenderChild {
   constructor(public containerEl: HTMLElement, public plugin: MediaExtended) {
@@ -36,7 +33,8 @@ type ElementWithInfo = HTMLElement & {
     start: number;
     end: number;
     child: UrlMediaRenderChild;
-  } & UrlMediaInfo;
+    url: MediaURL;
+  };
 };
 
 abstract class UrlPlayerWidget extends WidgetType {
@@ -80,7 +78,7 @@ abstract class UrlPlayerWidget extends WidgetType {
 
   constructor(
     public plugin: MediaExtended,
-    public media: UrlMediaInfo,
+    public media: MediaURL,
     public title: string,
     public start: number,
     public end: number,
@@ -94,7 +92,7 @@ abstract class UrlPlayerWidget extends WidgetType {
       start: this.start,
       end: this.end,
       child,
-      ...this.media,
+      url: this.media,
     };
   }
 
@@ -102,7 +100,7 @@ abstract class UrlPlayerWidget extends WidgetType {
     const info = (domToUpdate as ElementWithInfo).playerInfo;
     if (!info) return false;
     const { title } = info;
-    if (info.isSameSource(this.media.original)) {
+    if (this.media.compare(info.url)) {
       if (this.title !== title) {
         info.title = this.title;
         this.applyTitle(domToUpdate);
@@ -121,13 +119,10 @@ abstract class UrlPlayerWidget extends WidgetType {
     }
   }
   eq(other: UrlPlayerWidget): boolean {
-    return (
-      other.media.isSameSource(this.media.original) &&
-      this.title === other.title
-    );
+    return this.media.compare(other.media) && this.title === other.title;
   }
 
-  abstract toInfoFacet(media: UrlMediaInfo): InfoFacet;
+  abstract toInfoFacet(media: MediaURL): StateFacet;
 
   setDOM(view: EditorView, container: HTMLDivElement) {
     container.tabIndex = -1;
@@ -202,39 +197,34 @@ Object.defineProperty(UrlPlayerWidget.prototype, "estimatedHeight", {
   configurable: true,
 });
 
-function toInfoFacet(media: UrlMediaInfo) {
+function toInfoFacet(media: MediaURL, enableWebview: boolean): StateFacet {
   return {
     hash: media.hash,
-    source: {
-      src: media.source.href,
-      original: media.original,
-      viewType: media.viewType,
-    },
+    source: media,
+    enableWebview,
     title: titleFromUrl(media.source.href),
   };
 }
 
 export class VideoUrlPlayerWidget extends UrlPlayerWidget {
-  toInfoFacet = toInfoFacet;
+  toInfoFacet(media: MediaURL) {
+    return toInfoFacet(media, false);
+  }
 }
 export class AudioUrlPlayerWidget extends UrlPlayerWidget {
-  toInfoFacet = toInfoFacet;
+  toInfoFacet(media: MediaURL) {
+    return toInfoFacet(media, false);
+  }
 }
 export class IframePlayerWidget extends UrlPlayerWidget {
-  toInfoFacet = toInfoFacet;
+  toInfoFacet(media: MediaURL) {
+    return toInfoFacet(media, false);
+  }
 }
 
 export class WebpagePlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: UrlMediaInfo) {
-    return {
-      hash: media.hash,
-      source: {
-        src: encodeWebpageUrl(media.source.href),
-        original: media.original,
-        viewType: media.viewType,
-      },
-      title: titleFromUrl(media.source.href),
-    };
+  toInfoFacet(media: MediaURL) {
+    return toInfoFacet(media, true);
   }
 }
 

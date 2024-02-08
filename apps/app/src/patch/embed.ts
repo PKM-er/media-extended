@@ -1,12 +1,13 @@
 import type { EmbedCreator, Plugin } from "obsidian";
-import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle } from "@/lib/size-syntax";
-import type { UrlMediaInfo } from "@/media-note/note-index/url-info";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
+import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/view-type";
+import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
+import type { MediaURL } from "@/web/url-match";
+import { getSupportedViewType } from "@/web/url-match/view-type";
 import setupEmbedWidget from "./embed-widget";
 import { MediaFileExtensions } from "./media-type";
 import { reloadMarkdownPreview } from "./utils";
@@ -60,7 +61,8 @@ function injectFileMediaEmbed(this: Plugin, embedCreator: EmbedCreator) {
 
 class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
   constructor(
-    public info: UrlMediaInfo,
+    public info: MediaURL,
+    public viewType: RemoteMediaViewType,
     public containerEl: HTMLElement,
     public plugin: MxPlugin,
   ) {
@@ -68,92 +70,87 @@ class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
     containerEl.addClasses(["mx-external-media-embed"]);
     this.update({
       hash: info.hash,
-      source: {
-        src:
-          info.viewType === "mx-webpage"
-            ? encodeWebpageUrl(info.source.href)
-            : info.source.href,
-        original: info.original,
-        viewType: info.viewType,
-      },
       title: titleFromUrl(info.source.href),
+      source: info,
+      enableWebview: viewType === MEDIA_WEBPAGE_VIEW_TYPE,
     });
   }
 }
 
 function injectUrlMediaEmbed(this: MxPlugin) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const plguin = this;
   this.registerMarkdownPostProcessor((el, ctx) => {
     for (const img of el.querySelectorAll("img")) {
-      const info = extractSourceFromImg(img, this);
+      const info = extractSourceFromImg(img);
       if (!info) continue;
-      replace(this, info, img);
+      replace(info, img);
     }
     for (const iframe of el.querySelectorAll<HTMLIFrameElement>(
       'iframe[src*="youtube.com/embed/"]',
     )) {
       const sourceText = ctx.getSectionInfo(iframe)?.text;
       const info =
-        extractSourceFromMarkdown(sourceText, this) ??
-        extractSourceFromIframe(iframe, this);
+        extractSourceFromMarkdown(sourceText) ??
+        extractSourceFromIframe(iframe);
       if (!info) continue;
-      replace(this, info, iframe);
+      const src = this.resolveUrl(info.url);
+      if (!src) continue;
+      replace(info, iframe);
     }
 
-    function replace(plguin: MxPlugin, info: EmbedSource, target: HTMLElement) {
-      const { title, original } = info;
+    function replace({ title, url }: EmbedSource, target: HTMLElement) {
+      const src = plguin.resolveUrl(url);
+      if (!src) return;
+      const viewType = getSupportedViewType(src)[0];
       const newWarpper = createSpan({
         cls: ["media-embed", "external-embed", "is-loaded"],
         attr: {
-          src: original,
+          src: src.href,
           alt: title,
         },
       });
       target.replaceWith(newWarpper);
-      ctx.addChild(new UrlEmbedMarkdownRenderChild(info, newWarpper, plguin));
+      ctx.addChild(
+        new UrlEmbedMarkdownRenderChild(src, viewType, newWarpper, plguin),
+      );
     }
   });
 }
 
-interface EmbedSource extends UrlMediaInfo {
+interface EmbedSource {
+  url: string;
   title: string;
   size: Size | null;
 }
 
-function extractSourceFromImg(
-  img: HTMLImageElement,
-  plugin: MxPlugin,
-): EmbedSource | null {
+function extractSourceFromImg(img: HTMLImageElement): EmbedSource | null {
   const linkTitle = img.alt,
     srcText = img.src;
 
-  const src = parseUrl(srcText, plugin);
-  if (!src) return null;
+  if (!srcText) return null;
 
   const [title, size] = parseSizeFromLinkTitle(linkTitle);
-  return { ...src, title, size };
+  return { url: srcText, title, size };
 }
 
 function extractSourceFromMarkdown(
   md: string | null | undefined,
-  plugin: MxPlugin,
 ): EmbedSource | null {
   if (!md) return null;
   const match = md.match(/!\[(?<alt>[^\]]*)\]\((?<src>[^)]+)\)/);
   if (!match) return null;
   const { alt: linkTitle, src: srcText } = match.groups!;
-  const src = parseUrl(srcText, plugin);
-  if (!src) return null;
+  if (!srcText) return null;
   const [title, size] = parseSizeFromLinkTitle(linkTitle);
-  return { ...src, title, size };
+  return { url: srcText, title, size };
 }
 
 function extractSourceFromIframe(
   iframe: HTMLIFrameElement,
-  plugin: MxPlugin,
 ): EmbedSource | null {
   console.warn("cannot get source text of iframe, use src instead");
   const srcText = iframe.src;
-  const src = parseUrl(srcText, plugin);
-  if (!src) return null;
-  return { ...src, title: titleFromUrl(srcText), size: null };
+  if (!srcText) return null;
+  return { url: srcText, title: titleFromUrl(srcText), size: null };
 }

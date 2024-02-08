@@ -1,10 +1,7 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { MediaViewState } from "@/components/context";
-import { parseFileInfo } from "@/media-note/note-index/file-info";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
-import type { MediaViewType } from "../view-type";
-import { isMediaFileViewType } from "../view-type";
+import type { MediaURL } from "@/web/url-match";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";
 import { speedMenu } from "./speed";
@@ -14,11 +11,7 @@ import { webpageMenu } from "./webpage";
 
 export interface PlayerContext {
   player: MediaPlayerInstance;
-  source: {
-    src: string;
-    viewType: MediaViewType;
-    original: string;
-  };
+  source: MediaURL;
   plugin: MxPlugin;
   setTransform: MediaViewState["setTransform"];
   transform: MediaViewState["transform"];
@@ -29,6 +22,7 @@ export interface PlayerContext {
 
 declare module "obsidian" {
   interface Workspace {
+    on(name: "url-menu", callback: (menu: Menu, link: string) => any): EventRef;
     on(
       name: "mx-media-menu",
       callback: (
@@ -72,39 +66,35 @@ export default function registerMediaMenu(this: MxPlugin) {
         muteMenu(menu, ctx.player);
       }
       if (source === "player-menu-embed") {
-        const mediaInfo = isMediaFileViewType(ctx.source.viewType)
-          ? parseFileInfo(ctx.source.original, ctx.hash, this.app.vault)
-          : parseUrl(ctx.source.original, ctx.plugin);
-        if (mediaInfo) {
-          menu
-            .addItem((item) =>
-              item
-                .setTitle("Open to the right")
-                .setIcon("separator-vertical")
-                .setSection("view")
-                .onClick(() => {
-                  this.leafOpener.openMedia(mediaInfo, "split");
-                }),
-            )
-            .addItem((item) =>
-              item
-                .setTitle("Open in new tab")
-                .setSection("view")
-                .setIcon("file-plus")
-                .onClick(() => {
-                  this.leafOpener.openMedia(mediaInfo, "tab");
-                }),
-            )
-            .addItem((item) =>
-              item
-                .setTitle("Open in new window")
-                .setSection("view")
-                .setIcon("maximize")
-                .onClick(() => {
-                  this.leafOpener.openMedia(mediaInfo, "window");
-                }),
-            );
-        }
+        const mediaInfo = ctx.source;
+        menu
+          .addItem((item) =>
+            item
+              .setTitle("Open to the right")
+              .setIcon("separator-vertical")
+              .setSection("view")
+              .onClick(() => {
+                this.leafOpener.openMedia(mediaInfo, "split");
+              }),
+          )
+          .addItem((item) =>
+            item
+              .setTitle("Open in new tab")
+              .setSection("view")
+              .setIcon("file-plus")
+              .onClick(() => {
+                this.leafOpener.openMedia(mediaInfo, "tab");
+              }),
+          )
+          .addItem((item) =>
+            item
+              .setTitle("Open in new window")
+              .setSection("view")
+              .setIcon("maximize")
+              .onClick(() => {
+                this.leafOpener.openMedia(mediaInfo, "window");
+              }),
+          );
       }
       webpageMenu(menu, ctx, source);
       if (source === "player-menu-embed" || source === "more-options") {

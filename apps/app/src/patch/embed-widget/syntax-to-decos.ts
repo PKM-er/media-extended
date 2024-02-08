@@ -3,10 +3,11 @@ import type { EditorState } from "@codemirror/state";
 import type { WidgetType } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 // import { editorInfoField } from "obsidian";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import type MediaExtended from "@/mx-main";
 
 // import { getFileHashFromLinktext } from "../../player/thunk/set-media";
+import { SupportedMediaHost } from "@/web/url-match/supported";
+import { getSupportedViewType } from "@/web/url-match/view-type";
 import { isMdFavorInternalLink } from "./utils";
 import { WidgetCtorMap } from "./widget";
 
@@ -54,9 +55,10 @@ const getPlayerDecos = (
         if (isMdFavorInternalLink(imgUrlText)) {
           return;
         }
-        const urlInfo = parseUrl(imgUrlText, plugin);
-        if (urlInfo) {
-          const widget = new WidgetCtorMap[urlInfo.viewType](
+        const urlInfo = plugin.resolveUrl(imgUrlText);
+        if (urlInfo && urlInfo.type !== SupportedMediaHost.Generic) {
+          const viewType = getSupportedViewType(urlInfo)[0];
+          const widget = new WidgetCtorMap[viewType](
             plugin,
             urlInfo,
             imgAltText,

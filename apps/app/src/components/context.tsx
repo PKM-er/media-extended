@@ -6,10 +6,10 @@ import { createStore, useStore } from "zustand";
 import noop from "@/lib/no-op";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
-import type { MediaInfo } from "@/media-note/note-index";
 import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
-import type { SupportedWebHost } from "@/web/match-webpage";
+import type { MediaURL } from "@/web/url-match";
+import type { SupportedMediaHost } from "@/web/url-match/supported";
 
 export interface TransformConfig {
   rotate: "90" | "180" | "270";
@@ -23,9 +23,8 @@ export interface MediaViewState {
   playerRef: React.RefCallback<MediaPlayerInstance>;
   source:
     | {
-        src: string;
-        original: string;
-        viewType: MediaInfo["viewType"];
+        url: MediaURL;
+        enableWebview?: boolean;
         type?: string;
       }
     | undefined;
@@ -36,8 +35,8 @@ export interface MediaViewState {
   controls?: boolean;
   toggleControls: (showCustom: boolean) => void;
   textTracks: TextTrackInit[];
-  webHost?: Exclude<SupportedWebHost, SupportedWebHost.Generic>;
-  updateWebHost: (webHost: SupportedWebHost) => void;
+  webHost?: Exclude<SupportedMediaHost, SupportedMediaHost.Generic>;
+  updateWebHost: (webHost: SupportedMediaHost) => void;
 }
 
 export function createMediaViewStore() {

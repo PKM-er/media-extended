@@ -2,10 +2,9 @@ import { MarkdownRenderChild } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
-import { parseUrl } from "@/media-note/note-index/url-info";
 import type MxPlugin from "@/mx-main";
+import type { MediaURL } from "@/web/url-match";
 import { type PlayerComponent } from "./base";
-import type { MediaViewType } from "./view-type";
 
 export class MediaRenderChild
   extends MarkdownRenderChild
@@ -21,17 +20,14 @@ export class MediaRenderChild
   }
 
   getMediaInfo() {
-    return parseUrl(this.store.getState().source?.original, this.plugin);
+    return this.store.getState().source?.url ?? null;
   }
 
-  update(
-    facet: Partial<{
-      hash: string;
-      title: string;
-      source: { src: string; original: string; viewType: MediaViewType };
-    }>,
-  ): void {
-    this.store.setState(facet);
+  update({ source, enableWebview, ...rest }: Partial<StateFacet>): void {
+    this.store.setState({
+      ...rest,
+      source: source ? { url: source, enableWebview } : undefined,
+    });
   }
 
   onload(): void {
@@ -56,4 +52,11 @@ export class MediaRenderChild
     this.root = null;
     super.onunload();
   }
+}
+
+export interface StateFacet {
+  hash: string;
+  title: string;
+  source: MediaURL;
+  enableWebview: boolean;
 }

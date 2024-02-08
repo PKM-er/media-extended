@@ -25,7 +25,8 @@ const fillZero = (time: number, fractionDigits = 2) => {
   return frac ? main + "." + frac : main;
 };
 
-export function updateHash(url: URL, tempFrag: TempFragment | null): void {
+export function addTempFrag(url: URL, tempFrag: TempFragment | null): URL {
+  url = new URL(url);
   const hashWithoutTempFrag = url.hash.replace(/t=[^&]+/, "");
   if (!tempFrag) {
     url.hash = hashWithoutTempFrag;
@@ -33,6 +34,7 @@ export function updateHash(url: URL, tempFrag: TempFragment | null): void {
     const tempFragString = toTempFragString(tempFrag);
     url.hash = `${hashWithoutTempFrag}&${tempFragString}`;
   }
+  return url;
 }
 
 export function toTempFrag(start: number, end: number): TempFragment {

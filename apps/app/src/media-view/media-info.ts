@@ -6,6 +6,9 @@ import {
   MEDIA_FILE_VIEW_TYPE,
 } from "@/media-view/view-type";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
+import type { MediaURL } from "@/web/url-match";
+
+export type MediaInfo = FileMediaInfo | MediaURL;
 
 export interface FileMediaInfo {
   viewType: MediaFileViewType;
