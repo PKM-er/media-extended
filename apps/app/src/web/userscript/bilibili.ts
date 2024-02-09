@@ -7,7 +7,7 @@ const css = `
 #bilibili-player .bpx-player-control-wrap {
     opacity: 0 !important;
 }
-#bilibili-player.mx-show-controls .bpx-player-control-wrap {
+.mx-show-controls #bilibili-player .bpx-player-control-wrap {
     opacity: 100 !important;
 }
 `;
@@ -21,11 +21,13 @@ export default class BilibiliPlugin extends MediaPlugin {
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
+  getStyle() {
+    return css;
+  }
   async onload(): Promise<void> {
     this.controller.handle("bili_getManifest", () => {
       return { value: window.player.getManifest() };
     });
-    this.injectStyle(css);
     localStorage.setItem("recommend_auto_play", "close");
     // disable autoplay
     localStorage.setItem(
@@ -33,31 +35,12 @@ export default class BilibiliPlugin extends MediaPlugin {
       JSON.stringify({ media: { autoplay: false } }),
     );
     await super.onload();
-    // this.untilMediaReady("loadeddata").then(() => {
-    //   this.preventAutoplay();
-    // });
-    // this.preventAutoplay();
-    // disable auto play recommendation
-    const player = document.querySelector<HTMLDivElement>("#bilibili-player");
-    if (!player) {
-      throw new Error("Bind failed: #bilibili-player not found");
-    }
-    this.#player = player;
     await this.untilMediaReady("canplay");
-    this.register(
-      this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
-        player.classList.toggle("mx-show-controls", showWebsite);
-      }),
-    );
-    await Promise.all([this.toggleDanmaku(false), this.enterWebFullscreen()]);
+    await Promise.all([this.toggleDanmaku(false), this.untilWebFullscreen()]);
   }
 
-  #player: HTMLDivElement | null = null;
   get player() {
-    if (!this.#player) {
-      throw new Error("Get player before load");
-    }
-    return this.#player;
+    return this.media.closest<HTMLDivElement>("#bilibili-player")!;
   }
 
   async toggleDanmaku(val?: boolean) {
@@ -118,13 +101,11 @@ export default class BilibiliPlugin extends MediaPlugin {
     );
     console.log("Clicking fullscreen button");
     fsButton.click();
-    // wait for playerEl to have class mode-webscreen
-    await this.untilWebFullscreen();
-    console.log("Entered web fullscreen");
   }
 
   async untilWebFullscreen() {
     const playerEl = this.player;
+    if (this.isWebFullscreen()) return;
     await new Promise((resolve) => {
       const observer = new MutationObserver((mutations) => {
         const mutation = mutations.find(

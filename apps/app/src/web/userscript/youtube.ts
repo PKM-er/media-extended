@@ -41,7 +41,7 @@ ytd-app .html5-endscreen {
 ytd-app .ytp-chrome-bottom {
   opacity: 0 !important;
 }
-ytd-app.mx-show-controls .ytp-chrome-bottom {
+.mx-show-controls ytd-app .ytp-chrome-bottom {
   opacity: 100 !important;
 }
 `;
@@ -53,47 +53,29 @@ const { waitForSelector, MediaPlugin } = requireMx();
 
 export default class BilibiliPlugin extends MediaPlugin {
   findMedia(): Promise<HTMLMediaElement> {
-    return waitForSelector<HTMLMediaElement>("#ytd-player video");
+    return waitForSelector<HTMLMediaElement>("ytd-app #movie_player video");
+  }
+
+  getStyle() {
+    return css;
   }
   async onload(): Promise<void> {
-    this.injectStyle(css);
     await super.onload();
-    const app = document.querySelector<HTMLElement>("ytd-app");
-    if (!app) {
-      throw new Error("Bind failed: #ytd-app not found");
-    }
-    this.#app = app;
 
-    await Promise.all([
-      this.untilMediaReady("canplay").then(() => {
-        this.register(
-          this.controller.on(
-            "mx-toggle-controls",
-            ({ payload: showWebsite }) => {
-              this.app.classList.toggle("mx-show-controls", showWebsite);
-            },
-          ),
-        );
-      }),
-      await this.disableAutoPlay(),
-      this.enterWebFullscreen(),
-    ]);
+    await Promise.all([this.disableAutoPlay()]);
   }
 
-  #app: HTMLElement | null = null;
   get app() {
-    if (!this.#app) {
-      throw new Error("Get player before load");
-    }
-    return this.#app;
+    return this.media.closest<HTMLElement>("ytd-app")!;
   }
 
   async disableAutoPlay() {
     console.log("Disabling autoplay...");
     const autoPlayButtonSelector =
       'button.ytp-button[data-tooltip-target-id="ytp-autonav-toggle-button"]';
-    const autoPlayButton = this.app.querySelector<HTMLButtonElement>(
+    const autoPlayButton = await waitForSelector<HTMLButtonElement>(
       autoPlayButtonSelector,
+      this.app,
     );
 
     if (!autoPlayButton) {
@@ -125,25 +107,15 @@ export default class BilibiliPlugin extends MediaPlugin {
   }
 
   async enterWebFullscreen() {
-    const moviePlayer = await waitForSelector<HTMLDivElement>(
-      "#movie_player",
-      this.app,
-    );
-    for (const parent of parents(moviePlayer)) {
-      parent.classList.add("mx-parent");
-      if (getComputedStyle(parent).position == "fixed") {
-        parent.classList.add("mx-absolute");
-      }
-    }
-    console.log("added parent classes");
+    const moviePlayer = this.media.closest<HTMLElement>("#movie_player")!;
+    this.assignParentClass(moviePlayer);
 
+    const fsButton = await waitForSelector<HTMLButtonElement>(
+      "#movie_player .ytp-size-button",
+    );
     const isCinematicsMode = () =>
       !!this.app.querySelector("ytd-watch-flexy[theater]");
     if (!isCinematicsMode()) {
-      const fsButton = await waitForSelector<HTMLButtonElement>(
-        "#movie_player .ytp-size-button",
-        this.app,
-      );
       console.log("Entering cinema mode");
       do {
         fsButton.click();
@@ -152,15 +124,6 @@ export default class BilibiliPlugin extends MediaPlugin {
       console.log("Entered cinema mode");
     }
     window.dispatchEvent(new Event("resize"));
-  }
-}
-
-function* parents(element: HTMLElement, includeSelf = false) {
-  if (includeSelf) yield element;
-  // break if element is document.body
-  while (element.parentElement && element.parentElement !== document.body) {
-    element = element.parentElement;
-    yield element;
   }
 }
 
