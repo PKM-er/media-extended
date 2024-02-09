@@ -1,10 +1,18 @@
 import type { Menu } from "obsidian";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
+import { SupportedMediaHost } from "@/web/url-match/supported";
 import type { PlayerContext } from ".";
 
 export function webpageMenu(
   menu: Menu,
-  { controls = true, toggleControls, player }: PlayerContext,
+  {
+    controls = true,
+    toggleControls,
+    player,
+    source: media,
+    disableWebFullscreen,
+    toggleWebFullscreen,
+  }: PlayerContext,
   source:
     | "player-menu-view"
     | "player-menu-embed"
@@ -15,7 +23,7 @@ export function webpageMenu(
   if (
     player.provider instanceof WebiviewMediaProvider &&
     source === "more-options"
-  )
+  ) {
     menu.addItem((item) => {
       item
         .setTitle(
@@ -27,4 +35,23 @@ export function webpageMenu(
           toggleControls(!controls);
         });
     });
+    if (
+      media.type !== SupportedMediaHost.Bilibili &&
+      media.type !== SupportedMediaHost.YouTube
+    ) {
+      menu.addItem((item) => {
+        item
+          .setTitle(
+            disableWebFullscreen
+              ? "Enable in-player fullscreen"
+              : "Disable in-player fullscreen",
+          )
+          .setSection("mx-player")
+          .setIcon(disableWebFullscreen ? "maximize" : "minimize")
+          .onClick(() => {
+            toggleWebFullscreen(!!disableWebFullscreen);
+          });
+      });
+    }
+  }
 }

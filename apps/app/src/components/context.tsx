@@ -33,7 +33,9 @@ export interface MediaViewState {
   transform: Partial<TransformConfig> | null;
   setTransform: (transform: Partial<TransformConfig> | null) => void;
   controls?: boolean;
+  disableWebFullscreen?: boolean;
   toggleControls: (showCustom: boolean) => void;
+  toggleWebFullscreen: (enableWebFs: boolean) => void;
   textTracks: TextTrackInit[];
   webHost?: Exclude<SupportedMediaHost, SupportedMediaHost.Generic>;
   updateWebHost: (webHost: SupportedMediaHost) => void;
@@ -75,6 +77,13 @@ export function createMediaViewStore() {
       set({ controls: showCustom });
       if (player && player.provider instanceof WebiviewMediaProvider) {
         player.provider.media.send("mx-toggle-controls", !showCustom);
+      }
+    },
+    toggleWebFullscreen(enableWebFs) {
+      const { player } = get();
+      set({ disableWebFullscreen: !enableWebFs });
+      if (player && player.provider instanceof WebiviewMediaProvider) {
+        player.provider.media.send("mx-toggle-webfs", enableWebFs);
       }
     },
     textTracks: [],

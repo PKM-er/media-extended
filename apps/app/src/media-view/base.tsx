@@ -155,6 +155,8 @@ export function onPaneMenu<
     hash,
     setTransform,
     transform,
+    toggleWebFullscreen,
+    disableWebFullscreen,
   } = view.store.getState();
   if (!player || !source) return;
   view.plugin.app.workspace.trigger(
@@ -169,6 +171,8 @@ export function onPaneMenu<
       setTransform,
       transform,
       plugin: view.plugin,
+      disableWebFullscreen,
+      toggleWebFullscreen,
     },
     menuSource,
     view.leaf,

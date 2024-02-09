@@ -66,8 +66,15 @@ export function MoreOptions() {
       {...{ [dataLpPassthrough]: true }}
       onClick={(evt) => {
         const menu = new Menu();
-        const { toggleControls, controls, hash, setTransform, transform } =
-          store.getState();
+        const {
+          toggleControls,
+          controls,
+          hash,
+          setTransform,
+          transform,
+          disableWebFullscreen,
+          toggleWebFullscreen,
+        } = store.getState();
         workspace.trigger(
           "mx-media-menu",
           menu,
@@ -80,6 +87,8 @@ export function MoreOptions() {
             setTransform,
             transform,
             plugin,
+            disableWebFullscreen,
+            toggleWebFullscreen,
           },
           isEmbed ? "player-menu-embed" : "player-menu-view",
         );

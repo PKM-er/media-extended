@@ -201,6 +201,7 @@ export type MsgCtrlRemote = MessageController<
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;
+    "mx-toggle-webfs": boolean;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap
 >;
@@ -234,6 +235,7 @@ export type MsgCtrlLocal = MessageController<
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;
+    "mx-toggle-webfs": boolean;
   }
 >;
 

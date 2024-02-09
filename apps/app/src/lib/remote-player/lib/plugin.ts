@@ -41,6 +41,11 @@ export default class MediaPlugin extends LifeCycle {
           document.body.classList.toggle("mx-show-controls", showWebsite);
         }),
       );
+      this.register(
+        this.controller.on("mx-toggle-webfs", ({ payload: enableWebFs }) => {
+          document.body.classList.toggle("mx-fs-enable", enableWebFs);
+        }),
+      );
     });
     this.controller.send("mx-play-ready", void 0);
   }

@@ -17,6 +17,8 @@ export interface PlayerContext {
   transform: MediaViewState["transform"];
   hash: string;
   controls: boolean | undefined;
+  disableWebFullscreen: boolean | undefined;
+  toggleWebFullscreen: (enableWebFs: boolean) => void;
   toggleControls: (showCustom: boolean) => void;
 }
 
