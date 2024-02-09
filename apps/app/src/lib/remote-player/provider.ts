@@ -193,7 +193,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     });
 
     finishLoad
-      .then(() => Promise.race([playReady, timeout(10e3)]))
+      .then(() => Promise.race([playReady, timeout(5e3)]))
       .then(() => {
         this.togglePlayReady(true);
       })
@@ -205,6 +205,9 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
         } else {
           throw err;
         }
+      })
+      .finally(() => {
+        this.togglePlayReady(true);
       });
   }
 
@@ -240,12 +243,9 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     }
   }
 
-  revokePlayReady?: () => void;
-
   untilPluginReady() {
     const webview = this._webview;
     this.togglePlayReady(false);
-    this.revokePlayReady?.();
     webview.removeEventListener("dom-ready", this.onDomReady);
     return new Promise<void>((resolve, reject) => {
       const onDomReady = (evt: Event) => {
@@ -254,9 +254,6 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
         webview.addEventListener("dom-ready", this.onDomReady);
       };
       webview.addEventListener("dom-ready", onDomReady);
-      this.revokePlayReady = this._port.on("mx-play-ready", () => {
-        this.togglePlayReady(true);
-      });
     });
   }
 
