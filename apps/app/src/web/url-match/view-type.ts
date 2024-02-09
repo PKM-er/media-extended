@@ -39,6 +39,7 @@ export function getSupportedViewType(url: MediaInfo): MediaViewType[] {
     case SupportedMediaHost.Vimeo:
       return [MEDIA_WEBPAGE_VIEW_TYPE, MEDIA_EMBED_VIEW_TYPE];
     case SupportedMediaHost.Bilibili:
+    case SupportedMediaHost.Coursera:
       return [MEDIA_WEBPAGE_VIEW_TYPE];
     default:
       assertNever(url.type);

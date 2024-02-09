@@ -7,5 +7,6 @@ export const plugins = {
   bilibili: BilibiliPlugin,
   youtube: YouTubePlugin,
   vimeo: VimeoPlugin,
+  coursera: undefined,
   generic: undefined,
 } satisfies Record<SupportedMediaHost, string | undefined>;

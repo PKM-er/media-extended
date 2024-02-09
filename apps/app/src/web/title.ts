@@ -8,4 +8,5 @@ export const titleParser: Record<
   bilibili: (title) => title.replace(/_哔哩哔哩_bilibili$/, ""),
   youtube: (title) => title.replace(/ - YouTube$/, ""),
   vimeo: (title) => title.replace(/ on Vimeo$/, ""),
+  coursera: (title) => title.replace(/ \| Coursera$/, ""),
 };

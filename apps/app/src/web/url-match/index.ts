@@ -5,6 +5,7 @@ import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
 import type { URLResolveResult } from "./base";
 import { bilibiliResolver } from "./bilibili";
+import { courseraResolver } from "./coursera";
 import { genericResolver } from "./generic";
 import type { SupportedMediaHost } from "./supported";
 import { viemoResolver } from "./viemo";
@@ -57,7 +58,12 @@ export function resolveUrl(url: URL): URLResolveResult {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     return genericResolver(url);
   }
-  for (const resolve of [bilibiliResolver, youtubeResolver, viemoResolver]) {
+  for (const resolve of [
+    bilibiliResolver,
+    youtubeResolver,
+    viemoResolver,
+    courseraResolver,
+  ]) {
     const result = resolve(url);
     if (result) return result;
   }

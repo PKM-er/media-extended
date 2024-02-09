@@ -6,6 +6,7 @@ export const enum SupportedMediaHost {
   Bilibili = "bilibili",
   YouTube = "youtube",
   Vimeo = "vimeo",
+  Coursera = "coursera",
   Generic = "generic",
 }
 
@@ -18,6 +19,7 @@ export const mediaHostUrl: Record<SupportedHostNoGeneric, string> = {
   [SupportedMediaHost.Bilibili]: "https://www.bilibili.com",
   [SupportedMediaHost.YouTube]: "https://www.youtube.com",
   [SupportedMediaHost.Vimeo]: "https://www.viemo.com",
+  [SupportedMediaHost.Coursera]: "https://www.coursera.org",
 };
 
 export const mediaHostDisplayName: Record<SupportedMediaHost, string> = {
@@ -25,6 +27,7 @@ export const mediaHostDisplayName: Record<SupportedMediaHost, string> = {
   [SupportedMediaHost.YouTube]: "YouTube",
   [SupportedMediaHost.Generic]: "Website",
   [SupportedMediaHost.Vimeo]: "Viemo",
+  [SupportedMediaHost.Coursera]: "Coursera",
 };
 
 export const noGeneric = (labels: Record<SupportedMediaHost, string>) =>
