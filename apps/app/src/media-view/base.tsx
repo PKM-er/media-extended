@@ -7,7 +7,7 @@ import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
 import type { MediaInfo } from "./media-info";
-import type { MediaViewType } from "./view-type";
+import { MEDIA_EMBED_VIEW_TYPE, type MediaViewType } from "./view-type";
 
 export interface PlayerComponent extends Component {
   plugin: MediaExtended;
@@ -49,13 +49,14 @@ export function addAction(player: PlayerComponent & ItemView) {
       takeTimestamp(player, ctx),
     );
   });
-  player.addAction("camera", "Screenshot", () => {
-    const info = player.getMediaInfo();
-    if (!info) return;
-    openOrCreateMediaNote(info, player).then((ctx) =>
-      saveScreenshot(player, ctx),
-    );
-  });
+  if (player.getViewType() !== MEDIA_EMBED_VIEW_TYPE)
+    player.addAction("camera", "Screenshot", () => {
+      const info = player.getMediaInfo();
+      if (!info) return;
+      openOrCreateMediaNote(info, player).then((ctx) =>
+        saveScreenshot(player, ctx),
+      );
+    });
 }
 
 export function onPaneMenu<
