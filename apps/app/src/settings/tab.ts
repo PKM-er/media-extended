@@ -300,7 +300,15 @@ export class MxSettingTabs extends PluginSettingTab {
       .then((s) => s.controlEl.appendText("%"));
     new Setting(container)
       .setName("Load strategy")
-      .setDesc("Configure how media embeds are loaded in the note")
+      .setDesc(
+        createFragment((el) => {
+          el.appendText("Configure when media embeds are loaded in the note");
+          el.createEl("br");
+          el.appendText(
+            "Useful if you want lazy load media embeds in a note when there are many of them",
+          );
+        }),
+      )
       .addDropdown((d) =>
         d
           .addOption("eager", "On note open")
