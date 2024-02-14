@@ -1,6 +1,6 @@
 import type { Menu } from "obsidian";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { SupportedMediaHost } from "@/web/url-match/supported";
+import { MediaHost } from "@/web/url-match/supported";
 import type { PlayerContext } from ".";
 
 export function webpageMenu(
@@ -35,10 +35,7 @@ export function webpageMenu(
           toggleControls(!controls);
         });
     });
-    if (
-      media.type !== SupportedMediaHost.Bilibili &&
-      media.type !== SupportedMediaHost.YouTube
-    ) {
+    if (media.type !== MediaHost.Bilibili && media.type !== MediaHost.YouTube) {
       menu.addItem((item) => {
         item
           .setTitle(

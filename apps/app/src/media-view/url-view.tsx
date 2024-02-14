@@ -1,6 +1,5 @@
 import type { ViewStateResult } from "obsidian";
 import { MediaURL } from "@/web/url-match";
-import { titleFromUrl } from "./base";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";
@@ -20,11 +19,7 @@ abstract class MediaUrlView extends MediaRemoteView {
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
-        this._title = titleFromUrl(url.source.href);
-        this.store.setState({
-          source: { url },
-          title: this._title,
-        });
+        this.store.getState().setSource(url, { title: true });
       }
     }
     return super.setState(state, result);
@@ -46,9 +41,7 @@ export class VideoUrlView extends MediaUrlView {
     return MEDIA_URL_VIEW_TYPE.video;
   }
   getDisplayText(): string {
-    const title = this._title;
-    if (!title) return "Video";
-    return title;
+    return this.playerTitle || "Video";
   }
 }
 
@@ -57,9 +50,7 @@ export class AudioUrlView extends MediaUrlView {
     return "file-audio";
   }
   getDisplayText(): string {
-    const title = this._title;
-    if (!title) return "Audio";
-    return title;
+    return this.playerTitle || "Audio";
   }
   getViewType() {
     return MEDIA_URL_VIEW_TYPE.audio;

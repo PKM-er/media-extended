@@ -26,7 +26,7 @@ export class MediaEmbedView extends MediaRemoteView {
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
-        this.store.setState({ source: { url } });
+        this.store.getState().setSource(url);
       }
     }
     return super.setState(state, result);
@@ -39,12 +39,19 @@ export class MediaEmbedView extends MediaRemoteView {
     };
   }
   getDisplayText(): string {
-    const source = hostTitleMap[this._sourceType] ?? "Embed";
-    if (!this._title) return source;
-    return `${this._title} - ${source}`;
+    const source = hostTitleMap[this.sourceType] ?? "Embed";
+    if (!this.playerTitle) return source;
+    return `${this.playerTitle} - ${source}`;
   }
   getIcon(): string {
-    return this._sourceType === "video/youtube" ? "youtube" : "video";
+    switch (this.sourceType) {
+      case "video/youtube":
+        return "youtube";
+      case "video/vimeo":
+        return "vimeo";
+      default:
+        return "video";
+    }
   }
   getViewType(): MediaEmbedViewType {
     return MEDIA_EMBED_VIEW_TYPE;

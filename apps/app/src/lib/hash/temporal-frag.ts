@@ -18,9 +18,7 @@ export function isTempFragEqual(
 }
 
 /** parse temporal fragment from hash */
-export const parseTempFrag = (
-  hash: string | undefined,
-): TempFragment | null => {
+export function parseTempFrag(hash: string | undefined): TempFragment | null {
   if (!hash) return null;
   const query = new URLSearchParams(hash.replace(/^#+/, ""));
   const tempFragQuery = query.get("t");
@@ -29,7 +27,7 @@ export const parseTempFrag = (
   if (!match) return null;
   const { start, end } = match.groups!;
   return getTimeSpan(start, end);
-};
+}
 
 export interface TempFragment {
   /** -1 if not explicitly specified */

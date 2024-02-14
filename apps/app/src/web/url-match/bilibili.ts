@@ -1,8 +1,11 @@
-import { addTempFrag } from "@/lib/hash/format";
-import { parseTempFrag, isTimestamp } from "@/lib/hash/temporal-frag";
+import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
-import type { URLResolver } from "./base";
-import { SupportedMediaHost } from "./supported";
+import {
+  removeHashTempFragment,
+  type URLDetecter,
+  type URLResolver,
+} from "./base";
+import { MediaHost } from "./supported";
 
 function parseVideoId(url: URL): string | false | null {
   if (url.hostname === "b23.tv") {
@@ -18,9 +21,17 @@ function parseVideoId(url: URL): string | false | null {
   return false;
 }
 
-export const bilibiliResolver: URLResolver = (url) => {
+export const bilibiliDetecter: URLDetecter = (url) => {
   const vid = parseVideoId(url);
   if (vid === null) return null;
+  return MediaHost.Bilibili;
+};
+
+export const bilibiliResolver: URLResolver = (url) => {
+  const vid = parseVideoId(url);
+  if (vid === null) {
+    throw new Error("Invalid bilibili url");
+  }
   let tempFrag = parseTempFrag(url.hash);
   const time = parseTimeFromBilibiliUrl(url);
 
@@ -40,13 +51,9 @@ export const bilibiliResolver: URLResolver = (url) => {
     source.searchParams.set("t", String(tempFrag.start));
   }
 
-  // add temp frag parsed from url to the source url
-  addTempFrag(source, tempFrag);
-
   return {
-    source,
+    source: removeHashTempFragment(source),
     cleaned,
-    type: SupportedMediaHost.Bilibili,
     id: vid || undefined,
   };
 };

@@ -1,15 +1,17 @@
 import type { TFile, Vault } from "obsidian";
 import { Platform } from "obsidian";
+import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
+import type { TempFragment } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
-import type { URLResolveResult } from "./base";
-import { bilibiliResolver } from "./bilibili";
-import { courseraResolver } from "./coursera";
+import type { URLResolveResult, URLResolver } from "./base";
+import { bilibiliDetecter, bilibiliResolver } from "./bilibili";
+import { courseraDetecter, courseraResolver } from "./coursera";
 import { genericResolver } from "./generic";
-import type { SupportedMediaHost } from "./supported";
-import { viemoResolver } from "./viemo";
-import { youtubeResolver } from "./youtube";
+import { MediaHost } from "./supported";
+import { viemoDetecter, viemoResolver } from "./viemo";
+import { youtubeDetecter, youtubeResolver } from "./youtube";
 
 const allowedProtocols = new Set(["https:", "http:", "file:"]);
 
@@ -38,23 +40,82 @@ export class MediaURL extends URL implements URLResolveResult {
     );
   }
 
+  // get tempFrag(): TempFragment | null {
+  //   return parseTempFrag(this.hash);
+  // }
+  // get isTimestamp(): boolean {
+  //   return !!this.tempFrag && isTimestamp(this.tempFrag);
+  // }
+
+  // setHash(hash: string | ((hash: string) => string)): MediaURL {
+  //   const prevHash = this.hash.replace(/^#+/, "");
+  //   const newHash =
+  //     typeof hash === "string" ? hash.replace(/^#+/, "") : hash(prevHash);
+  //   if (newHash === prevHash) return this;
+  //   const newURL = this.clone();
+  //   newURL.hash = newHash;
+  //   return newURL;
+  // }
+  setTempFrag(tempFrag: TempFragment | null): MediaURL {
+    const newUrl = this.clone();
+    const notf = removeTempFrag(this.hash);
+    if (!tempFrag) {
+      newUrl.hash = notf;
+    } else {
+      newUrl.hash = addTempFrag(notf, tempFrag);
+    }
+    return newUrl;
+  }
+
+  clone() {
+    return new MediaURL(this);
+  }
+
   get srcHash(): string {
     return this.source.hash;
   }
 
-  readonly source!: URL;
-  readonly cleaned!: URL;
-  readonly type!: SupportedMediaHost;
-  readonly id?: string;
+  #resolved: URLResolveResult;
+
+  get source() {
+    return this.#resolved.source;
+  }
+  get cleaned(): URL {
+    return this.#resolved.cleaned;
+  }
+  get id(): string | undefined {
+    return this.#resolved.id;
+  }
+  readonly type: MediaHost;
   constructor(original: string | URL) {
     super(original);
     if (!allowedProtocols.has(this.protocol))
       throw new Error("Unsupported protocol: " + this.protocol);
-    Object.assign(this, resolveUrl(this));
+    this.type =
+      detecters.reduce<MediaHost | null>(
+        (prev, detect) => prev ?? detect(this),
+        null,
+      ) ?? MediaHost.Generic;
+    this.#resolved = Resolver[this.type](this);
   }
 }
 
-export function resolveUrl(url: URL): URLResolveResult {
+const detecters = [
+  bilibiliDetecter,
+  youtubeDetecter,
+  viemoDetecter,
+  courseraDetecter,
+];
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const Resolver: Record<MediaHost, URLResolver> = {
+  [MediaHost.Bilibili]: bilibiliResolver,
+  [MediaHost.YouTube]: youtubeResolver,
+  [MediaHost.Vimeo]: viemoResolver,
+  [MediaHost.Coursera]: courseraResolver,
+  [MediaHost.Generic]: genericResolver,
+};
+
+export function resolveUrl(url: MediaURL): URLResolveResult {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     return genericResolver(url);
   }

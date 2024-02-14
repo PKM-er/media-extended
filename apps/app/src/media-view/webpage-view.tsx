@@ -1,9 +1,6 @@
 import type { ViewStateResult } from "obsidian";
 import { MediaURL } from "@/web/url-match";
-import {
-  SupportedMediaHost,
-  mediaHostDisplayName,
-} from "@/web/url-match/supported";
+import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
 import { MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
@@ -20,21 +17,20 @@ export class MediaWebpageView extends MediaRemoteView {
   }
   getIcon(): string {
     const host = this.getHost();
-    if (host === SupportedMediaHost.Generic) {
+    if (host === MediaHost.Generic) {
       return "globe";
     }
     return host;
   }
 
-  getHost(): SupportedMediaHost {
+  getHost(): MediaHost {
     const { source } = this.getState();
-    if (!source) return SupportedMediaHost.Generic;
+    if (!source) return MediaHost.Generic;
     return source.type;
   }
   getDisplayText(): string {
-    const title = this._title;
-    if (!title) return "Webpage";
-    return `${title} - ${mediaHostDisplayName[this.getHost()]}`;
+    if (!this.playerTitle) return "Webpage";
+    return `${this.playerTitle} - ${mediaHostDisplayName[this.getHost()]}`;
   }
 
   async setState(
@@ -46,7 +42,7 @@ export class MediaWebpageView extends MediaRemoteView {
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
-        this.store.setState({ source: { url, enableWebview: true } });
+        this.store.getState().setSource(url, { enableWebview: true });
       }
     }
     return super.setState(state, result);

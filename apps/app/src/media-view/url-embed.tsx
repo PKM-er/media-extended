@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
 import type MxPlugin from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
 import { type PlayerComponent } from "./base";
 
 export class MediaRenderChild
@@ -23,11 +22,8 @@ export class MediaRenderChild
     return this.store.getState().source?.url ?? null;
   }
 
-  update({ source, enableWebview, ...rest }: Partial<StateFacet>): void {
-    this.store.setState({
-      ...rest,
-      source: source ? { url: source, enableWebview } : undefined,
-    });
+  get update() {
+    return this.store.getState().setSource;
   }
 
   onload(): void {
@@ -52,11 +48,4 @@ export class MediaRenderChild
     this.root = null;
     super.onunload();
   }
-}
-
-export interface StateFacet {
-  hash: string;
-  title: string;
-  source: MediaURL;
-  enableWebview: boolean;
 }

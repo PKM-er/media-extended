@@ -1,15 +1,11 @@
-import type { MediaPlayerInstance } from "@vidstack/react";
-import type { Component, Menu, View, ItemView, TFile } from "obsidian";
+import type { Component, Menu, View, ItemView } from "obsidian";
 import type ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
-import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
-import { getTracks } from "@/lib/subtitle";
 import { toURL } from "@/lib/url";
 import { saveScreenshot } from "@/media-note/timestamp/screenshot";
 import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
-import { fromFile } from "@/web/url-match";
 import type { MediaInfo } from "./media-info";
 import type { MediaViewType } from "./view-type";
 
@@ -19,58 +15,6 @@ export interface PlayerComponent extends Component {
   containerEl: HTMLElement;
   getMediaInfo(): MediaInfo | null;
   root: ReactDOM.Root | null;
-}
-
-export async function setTempFrag(
-  hash: string,
-  store: MediaViewStoreApi,
-  initial = false,
-) {
-  store.setState({ hash });
-  const tf = parseTempFrag(hash);
-  if (!tf) return;
-  const player = await new Promise<MediaPlayerInstance>((resolve) => {
-    const player = store.getState().player;
-    if (player) resolve(player);
-    else {
-      const unsubscribe = store.subscribe(({ player }) => {
-        if (player) {
-          unsubscribe();
-          resolve(player);
-        }
-      });
-    }
-  });
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  let _newTime: number | null = null;
-  // allow 0.25s offset from end, in case delay in seeking
-  const allowedOffset = 0.25;
-  if (
-    isTimestamp(tf) ||
-    player.currentTime < tf.start ||
-    Math.abs(player.currentTime - tf.end) < allowedOffset
-  ) {
-    _newTime = tf.start;
-  } else if (player.currentTime - allowedOffset > tf.end) {
-    _newTime = tf.end;
-  }
-  if (_newTime !== null) {
-    const newTime = _newTime;
-    player.currentTime = newTime;
-    // trying to fix youtube iframe autoplay on initial seek
-    if (
-      !player.state.canPlay &&
-      ["video/youtube"].includes(player.state.source.type) &&
-      !player.state.autoPlay
-    ) {
-      await waitFor(player, "seeked");
-      await player.pause();
-    }
-  }
-
-  if (isTimestamp(tf) && player.state.canPlay && !initial) {
-    player.play(new Event("hashchange"));
-  }
 }
 
 declare module "obsidian" {
@@ -84,30 +28,6 @@ declare module "obsidian" {
   interface Workspace {
     requestActiveLeafEvents(): boolean;
   }
-}
-
-function waitFor(
-  player: MediaPlayerInstance,
-  event:
-    | "time-update"
-    | "play"
-    | "can-play"
-    | "canplay"
-    | "timeupdate"
-    | "seeking"
-    | "seeked",
-) {
-  return new Promise<void>((resolve) => {
-    const timeout = window.setTimeout(() => {
-      resolve();
-      unload();
-    }, 5e3);
-    const unload = player.listen(event, () => {
-      resolve();
-      window.clearTimeout(timeout);
-      unload();
-    });
-  });
 }
 
 export function titleFromUrl(src: string): string {
@@ -152,7 +72,6 @@ export function onPaneMenu<
     source,
     toggleControls,
     controls,
-    hash,
     setTransform,
     transform,
     toggleWebFullscreen,
@@ -167,7 +86,6 @@ export function onPaneMenu<
       player,
       toggleControls,
       controls,
-      hash,
       setTransform,
       transform,
       plugin: view.plugin,
@@ -177,14 +95,4 @@ export function onPaneMenu<
     menuSource,
     view.leaf,
   );
-}
-
-export async function loadFile(file: TFile, player: PlayerComponent) {
-  const { vault } = player.plugin.app;
-  const textTracks = await getTracks(file, vault);
-  player.store.setState({
-    source: { url: fromFile(file, vault) },
-    textTracks,
-    title: file.name,
-  });
 }

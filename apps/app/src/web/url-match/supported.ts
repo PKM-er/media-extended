@@ -2,7 +2,7 @@
 
 import { omit } from "@/lib/pick";
 
-export const enum SupportedMediaHost {
+export const enum MediaHost {
   Bilibili = "bilibili",
   YouTube = "youtube",
   Vimeo = "vimeo",
@@ -10,25 +10,22 @@ export const enum SupportedMediaHost {
   Generic = "generic",
 }
 
-export type SupportedHostNoGeneric = Exclude<
-  SupportedMediaHost,
-  SupportedMediaHost.Generic
->;
+export type SupportedMediaHost = Exclude<MediaHost, MediaHost.Generic>;
 
-export const mediaHostUrl: Record<SupportedHostNoGeneric, string> = {
-  [SupportedMediaHost.Bilibili]: "https://www.bilibili.com",
-  [SupportedMediaHost.YouTube]: "https://www.youtube.com",
-  [SupportedMediaHost.Vimeo]: "https://www.viemo.com",
-  [SupportedMediaHost.Coursera]: "https://www.coursera.org",
+export const mediaHostUrl: Record<SupportedMediaHost, string> = {
+  [MediaHost.Bilibili]: "https://www.bilibili.com",
+  [MediaHost.YouTube]: "https://www.youtube.com",
+  [MediaHost.Vimeo]: "https://www.viemo.com",
+  [MediaHost.Coursera]: "https://www.coursera.org",
 };
 
-export const mediaHostDisplayName: Record<SupportedMediaHost, string> = {
-  [SupportedMediaHost.Bilibili]: "bilibili",
-  [SupportedMediaHost.YouTube]: "YouTube",
-  [SupportedMediaHost.Generic]: "Website",
-  [SupportedMediaHost.Vimeo]: "Viemo",
-  [SupportedMediaHost.Coursera]: "Coursera",
+export const mediaHostDisplayName: Record<MediaHost, string> = {
+  [MediaHost.Bilibili]: "bilibili",
+  [MediaHost.YouTube]: "YouTube",
+  [MediaHost.Generic]: "Website",
+  [MediaHost.Vimeo]: "Viemo",
+  [MediaHost.Coursera]: "Coursera",
 };
 
-export const noGeneric = (labels: Record<SupportedMediaHost, string>) =>
-  omit(labels, [SupportedMediaHost.Generic]);
+export const noGeneric = (labels: Record<MediaHost, string>) =>
+  omit(labels, [MediaHost.Generic]);

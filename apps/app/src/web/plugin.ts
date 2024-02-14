@@ -1,7 +1,7 @@
 import BilibiliPlugin from "inline:./userscript/bilibili";
 import VimeoPlugin from "inline:./userscript/vimeo";
 import YouTubePlugin from "inline:./userscript/youtube";
-import type { SupportedMediaHost } from "./url-match/supported";
+import type { MediaHost } from "./url-match/supported";
 
 export const plugins = {
   bilibili: BilibiliPlugin,
@@ -9,4 +9,4 @@ export const plugins = {
   vimeo: VimeoPlugin,
   coursera: undefined,
   generic: undefined,
-} satisfies Record<SupportedMediaHost, string | undefined>;
+} satisfies Record<MediaHost, string | undefined>;

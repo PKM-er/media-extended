@@ -25,16 +25,13 @@ const fillZero = (time: number, fractionDigits = 2) => {
   return frac ? main + "." + frac : main;
 };
 
-export function addTempFrag(url: URL, tempFrag: TempFragment | null): URL {
-  url = new URL(url);
-  const hashWithoutTempFrag = url.hash.replace(/t=[^&]+/, "");
-  if (!tempFrag) {
-    url.hash = hashWithoutTempFrag;
-  } else {
-    const tempFragString = toTempFragString(tempFrag);
-    url.hash = `${hashWithoutTempFrag}&${tempFragString}`;
-  }
-  return url;
+export function removeTempFrag(hash: string) {
+  return hash.replace(/t=[^&]+/, "");
+}
+
+export function addTempFrag(hash: string, tempFrag: TempFragment) {
+  const tempFragString = toTempFragString(tempFrag);
+  return `${hash}&${tempFragString}`;
 }
 
 export function toTempFrag(start: number, end: number): TempFragment {

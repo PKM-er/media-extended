@@ -1,21 +1,35 @@
 import type { MediaPlayerInstance, TextTrackInit } from "@vidstack/react";
-import type { App } from "obsidian";
+import type { App, TFile, Vault } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
 import { createStore, useStore } from "zustand";
+import { parseHashProps, type HashProps } from "@/lib/hash/hash-prop";
+import { TimeoutError } from "@/lib/message";
 import noop from "@/lib/no-op";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
+import { getTracks } from "@/lib/subtitle";
+import { titleFromUrl } from "@/media-view/base";
 import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
-import type { MediaURL } from "@/web/url-match";
-import type { SupportedMediaHost } from "@/web/url-match/supported";
+import { fromFile, type MediaURL } from "@/web/url-match";
+import type { MediaHost } from "@/web/url-match/supported";
+import { applyTempFrag, handleTempFrag } from "./state/apply-tf";
 
 export interface TransformConfig {
   rotate: "90" | "180" | "270";
   flipHorizontal: boolean;
   flipVertical: boolean;
   zoom: number;
+}
+
+export interface SourceFacet {
+  hash: string;
+  /**
+   * true: auto detect title from url
+   */
+  title: string | true;
+  enableWebview: boolean;
 }
 
 export interface MediaViewState {
@@ -28,8 +42,12 @@ export interface MediaViewState {
         type?: string;
       }
     | undefined;
-  hash: string;
   title: string;
+  hash: HashProps;
+  setHash: (hash: string) => void;
+  getPlayer(): Promise<MediaPlayerInstance>;
+  loadFile(file: TFile, vault: Vault, subpath?: string): Promise<void>;
+  setSource(url: MediaURL, other?: Partial<SourceFacet>): void;
   transform: Partial<TransformConfig> | null;
   setTransform: (transform: Partial<TransformConfig> | null) => void;
   controls?: boolean;
@@ -37,16 +55,68 @@ export interface MediaViewState {
   toggleControls: (showCustom: boolean) => void;
   toggleWebFullscreen: (enableWebFs: boolean) => void;
   textTracks: TextTrackInit[];
-  webHost?: Exclude<SupportedMediaHost, SupportedMediaHost.Generic>;
-  updateWebHost: (webHost: SupportedMediaHost) => void;
+  webHost?: Exclude<MediaHost, MediaHost.Generic>;
+  updateWebHost: (webHost: MediaHost) => void;
 }
 
 export function createMediaViewStore() {
-  return createStore<MediaViewState>((set, get) => ({
+  const store = createStore<MediaViewState>((set, get, store) => ({
     player: null,
     playerRef: (inst) => set({ player: inst }),
     source: undefined,
-    hash: "",
+    hash: {
+      autoplay: undefined,
+      controls: undefined,
+      loop: undefined,
+      muted: undefined,
+      tempFragment: null,
+      volume: undefined,
+    },
+    async getPlayer(timeout = 10e3) {
+      const { player } = get();
+      if (player) return player;
+      return new Promise((resolve, reject) => {
+        const unsubscribe = store.subscribe(({ player }) => {
+          if (!player) return;
+          unsubscribe();
+          resolve(player);
+          window.clearTimeout(timeoutId);
+        });
+        const timeoutId = window.setTimeout(() => {
+          unsubscribe();
+          reject(new TimeoutError(timeout));
+        }, timeout);
+      });
+    },
+    setSource(url, { hash, enableWebview, title: givenTitle } = {}) {
+      const title =
+        givenTitle === true ? titleFromUrl(url.source.href) : givenTitle;
+      set(({ source, title: ogTitle }) => ({
+        source: {
+          ...source,
+          url,
+          enableWebview:
+            enableWebview !== undefined ? enableWebview : source?.enableWebview,
+        },
+        hash: parseHashProps(hash || url.hash),
+        title: title ?? ogTitle,
+      }));
+      applyTempFrag(get());
+    },
+    setHash(hash) {
+      set({ hash: parseHashProps(hash) });
+      applyTempFrag(get());
+    },
+    async loadFile(file, vault, subpath) {
+      const textTracks = await getTracks(file, vault);
+      set(({ source, hash }) => ({
+        source: { ...source, url: fromFile(file, vault) },
+        textTracks,
+        title: file.name,
+        hash: subpath ? parseHashProps(subpath) : hash,
+      }));
+      await applyTempFrag(get());
+    },
     title: "",
     transform: null,
     setTransform: (transform: Partial<TransformConfig> | null) => {
@@ -90,6 +160,9 @@ export function createMediaViewStore() {
     updateWebHost: (webHost) =>
       set({ webHost: webHost === "generic" ? undefined : webHost }),
   }));
+
+  handleTempFrag(store);
+  return store;
 }
 
 export type MediaViewStoreApi = ReturnType<typeof createMediaViewStore>;

@@ -12,7 +12,7 @@ import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import type { PlayerComponent } from "./base";
-import { addAction, onPaneMenu, setTempFrag } from "./base";
+import { addAction, onPaneMenu } from "./base";
 import type { RemoteMediaViewType } from "./view-type";
 
 export interface MediaRemoteViewState {
@@ -29,11 +29,15 @@ export abstract class MediaRemoteView
   scope: Scope;
   root: ReactDOM.Root | null = null;
   navigation = true;
-  protected _title = "";
-  protected _sourceType = "";
 
   getMediaInfo() {
     return this.store.getState().source?.url ?? null;
+  }
+  get sourceType(): string {
+    return this.store.getState().player?.state.source.type ?? "";
+  }
+  get playerTitle(): string {
+    return this.store.getState().player?.state.title ?? "";
   }
 
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
@@ -65,9 +69,8 @@ export abstract class MediaRemoteView
   registerRemoteTitleChange() {
     this.register(
       onPlayerMounted(this.store, (player) =>
-        player.subscribe(({ title, source }) => {
-          this._title = title;
-          this._sourceType = source.type;
+        player.subscribe(({ title }) => {
+          title;
           this.updateTitle();
         }),
       ),
@@ -77,8 +80,6 @@ export abstract class MediaRemoteView
   abstract getViewType(): RemoteMediaViewType;
   abstract getIcon(): string;
   abstract getDisplayText(): string;
-
-  initialEphemeralState = true;
 
   onPaneMenu(
     menu: Menu,
@@ -91,12 +92,7 @@ export abstract class MediaRemoteView
   setEphemeralState(state: any): void {
     if ("subpath" in state) {
       const { subpath } = state;
-      if (this.initialEphemeralState === true) {
-        setTempFrag(subpath, this.store, true);
-        this.initialEphemeralState = false;
-      } else {
-        setTempFrag(subpath, this.store);
-      }
+      this.store.getState().setHash(subpath);
     }
     super.setEphemeralState(state);
   }

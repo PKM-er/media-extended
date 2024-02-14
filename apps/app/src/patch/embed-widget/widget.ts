@@ -4,8 +4,6 @@ import { WidgetType } from "@codemirror/view";
 import { Platform } from "obsidian";
 import { dataLpPassthrough } from "@/components/player/buttons";
 import { parseSizeSyntax } from "@/lib/size-syntax";
-import { titleFromUrl } from "@/media-view/base";
-import type { StateFacet } from "@/media-view/url-embed";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MediaExtended from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
@@ -38,6 +36,7 @@ type ElementWithInfo = HTMLElement & {
 };
 
 abstract class UrlPlayerWidget extends WidgetType {
+  abstract enableWebview?: boolean;
   setPos(dom: HTMLElement) {
     const info = (dom as ElementWithInfo).playerInfo;
     if (info) {
@@ -107,7 +106,7 @@ abstract class UrlPlayerWidget extends WidgetType {
         this.setPos(domToUpdate);
       }
     } else {
-      info.child.update(this.toInfoFacet(this.media));
+      info.child.update(this.media, { title: true });
     }
     return true;
   }
@@ -122,8 +121,6 @@ abstract class UrlPlayerWidget extends WidgetType {
     return this.media.compare(other.media) && this.title === other.title;
   }
 
-  abstract toInfoFacet(media: MediaURL): StateFacet;
-
   setDOM(view: EditorView, container: HTMLDivElement) {
     container.tabIndex = -1;
     // container.setAttr("src", this.linktext);
@@ -133,7 +130,7 @@ abstract class UrlPlayerWidget extends WidgetType {
     //   (evt) => 0 === evt.button && view.hasFocus && evt.preventDefault(),
     // );
     const child = new UrlMediaRenderChild(container, this.plugin);
-    child.update(this.toInfoFacet(this.media));
+    child.update(this.media, { title: true });
     child.load();
     this.hookClickHandler(view, container);
     this.setInfo(container, child);
@@ -177,7 +174,6 @@ abstract class UrlPlayerWidget extends WidgetType {
   toDOM(view: EditorView): HTMLDivElement {
     const container = createDiv();
     container.style.display = "none";
-    // vaildateMediaURL(this.media.src).then((vaild) => {
     container.setAttr("src", this.media.source.href);
     container.addClasses([
       "external-embed",
@@ -186,7 +182,6 @@ abstract class UrlPlayerWidget extends WidgetType {
     ]);
     container.style.removeProperty("display");
     this.setDOM(view, container);
-    // });
 
     return container;
   }
@@ -197,35 +192,18 @@ Object.defineProperty(UrlPlayerWidget.prototype, "estimatedHeight", {
   configurable: true,
 });
 
-function toInfoFacet(media: MediaURL, enableWebview: boolean): StateFacet {
-  return {
-    hash: media.hash,
-    source: media,
-    enableWebview,
-    title: titleFromUrl(media.source.href),
-  };
-}
-
 export class VideoUrlPlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: MediaURL) {
-    return toInfoFacet(media, false);
-  }
+  enableWebview = false;
 }
 export class AudioUrlPlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: MediaURL) {
-    return toInfoFacet(media, false);
-  }
+  enableWebview = false;
 }
 export class IframePlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: MediaURL) {
-    return toInfoFacet(media, false);
-  }
+  enableWebview = false;
 }
 
 export class WebpagePlayerWidget extends UrlPlayerWidget {
-  toInfoFacet(media: MediaURL) {
-    return toInfoFacet(media, true);
-  }
+  enableWebview = true;
 }
 
 export const WidgetCtorMap = {

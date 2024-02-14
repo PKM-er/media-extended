@@ -7,13 +7,7 @@ import { handleWindowMigration } from "@/lib/window-migration";
 import type { FileMediaInfo } from "@/media-view/media-info";
 import type MediaExtended from "@/mx-main";
 import { MediaFileExtensions } from "@/patch/media-type";
-import {
-  setTempFrag,
-  type PlayerComponent,
-  addAction,
-  onPaneMenu,
-  loadFile,
-} from "./base";
+import { type PlayerComponent, addAction, onPaneMenu } from "./base";
 import type { MediaFileViewType } from "./view-type";
 import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
@@ -47,7 +41,7 @@ abstract class MediaFileView
   abstract getMediaInfo(): FileMediaInfo | null;
 
   async onLoadFile(file: TFile): Promise<void> {
-    await loadFile(file, this);
+    await this.store.getState().loadFile(file, this.app.vault);
   }
   onPaneMenu(
     menu: Menu,
@@ -58,16 +52,10 @@ abstract class MediaFileView
   }
   abstract canAcceptExtension(extension: string): boolean;
 
-  initialEphemeralState = true;
   setEphemeralState(state: any): void {
     if ("subpath" in state) {
       const { subpath } = state;
-      if (this.initialEphemeralState === true) {
-        setTempFrag(subpath, this.store, true);
-        this.initialEphemeralState = false;
-      } else {
-        setTempFrag(subpath, this.store);
-      }
+      this.store.getState().setHash(subpath);
     }
     super.setEphemeralState(state);
   }

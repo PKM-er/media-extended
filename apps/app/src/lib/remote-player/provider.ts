@@ -15,7 +15,7 @@ import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MediaURL } from "@/web/url-match";
-import { SupportedMediaHost } from "@/web/url-match/supported";
+import { MediaHost } from "@/web/url-match/supported";
 import { MessageController, TimeoutError } from "../message";
 import { noHash } from "../url";
 import { decodeWebpageUrl } from "./encode";
@@ -28,7 +28,7 @@ import type { MsgCtrlLocal } from "./type";
 const { createScope, onDispose, scoped } = Maverick;
 
 interface WebviewMediaSrc extends MediaSrc<string> {
-  host: SupportedMediaHost;
+  host: MediaHost;
 }
 
 export class WebiviewMediaProvider implements MediaProviderAdapter {
@@ -79,8 +79,8 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   get currentSrc() {
     return this._currentSrc;
   }
-  get currentWebHost(): SupportedMediaHost {
-    return this._currentSrc?.host ?? SupportedMediaHost.Generic;
+  get currentWebHost(): MediaHost {
+    return this._currentSrc?.host ?? MediaHost.Generic;
   }
 
   setPlaybackRate(rate: number) {
@@ -139,7 +139,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     this._notify("title-change", finalTitle, _evt);
   }
 
-  loadPlugin(host: SupportedMediaHost) {
+  loadPlugin(host: MediaHost) {
     return new Promise<void>((resolve, reject) => {
       const webview = this._webview as WebviewElement;
       // #region -- logic to handle plugin load
@@ -266,7 +266,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     this._currentSrc = {
       src: url?.source.href ?? "",
       type,
-      host: url?.type ?? SupportedMediaHost.Generic,
+      host: url?.type ?? MediaHost.Generic,
     };
 
     if (!url) {

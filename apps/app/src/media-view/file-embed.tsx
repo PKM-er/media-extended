@@ -7,7 +7,7 @@ import { dataLpPassthrough } from "@/components/player/buttons";
 import type { FileMediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
-import { loadFile, type PlayerComponent } from "./base";
+import { type PlayerComponent } from "./base";
 import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
 export class MediaFileEmbed
@@ -26,7 +26,6 @@ export class MediaFileEmbed
     super();
     this.containerEl = info.containerEl;
     this.store = createMediaViewStore();
-    this.store.setState({ hash: subpath, title: file.name });
     const { containerEl } = info;
     containerEl.addClasses(["mx", "mx-media-embed", "custom"]);
     function isEditButton(target: EventTarget | null): boolean {
@@ -71,7 +70,9 @@ export class MediaFileEmbed
   }
 
   async loadFile() {
-    await loadFile(this.file, this);
+    await this.store
+      .getState()
+      .loadFile(this.file, this.plugin.app.vault, this.subpath);
   }
 
   onunload() {

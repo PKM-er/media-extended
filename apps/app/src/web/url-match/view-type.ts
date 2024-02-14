@@ -10,7 +10,7 @@ import {
   MEDIA_EMBED_VIEW_TYPE,
   MEDIA_WEBPAGE_VIEW_TYPE,
 } from "@/media-view/view-type";
-import { SupportedMediaHost } from "./supported";
+import { MediaHost } from "./supported";
 import { MediaURL } from ".";
 
 export function getSupportedViewType(url: MediaURL): RemoteMediaViewType[];
@@ -20,7 +20,7 @@ export function getSupportedViewType(url: MediaInfo): MediaViewType[] {
   if (!(url instanceof MediaURL)) {
     return [url.viewType];
   }
-  if (url.type === SupportedMediaHost.Generic) {
+  if (url.type === MediaHost.Generic) {
     switch (url.inferredType) {
       case "video":
         return [MEDIA_URL_VIEW_TYPE.video, MEDIA_WEBPAGE_VIEW_TYPE];
@@ -35,11 +35,11 @@ export function getSupportedViewType(url: MediaInfo): MediaViewType[] {
     }
   }
   switch (url.type) {
-    case SupportedMediaHost.YouTube:
-    case SupportedMediaHost.Vimeo:
+    case MediaHost.YouTube:
+    case MediaHost.Vimeo:
       return [MEDIA_WEBPAGE_VIEW_TYPE, MEDIA_EMBED_VIEW_TYPE];
-    case SupportedMediaHost.Bilibili:
-    case SupportedMediaHost.Coursera:
+    case MediaHost.Bilibili:
+    case MediaHost.Coursera:
       return [MEDIA_WEBPAGE_VIEW_TYPE];
     default:
       assertNever(url.type);

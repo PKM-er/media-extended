@@ -2,7 +2,7 @@ import { parseLinktext } from "obsidian";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
-import { SupportedMediaHost } from "@/web/url-match/supported";
+import { MediaHost } from "@/web/url-match/supported";
 
 export async function onExternalLinkClick(
   this: MxPlugin,
@@ -11,7 +11,7 @@ export async function onExternalLinkClick(
   fallback: () => void,
 ) {
   const url = this.resolveUrl(link);
-  if (!url || url.type === SupportedMediaHost.Generic) {
+  if (!url || (url.type === MediaHost.Generic && !url.isFileUrl)) {
     fallback();
     return;
   }

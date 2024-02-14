@@ -68,10 +68,8 @@ class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
   ) {
     super(containerEl, plugin);
     containerEl.addClasses(["mx-external-media-embed"]);
-    this.update({
-      hash: info.hash,
-      title: titleFromUrl(info.source.href),
-      source: info,
+    this.update(info, {
+      title: true,
       enableWebview: viewType === MEDIA_WEBPAGE_VIEW_TYPE,
     });
   }

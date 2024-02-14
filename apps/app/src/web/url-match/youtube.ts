@@ -1,8 +1,22 @@
-import { toTempFrag, addTempFrag } from "@/lib/hash/format";
+import { toTempFrag } from "@/lib/hash/format";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
-import type { URLResolver } from "./base";
-import { SupportedMediaHost } from "./supported";
+import { removeHashTempFragment, type URLResolver } from "./base";
+import { MediaHost } from "./supported";
+
+function parseVideoId(url: URL): string | null {
+  if (url.hostname === "youtu.be") {
+    const seg = url.pathname.split("/");
+    if (seg.length === 2) return seg[1];
+  }
+  if (url.hostname === "www.youtube.com") {
+    return url.searchParams.get("v");
+  }
+  return null;
+}
+
+export const youtubeDetecter = (url: URL) =>
+  parseVideoId(url) ? MediaHost.YouTube : null;
 
 export const youtubeResolver: URLResolver = (url) => {
   let tempFrag = parseTempFrag(url.hash);
@@ -10,11 +24,8 @@ export const youtubeResolver: URLResolver = (url) => {
     startTime = parseYoutubeTime(url.searchParams.get("start")),
     endTime = parseYoutubeTime(url.searchParams.get("end"));
 
-  const vid = url.hostname.contains("youtu.be")
-    ? url.pathname.slice(1)
-    : url.searchParams.get("v");
-
-  if (!vid) return null;
+  const vid = parseVideoId(url);
+  if (!vid) throw new Error("Invalid youtube url");
 
   const cleaned = noHashUrl("https://www.youtube.com/watch");
   cleaned.search = new URLSearchParams({
@@ -56,13 +67,9 @@ export const youtubeResolver: URLResolver = (url) => {
     }
   }
 
-  // add temp frag parsed from url to the source url
-  addTempFrag(source, tempFrag);
-
   return {
-    source,
+    source: removeHashTempFragment(source),
     cleaned,
-    type: SupportedMediaHost.YouTube,
     id: vid,
   };
 };

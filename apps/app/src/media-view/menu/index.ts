@@ -15,7 +15,6 @@ export interface PlayerContext {
   plugin: MxPlugin;
   setTransform: MediaViewState["setTransform"];
   transform: MediaViewState["transform"];
-  hash: string;
   controls: boolean | undefined;
   disableWebFullscreen: boolean | undefined;
   toggleWebFullscreen: (enableWebFs: boolean) => void;

@@ -16,7 +16,7 @@ import {
   mediaHostUrl,
   noGeneric,
 } from "@/web/url-match/supported";
-import type { SupportedHostNoGeneric } from "@/web/url-match/supported";
+import type { SupportedMediaHost } from "@/web/url-match/supported";
 
 export class LoginModal extends Modal {
   navEl = this.contentEl.insertAdjacentElement(
@@ -127,7 +127,7 @@ export class LoginModal extends Modal {
       .setValue(".")
       .onChange((val) => {
         if (val in mediaHostUrl) {
-          this.setUrl(mediaHostUrl[val as SupportedHostNoGeneric]);
+          this.setUrl(mediaHostUrl[val as SupportedMediaHost]);
         }
       });
   }

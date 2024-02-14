@@ -38,11 +38,12 @@ export function Player() {
 
   const src = useMediaViewStore(({ source }) => {
     if (!source) return;
+    const url = source.url.source.href;
     if (source.enableWebview) {
       // webview will create a new MediaURL instance
-      return encodeWebpageUrl(source.url.href);
+      return encodeWebpageUrl(url);
     }
-    return source.url.source.href;
+    return url;
   });
   const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
 

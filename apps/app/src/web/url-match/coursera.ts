@@ -1,19 +1,23 @@
 import { noHashUrl } from "@/lib/url";
-import type { URLResolver } from "./base";
-import { SupportedMediaHost } from "./supported";
+import {
+  removeHashTempFragment,
+  type URLDetecter,
+  type URLResolver,
+} from "./base";
+import { MediaHost } from "./supported";
+
+export const courseraDetecter: URLDetecter = (url) => {
+  return url.hostname === "www.coursera.org" ? MediaHost.Coursera : null;
+};
 
 export const courseraResolver: URLResolver = (url) => {
-  if (url.hostname !== "www.coursera.org") return null;
   const cleaned = noHashUrl(url);
   cleaned.search = "";
 
   const source = new URL(url);
-  // const tempFrag = parseTempFrag(source.hash);
-  // addTempFrag(source, tempFrag);
 
   return {
-    type: SupportedMediaHost.Coursera,
     cleaned,
-    source,
+    source: removeHashTempFragment(source),
   };
 };

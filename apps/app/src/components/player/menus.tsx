@@ -69,7 +69,6 @@ export function MoreOptions() {
         const {
           toggleControls,
           controls,
-          hash,
           setTransform,
           transform,
           disableWebFullscreen,
@@ -83,7 +82,6 @@ export function MoreOptions() {
             source,
             toggleControls,
             controls,
-            hash,
             setTransform,
             transform,
             plugin,

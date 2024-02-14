@@ -1,11 +1,6 @@
 import { useMediaPlayer, type MediaPlayerInstance } from "@vidstack/react";
 import { useEffect } from "react";
-import {
-  isTempFragEqual,
-  isTimestamp,
-  parseTempFrag,
-  type TempFragment,
-} from "@/lib/hash/temporal-frag";
+import { isTimestamp, type TempFragment } from "@/lib/hash/temporal-frag";
 import type { MediaViewStoreApi } from "../context";
 import { useMediaViewStoreInst } from "../context";
 
@@ -19,7 +14,6 @@ export function useTempFragHandler() {
 }
 
 function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
-  let frag: TempFragment | null = null;
   const prev = {
     currentTime: player.state.currentTime,
     paused: player.state.paused,
@@ -28,6 +22,10 @@ function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
   let seekingLock = false;
   const unloads = [
     player.subscribe(({ currentTime, paused, loop }) => {
+      const frag = limitRange(
+        store.getState().hash.tempFragment,
+        player.state.duration,
+      );
       if (!frag || isTimestamp(frag)) return;
       const { start, end } = frag;
       // onPlay
@@ -61,30 +59,6 @@ function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
         }
       }
       Object.assign(prev, { currentTime, paused, loop });
-    }),
-    store.subscribe((curr, prev) => {
-      if (curr.hash === prev.hash) return;
-      try {
-        const newFrag = limitRange(
-          parseTempFrag(curr.hash),
-          player.state.duration,
-        );
-        if (isTempFragEqual(newFrag, frag)) return;
-        frag = newFrag;
-        if (!frag) return;
-      } catch {
-        frag = null;
-      }
-    }),
-    player.subscribe(({ duration }) => {
-      const { hash } = store.getState();
-      try {
-        const newFrag = limitRange(parseTempFrag(hash), duration);
-        if (isTempFragEqual(newFrag, frag)) return;
-        frag = newFrag;
-      } catch {
-        frag = null;
-      }
     }),
   ];
   return () => unloads.forEach((u) => u());

@@ -1,9 +1,17 @@
-/** Player Properties that can be controlled by hash */
-type PlayerProperties = "loop" | "muted" | "autoplay" | "controls" | "volume";
+import type { TempFragment } from "./temporal-frag";
+import { parseTempFrag } from "./temporal-frag";
+
+export interface HashProps {
+  loop: true | undefined;
+  muted: true | undefined;
+  autoplay: true | undefined;
+  controls: boolean | undefined;
+  volume: number | undefined;
+  tempFragment: TempFragment | null;
+}
 
 /** check if certain prop exists in given hash */
-export const convertHashToProps = (hash: string | undefined) => {
-  if (!hash) return {};
+export function parseHashProps(hash: string): HashProps {
   const query = new URLSearchParams(hash.replace(/^#+/, ""));
   const controls =
     !query.has("noctrl") && !query.has("controls")
@@ -16,8 +24,9 @@ export const convertHashToProps = (hash: string | undefined) => {
     autoplay: query.has("play") ? true : undefined,
     controls,
     volume: parseVolume(query.get("vol")),
-  } satisfies Partial<Record<PlayerProperties, boolean | number>>;
-};
+    tempFragment: parseTempFrag(hash),
+  };
+}
 
 function parseVolume(volume: string | null): number | undefined {
   if (!volume) return;

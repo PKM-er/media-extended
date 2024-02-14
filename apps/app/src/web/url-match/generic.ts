@@ -1,13 +1,15 @@
 import { Platform } from "obsidian";
 import { noHashUrl } from "@/lib/url";
-import type { URLResolveResult } from "./base";
-import { SupportedMediaHost } from "./supported";
+import { removeHashTempFragment, type URLResolver } from "./base";
+import { MediaHost } from "./supported";
 
-export const genericResolver = (url: URL): URLResolveResult => {
+export const genericResolver: URLResolver = (url) => {
   return {
-    type: SupportedMediaHost.Generic,
+    type: MediaHost.Generic,
     cleaned: noHashUrl(url),
-    source: url.protocol === "file:" ? toAppUrl(url) : url,
+    source: removeHashTempFragment(
+      url.protocol === "file:" ? toAppUrl(url) : url,
+    ),
   };
 };
 
