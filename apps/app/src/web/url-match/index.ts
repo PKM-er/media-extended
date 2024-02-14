@@ -71,10 +71,6 @@ export class MediaURL extends URL implements URLResolveResult {
     return new MediaURL(this);
   }
 
-  get srcHash(): string {
-    return this.source.hash;
-  }
-
   #resolved: URLResolveResult;
 
   get source() {

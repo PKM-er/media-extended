@@ -1,4 +1,5 @@
 import { pathToFileURL } from "url";
+import type { PaneType } from "obsidian";
 import {
   TextComponent,
   PluginSettingTab,
@@ -10,6 +11,7 @@ import { showAtButton } from "@/lib/menu";
 import type MxPlugin from "@/mx-main";
 import "./style.global.less";
 import { getDialog } from "@/web/session/utils";
+import type { OpenLinkBehavior } from "./def";
 
 export class MxSettingTabs extends PluginSettingTab {
   plugin: MxPlugin;
@@ -43,44 +45,47 @@ export class MxSettingTabs extends PluginSettingTab {
           .onChange((val) => this.state.setDeviceName(val)),
       )
       .addExtraButton((btn) =>
-        btn.setIcon("plus").onClick(() => {
-          const menu = new Menu().addItem((item) =>
-            item
-              .setIcon("link")
-              .setTitle("Add link")
-              .onClick(() => {
-                const setting = buildItem({
-                  protocol: "",
-                  replace: "https://",
-                });
-                list.insertAdjacentElement("afterbegin", setting.settingEl);
-              }),
-          );
-          if (Platform.isDesktopApp) {
-            menu.addItem((item) =>
+        btn
+          .setIcon("plus")
+          .setTooltip("Add new protocol")
+          .onClick(() => {
+            const menu = new Menu().addItem((item) =>
               item
-                .setIcon("folder")
-                .setTitle("Add folder")
-                .onClick(async () => {
-                  const folder = (
-                    await getDialog().showOpenDialog({
-                      title: "Pick a folder",
-                      message: "Pick a folder to resolve media files from",
-                      buttonLabel: "Pick",
-                      properties: ["openDirectory"],
-                    })
-                  ).filePaths[0];
-                  if (!folder) return;
+                .setIcon("link")
+                .setTitle("Link mapping")
+                .onClick(() => {
                   const setting = buildItem({
                     protocol: "",
-                    replace: pathToFileURL(folder).href,
+                    replace: "https://",
                   });
                   list.insertAdjacentElement("afterbegin", setting.settingEl);
                 }),
             );
-          }
-          showAtButton(btn.extraSettingsEl, menu);
-        }),
+            if (Platform.isDesktopApp) {
+              menu.addItem((item) =>
+                item
+                  .setIcon("folder")
+                  .setTitle("Folder mapping")
+                  .onClick(async () => {
+                    const folder = (
+                      await getDialog().showOpenDialog({
+                        title: "Pick a folder",
+                        message: "Pick a folder to resolve media files from",
+                        buttonLabel: "Pick",
+                        properties: ["openDirectory"],
+                      })
+                    ).filePaths[0];
+                    if (!folder) return;
+                    const setting = buildItem({
+                      protocol: "",
+                      replace: pathToFileURL(folder).href,
+                    });
+                    list.insertAdjacentElement("afterbegin", setting.settingEl);
+                  }),
+              );
+            }
+            showAtButton(btn.extraSettingsEl, menu);
+          }),
       );
     const list = container.createDiv({ cls: "mx-protocol-list" });
     const buildItem = (p: {
@@ -129,10 +134,13 @@ export class MxSettingTabs extends PluginSettingTab {
         protocol.inputEl.addClass("mx-protocol-input");
         replace.inputEl.addClass("mx-replace-input");
         item.addExtraButton((btn) =>
-          btn.setIcon("trash").onClick(() => {
-            this.state.removeUrlMapping(protocol.getValue());
-            item.settingEl.remove();
-          }),
+          btn
+            .setIcon("trash")
+            .setTooltip(`Remove ${protocol.getValue() || "empty"} protocol`)
+            .onClick(() => {
+              this.state.removeUrlMapping(protocol.getValue());
+              item.settingEl.remove();
+            }),
         );
       });
 
@@ -152,6 +160,107 @@ export class MxSettingTabs extends PluginSettingTab {
           ),
         replace: this.state.getUrlMapping(protocol) ?? "",
       });
+    });
+  }
+
+  linkOpen() {
+    const { containerEl: container } = this;
+    new Setting(container)
+      .setHeading()
+      .setName("Link open")
+      .setDesc("Configure how links to media are opened");
+    type OpenLinkLabelled = PaneType | "replace" | "default";
+    const options = {
+      default: "Default obsidian behavior",
+      replace: "In current pane",
+      split: "New pane on the side",
+      tab: "New tab",
+      window: "New window",
+    } satisfies Record<OpenLinkLabelled, string>;
+    const toKeyDesc = (val: OpenLinkBehavior): string => {
+      // Translates an event into the type of pane that should open.
+      // Returns 'tab' if the modifier key Cmd/Ctrl is pressed OR
+      // if this is a middle-click MouseEvent.
+      // Returns 'split' if Cmd/Ctrl+Alt is pressed.
+      // Returns 'window' if Cmd/Ctrl+Alt+Shift is pressed.
+      switch (val) {
+        case "split":
+          if (Platform.isMacOS) return "click holding ⌘+⌥";
+          return "click holding Ctrl+Alt";
+        case "tab":
+          if (Platform.isMacOS) return "click holding ⌘ or middle-click";
+          return "middle-click or click holding Ctrl";
+        case "window":
+          if (Platform.isMacOS) return "click holding ⌘+⌥+⇧";
+          return "click holding Ctrl+Alt+Shift";
+        default:
+          return "";
+      }
+    };
+    const toLabel = (val: OpenLinkBehavior): OpenLinkLabelled => {
+      if (val === null) return "default";
+      if (val === false) return "replace";
+      return val;
+    };
+    const fromLabel = (val: string): OpenLinkBehavior => {
+      switch (val) {
+        case "replace":
+          return false;
+        case "split":
+        case "tab":
+        case "window":
+          return val as PaneType;
+        // case "default":
+        default:
+          return null;
+      }
+    };
+
+    new Setting(container)
+      .setName("Default link click")
+      .setDesc("Configure how links to media are opened")
+      .addDropdown((d) =>
+        d
+          .addOptions(options)
+          .setValue(toLabel(this.state.defaultMxLinkClick.click))
+          .onChange((val) =>
+            this.state.setDefaultMxLinkBehavior(fromLabel(val)),
+          )
+          .then(() =>
+            this.sub((s, prev) => {
+              if (s.defaultMxLinkClick.click === prev.defaultMxLinkClick.click)
+                return;
+              d.setValue(toLabel(s.defaultMxLinkClick.click));
+            }),
+          ),
+      );
+
+    const altCfg = new Setting(container)
+      .setName("Altnernative behavior")
+      .addDropdown((d) =>
+        d
+          .addOptions(options)
+          .setValue(toLabel(this.state.defaultMxLinkClick.alt))
+          .onChange((val) => this.state.setMxLinkAltBehavior(fromLabel(val)))
+          .then(() =>
+            this.sub((s, prev) => {
+              if (s.defaultMxLinkClick.alt === prev.defaultMxLinkClick.alt)
+                return;
+              d.setValue(toLabel(s.defaultMxLinkClick.alt));
+            }),
+          ),
+      );
+    function onClickCfgUpdate(click: OpenLinkBehavior) {
+      altCfg.settingEl.style.display = !click ? "none" : "";
+      const keyDesc = toKeyDesc(click);
+      altCfg.setDesc(
+        "Configure link open behavior" + keyDesc ? ` when ${keyDesc}` : "",
+      );
+    }
+    onClickCfgUpdate(this.state.defaultMxLinkClick.click);
+    this.sub((s, prev) => {
+      if (s.defaultMxLinkClick === prev.defaultMxLinkClick) return;
+      onClickCfgUpdate(s.defaultMxLinkClick.click);
     });
   }
 
@@ -188,7 +297,7 @@ export class MxSettingTabs extends PluginSettingTab {
           }),
       )
       .then((s) => s.controlEl.appendText("%"));
-
+    this.linkOpen();
     this.protocol();
   }
 }

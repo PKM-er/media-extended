@@ -1,11 +1,18 @@
-import type { TFile } from "obsidian";
+import type { PaneType, TFile } from "obsidian";
+import type MxPlugin from "@/mx-main";
 
 export interface LinkEvent {
-  onExternalLinkClick(url: string, newLeaf: boolean, fallback: () => void): any;
+  onExternalLinkClick(
+    this: MxPlugin,
+    url: string,
+    newLeaf: false | PaneType,
+    fallback: () => void,
+  ): any;
   onInternalLinkClick(
+    this: MxPlugin,
     linktext: string,
     sourcePath: string,
-    newLeaf: boolean,
+    newLeaf: false | PaneType | undefined,
     fallback: () => void,
   ): any;
 }

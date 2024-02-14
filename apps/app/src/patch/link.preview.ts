@@ -1,12 +1,13 @@
 import { around } from "monkey-around";
-import type { Plugin, PreviewEventHanlder } from "obsidian";
+import type { PreviewEventHanlder } from "obsidian";
 import { MarkdownPreviewRenderer, Keymap } from "obsidian";
+import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "./event";
 import { getInstancePrototype } from "./utils";
 
 export default function patchPreviewClick(
-  this: Plugin,
-  events: Partial<LinkEvent>,
+  this: MxPlugin,
+  events: Pick<LinkEvent, "onExternalLinkClick">,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const plugin = this;
@@ -27,8 +28,8 @@ export default function patchPreviewClick(
 
 function patchPreviewEventHanlder(
   handler: PreviewEventHanlder,
-  { onExternalLinkClick, onInternalLinkClick }: Partial<LinkEvent>,
-  plugin: Plugin,
+  { onExternalLinkClick }: Pick<LinkEvent, "onExternalLinkClick">,
+  plugin: MxPlugin,
 ) {
   plugin.register(
     around(getInstancePrototype(handler), {
@@ -39,39 +40,15 @@ function patchPreviewEventHanlder(
           evt.preventDefault();
           const paneCreateType = Keymap.isModEvent(evt);
           try {
-            await onExternalLinkClick(link, paneCreateType !== false, fallback);
-          } catch (e) {
-            console.error(
-              `onExternalLinkClick error in preview, fallback to default`,
-              e,
-            );
-            fallback();
-          }
-        },
-      onInternalLinkClick: (next) =>
-        async function (
-          this: PreviewEventHanlder,
-          evt,
-          target,
-          linktext,
-          ...args
-        ) {
-          const fallback = () =>
-            next.call(this, evt, target, linktext, ...args);
-          if (!onInternalLinkClick) return fallback();
-          evt.preventDefault();
-          const paneCreateType = Keymap.isModEvent(evt);
-          const sourcePath = this.info?.file?.path ?? "";
-          try {
-            await onInternalLinkClick(
-              linktext,
-              sourcePath,
-              paneCreateType !== false,
+            await onExternalLinkClick.call(
+              plugin,
+              link,
+              paneCreateType === true ? "tab" : paneCreateType,
               fallback,
             );
           } catch (e) {
             console.error(
-              `onInternalLinkClick error in preview, fallback to default`,
+              `onExternalLinkClick error in preview, fallback to default`,
               e,
             );
             fallback();

@@ -1,24 +1,36 @@
+import type { PaneType } from "obsidian";
 import { Platform, debounce } from "obsidian";
 import { createStore } from "zustand";
 import { enumerate } from "@/lib/must-include";
 import { pick, omit } from "@/lib/pick";
 import type MxPlugin from "@/mx-main";
 
+export type OpenLinkBehavior = false | PaneType | null;
+
 type MxSettingValues = {
   defaultVolume: number;
   urlMappingData: { appId: string; protocol: string; replace: string }[];
   devices: { appId: string; name: string }[];
+  defaultMxLinkClick: {
+    click: OpenLinkBehavior;
+    alt: OpenLinkBehavior;
+  };
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
   "urlMappingData",
   "devices",
+  "defaultMxLinkClick",
 );
 
 const mxSettingsDefault = {
   defaultVolume: 80,
   urlMappingData: [],
   devices: [],
+  defaultMxLinkClick: {
+    click: "split",
+    alt: "window",
+  },
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -58,11 +70,11 @@ export type MxSettings = {
   setDeviceName: (label: string, id?: string) => void;
   urlMapping: Map<string, string>;
   getUrlMappingData: () => MxSettingValues["urlMappingData"];
-  devices: MxSettingValues["devices"];
-  defaultVolume: number;
+  setDefaultMxLinkBehavior: (click: OpenLinkBehavior) => void;
+  setMxLinkAltBehavior: (click: OpenLinkBehavior) => void;
   load: () => Promise<void>;
   save: () => void;
-};
+} & Omit<MxSettingValues, "urlMappingData">;
 
 export function toUrlMap(data: MxSettingValues["urlMappingData"]) {
   return new Map(data.map((x) => [`${x.appId}%${x.protocol}`, x.replace]));
@@ -88,6 +100,21 @@ export function createSettingsStore(plugin: MxPlugin) {
     ...omit(mxSettingsDefault, ["urlMappingData"]),
     getUrlMappingData() {
       return toUrlMappingData(get().urlMapping);
+    },
+    setDefaultMxLinkBehavior: (click) => {
+      let alt: OpenLinkBehavior;
+      if (click === "split") alt = "window";
+      else if (click === "window") alt = "tab";
+      else if (click === "tab") alt = "split";
+      else alt = null;
+      set({ defaultMxLinkClick: { click, alt } });
+      save(get());
+    },
+    setMxLinkAltBehavior: (click) => {
+      set(({ defaultMxLinkClick }) => ({
+        defaultMxLinkClick: { ...defaultMxLinkClick, alt: click },
+      }));
+      save(get());
     },
     urlMapping: toUrlMap(mxSettingsDefault.urlMappingData),
     setDefaultVolume: (volume: number) => {

@@ -26,9 +26,9 @@ import {
 } from "./media-view/view-type";
 import { MediaWebpageView } from "./media-view/webpage-view";
 import injectMediaEmbed from "./patch/embed";
-import patchMediaNoteLinktextOpen from "./patch/link.default";
 import patchEditorClick from "./patch/link.editor";
 import patchInlineUrl from "./patch/link.inline-field";
+import patchLinktextOpen from "./patch/link.internal";
 import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/media-type";
@@ -95,10 +95,8 @@ export default class MxPlugin extends Plugin {
   patchEditorClick = patchEditorClick;
   patchPreviewClick = patchPreviewClick;
   patchInlineUrl = patchInlineUrl;
-  patchMediaNoteLinktextOpen = patchMediaNoteLinktextOpen;
+  patchLinktextOpen = patchLinktextOpen;
   modifySession = modifySession;
-  onExternalLinkClick = onExternalLinkClick.bind(this);
-  onInternalLinkClick = onInternalLinkClick.bind(this);
   initLogin = initLogin;
 
   private loadPatches() {
@@ -132,16 +130,10 @@ export default class MxPlugin extends Plugin {
       (leaf) => new AudioUrlView(leaf, this),
     );
 
-    this.patchEditorClick({
-      onExternalLinkClick: this.onExternalLinkClick,
-      onInternalLinkClick: this.onInternalLinkClick,
-    });
-    this.patchPreviewClick({
-      onExternalLinkClick: this.onExternalLinkClick,
-      onInternalLinkClick: this.onInternalLinkClick,
-    });
+    this.patchEditorClick({ onExternalLinkClick });
+    this.patchPreviewClick({ onExternalLinkClick });
     this.fixLinkLabel();
     this.patchInlineUrl();
-    this.patchMediaNoteLinktextOpen();
+    this.patchLinktextOpen({ onInternalLinkClick });
   }
 }

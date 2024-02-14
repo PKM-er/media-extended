@@ -129,18 +129,34 @@ export class LeafOpener extends Component {
     return leaves[0];
   }
 
+  get settings() {
+    return this.plugin.settings.getState();
+  }
+
+  getSplitBehavior(
+    newLeaf: PaneType | boolean | undefined,
+  ): PaneType | boolean {
+    const {
+      defaultMxLinkClick: { click, alt },
+    } = this.settings;
+    if (click === null) {
+      return newLeaf ?? false;
+    }
+    if (newLeaf === undefined || newLeaf === false) {
+      return click;
+    }
+    // alt only works as a replacement of original click behavior
+    // eg, if click is set to "split", original split action (cmd+alt)
+    // is replaced by behavior set in alt
+    if (alt !== null && newLeaf === click) {
+      return alt;
+    }
+    return newLeaf;
+  }
+
   async openMedia(
     mediaInfo: MediaInfo,
-    newLeaf?: "split",
-    direction?: SplitDirection,
-  ): Promise<MediaLeaf>;
-  async openMedia(
-    mediaInfo: MediaInfo,
-    newLeaf?: PaneType | boolean,
-  ): Promise<MediaLeaf>;
-  async openMedia(
-    mediaInfo: MediaInfo,
-    newLeaf?: PaneType | boolean,
+    newLeaf?: PaneType | false,
     direction?: SplitDirection,
   ): Promise<MediaLeaf> {
     const { workspace } = this.app;
@@ -148,7 +164,11 @@ export class LeafOpener extends Component {
       const existing = this.#openInExistingPlayer(mediaInfo);
       if (existing) return existing;
     }
-    const leaf = workspace.getLeaf(newLeaf as any, direction);
+
+    const leaf = workspace.getLeaf(
+      this.getSplitBehavior(newLeaf) as any,
+      direction,
+    );
     if (isFileMediaInfo(mediaInfo)) {
       await leaf.openFile(mediaInfo.file, {
         eState: { subpath: mediaInfo.hash },

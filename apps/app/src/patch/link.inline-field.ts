@@ -9,7 +9,8 @@ export default function patchInlineUrl(this: MxPlugin) {
     const urlInfo = this.resolveUrl(e.target.textContent);
     if (!urlInfo) return;
     e.stopImmediatePropagation();
-    this.leafOpener.openMedia(urlInfo, Keymap.isModEvent(e) ? true : "split");
+    const newLeaf = Keymap.isModEvent(e);
+    this.leafOpener.openMedia(urlInfo, newLeaf === true ? "tab" : newLeaf);
   };
   const unload = around(MarkdownView.prototype, {
     onload: (next) =>
