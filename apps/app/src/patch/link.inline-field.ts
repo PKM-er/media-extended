@@ -4,9 +4,10 @@ import type MxPlugin from "@/mx-main";
 
 export default function patchInlineUrl(this: MxPlugin) {
   const clickHandler = (e: MouseEvent) => {
-    if (!(e.target instanceof HTMLDivElement)) return;
-    if (!e.target.matches(".metadata-link-inner.external-link")) return;
-    const urlInfo = this.resolveUrl(e.target.textContent);
+    const target = e.target as HTMLElement;
+    if (!target.instanceOf(HTMLElement)) return;
+    if (!target.matches(".metadata-link-inner.external-link")) return;
+    const urlInfo = this.resolveUrl(target.textContent);
     if (!urlInfo) return;
     e.stopImmediatePropagation();
     const newLeaf = Keymap.isModEvent(e);
