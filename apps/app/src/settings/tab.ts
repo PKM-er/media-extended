@@ -350,7 +350,7 @@ export class MxSettingTabs extends PluginSettingTab {
           .setValue(this.state.timestampTemplate)
           .onChange((val) => this.state.setTemplate("timestamp", val));
         text.inputEl.rows = 5;
-        text.inputEl.cols = 20;
+        text.inputEl.cols = 40;
       });
     new Setting(container)
       .setName("Screenshot linktext template")
@@ -366,7 +366,7 @@ export class MxSettingTabs extends PluginSettingTab {
           .setValue(this.state.screenshotEmbedTemplate)
           .onChange((val) => this.state.setTemplate("screenshotEmbed", val));
         text.inputEl.rows = 5;
-        text.inputEl.cols = 20;
+        text.inputEl.cols = 40;
       });
     new Setting(container)
       .setName("Screenshot template")
@@ -384,7 +384,7 @@ export class MxSettingTabs extends PluginSettingTab {
           .setValue(this.state.screenshotTemplate)
           .onChange((val) => this.state.setTemplate("screenshot", val));
         text.inputEl.rows = 5;
-        text.inputEl.cols = 20;
+        text.inputEl.cols = 40;
       });
     new Setting(container)
       .setName("Timestamp offset")
