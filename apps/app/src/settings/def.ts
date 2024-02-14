@@ -25,6 +25,8 @@ type MxSettingValues = {
   screenshotTemplate: string;
   screenshotEmbedTemplate: string;
   insertBefore: boolean;
+  /** in seconds */
+  timestampOffset: number;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -37,6 +39,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "screenshotTemplate",
   "screenshotEmbedTemplate",
   "insertBefore",
+  "timestampOffset",
 );
 
 const mxSettingsDefault = {
@@ -58,6 +61,7 @@ const mxSettingsDefault = {
   screenshotEmbedTemplate: "{{TITLE}}{{DURATION}}|50",
   screenshotTemplate: "\n- {{SCREENSHOT}} {{TIMESTAMP}}",
   insertBefore: false,
+  timestampOffset: 0,
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -100,6 +104,7 @@ export type MxSettings = {
     key: "timestamp" | "screenshot" | "screenshotEmbed",
     value: string,
   ) => void;
+  setTimestampOffset: (offset: number) => void;
   setInsertPosition: (pos: "before" | "after") => void;
   getUrlMappingData: () => MxSettingValues["urlMappingData"];
   setDefaultMxLinkBehavior: (click: OpenLinkBehavior) => void;
@@ -145,6 +150,10 @@ export function createSettingsStore(plugin: MxPlugin) {
         linkHandler[type] = [...linkHandler[type], pattern];
         return { linkHandler };
       });
+      save(get());
+    },
+    setTimestampOffset(offset) {
+      set({ timestampOffset: offset });
       save(get());
     },
     setDefaultMxLinkBehavior: (click) => {

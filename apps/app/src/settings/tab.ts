@@ -378,6 +378,36 @@ export class MxSettingTabs extends PluginSettingTab {
         text.inputEl.rows = 5;
         text.inputEl.cols = 20;
       });
+    new Setting(container)
+      .setName("Timestamp offset")
+      .setDesc("Offset in seconds to add to the timestamp")
+      .addSlider((slide) =>
+        slide
+          .setLimits(-10, 10, 0.01)
+          .setValue(this.state.timestampOffset)
+          .onChange(this.state.setTimestampOffset)
+          .then((slide) => {
+            this.sub((s, prev) => {
+              if (s.timestampOffset === prev.timestampOffset) return;
+              slide.setValue(s.timestampOffset);
+            });
+          }),
+      )
+      .addText((text) =>
+        text
+          .setValue(toStr(this.state.timestampOffset))
+          .onChange(handleFloat(this.state.setTimestampOffset))
+          .then((input) => {
+            setLimits.call(input, -10, 10, 0.01);
+            input.inputEl.type = "number";
+            input.inputEl.style.textAlign = "center";
+            this.sub((s, prev) => {
+              if (s.timestampOffset === prev.timestampOffset) return;
+              input.setValue(toStr(s.timestampOffset));
+            });
+          }),
+      )
+      .then((s) => s.controlEl.appendText("s"));
   }
 
   display() {
@@ -393,6 +423,9 @@ export class MxSettingTabs extends PluginSettingTab {
 
 function handleInt(handler: (val: number) => void) {
   return (val: string) => handler(parseInt(val, 10));
+}
+function handleFloat(handler: (val: number) => void) {
+  return (val: string) => handler(parseFloat(val));
 }
 function toStr(val: number) {
   return val.toString();

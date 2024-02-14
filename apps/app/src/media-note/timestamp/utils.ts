@@ -87,18 +87,24 @@ export function timestampGenerator(
   playerComponent: PlayerComponent,
 ): (newNotePath: string) => string {
   const { fileManager } = playerComponent.plugin.app;
+  const { timestampOffset } = playerComponent.plugin.settings.getState();
+  const duration = playerComponent.store.getState().player?.state.duration;
 
-  const duration = formatDuration(time);
+  time += timestampOffset;
+  if (time < 0) time = 0;
+  if (duration && time > duration) time = duration;
+
+  const timeInDuration = formatDuration(time);
   const hash =
     time > 0 ? `#${toTempFragString({ start: time, end: -1 })!}` : "";
   if (isFileMediaInfo(mediaInfo)) {
     const { file } = mediaInfo;
     return (newNotePath: string) =>
       fileManager
-        .generateMarkdownLink(file, newNotePath, hash, duration)
+        .generateMarkdownLink(file, newNotePath, hash, timeInDuration)
         .replace(/^!/, "");
   } else {
     const sourceUrl = mediaInfo.cleaned;
-    return () => `[${duration}](${noHash(sourceUrl)}${hash})`;
+    return () => `[${timeInDuration}](${noHash(sourceUrl)}${hash})`;
   }
 }
