@@ -9,7 +9,7 @@ import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { cn } from "@/lib/utils";
 import { useMediaViewStore } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
-import { useControls, useHashProps } from "./hook/use-hash";
+import { useControls, useDefaultVolume, useHashProps } from "./hook/use-hash";
 import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
 import { MediaProviderEnhanced } from "./provider";
@@ -21,6 +21,7 @@ function HookLoader({
 }) {
   useViewTypeDetect(onViewTypeChange);
   useTempFragHandler();
+  useDefaultVolume();
   return <></>;
 }
 

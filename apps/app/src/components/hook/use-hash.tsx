@@ -1,5 +1,5 @@
-import type { MediaVolumeChange } from "@vidstack/react";
-import { useCallback, useState } from "react";
+import { useMediaPlayer } from "@vidstack/react";
+import { useEffect, useRef } from "react";
 import { useMediaViewStore, useSettings } from "../context";
 
 export function useControls() {
@@ -17,19 +17,24 @@ export function useControls() {
 }
 
 export function useHashProps() {
-  const {
-    volume: init,
-    tempFragment,
-    ...props
-  } = useMediaViewStore((s) => s.hash);
+  const { volume, tempFragment, ...props } = useMediaViewStore((s) => s.hash);
+  return props;
+}
+
+export function useDefaultVolume() {
+  const player = useMediaPlayer();
+  const { volume } = useMediaViewStore((s) => s.hash);
   const defaultVolume = useSettings((s) => s.defaultVolume / 100);
 
-  const [volume, setVolume] = useState(init ?? defaultVolume);
-  return {
-    ...props,
-    volume,
-    onVolumeChange: useCallback((details: MediaVolumeChange) => {
-      setVolume(details.volume);
-    }, []),
-  };
+  const initVolume = volume ?? defaultVolume;
+  const initVolumeRef = useRef<number>(initVolume);
+  initVolumeRef.current = initVolume;
+
+  useEffect(
+    () =>
+      player?.subscribe(({ canPlay }) => {
+        if (canPlay) player.volume = initVolumeRef.current;
+      }),
+    [player],
+  );
 }

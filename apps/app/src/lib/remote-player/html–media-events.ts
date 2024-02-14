@@ -223,7 +223,6 @@ export class HTMLMediaEvents {
   }
 
   private _onCanPlay({ type, payload }: MediaEventMap["canplay"]) {
-    this._provider.media.methods.setVolume(this._ctx.$state.volume());
     const buffered = deserializeMediaStatePropValue(
       payload.buffered,
     ) as TimeRanges;
