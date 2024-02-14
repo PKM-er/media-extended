@@ -53,7 +53,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
           if (!isMediaNote) return false;
           if (checking) return true;
           _view = plugin.leafOpener
-            .openMedia(isMediaNote, "split")
+            .openMedia(isMediaNote, undefined)
             .then((l) => l.view);
         } else {
           if (checking) return true;

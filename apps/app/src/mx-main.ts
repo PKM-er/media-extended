@@ -70,7 +70,10 @@ export default class MxPlugin extends Plugin {
         new Notice("Protocol not yet supported");
         return;
       }
-      await this.leafOpener.openMedia(urlInfo, newLeaf, { direction });
+      await this.leafOpener.openMedia(urlInfo, newLeaf, {
+        direction,
+        noRemap: true,
+      });
     },
   };
 

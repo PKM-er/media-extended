@@ -164,9 +164,11 @@ export class LeafOpener extends Component {
     {
       direction,
       viewType,
+      noRemap,
     }: {
       viewType?: RemoteMediaViewType;
       direction?: SplitDirection;
+      noRemap?: boolean;
     } = {},
   ): Promise<MediaLeaf> {
     const { workspace } = this.app;
@@ -176,7 +178,7 @@ export class LeafOpener extends Component {
     }
 
     const leaf = workspace.getLeaf(
-      this.getSplitBehavior(newLeaf) as "split",
+      (noRemap ? newLeaf : this.getSplitBehavior(newLeaf)) as "split",
       direction,
     );
     if (isFileMediaInfo(mediaInfo)) {

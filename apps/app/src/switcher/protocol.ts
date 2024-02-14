@@ -59,6 +59,6 @@ export function registerProtocol(plugin: MxPlugin) {
       new Notice("Invail URL: " + url.href);
       return;
     }
-    plugin.leafOpener.openMedia(urlInfo);
+    plugin.leafOpener.openMedia(urlInfo, undefined);
   }
 }

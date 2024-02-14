@@ -77,7 +77,9 @@ export default function registerMediaMenu(this: MxPlugin) {
               .setIcon("separator-vertical")
               .setSection("view")
               .onClick(() => {
-                this.leafOpener.openMedia(mediaInfo, "split");
+                this.leafOpener.openMedia(mediaInfo, "split", {
+                  noRemap: true,
+                });
               }),
           )
           .addItem((item) =>
@@ -86,7 +88,7 @@ export default function registerMediaMenu(this: MxPlugin) {
               .setSection("view")
               .setIcon("file-plus")
               .onClick(() => {
-                this.leafOpener.openMedia(mediaInfo, "tab");
+                this.leafOpener.openMedia(mediaInfo, "tab", { noRemap: true });
               }),
           )
           .addItem((item) =>
@@ -95,7 +97,9 @@ export default function registerMediaMenu(this: MxPlugin) {
               .setSection("view")
               .setIcon("maximize")
               .onClick(() => {
-                this.leafOpener.openMedia(mediaInfo, "window");
+                this.leafOpener.openMedia(mediaInfo, "window", {
+                  noRemap: true,
+                });
               }),
           );
       }
