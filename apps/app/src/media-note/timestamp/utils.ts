@@ -8,17 +8,33 @@ import type { MediaInfo, FileMediaInfo } from "@/media-view/media-info";
 import type { MediaURL } from "@/web/url-match";
 
 export function insertTimestamp(
-  link: string,
-  editor: Editor,
-  focus?: () => void,
+  { timestamp, screenshot }: { timestamp: string; screenshot?: string },
+  {
+    template,
+    editor,
+    insertBefore,
+  }: { template: string; editor: Editor; insertBefore?: boolean },
 ) {
-  insertToCursor("\n" + link, editor);
-  focus?.();
+  let toInsert = template.replace("{{TIMESTAMP}}", timestamp);
+  if (screenshot) {
+    toInsert = toInsert.replace("{{SCREENSHOT}}", screenshot);
+  }
+
+  if (insertBefore) {
+    insertBeforeCursor(toInsert, editor);
+  } else {
+    insertToCursor(toInsert, editor);
+  }
 }
 function insertToCursor(str: string, editor: Editor) {
   const cursor = editor.getCursor("to");
   editor.replaceRange(str, cursor, cursor);
   editor.setCursor(editor.offsetToPos(editor.posToOffset(cursor) + str.length));
+}
+function insertBeforeCursor(str: string, editor: Editor) {
+  const cursor = editor.getCursor("from");
+  editor.replaceRange(str, cursor, cursor);
+  // editor.setCursor(editor.offsetToPos(editor.posToOffset(cursor) + str.length));
 }
 
 function fileTitle(media: FileMediaInfo) {
@@ -65,7 +81,7 @@ export function openOrCreateMediaNote(
   }
 }
 
-export function createTimestampGen(
+export function timestampGenerator(
   time: number,
   mediaInfo: MediaInfo,
   playerComponent: PlayerComponent,

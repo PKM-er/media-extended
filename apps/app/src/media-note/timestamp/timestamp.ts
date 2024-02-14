@@ -1,7 +1,7 @@
 import type { Editor, TFile } from "obsidian";
 import { Notice } from "obsidian";
 import type { PlayerComponent } from "@/media-view/base";
-import { createTimestampGen, insertTimestamp } from "./utils";
+import { timestampGenerator, insertTimestamp } from "./utils";
 
 export async function takeTimestamp<T extends PlayerComponent>(
   playerComponent: T,
@@ -18,11 +18,18 @@ export async function takeTimestamp<T extends PlayerComponent>(
     return;
   }
   const time = player.currentTime;
-  const genTimestamp = createTimestampGen(time, mediaInfo, playerComponent);
+  const genTimestamp = timestampGenerator(time, mediaInfo, playerComponent);
 
   if (time > 0) {
-    insertTimestamp(genTimestamp(mediaNote.path), editor, () =>
-      playerComponent.containerEl.focus(),
+    const { insertBefore, timestampTemplate: template } =
+      playerComponent.plugin.settings.getState();
+    insertTimestamp(
+      { timestamp: genTimestamp(mediaNote.path) },
+      {
+        editor,
+        template,
+        insertBefore,
+      },
     );
   } else {
     new Notice("Playback not started yet");

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import { assertNever } from "assert-never";
 import type { PaneType } from "obsidian";
 import { Platform, debounce } from "obsidian";
 import { createStore } from "zustand";
@@ -20,6 +21,10 @@ type MxSettingValues = {
   };
   loadStrategy: "play" | "eager";
   linkHandler: Record<RemoteMediaViewType, URLMatchPattern[]>;
+  timestampTemplate: string;
+  screenshotTemplate: string;
+  screenshotEmbedTemplate: string;
+  insertBefore: boolean;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -28,6 +33,10 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultMxLinkClick",
   "linkHandler",
   "loadStrategy",
+  "timestampTemplate",
+  "screenshotTemplate",
+  "screenshotEmbedTemplate",
+  "insertBefore",
 );
 
 const mxSettingsDefault = {
@@ -45,6 +54,10 @@ const mxSettingsDefault = {
     "mx-webpage": [],
   },
   loadStrategy: "eager",
+  timestampTemplate: "\n- {{TIMESTAMP}}",
+  screenshotEmbedTemplate: "{{TITLE}}{{DURATION}}|50",
+  screenshotTemplate: "\n- {{SCREENSHOT}} {{TIMESTAMP}}",
+  insertBefore: false,
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -83,6 +96,11 @@ export type MxSettings = {
   getDeviceNameWithDefault: (id?: string) => string;
   setDeviceName: (label: string, id?: string) => void;
   urlMapping: Map<string, string>;
+  setTemplate: (
+    key: "timestamp" | "screenshot" | "screenshotEmbed",
+    value: string,
+  ) => void;
+  setInsertPosition: (pos: "before" | "after") => void;
   getUrlMappingData: () => MxSettingValues["urlMappingData"];
   setDefaultMxLinkBehavior: (click: OpenLinkBehavior) => void;
   setMxLinkAltBehavior: (click: OpenLinkBehavior) => void;
@@ -117,6 +135,10 @@ export function createSettingsStore(plugin: MxPlugin) {
     getUrlMappingData() {
       return toUrlMappingData(get().urlMapping);
     },
+    setInsertPosition(pos) {
+      set({ insertBefore: pos === "before" });
+      save(get());
+    },
     setLinkHandler(pattern, type) {
       set((prev) => {
         const linkHandler = { ...prev.linkHandler };
@@ -133,6 +155,18 @@ export function createSettingsStore(plugin: MxPlugin) {
       else alt = null;
       set({ defaultMxLinkClick: { click, alt } });
       save(get());
+    },
+    setTemplate(key, value) {
+      switch (key) {
+        case "screenshot":
+          return set({ screenshotTemplate: value });
+        case "screenshotEmbed":
+          return set({ screenshotEmbedTemplate: value });
+        case "timestamp":
+          return set({ timestampTemplate: value });
+        default:
+          assertNever(key);
+      }
     },
     setMxLinkAltBehavior: (click) => {
       set(({ defaultMxLinkClick }) => ({

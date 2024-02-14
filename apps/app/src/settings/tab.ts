@@ -312,11 +312,80 @@ export class MxSettingTabs extends PluginSettingTab {
       );
   }
 
+  noteTaking() {
+    const { containerEl: container } = this;
+
+    new Setting(container).setHeading().setName("Note taking");
+    new Setting(container)
+      .setDesc("Configure where timestamps and screenshots are inserted")
+      .setName("Insert location")
+      .addDropdown((d) =>
+        d
+          .addOption("before", "Latest content on top")
+          .addOption("after", "Latest content at end")
+          .setValue(this.state.insertBefore === true ? "before" : "after")
+          .onChange((val) =>
+            this.state.setInsertPosition(val as "before" | "after"),
+          ),
+      );
+    new Setting(container)
+      .setName("Timestamp template")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("The template used to insert timestamps.");
+          descEl.createEl("br");
+          descEl.appendText("Supported placeholders: {{TIMESTAMP}}");
+        }),
+      )
+      .addTextArea((text) => {
+        text
+          .setValue(this.state.timestampTemplate)
+          .onChange((val) => this.state.setTemplate("timestamp", val));
+        text.inputEl.rows = 5;
+        text.inputEl.cols = 20;
+      });
+    new Setting(container)
+      .setName("Screenshot linktext template")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("The template used to create screenshot linktext.");
+          descEl.createEl("br");
+          descEl.appendText("Supported placeholders: {{DURATION}}, {{TITLE}}");
+        }),
+      )
+      .addTextArea((text) => {
+        text
+          .setValue(this.state.screenshotEmbedTemplate)
+          .onChange((val) => this.state.setTemplate("screenshotEmbed", val));
+        text.inputEl.rows = 5;
+        text.inputEl.cols = 20;
+      });
+    new Setting(container)
+      .setName("Screenshot template")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("The template used to insert screenshot.");
+          descEl.createEl("br");
+          descEl.appendText(
+            "Supported placeholders: {{TIMESTAMP}}, {{SCREENSHOT}}",
+          );
+        }),
+      )
+      .addTextArea((text) => {
+        text
+          .setValue(this.state.screenshotTemplate)
+          .onChange((val) => this.state.setTemplate("screenshot", val));
+        text.inputEl.rows = 5;
+        text.inputEl.cols = 20;
+      });
+  }
+
   display() {
     const { containerEl: container } = this;
     container.empty();
 
     this.playback();
+    this.noteTaking();
     this.linkOpen();
     this.protocol();
   }

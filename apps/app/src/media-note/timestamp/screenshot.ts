@@ -8,7 +8,7 @@ import {
 } from "@/components/player/screenshot";
 import { formatDuration, toDurationISOString } from "@/lib/hash/format";
 import type { PlayerComponent } from "@/media-view/base";
-import { createTimestampGen, insertTimestamp, mediaTitle } from "./utils";
+import { timestampGenerator, insertTimestamp, mediaTitle } from "./utils";
 
 declare module "obsidian" {
   interface Vault {
@@ -40,7 +40,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
     return;
   }
   const { blob, time } = await takeScreenshot(player.provider);
-  const genTimestamp = createTimestampGen(time, mediaInfo, playerComponent);
+  const genTimestamp = timestampGenerator(time, mediaInfo, playerComponent);
 
   const ext = mime.getExtension(blob.type);
   if (!ext) {
@@ -63,15 +63,25 @@ export async function saveScreenshot<T extends PlayerComponent>(
     blob.arrayBuffer,
   );
   new Notice("Screenshot saved to " + screenshotFile.path);
+  const { insertBefore, screenshotTemplate, screenshotEmbedTemplate } =
+    playerComponent.plugin.settings.getState();
+
   const timestamp = genTimestamp(newNote.path),
     screenshotEmbed = fileManager.generateMarkdownLink(
       screenshotFile,
       newNote.path,
       "",
-      `${title}${humanizedDuration}|50`,
+      screenshotEmbedTemplate
+        .replaceAll("{{TITLE}}", title)
+        .replaceAll("{{DURATION}}", humanizedDuration),
     );
 
-  insertTimestamp(`- ${screenshotEmbed} ${timestamp}`, editor, () =>
-    playerComponent.containerEl.focus(),
+  insertTimestamp(
+    { timestamp, screenshot: screenshotEmbed },
+    {
+      editor,
+      template: screenshotTemplate,
+      insertBefore,
+    },
   );
 }
