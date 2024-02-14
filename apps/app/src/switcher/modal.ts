@@ -110,7 +110,9 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
       }
     }
     if (Keymap.isModifier(evt, "Mod") && Keymap.isModifier(evt, "Alt")) {
-      this.plugin.leafOpener.openMedia(item, "split", "vertical");
+      this.plugin.leafOpener.openMedia(item, "split", {
+        direction: "vertical",
+      });
     } else if (Keymap.isModifier(evt, "Mod")) {
       this.plugin.leafOpener.openMedia(item, "tab");
     } else {

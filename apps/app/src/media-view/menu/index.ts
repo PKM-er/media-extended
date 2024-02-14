@@ -1,5 +1,6 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { MediaViewState } from "@/components/context";
+import { handleExternalLinkMenu } from "@/media-note/link-click";
 import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import { muteMenu } from "./mute";
@@ -55,6 +56,7 @@ declare module "obsidian" {
 }
 
 export default function registerMediaMenu(this: MxPlugin) {
+  handleExternalLinkMenu(this);
   this.registerEvent(
     this.app.workspace.on("mx-media-menu", (menu, ctx, source) => {
       if (source !== "sidebar-context-menu" && source !== "tab-header") {

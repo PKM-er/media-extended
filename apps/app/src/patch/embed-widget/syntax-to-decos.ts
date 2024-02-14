@@ -7,7 +7,6 @@ import type MediaExtended from "@/mx-main";
 
 // import { getFileHashFromLinktext } from "../../player/thunk/set-media";
 import { MediaHost } from "@/web/url-match/supported";
-import { getSupportedViewType } from "@/web/url-match/view-type";
 import { isMdFavorInternalLink } from "./utils";
 import { WidgetCtorMap } from "./widget";
 
@@ -57,7 +56,7 @@ const getPlayerDecos = (
         }
         const urlInfo = plugin.resolveUrl(imgUrlText);
         if (urlInfo && urlInfo.type !== MediaHost.Generic) {
-          const viewType = getSupportedViewType(urlInfo)[0];
+          const viewType = plugin.urlViewType.getPreferred(urlInfo);
           const widget = new WidgetCtorMap[viewType](
             plugin,
             urlInfo,

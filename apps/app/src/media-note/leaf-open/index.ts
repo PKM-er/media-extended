@@ -13,12 +13,14 @@ import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaInfo } from "@/media-view/media-info";
 import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaUrlViewState } from "@/media-view/url-view";
-import type { MediaView } from "@/media-view/view-type";
+import type {
+  MediaView,
+  MediaViewType,
+  RemoteMediaViewType,
+} from "@/media-view/view-type";
 import { isMediaViewType } from "@/media-view/view-type";
 import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
-import { getSupportedViewType } from "@/web/url-match/view-type";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
 import "./active.global.less";
 
@@ -123,10 +125,12 @@ export class LeafOpener extends Component {
     return fallback();
   }
 
-  findExistingPlayer(info: MediaInfo) {
-    const leaves = getMediaLeavesOf(info, this.workspace);
-    if (leaves.length === 0) return null;
-    return leaves[0];
+  findExistingPlayer(info: MediaInfo): MediaLeaf | null {
+    for (const type of this.plugin.urlViewType.getSupported(info)) {
+      const leaves = getMediaLeavesOf(info, type, this.workspace);
+      if (leaves.length > 0) return leaves[0];
+    }
+    return null;
   }
 
   get settings() {
@@ -157,7 +161,13 @@ export class LeafOpener extends Component {
   async openMedia(
     mediaInfo: MediaInfo,
     newLeaf?: PaneType | false,
-    direction?: SplitDirection,
+    {
+      direction,
+      viewType,
+    }: {
+      viewType?: RemoteMediaViewType;
+      direction?: SplitDirection;
+    } = {},
   ): Promise<MediaLeaf> {
     const { workspace } = this.app;
     if (!newLeaf) {
@@ -166,15 +176,28 @@ export class LeafOpener extends Component {
     }
 
     const leaf = workspace.getLeaf(
-      this.getSplitBehavior(newLeaf) as any,
+      this.getSplitBehavior(newLeaf) as "split",
       direction,
     );
     if (isFileMediaInfo(mediaInfo)) {
       await leaf.openFile(mediaInfo.file, {
         eState: { subpath: mediaInfo.hash },
+        active: true,
       });
     } else {
-      await openInLeaf(mediaInfo, leaf);
+      const state:
+        | MediaEmbedViewState
+        | MediaWebpageViewState
+        | MediaUrlViewState = { source: mediaInfo };
+      viewType ??= this.plugin.urlViewType.getPreferred(mediaInfo);
+      await leaf.setViewState(
+        {
+          type: viewType,
+          state,
+          active: true,
+        },
+        { subpath: mediaInfo.hash },
+      );
     }
     return leaf as MediaLeaf;
   }
@@ -278,8 +301,11 @@ function getAllMediaLeaves(workspace: Workspace) {
   return leaves as MediaLeaf[];
 }
 
-function getMediaLeavesOf(info: MediaInfo, workspace: Workspace) {
-  const viewType = getSupportedViewType(info)[0];
+function getMediaLeavesOf(
+  info: MediaInfo,
+  viewType: MediaViewType,
+  workspace: Workspace,
+) {
   const leaves = workspace.getLeavesOfType(viewType).filter((leaf) => {
     if (isFileMediaInfo(info)) {
       return filterFileLeaf(leaf, info);
@@ -301,18 +327,4 @@ function byActiveTime(a: WorkspaceLeaf, b: WorkspaceLeaf) {
 
 function updateHash(hash: string, leaf: WorkspaceLeaf) {
   leaf.setEphemeralState({ subpath: hash });
-}
-
-async function openInLeaf(info: MediaURL, leaf: WorkspaceLeaf) {
-  const state: MediaEmbedViewState | MediaWebpageViewState | MediaUrlViewState =
-    { source: info };
-  const viewType = getSupportedViewType(info)[0];
-  await leaf.setViewState(
-    {
-      type: viewType,
-      state,
-      active: true,
-    },
-    { subpath: info.srcHash },
-  );
 }

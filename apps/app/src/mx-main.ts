@@ -40,6 +40,15 @@ import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import "./login/modal";
 import { MediaURL, resolveMxProtocol } from "./web/url-match";
+import { URLViewType } from "./web/url-match/view-type";
+
+interface MxAPI {
+  openUrl: (
+    url: string,
+    newLeaf?: PaneType,
+    direction?: SplitDirection,
+  ) => Promise<void>;
+}
 
 export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
@@ -54,20 +63,18 @@ export default class MxPlugin extends Plugin {
     const urlInfo = MediaURL.create(resolved);
     return urlInfo;
   }
-  api = {
-    openUrl: async (
-      url: string,
-      newLeaf?: PaneType,
-      direction?: SplitDirection,
-    ) => {
+  api: MxAPI = {
+    openUrl: async (url, newLeaf, direction) => {
       const urlInfo = this.resolveUrl(url);
       if (!urlInfo) {
-        new Notice("Provider not yet supported");
+        new Notice("Protocol not yet supported");
         return;
       }
-      await this.leafOpener.openMedia(urlInfo, newLeaf as "split", direction);
+      await this.leafOpener.openMedia(urlInfo, newLeaf, { direction });
     },
   };
+
+  urlViewType = this.addChild(new URLViewType(this));
 
   async onload() {
     this.addSettingTab(new MxSettingTabs(this));

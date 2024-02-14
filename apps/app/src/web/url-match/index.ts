@@ -1,7 +1,7 @@
 import type { TFile, Vault } from "obsidian";
 import { Platform } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
-import type { TempFragment } from "@/lib/hash/temporal-frag";
+import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
@@ -40,9 +40,9 @@ export class MediaURL extends URL implements URLResolveResult {
     );
   }
 
-  // get tempFrag(): TempFragment | null {
-  //   return parseTempFrag(this.hash);
-  // }
+  get tempFrag(): TempFragment | null {
+    return parseTempFrag(this.hash);
+  }
   // get isTimestamp(): boolean {
   //   return !!this.tempFrag && isTimestamp(this.tempFrag);
   // }

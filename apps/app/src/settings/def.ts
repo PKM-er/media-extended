@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { PaneType } from "obsidian";
 import { Platform, debounce } from "obsidian";
 import { createStore } from "zustand";
 import { enumerate } from "@/lib/must-include";
 import { pick, omit } from "@/lib/pick";
+import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
+import type { URLMatchPattern } from "@/web/url-match/view-type";
 
 export type OpenLinkBehavior = false | PaneType | null;
 
@@ -15,12 +18,14 @@ type MxSettingValues = {
     click: OpenLinkBehavior;
     alt: OpenLinkBehavior;
   };
+  linkHandler: Record<RemoteMediaViewType, URLMatchPattern[]>;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
   "urlMappingData",
   "devices",
   "defaultMxLinkClick",
+  "linkHandler",
 );
 
 const mxSettingsDefault = {
@@ -30,6 +35,12 @@ const mxSettingsDefault = {
   defaultMxLinkClick: {
     click: "split",
     alt: "window",
+  },
+  linkHandler: {
+    "mx-embed": [],
+    "mx-url-audio": [],
+    "mx-url-video": [],
+    "mx-webpage": [],
   },
 } satisfies MxSettingValues;
 
@@ -72,6 +83,7 @@ export type MxSettings = {
   getUrlMappingData: () => MxSettingValues["urlMappingData"];
   setDefaultMxLinkBehavior: (click: OpenLinkBehavior) => void;
   setMxLinkAltBehavior: (click: OpenLinkBehavior) => void;
+  setLinkHandler: (pattern: URLMatchPattern, type: RemoteMediaViewType) => void;
   load: () => Promise<void>;
   save: () => void;
 } & Omit<MxSettingValues, "urlMappingData">;
@@ -100,6 +112,14 @@ export function createSettingsStore(plugin: MxPlugin) {
     ...omit(mxSettingsDefault, ["urlMappingData"]),
     getUrlMappingData() {
       return toUrlMappingData(get().urlMapping);
+    },
+    setLinkHandler(pattern, type) {
+      set((prev) => {
+        const linkHandler = { ...prev.linkHandler };
+        linkHandler[type] = [...linkHandler[type], pattern];
+        return { linkHandler };
+      });
+      save(get());
     },
     setDefaultMxLinkBehavior: (click) => {
       let alt: OpenLinkBehavior;

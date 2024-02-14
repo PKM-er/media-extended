@@ -7,7 +7,6 @@ import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/view-type";
 import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
-import { getSupportedViewType } from "@/web/url-match/view-type";
 import setupEmbedWidget from "./embed-widget";
 import { MediaFileExtensions } from "./media-type";
 import { reloadMarkdownPreview } from "./utils";
@@ -100,7 +99,7 @@ function injectUrlMediaEmbed(this: MxPlugin) {
     function replace({ title, url }: EmbedSource, target: HTMLElement) {
       const src = plguin.resolveUrl(url);
       if (!src) return;
-      const viewType = getSupportedViewType(src)[0];
+      const viewType = plguin.urlViewType.getPreferred(src);
       const newWarpper = createSpan({
         cls: ["media-embed", "external-embed", "is-loaded"],
         attr: {
