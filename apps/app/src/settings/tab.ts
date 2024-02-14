@@ -264,9 +264,10 @@ export class MxSettingTabs extends PluginSettingTab {
     });
   }
 
-  display() {
+  playback() {
     const { containerEl: container } = this;
-    container.empty();
+
+    new Setting(container).setHeading().setName("Playback");
     new Setting(container)
       .setName("Default volume")
       .setDesc("The default volume for media files")
@@ -297,6 +298,25 @@ export class MxSettingTabs extends PluginSettingTab {
           }),
       )
       .then((s) => s.controlEl.appendText("%"));
+    new Setting(container)
+      .setName("Load strategy")
+      .setDesc("Configure how media embeds are loaded in the note")
+      .addDropdown((d) =>
+        d
+          .addOption("eager", "On note open")
+          .addOption("play", "When interacted with")
+          .setValue(this.state.loadStrategy)
+          .onChange((val) =>
+            this.state.setLoadStrategy(val as "play" | "eager"),
+          ),
+      );
+  }
+
+  display() {
+    const { containerEl: container } = this;
+    container.empty();
+
+    this.playback();
     this.linkOpen();
     this.protocol();
   }

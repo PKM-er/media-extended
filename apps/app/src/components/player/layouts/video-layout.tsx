@@ -18,7 +18,7 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
       <Captions
         className={`mx-captions media-preview:opacity-0 media-controls:bottom-[85px] media-captions:opacity-100 absolute inset-0 bottom-2 z-10 select-none break-words opacity-0 transition-[opacity,bottom] duration-300`}
       />
-      <Controls.Root className="media-controls:opacity-100 absolute inset-0 z-10 flex h-full w-full flex-col bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity">
+      <Controls.Root className="absolute inset-0 z-10 flex h-full w-full flex-col bg-gradient-to-t from-black/10 to-transparent opacity-100 transition-opacity">
         <Tooltip.Provider>
           <div className="flex-1" />
           <Controls.Group className="flex w-full items-center px-2">

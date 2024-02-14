@@ -18,6 +18,7 @@ type MxSettingValues = {
     click: OpenLinkBehavior;
     alt: OpenLinkBehavior;
   };
+  loadStrategy: "play" | "eager";
   linkHandler: Record<RemoteMediaViewType, URLMatchPattern[]>;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
@@ -26,6 +27,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "devices",
   "defaultMxLinkClick",
   "linkHandler",
+  "loadStrategy",
 );
 
 const mxSettingsDefault = {
@@ -42,6 +44,7 @@ const mxSettingsDefault = {
     "mx-url-video": [],
     "mx-webpage": [],
   },
+  loadStrategy: "eager",
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -84,6 +87,7 @@ export type MxSettings = {
   setDefaultMxLinkBehavior: (click: OpenLinkBehavior) => void;
   setMxLinkAltBehavior: (click: OpenLinkBehavior) => void;
   setLinkHandler: (pattern: URLMatchPattern, type: RemoteMediaViewType) => void;
+  setLoadStrategy: (strategy: "play" | "eager") => void;
   load: () => Promise<void>;
   save: () => void;
 } & Omit<MxSettingValues, "urlMappingData">;
@@ -188,6 +192,10 @@ export function createSettingsStore(plugin: MxPlugin) {
           { appId: id, name: label },
         ],
       });
+      save(get());
+    },
+    setLoadStrategy: (strategy) => {
+      set({ loadStrategy: strategy });
       save(get());
     },
     load: async () => {

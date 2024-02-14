@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useTempFragHandler } from "@/components/hook/use-temporal-frag";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { cn } from "@/lib/utils";
-import { useMediaViewStore } from "./context";
+import { useIsEmbed, useMediaViewStore, useSettings } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
 import { useControls, useDefaultVolume, useHashProps } from "./hook/use-hash";
 import { AudioLayout } from "./player/layouts/audio-layout";
@@ -47,6 +47,8 @@ export function Player() {
     return url;
   });
   const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
+  const load = useSettings((s) => s.loadStrategy);
+  const isEmbed = useIsEmbed();
 
   const [viewType, setViewType] = useState<MediaViewType>("unknown");
   const title = useMediaViewStore((s) => s.title);
@@ -55,11 +57,11 @@ export function Player() {
   if (!src) return null;
   return (
     <MediaPlayer
-      onTimeUpdate={() => void 0}
       className={cn(
         "w-full bg-slate-900 text-white font-sans overflow-hidden rounded-md ring-mod-border-focus data-[focus]:ring-2",
         "data-[view-type=video]:aspect-video data-[view-type=audio]:h-20 data-[view-type=audio]:aspect-auto",
       )}
+      load={isEmbed ? load : "eager"}
       src={src}
       playsInline
       title={title}
