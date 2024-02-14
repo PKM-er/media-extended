@@ -1,4 +1,5 @@
 import type { ViewStateResult } from "obsidian";
+import { handlePaneMigration } from "@/lib/window-migration";
 import { MediaURL } from "@/web/url-match";
 import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
 import type { MediaRemoteViewState } from "./remote-view";
@@ -11,6 +12,7 @@ export class MediaWebpageView extends MediaRemoteView {
   onload(): void {
     super.onload();
     this.registerRemoteTitleChange();
+    handlePaneMigration(this, () => this.render());
   }
   getViewType() {
     return MEDIA_WEBPAGE_VIEW_TYPE;
