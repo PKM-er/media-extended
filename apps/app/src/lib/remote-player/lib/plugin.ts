@@ -1,6 +1,7 @@
 import { LifeCycle } from "@/lib/lifecycle";
 import { TimeoutError } from "@/lib/message";
 import { registerEvents } from "../hook/event-register";
+import type { MediaStateRef } from "../hook/handler-register";
 import { registerHandlers } from "../hook/handler-register";
 import { handleReadyState } from "../hook/ready-state";
 import { fluentTimeUpdate } from "../hook/time-update";
@@ -25,6 +26,7 @@ export default class MediaPlugin extends LifeCycle {
   }
 
   #media: HTMLMediaElement | null = null;
+  protected stateRef: MediaStateRef = { prevSeek: null };
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("video, audio");
   }
@@ -110,7 +112,7 @@ export default class MediaPlugin extends LifeCycle {
     handleReadyState(this);
     fluentTimeUpdate(this);
     registerEvents(this);
-    registerHandlers(this);
+    registerHandlers.call(this);
     this.controller.send(mountedEvent, void 0);
   }
 }

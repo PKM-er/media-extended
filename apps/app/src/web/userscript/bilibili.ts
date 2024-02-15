@@ -35,6 +35,7 @@ export default class BilibiliPlugin extends MediaPlugin {
       JSON.stringify({ media: { autoplay: false } }),
     );
     await super.onload();
+    this.revertAutoSeek();
     await this.untilMediaReady("canplay");
     await Promise.all([this.toggleDanmaku(false), this.untilWebFullscreen()]);
   }
@@ -101,6 +102,45 @@ export default class BilibiliPlugin extends MediaPlugin {
     );
     console.log("Clicking fullscreen button");
     fsButton.click();
+  }
+
+  async revertAutoSeek() {
+    const plyaer = this.player;
+    const toastContainer = plyaer.querySelector<HTMLDivElement>(
+      ".bpx-player-toast-auto",
+    );
+    if (!toastContainer) {
+      console.log("toast container not found");
+      return;
+    }
+
+    const handler = () => {
+      if (
+        this.stateRef.prevSeek &&
+        this.stateRef.prevSeek.time > Date.now() - 5e3
+      ) {
+        // if the seek is recent (within 5 seconds)
+        this.media.currentTime = this.stateRef.prevSeek.value;
+      } else {
+        this.media.currentTime = 0;
+      }
+    };
+
+    const observer = new MutationObserver((mutations) => {
+      mutations
+        .find((m) => m.type === "childList" && m.addedNodes.length > 0)
+        ?.addedNodes.forEach((node) => {
+          if (node.textContent?.includes("已为您定位至")) {
+            (node as HTMLDivElement).style.opacity = "0";
+            handler();
+          }
+        });
+    });
+    observer.observe(toastContainer, {
+      childList: true,
+      subtree: true,
+    });
+    this.register(() => observer.disconnect());
   }
 
   async untilWebFullscreen() {

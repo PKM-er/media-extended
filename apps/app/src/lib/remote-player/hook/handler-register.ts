@@ -9,9 +9,17 @@ import {
   serializeMediaStatePropValue,
 } from "../type";
 
-export function registerHandlers(plugin: MediaPlugin) {
-  const player = plugin.media;
-  const port = plugin.controller;
+export interface MediaStateRef {
+  prevSeek: {
+    value: number;
+    time: number;
+  } | null;
+}
+
+export function registerHandlers(this: MediaPlugin) {
+  const player = this.media;
+  const port = this.controller;
+  const ref = this.stateRef;
   mediaReadonlyStateProps.forEach((prop) => {
     port.handle(`get${capitalize(prop)}`, () => ({
       value: serializeMediaStatePropValue(player[prop]),
@@ -30,9 +38,19 @@ export function registerHandlers(plugin: MediaPlugin) {
     port.handle(`get${capitalize(prop)}`, () => ({
       value: serializeMediaStatePropValue(player[prop]),
     }));
-    port.handle(`set${capitalize(prop)}`, (val) => {
-      (player as any)[prop] = val;
-    });
+    if (prop === "currentTime") {
+      port.handle(`set${capitalize(prop)}`, (val) => {
+        ref.prevSeek = {
+          value: player.currentTime,
+          time: Date.now(),
+        };
+        (player as any)[prop] = val;
+      });
+    } else {
+      port.handle(`set${capitalize(prop)}`, (val) => {
+        (player as any)[prop] = val;
+      });
+    }
   });
   mediaActionProps.forEach((prop) => {
     port.handle(prop, async (...args) => ({
@@ -73,6 +91,7 @@ export function registerHandlers(plugin: MediaPlugin) {
       transfer: [ab],
     };
   });
+  return ref;
 }
 
 async function streamToArrayBuffer(readableStream: ReadableStream<Uint8Array>) {
