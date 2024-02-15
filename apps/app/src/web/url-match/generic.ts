@@ -15,8 +15,7 @@ export const genericResolver: URLResolver = (url) => {
 
 function toAppUrl(url: URL) {
   const fixed = new URL(
-    url.href.substring("file:///".length),
-    Platform.resourcePathPrefix,
+    Platform.resourcePathPrefix + url.href.substring("file:///".length),
   );
   fixed.search = Date.now().toString();
   return fixed;
