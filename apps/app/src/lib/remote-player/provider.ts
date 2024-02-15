@@ -193,7 +193,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     });
 
     finishLoad
-      .then(() => Promise.race([playReady, timeout(5e3)]))
+      .then(() => Promise.race([playReady, timeout(10e3)]))
       .then(() => {
         this.togglePlayReady(true);
       })
