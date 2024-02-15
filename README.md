@@ -1,42 +1,64 @@
-# Turborepo starter with shell commands
+# Media Extended
 
-This is an official starter Turborepo meant for debugging, learning, and exploring.
+Media(Video/Audio) Playback Enhancement for Obsidian.md
 
-## Using this example
+## Intro
 
-Run the following command:
+This plugin introduce some new features that enhance media (video/audio) playback: 
 
-```sh
-npx create-turbo@latest -e with-shell-commands
-```
+- Player Enhancement
+    - [Speed control](https://github.com/aidenlx/media-extended/wiki/Speed-Control)
+    - [Inline options](https://github.com/aidenlx/media-extended/wiki/Inline-Options) for loop/autoplay/mute/hide controls
+    - [Embed/Link for online media](https://github.com/aidenlx/media-extended/wiki/Create-Online-Media-Embed-Link)
+    - [Caption/Subtitle support](https://github.com/aidenlx/media-extended/wiki/Caption-Subtitle-Support)
+- Notetaking
+    - [Create timestamp link/media fragment](https://github.com/aidenlx/media-extended/wiki/Restrict-Play-Range)
+    - Dedicated media view binded to document to open media links
+    - [Get timestamp from existing media file](https://github.com/aidenlx/media-extended/wiki/Get-Timestamp)
+    - [Take timestamp from audio recorder](https://github.com/aidenlx/media-extended/wiki/Audio-Recorder)
 
-### For bug reproductions
+## Demo
 
-Giving the Turborepo core team a minimal reproduction is the best way to create a tight feedback loop for a bug you'd like to report.
+https://user-images.githubusercontent.com/31102694/118903647-c9d79780-b94a-11eb-8beb-ab507117790f.mp4
 
-Because most monorepos will rely on more tooling than Turborepo (frameworks, linters, formatters, etc.), it's often useful for us to have a reproduction that strips away all of this other tooling so we can focus _only_ on Turborepo's role in your repo. This example does exactly that, giving you a good starting point for creating a reproduction.
+https://user-images.githubusercontent.com/31102694/119340113-a3a45580-bcc4-11eb-9098-a27a16e9d6e0.mp4
 
-- Feel free to rename/delete packages for your reproduction so that you can be confident it most closely matches your use case.
-- If you need to use a different package manager to produce your bug, run `npx @turbo/workspaces convert` to switch package managers.
-- It's possible that your bug really **does** have to do with the interaction of Turborepo and other tooling within your repository. If you find that your bug does not reproduce in this minimal example and you're confident Turborepo is still at fault, feel free to bring that other tooling into your reproduction.
+https://user-images.githubusercontent.com/31102694/118903678-dd82fe00-b94a-11eb-8ef3-7b5044a2bab8.mp4
 
-## What's inside?
+https://user-images.githubusercontent.com/31102694/127543453-011d13b2-40e4-41e5-861e-3549d19be23f.mp4
 
-This Turborepo includes the following packages:
+## How to use
 
-### Apps and Packages
+Go to [Media Extended Wiki](https://github.com/aidenlx/media-extended/wiki) for more details
 
-- `app-a`: A final package that depends on all other packages in the graph and has no dependents. This could resemble an application in your monorepo that consumes everything in your monorepo through its topological tree.
-- `app-b`: Another final package with many dependencies. No dependents, lost of dependencies.
-- `pkg-a`: A package that has all scripts in the root `package.json`.
-- `pkg-b`: A package with _almost_ all scripts in the root `package.json`.
-- `tooling-config`: A package to simulate a common configuration used for all of your repository. This could resemble a configuration for tools like TypeScript or ESLint that are installed into all of your packages.
+***
 
-### Some scripts to try
+Note: for bilibili users, [bilibili plugin](https://github.com/aidenlx/mx-bili-plugin) is required for advanced features from v2.9.0
 
-If you haven't yet, [install global `turbo`](https://turbo.build/repo/docs/installing#install-globally) to run tasks.
+注意：v2.9.0开始，bilibili用户需要安装[bilibili plugin](https://github.com/aidenlx/mx-bili-plugin)以启用`高级bilibili功能`
 
-- `turbo build lint typecheck`: Runs all tasks in the default graph.
-- `turbo build`: A basic command to build `app-a` and `app-b` in parallel.
-- `turbo build --filter=app-a`: Building only `app-a` and its dependencies.
-- `turbo lint`: A basic command for running lints in all packages in parallel.
+## Compatibility
+
+The required API feature is only available for Obsidian v0.12.2+.
+
+## Installation
+
+### From Obsidian
+
+1. Open `Settings` > `Third-party plugin`
+2. Make sure Safe mode is **off**
+3. Click `Browse community plugins`
+4. Search for this plugin
+5. Click `Install`
+6. Once installed, close the community plugins window and the patch is ready to use.
+
+### From GitHub
+
+1. Download the Latest Release from the Releases section of the GitHub Repository
+2. Put files to your vault's plugins folder: `<vault>/.obsidian/plugins/media-extended`
+3. Reload Obsidian
+4. If prompted about Safe Mode, you can disable safe mode and enable the plugin.
+   Otherwise, head to Settings, third-party plugins, make sure safe mode is off and
+   enable the plugin from there.
+
+> Note: The `.obsidian` folder may be hidden. On macOS, you should be able to press `Command+Shift+Dot` to show the folder in Finder.
