@@ -11,7 +11,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
   addMediaViewCommand(
     {
       id: "take-timestamp",
-      name: "Take timstamp",
+      name: "Take timestamp",
       icon: "star",
       menu: true,
       section: "selection-link",
