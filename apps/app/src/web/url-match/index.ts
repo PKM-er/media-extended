@@ -2,7 +2,7 @@ import type { TFile, Vault } from "obsidian";
 import { Platform } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
-import { noHash, noHashUrl } from "@/lib/url";
+import { noHash } from "@/lib/url";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
 import type { URLResolveResult, URLResolver } from "./base";
@@ -17,6 +17,9 @@ const allowedProtocols = new Set(["https:", "http:", "file:"]);
 
 export class MediaURL extends URL implements URLResolveResult {
   static create(url: string | URL, mx?: URL | string): MediaURL | null {
+    if (url instanceof MediaURL) {
+      return url.clone();
+    }
     try {
       return new MediaURL(url, mx);
     } catch {
@@ -35,9 +38,7 @@ export class MediaURL extends URL implements URLResolveResult {
   }
 
   compare(other: MediaURL | null | undefined): boolean {
-    return (
-      !!other && noHashUrl(this.cleaned).href === noHashUrl(other.cleaned).href
-    );
+    return !!other && this.jsonState.source === other.jsonState.source;
   }
 
   get tempFrag(): TempFragment | null {
@@ -68,7 +69,7 @@ export class MediaURL extends URL implements URLResolveResult {
   }
 
   clone() {
-    return new MediaURL(this);
+    return new MediaURL(this, this.mxUrl ?? undefined);
   }
 
   #resolved: URLResolveResult;
