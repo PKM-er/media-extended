@@ -294,14 +294,22 @@ function notifyLogin() {
   if (notified) return;
   new Notice(
     createFragment((e) => {
-      e.appendText("You're using a webpage media player");
-      e.createEl("p", { text: "To login to a website, use:" });
-      e.createEl("ul", {}, (ul) => {
-        ul.createEl("li", { text: 'the "Login" command' });
-        ul.createEl("li", { text: "the Settings tab" });
-      });
+      e.appendText("You're using a webpage media player.");
+      e.createEl(
+        "p",
+        {
+          text: "If you are requested to login, you can open a browser to login from:",
+        },
+        (p) => {
+          p.createEl("br");
+          p.appendText('- the "Login" command');
+          p.createEl("br");
+          p.appendText("- the entry in settings tab");
+        },
+      );
+      e.appendText("Click to dismiss this notice.");
     }),
-    10e3,
+    0,
   );
   localStorage.setItem("mx:webview-login-notified", "1");
 }
