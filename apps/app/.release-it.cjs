@@ -34,7 +34,7 @@ module.exports = {
       "dist/main.js",
       "dist/manifest.json",
       "dist/styles.css",
-      "dist/mx-*.zip",
+      "dist/media-extended.zip",
     ],
     proxy: process.env.HTTPS_PROXY,
     releaseName: "${version}",
