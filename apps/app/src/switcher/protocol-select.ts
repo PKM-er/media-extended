@@ -1,5 +1,4 @@
 import { fileURLToPath } from "url";
-import type { FuzzyMatch } from "obsidian";
 import { FuzzySuggestModal } from "obsidian";
 import noop from "@/lib/no-op";
 import type MxPlugin from "@/mx-main";
@@ -37,12 +36,7 @@ export class FileProtocolModal extends FuzzySuggestModal<FileProtocol> {
   }
 
   getItemText(item: FileProtocol): string {
-    return item.action;
-  }
-
-  renderSuggestion(item: FuzzyMatch<FileProtocol>, el: HTMLElement): void {
-    super.renderSuggestion(item, el);
-    el.createEl("div", { text: item.item.path });
+    return `mx://${item.action}: ${item.path}`;
   }
 
   resolve: (item: FileProtocol | null) => void = noop;
