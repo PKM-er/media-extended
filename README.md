@@ -3,9 +3,13 @@
 Enhanced media playback for obsidian.md
 
 > [!TIP]
+>
 > 🚀 Media Extended v3.0 for Desktop is now available for beta testing! 🚀
+>
 > Live Preview, inline field, multi-window support, webpage player and more...
+>
 > Join the beta testing by adding `PKM-er/media-extended` to BRAT beta plugin list.
+>
 
 ## Intro
 
