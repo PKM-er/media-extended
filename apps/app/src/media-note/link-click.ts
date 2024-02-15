@@ -12,7 +12,7 @@ import { MediaHost } from "@/web/url-match/supported";
 function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
   return !!(
     url.type !== MediaHost.Generic ||
-    (url.isFileUrl && url.inferredType) ||
+    url.inferredType ||
     url.tempFrag ||
     plugin.mediaNote.findNotes(url).length > 0 ||
     plugin.urlViewType.getPreferred(url, true)
@@ -44,7 +44,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
     plugin.app.workspace.on("url-menu", (menu, link) => {
       const url = plugin.resolveUrl(link);
       if (!url) return;
-      const { protocol, hostname, pathname } = url;
+      const { protocol, hostname, pathname, host, port } = url;
       const supported = plugin.urlViewType.getSupported(url);
       const preferred = plugin.urlViewType.getPreferred(url);
       const showInMenu = shouldOpenMedia(url, plugin)
@@ -82,7 +82,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
               .setSection("mx-link")
               .onClick(async () => {
                 plugin.urlViewType.setPreferred(
-                  { protocol, hostname, pathname },
+                  { protocol, hostname, pathname, port },
                   viewType,
                 );
                 await plugin.leafOpener.openMedia(url, undefined, {
@@ -95,7 +95,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
       if (hostname)
         menu.addItem((item) => {
           const matchHostname = item
-            .setTitle(`Always open ${hostname} as`)
+            .setTitle(`Always open ${host} as`)
             .setIcon("external-link")
             .setSection("mx-link")
             .setSubmenu();
@@ -105,7 +105,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
                 .setSection("mx-link")
                 .onClick(async () => {
                   plugin.urlViewType.setPreferred(
-                    { protocol, hostname },
+                    { protocol, hostname, port },
                     viewType,
                   );
                   await plugin.leafOpener.openMedia(url, undefined, {
