@@ -7,18 +7,14 @@ import {
 } from "./base";
 import { MediaHost } from "./supported";
 
-function parseVideoId(url: URL): string | false | null {
-  if (url.hostname === "b23.tv") {
-    // short url don't have vid in url
-    return false;
-  }
+function parseVideoId(url: URL): string | null {
   if (!url.hostname.endsWith(".bilibili.com")) {
     return null;
   }
   if (url.pathname.startsWith("/video/")) {
     return url.pathname.split("/").filter(Boolean).slice(-1).at(-1)!;
   }
-  return false;
+  return null;
 }
 
 export const bilibiliDetecter: URLDetecter = (url) => {
