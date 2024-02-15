@@ -15,7 +15,7 @@ export type SupportedMediaHost = Exclude<MediaHost, MediaHost.Generic>;
 export const mediaHostUrl: Record<SupportedMediaHost, string> = {
   [MediaHost.Bilibili]: "https://www.bilibili.com",
   [MediaHost.YouTube]: "https://www.youtube.com",
-  [MediaHost.Vimeo]: "https://www.viemo.com",
+  [MediaHost.Vimeo]: "https://www.vimeo.com",
   [MediaHost.Coursera]: "https://www.coursera.org",
 };
 
@@ -23,7 +23,7 @@ export const mediaHostDisplayName: Record<MediaHost, string> = {
   [MediaHost.Bilibili]: "bilibili",
   [MediaHost.YouTube]: "YouTube",
   [MediaHost.Generic]: "Website",
-  [MediaHost.Vimeo]: "Viemo",
+  [MediaHost.Vimeo]: "Vimeo",
   [MediaHost.Coursera]: "Coursera",
 };
 

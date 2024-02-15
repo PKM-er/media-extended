@@ -10,7 +10,7 @@ import { bilibiliDetecter, bilibiliResolver } from "./bilibili";
 import { courseraDetecter, courseraResolver } from "./coursera";
 import { genericResolver } from "./generic";
 import { MediaHost } from "./supported";
-import { viemoDetecter, viemoResolver } from "./viemo";
+import { vimeoDetecter, vimeoResolver } from "./vimeo";
 import { youtubeDetecter, youtubeResolver } from "./youtube";
 
 const allowedProtocols = new Set(["https:", "http:", "file:"]);
@@ -107,14 +107,14 @@ export class MediaURL extends URL implements URLResolveResult {
 const detecters = [
   bilibiliDetecter,
   youtubeDetecter,
-  viemoDetecter,
+  vimeoDetecter,
   courseraDetecter,
 ];
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const Resolver: Record<MediaHost, URLResolver> = {
   [MediaHost.Bilibili]: bilibiliResolver,
   [MediaHost.YouTube]: youtubeResolver,
-  [MediaHost.Vimeo]: viemoResolver,
+  [MediaHost.Vimeo]: vimeoResolver,
   [MediaHost.Coursera]: courseraResolver,
   [MediaHost.Generic]: genericResolver,
 };
@@ -126,7 +126,7 @@ export function resolveUrl(url: MediaURL): URLResolveResult {
   for (const resolve of [
     bilibiliResolver,
     youtubeResolver,
-    viemoResolver,
+    vimeoResolver,
     courseraResolver,
   ]) {
     const result = resolve(url);
