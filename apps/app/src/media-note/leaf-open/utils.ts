@@ -30,8 +30,8 @@ export function filterUrlLeaf(leaf: WorkspaceLeaf, info: MediaURL): boolean {
   ) {
     return false;
   }
-  const { source } = leaf.view.getState();
-  return info.compare(source);
+  const { source } = leaf.view.store.getState();
+  return info.compare(source?.url);
 }
 
 export function sortByMtime(a: TFile, b: TFile) {

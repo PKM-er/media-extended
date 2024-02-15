@@ -10,13 +10,12 @@ import {
 import { Player } from "@/components/player";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
 import type { PlayerComponent } from "./base";
 import { addAction, onPaneMenu } from "./base";
 import type { RemoteMediaViewType } from "./view-type";
 
 export interface MediaRemoteViewState {
-  source?: MediaURL;
+  source?: string;
 }
 
 export abstract class MediaRemoteView

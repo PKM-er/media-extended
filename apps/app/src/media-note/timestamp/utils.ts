@@ -73,7 +73,7 @@ export function openOrCreateMediaNote(
       sourcePath: file.path,
     });
   } else {
-    const sourceUrl = mediaInfo.cleaned;
+    const sourceUrl = mediaInfo.mxUrl ?? mediaInfo.cleaned;
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
       title: urlTitle(mediaInfo, player.state),
       fm: () => ({ media: noHash(sourceUrl) }),

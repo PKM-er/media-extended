@@ -39,7 +39,8 @@ import { initSwitcher } from "./switcher";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import "./login/modal";
-import { MediaURL, resolveMxProtocol } from "./web/url-match";
+import type { MediaURL } from "./web/url-match";
+import { resolveMxProtocol } from "./web/url-match";
 import { URLViewType } from "./web/url-match/view-type";
 
 interface MxAPI {
@@ -53,15 +54,9 @@ interface MxAPI {
 export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
 
-  resolveMxUrl(url: string | URL): URL | null {
-    return resolveMxProtocol(toURL(url), this.settings.getState());
-  }
   resolveUrl(url: string | URL | null | undefined): MediaURL | null {
     if (!url) return null;
-    const resolved = this.resolveMxUrl(url);
-    if (!resolved) return null;
-    const urlInfo = MediaURL.create(resolved);
-    return urlInfo;
+    return resolveMxProtocol(toURL(url), this.settings.getState());
   }
   api: MxAPI = {
     openUrl: async (url, newLeaf, direction) => {

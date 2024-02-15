@@ -1,6 +1,5 @@
 import type { ViewStateResult } from "obsidian";
 import { handlePaneMigration } from "@/lib/window-migration";
-import { MediaURL } from "@/web/url-match";
 import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
@@ -26,9 +25,9 @@ export class MediaWebpageView extends MediaRemoteView {
   }
 
   getHost(): MediaHost {
-    const { source } = this.getState();
-    if (!source) return MediaHost.Generic;
-    return source.type;
+    const { source } = this.store.getState();
+    if (!source?.url) return MediaHost.Generic;
+    return source.url.type;
   }
   getDisplayText(): string {
     if (!this.playerTitle) return "Webpage";
@@ -39,8 +38,8 @@ export class MediaWebpageView extends MediaRemoteView {
     state: MediaWebpageViewState,
     result: ViewStateResult,
   ): Promise<void> {
-    if (typeof state.source === "string" || state.source instanceof URL) {
-      const url = MediaURL.create(state.source);
+    if (typeof state.source === "string") {
+      const url = this.plugin.resolveUrl(state.source);
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
@@ -51,9 +50,10 @@ export class MediaWebpageView extends MediaRemoteView {
   }
   getState(): MediaWebpageViewState {
     const state = super.getState() as MediaWebpageViewState;
+    const url = this.store.getState().source?.url;
     return {
       ...state,
-      source: this.store.getState().source?.url,
+      source: url ? url.jsonState.source : state.source,
     };
   }
 }

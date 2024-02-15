@@ -198,7 +198,9 @@ export class LeafOpener extends Component {
       const state:
         | MediaEmbedViewState
         | MediaWebpageViewState
-        | MediaUrlViewState = { source: mediaInfo };
+        | MediaUrlViewState = {
+        source: mediaInfo.jsonState.source,
+      };
       viewType ??= this.plugin.urlViewType.getPreferred(mediaInfo);
       await leaf.setViewState(
         {

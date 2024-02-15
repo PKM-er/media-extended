@@ -16,9 +16,9 @@ import { youtubeDetecter, youtubeResolver } from "./youtube";
 const allowedProtocols = new Set(["https:", "http:", "file:"]);
 
 export class MediaURL extends URL implements URLResolveResult {
-  static create(url: string | URL): MediaURL | null {
+  static create(url: string | URL, mx?: URL | string): MediaURL | null {
     try {
-      return new MediaURL(url);
+      return new MediaURL(url, mx);
     } catch {
       return null;
     }
@@ -83,8 +83,15 @@ export class MediaURL extends URL implements URLResolveResult {
     return this.#resolved.id;
   }
   readonly type: MediaHost;
-  constructor(original: string | URL) {
+
+  get jsonState(): { source: string } {
+    return { source: this.mxUrl?.href ?? this.href };
+  }
+
+  mxUrl: URL | null;
+  constructor(original: string | URL, mx?: URL | string) {
     super(original);
+    this.mxUrl = mx ? new URL(mx) : null;
     if (!allowedProtocols.has(this.protocol))
       throw new Error("Unsupported protocol: " + this.protocol);
     this.type =
@@ -130,16 +137,17 @@ export function resolveUrl(url: MediaURL): URLResolveResult {
 export function resolveMxProtocol(
   src: URL | null,
   { getUrlMapping }: MxSettings,
-): URL | null {
+): MediaURL | null {
   if (!src) return null;
-  if (src.protocol !== "mx:") return src;
+  if (src.protocol !== "mx:") return new MediaURL(src);
 
   // custom protocol take // as part of the pathname
   const [, , mxProtocol] = src.pathname.split("/");
   const replace = getUrlMapping(mxProtocol);
-  if (!replace) return src;
+  if (!replace) return null;
   return MediaURL.create(
     src.href.replace(`mx://${mxProtocol}/`, replace.replace(/\/*$/, "/")),
+    src,
   );
 }
 

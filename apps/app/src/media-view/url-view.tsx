@@ -1,5 +1,4 @@
 import type { ViewStateResult } from "obsidian";
-import { MediaURL } from "@/web/url-match";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";
@@ -14,8 +13,8 @@ abstract class MediaUrlView extends MediaRemoteView {
     state: MediaUrlViewState,
     result: ViewStateResult,
   ): Promise<void> {
-    if (typeof state.source === "string" || state.source instanceof URL) {
-      const url = MediaURL.create(state.source);
+    if (typeof state.source === "string") {
+      const url = this.plugin.resolveUrl(state.source);
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
@@ -26,9 +25,10 @@ abstract class MediaUrlView extends MediaRemoteView {
   }
   getState(): MediaUrlViewState {
     const state = super.getState() as MediaUrlViewState;
+    const url = this.store.getState().source?.url;
     return {
       ...state,
-      source: this.store.getState().source?.url,
+      source: url ? url.jsonState.source : state.source,
     };
   }
 }

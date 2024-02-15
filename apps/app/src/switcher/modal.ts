@@ -3,8 +3,10 @@ import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import { pickFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
 import type MxPlugin from "@/mx-main";
-import { mediaExtensions } from "@/patch/media-type";
+import { MediaFileExtensions, mediaExtensions } from "@/patch/media-type";
+import { getDialog } from "@/web/session/utils";
 import { MediaURL } from "@/web/url-match";
+import { FileProtocolModal } from "./protocol-select";
 
 const avId = /^av(?<id>\d+)$/i;
 /**
@@ -82,19 +84,61 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
   onNoSuggestion(): void {
     super.onNoSuggestion();
     // @ts-ignore
-    this.chooser.setSuggestions([null]);
+    this.chooser.setSuggestions(["file-picker", "file-protocol-picker"]);
   }
-  renderSuggestion(value: MediaURL | null, el: HTMLElement) {
-    if (value) el.setText(value.href);
-    else {
+  renderSuggestion(
+    value: MediaURL | "file-picker" | "file-protocol-picker",
+    el: HTMLElement,
+  ) {
+    if (value instanceof MediaURL) el.setText(value.href);
+    else if (value === "file-picker") {
       el.setText("Open local file");
+    } else if (value === "file-protocol-picker") {
+      el.setText("Pick from folders defined in custom protocol");
     }
   }
   async onChooseSuggestion(
-    item: MediaURL | null,
+    item: MediaURL | "file-picker" | "file-protocol-picker",
     evt: MouseEvent | KeyboardEvent,
   ) {
-    if (!item) {
+    if (item === "file-protocol-picker") {
+      const fileProtocol = await FileProtocolModal.choose(this.plugin);
+      if (!fileProtocol) return;
+      const file = (
+        await getDialog().showOpenDialog({
+          title: "Pick a media file",
+          message: "Pick a media file to open",
+          buttonLabel: "Pick",
+          properties: ["openFile"],
+          filters: [
+            { extensions: MediaFileExtensions.video, name: "Video" },
+            { extensions: MediaFileExtensions.audio, name: "Audio" },
+          ],
+          defaultPath: fileProtocol.path,
+        })
+      ).filePaths[0];
+      if (!file?.startsWith(fileProtocol.path)) {
+        new Notice("File outside of protocol path: " + fileProtocol.path);
+        return;
+      }
+      try {
+        const url = pathToFileURL(file);
+        const resolved = this.plugin.resolveUrl(
+          url.href.replace(
+            fileProtocol.url.replace(/\/*$/, "/"),
+            `mx://${fileProtocol.action}/`,
+          ),
+        );
+        if (!resolved) {
+          new Notice("Failed to resolve file protocol url: " + url.href);
+          return;
+        }
+        item = resolved;
+      } catch (e) {
+        console.error("Failed to generate file protocol url", e, file);
+        return;
+      }
+    } else {
       const mediaFile = await pickFile(mediaExtensions);
       if (!mediaFile) return;
       try {
@@ -104,11 +148,12 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
         console.error("Failed to generate file url", e, mediaFile);
         return;
       }
-      if (!item.inferredType) {
-        new Notice("Unsupported file type: " + mediaFile);
-        return;
-      }
     }
+    if (!item.inferredType) {
+      new Notice("Unsupported file type: " + item.pathname);
+      return;
+    }
+
     if (Keymap.isModifier(evt, "Mod") && Keymap.isModifier(evt, "Alt")) {
       this.plugin.leafOpener.openMedia(item, "split", {
         direction: "vertical",

@@ -1,6 +1,5 @@
 import type { ViewStateResult } from "obsidian";
 import { handlePaneMigration } from "@/lib/window-migration";
-import { MediaURL } from "@/web/url-match";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaEmbedViewType } from "./view-type";
@@ -23,8 +22,8 @@ export class MediaEmbedView extends MediaRemoteView {
     state: MediaRemoteViewState,
     result: ViewStateResult,
   ): Promise<void> {
-    if (typeof state.source === "string" || state.source instanceof URL) {
-      const url = MediaURL.create(state.source);
+    if (typeof state.source === "string") {
+      const url = this.plugin.resolveUrl(state.source);
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
@@ -35,9 +34,10 @@ export class MediaEmbedView extends MediaRemoteView {
   }
   getState(): MediaRemoteViewState {
     const state = super.getState() as MediaRemoteViewState;
+    const url = this.store.getState().source?.url;
     return {
       ...state,
-      source: this.store.getState().source?.url,
+      source: url ? url.jsonState.source : state.source,
     };
   }
   getDisplayText(): string {
