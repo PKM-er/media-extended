@@ -377,9 +377,11 @@ export class MxSettingTabs extends PluginSettingTab {
         createFragment((descEl) => {
           descEl.appendText("The template used to insert screenshot.");
           descEl.createEl("br");
-          descEl.appendText(
-            "Supported placeholders: {{TIMESTAMP}}, {{SCREENSHOT}}",
-          );
+          descEl.appendText("Supported placeholders: ");
+          descEl.createEl("br");
+          descEl.appendText("{{SCREENSHOT}} - screenshot link");
+          descEl.createEl("br");
+          descEl.appendText("{{TIMESTAMP}} - timestamp link");
         }),
       )
       .addTextArea((text) => {

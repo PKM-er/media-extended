@@ -67,17 +67,19 @@ export async function saveScreenshot<T extends PlayerComponent>(
     playerComponent.plugin.settings.getState();
 
   const timestamp = genTimestamp(newNote.path),
-    screenshotEmbed = fileManager.generateMarkdownLink(
-      screenshotFile,
-      newNote.path,
-      "",
-      screenshotEmbedTemplate
-        .replaceAll("{{TITLE}}", title)
-        .replaceAll("{{DURATION}}", humanizedDuration),
-    );
+    screenshotLink = fileManager
+      .generateMarkdownLink(
+        screenshotFile,
+        newNote.path,
+        "",
+        screenshotEmbedTemplate
+          .replaceAll("{{TITLE}}", title)
+          .replaceAll("{{DURATION}}", humanizedDuration),
+      )
+      .replace(/^!/, "");
 
   insertTimestamp(
-    { timestamp, screenshot: screenshotEmbed },
+    { timestamp, screenshot: screenshotLink },
     {
       editor,
       template: screenshotTemplate,

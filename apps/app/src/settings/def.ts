@@ -62,7 +62,7 @@ const mxSettingsDefault = {
   loadStrategy: "eager",
   timestampTemplate: "\n- {{TIMESTAMP}} ",
   screenshotEmbedTemplate: "{{TITLE}}{{DURATION}}|50",
-  screenshotTemplate: "\n- {{SCREENSHOT}} {{TIMESTAMP}} ",
+  screenshotTemplate: "\n- !{{SCREENSHOT}} {{TIMESTAMP}} ",
   insertBefore: false,
   timestampOffset: 0,
   biliDefaultQuality: BilibiliQuality.FHD,
