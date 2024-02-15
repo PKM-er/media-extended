@@ -1,6 +1,6 @@
 import type { MediaProviderAdapter } from "@vidstack/react";
 import { isVideoProvider } from "@vidstack/react";
-import { Platform } from "obsidian";
+import { Notice, Platform } from "obsidian";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { captureScreenshot } from "@/lib/screenshot";
 
@@ -10,11 +10,23 @@ export function canProviderScreenshot(provider: MediaProviderAdapter | null) {
 
 export async function takeScreenshot(provider: MediaProviderAdapter) {
   const mimeType = Platform.isSafari ? "image/jpeg" : "image/webp";
-  if (isVideoProvider(provider)) {
-    return await captureScreenshot(provider.video, mimeType);
-  } else if (provider instanceof WebiviewMediaProvider) {
-    return await provider.media.methods.screenshot(mimeType);
-  } else {
-    throw new Error("Unsupported provider for screenshot");
+  try {
+    if (isVideoProvider(provider)) {
+      return await captureScreenshot(provider.video, mimeType);
+    } else if (provider instanceof WebiviewMediaProvider) {
+      return await provider.media.methods.screenshot(mimeType);
+    } else {
+      throw new Error("Unsupported provider for screenshot");
+    }
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "SecurityError") {
+      new Notice(
+        "Cannot take screenshot due to CORS restriction, you can try open media as webpage to bypass this",
+      );
+    }
+    new Notice(
+      "Cannot take screenshot: " + (e instanceof Error ? e.message : String(e)),
+    );
+    throw e;
   }
 }

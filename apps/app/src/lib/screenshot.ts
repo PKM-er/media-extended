@@ -26,13 +26,17 @@ export async function captureScreenshot(
   // Not working for MediaSource Extensions in Safari, eg. YouTube, bilibili
   // https://bugs.webkit.org/show_bug.cgi?id=206812
   ctx.drawImage(video, 0, 0, width, height);
-  const blob = await new Promise<Blob>((resolve, reject) =>
-    canvas.toBlob((blob) => {
-      // the image cannot be created for any reason
-      if (!blob) reject(new Error("Canvas to blob failed"));
-      else resolve(blob);
-    }, type),
-  );
+  const blob = await new Promise<Blob>((resolve, reject) => {
+    try {
+      canvas.toBlob((blob) => {
+        // the image cannot be created for any reason
+        if (!blob) reject(new Error("Canvas to blob failed"));
+        else resolve(blob);
+      }, type);
+    } catch (e) {
+      reject(e);
+    }
+  });
   const arrayBuffer = await blob.arrayBuffer();
   return {
     time: video.currentTime,

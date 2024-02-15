@@ -166,20 +166,24 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   handlePlayReady() {
     const finishLoad = new Promise<void>((_resolve, _reject) => {
-      const resolve = () => {
-        _resolve();
+      const unload = () => {
+        this.webview.removeEventListener("did-stop-loading", resolve);
+        this.webview.removeEventListener("did-finish-load", resolve);
         this.webview.removeEventListener("did-fail-load", reject);
       };
-      const reject = (evt: Electron.DidFailLoadEvent) => {
-        _reject(new WebviewLoadError(evt));
-        this.webview.removeEventListener("did-finish-load", resolve);
+      const resolve = () => {
+        console.log("webpage finish load");
+        _resolve();
+        unload();
       };
-      this.webview.addEventListener("did-finish-load", resolve, {
-        once: true,
-      } as any);
-      this.webview.addEventListener("did-fail-load", reject, {
-        once: true,
-      } as any);
+      const reject = (evt: Electron.DidFailLoadEvent) => {
+        console.log("webpage fail load");
+        _reject(new WebviewLoadError(evt));
+        unload();
+      };
+      this.webview.addEventListener("did-stop-loading", resolve);
+      this.webview.addEventListener("did-finish-load", resolve);
+      this.webview.addEventListener("did-fail-load", reject);
     });
     let timeoutId: number;
     const timeout = (ms: number) =>

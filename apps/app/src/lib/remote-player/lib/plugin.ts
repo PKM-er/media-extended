@@ -37,12 +37,26 @@ export default class MediaPlugin extends LifeCycle {
       this.injectStyle(style);
     }
     await super.load();
+    const isDirectPlay =
+      this.media.parentNode === document.body &&
+      this.media.getAttribute("name") === "media";
+    if (isDirectPlay) this.media.controls = false;
     this.untilMediaReady("canplay").then(() => {
       this.register(
         this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
           document.body.classList.toggle("mx-show-controls", showWebsite);
         }),
       );
+      if (isDirectPlay) {
+        this.register(
+          this.controller.on(
+            "mx-toggle-controls",
+            ({ payload: showWebsite }) => {
+              this.media.controls = showWebsite;
+            },
+          ),
+        );
+      }
       this.register(
         this.controller.on("mx-toggle-webfs", ({ payload: enableWebFs }) => {
           document.body.classList.toggle("mx-fs-enable", enableWebFs);
@@ -50,6 +64,7 @@ export default class MediaPlugin extends LifeCycle {
       );
     });
     this.controller.send("mx-play-ready", void 0);
+    console.log("sent play ready");
   }
 
   get media() {
@@ -61,7 +76,9 @@ export default class MediaPlugin extends LifeCycle {
 
   async onload() {
     this.#media = await this.findMedia();
+    console.log("found media");
     await Promise.all([this.enterWebFullscreen(), this.hookMediaEl()]);
+    console.log("media hooked");
   }
 
   enterWebFullscreen(): any {
