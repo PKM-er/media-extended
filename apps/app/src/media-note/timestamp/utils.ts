@@ -1,7 +1,6 @@
 import type { MediaState } from "@vidstack/react";
 import type { Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
-import { noHash } from "@/lib/url";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaInfo, FileMediaInfo } from "@/media-view/media-info";
@@ -73,10 +72,9 @@ export function openOrCreateMediaNote(
       sourcePath: file.path,
     });
   } else {
-    const sourceUrl = mediaInfo.mxUrl ?? mediaInfo.cleaned;
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
       title: urlTitle(mediaInfo, player.state),
-      fm: () => ({ media: noHash(sourceUrl) }),
+      fm: () => ({ media: mediaInfo.jsonState.source }),
     });
   }
 }
@@ -104,7 +102,7 @@ export function timestampGenerator(
         .generateMarkdownLink(file, newNotePath, hash, timeInDuration)
         .replace(/^!/, "");
   } else {
-    const sourceUrl = mediaInfo.cleaned;
-    return () => `[${timeInDuration}](${noHash(sourceUrl)}${hash})`;
+    const sourceUrl = mediaInfo.jsonState.source;
+    return () => `[${timeInDuration}](${sourceUrl}${hash})`;
   }
 }

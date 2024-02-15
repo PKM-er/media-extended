@@ -2,7 +2,7 @@ import type { TFile, Vault } from "obsidian";
 import { Platform } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
-import { noHashUrl } from "@/lib/url";
+import { noHash, noHashUrl } from "@/lib/url";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
 import type { URLResolveResult, URLResolver } from "./base";
@@ -85,7 +85,7 @@ export class MediaURL extends URL implements URLResolveResult {
   readonly type: MediaHost;
 
   get jsonState(): { source: string } {
-    return { source: this.mxUrl?.href ?? this.href };
+    return { source: noHash(this.mxUrl ?? this.cleaned) };
   }
 
   mxUrl: URL | null;
