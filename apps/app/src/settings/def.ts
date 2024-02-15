@@ -177,14 +177,18 @@ export function createSettingsStore(plugin: MxPlugin) {
     setTemplate(key, value) {
       switch (key) {
         case "screenshot":
-          return set({ screenshotTemplate: value });
+          set({ screenshotTemplate: value });
+          break;
         case "screenshotEmbed":
-          return set({ screenshotEmbedTemplate: value });
+          set({ screenshotEmbedTemplate: value });
+          break;
         case "timestamp":
-          return set({ timestampTemplate: value });
+          set({ timestampTemplate: value });
+          break;
         default:
           assertNever(key);
       }
+      save(get());
     },
     setMxLinkAltBehavior: (click) => {
       set(({ defaultMxLinkClick }) => ({
