@@ -7,12 +7,20 @@ import {
 } from "./base";
 import { MediaHost } from "./supported";
 
-function parseVideoId(url: URL): string | null {
+function parseVideoId(url: URL): string | false | null {
+  if (url.hostname === "b23.tv") {
+    // short url don't have vid in url
+    return false;
+  }
   if (!url.hostname.endsWith(".bilibili.com")) {
     return null;
   }
-  if (url.pathname.startsWith("/video/")) {
-    return url.pathname.split("/").filter(Boolean).slice(-1).at(-1)!;
+  if (
+    url.pathname.startsWith("/video/") ||
+    url.pathname.startsWith("/bangumi/play/")
+  ) {
+    // Extract the last segment of the pathname as the video ID
+    return url.pathname.split("/").filter(Boolean).slice(-1)[0];
   }
   return null;
 }
