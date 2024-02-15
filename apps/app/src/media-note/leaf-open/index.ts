@@ -35,6 +35,14 @@ declare module "obsidian" {
   interface Workspace {
     activeTabGroup: WorkspaceTabGroup | null;
   }
+  interface FileManager {
+    createNewFile(
+      folder: TFolder,
+      name: string,
+      ext: string,
+      content?: string,
+    ): Promise<TFile>;
+  }
 }
 
 export interface NewNoteInfo {
@@ -241,7 +249,7 @@ export class LeafOpener extends Component {
 
     let targetNote: TFile;
     if (notes.length === 0) {
-      const filename = `Media Note - ${newNoteInfo.title}.md`;
+      const filename = `Media Note - ${newNoteInfo.title}`;
       targetNote = await this.#createNewNote(
         filename,
         newNoteInfo.fm,
@@ -277,9 +285,14 @@ export class LeafOpener extends Component {
     fm: (sourcePath: string) => Record<string, any>,
     sourcePath = "",
   ) {
-    const { fileManager, vault } = this.app;
+    const { fileManager } = this.app;
     const folder = fileManager.getNewFileParent(sourcePath, filename);
-    const newNote = await vault.create(`${folder.path}/${filename}`, "");
+    const newNote = await fileManager.createNewFile(
+      folder,
+      filename,
+      "md",
+      "---\n---\n",
+    );
     await fileManager.processFrontMatter(newNote, (fn) => {
       Object.assign(fn, fm(newNote.path));
     });

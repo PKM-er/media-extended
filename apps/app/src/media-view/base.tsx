@@ -45,9 +45,9 @@ export function addAction(player: PlayerComponent & ItemView) {
   player.addAction("star", "Timestamp", () => {
     const info = player.getMediaInfo();
     if (!info) return;
-    openOrCreateMediaNote(info, player).then((ctx) =>
-      takeTimestamp(player, ctx),
-    );
+    openOrCreateMediaNote(info, player).then((ctx) => {
+      takeTimestamp(player, ctx);
+    });
   });
   if (player.getViewType() !== MEDIA_EMBED_VIEW_TYPE)
     player.addAction("camera", "Screenshot", () => {
