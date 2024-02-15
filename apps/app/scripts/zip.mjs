@@ -12,7 +12,7 @@ const zip = new JSZip();
 for (const filename of assets) {
   zip.file(filename, createReadStream(join("dist", filename)));
 }
-const version = JSON.parse(readFileSync(join("manifest.json"), "utf-8")).version;
+const version = JSON.parse(readFileSync(join("package.json"), "utf-8")).version;
 const out = join("dist", `mx-${version}.zip`)
 await pipeline(
   zip.generateNodeStream({ type: "nodebuffer", streamFiles: true }),
