@@ -11,9 +11,10 @@ import { MediaHost } from "@/web/url-match/supported";
 
 function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
   return !!(
+    url.type !== MediaHost.Generic ||
     (url.isFileUrl && url.inferredType) ||
     url.tempFrag ||
-    url.type !== MediaHost.Generic ||
+    plugin.mediaNote.findNotes(url).length > 0 ||
     plugin.urlViewType.getPreferred(url, true)
   );
 }
