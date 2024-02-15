@@ -8,6 +8,7 @@ import {
   Platform,
 } from "obsidian";
 import { showAtButton } from "@/lib/menu";
+import { LoginModal } from "@/login/modal";
 import type MxPlugin from "@/mx-main";
 import "./style.global.less";
 import { getDialog } from "@/web/session/utils";
@@ -418,10 +419,30 @@ export class MxSettingTabs extends PluginSettingTab {
       .then((s) => s.controlEl.appendText("s"));
   }
 
+  webpage() {
+    if (!Platform.isDesktopApp) return;
+    const { containerEl: container } = this;
+    new Setting(container).setHeading().setName("Webpage");
+    new Setting(container)
+      .setName("Login")
+      .setDesc(
+        "If website requires login to access content or request login during playback, you can open a browser page here to login.",
+      )
+      .addButton((btn) =>
+        btn
+          .setCta()
+          .setButtonText("Open broswer")
+          .onClick(() => {
+            new LoginModal(this.app).open();
+          }),
+      );
+  }
+
   display() {
     const { containerEl: container } = this;
     container.empty();
 
+    this.webpage();
     this.playback();
     this.noteTaking();
     this.linkOpen();
