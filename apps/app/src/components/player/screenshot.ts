@@ -23,10 +23,12 @@ export async function takeScreenshot(provider: MediaProviderAdapter) {
       new Notice(
         "Cannot take screenshot due to CORS restriction, you can try open media as webpage to bypass this",
       );
+    } else {
+      new Notice(
+        "Cannot take screenshot: " +
+          (e instanceof Error ? e.message : String(e)),
+      );
     }
-    new Notice(
-      "Cannot take screenshot: " + (e instanceof Error ? e.message : String(e)),
-    );
     throw e;
   }
 }

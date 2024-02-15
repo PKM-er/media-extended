@@ -172,12 +172,10 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
         this.webview.removeEventListener("did-fail-load", reject);
       };
       const resolve = () => {
-        console.log("webpage finish load");
         _resolve();
         unload();
       };
       const reject = (evt: Electron.DidFailLoadEvent) => {
-        console.log("webpage fail load");
         _reject(new WebviewLoadError(evt));
         unload();
       };
