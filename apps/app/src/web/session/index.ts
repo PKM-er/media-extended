@@ -10,5 +10,13 @@ export async function modifySession(this: MxPlugin) {
   const session = (remote.session as typeof Electron.Session).fromPartition(
     getPartition(this.app.appId),
   );
-  await modifyBilibiliSession(session);
+  this.settings.subscribe((s, prev) => {
+    if (s.biliDefaultQuality !== prev.biliDefaultQuality) {
+      modifyBilibiliSession(session, s.biliDefaultQuality);
+    }
+  });
+  await modifyBilibiliSession(
+    session,
+    this.settings.getState().biliDefaultQuality,
+  );
 }

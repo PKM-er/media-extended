@@ -11,6 +11,8 @@ import { showAtButton } from "@/lib/menu";
 import { LoginModal } from "@/login/modal";
 import type MxPlugin from "@/mx-main";
 import "./style.global.less";
+import type { BilibiliQuality } from "@/web/session/bilibili";
+import { bilibiliQualityLabels } from "@/web/session/bilibili";
 import { getDialog } from "@/web/session/utils";
 import type { OpenLinkBehavior } from "./def";
 
@@ -438,6 +440,32 @@ export class MxSettingTabs extends PluginSettingTab {
       );
   }
 
+  bilibili() {
+    const { containerEl: container } = this;
+    new Setting(container).setHeading().setName("Bilibili");
+    new Setting(container)
+      .setName("Default quality")
+      .setDesc(
+        createFragment((e) => {
+          e.appendText(
+            "The default quality for bilibili videos, will fallback to closest quality if not available",
+          );
+          e.createEl("br");
+          e.appendText("Only new videos will use this quality");
+        }),
+      )
+      .addDropdown((d) =>
+        d
+          .addOptions(bilibiliQualityLabels)
+          .setValue(this.state.biliDefaultQuality.toString())
+          .onChange(
+            handleInt((val) =>
+              this.state.setBiliDefaultQuality(val as BilibiliQuality),
+            ),
+          ),
+      );
+  }
+
   display() {
     const { containerEl: container } = this;
     container.empty();
@@ -447,6 +475,7 @@ export class MxSettingTabs extends PluginSettingTab {
     this.noteTaking();
     this.linkOpen();
     this.protocol();
+    this.bilibili();
   }
 }
 

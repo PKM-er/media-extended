@@ -7,6 +7,7 @@ import { enumerate } from "@/lib/must-include";
 import { pick, omit } from "@/lib/pick";
 import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
+import { BilibiliQuality } from "@/web/session/bilibili";
 import type { URLMatchPattern } from "@/web/url-match/view-type";
 
 export type OpenLinkBehavior = false | PaneType | null;
@@ -27,6 +28,7 @@ type MxSettingValues = {
   insertBefore: boolean;
   /** in seconds */
   timestampOffset: number;
+  biliDefaultQuality: BilibiliQuality;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -40,6 +42,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "screenshotEmbedTemplate",
   "insertBefore",
   "timestampOffset",
+  "biliDefaultQuality",
 );
 
 const mxSettingsDefault = {
@@ -62,6 +65,7 @@ const mxSettingsDefault = {
   screenshotTemplate: "\n- {{SCREENSHOT}} {{TIMESTAMP}} ",
   insertBefore: false,
   timestampOffset: 0,
+  biliDefaultQuality: BilibiliQuality.FHD,
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -111,6 +115,7 @@ export type MxSettings = {
   setMxLinkAltBehavior: (click: OpenLinkBehavior) => void;
   setLinkHandler: (pattern: URLMatchPattern, type: RemoteMediaViewType) => void;
   setLoadStrategy: (strategy: "play" | "eager") => void;
+  setBiliDefaultQuality: (quality: BilibiliQuality) => void;
   load: () => Promise<void>;
   save: () => void;
 } & Omit<MxSettingValues, "urlMappingData">;
@@ -139,6 +144,10 @@ export function createSettingsStore(plugin: MxPlugin) {
     ...omit(mxSettingsDefault, ["urlMappingData"]),
     getUrlMappingData() {
       return toUrlMappingData(get().urlMapping);
+    },
+    setBiliDefaultQuality(quality) {
+      set({ biliDefaultQuality: quality });
+      save(get());
     },
     setInsertPosition(pos) {
       set({ insertBefore: pos === "before" });
