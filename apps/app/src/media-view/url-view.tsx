@@ -8,15 +8,6 @@ export type MediaUrlViewState = MediaRemoteViewState;
 
 abstract class MediaUrlView extends MediaRemoteView {
   abstract getViewType(): MediaUrlViewType;
-
-  getState(): MediaUrlViewState {
-    const state = super.getState() as MediaUrlViewState;
-    const url = this.store.getState().source?.url;
-    return {
-      ...state,
-      source: url ? url.jsonState.source : state.source,
-    };
-  }
 }
 
 export class VideoUrlView extends MediaUrlView {

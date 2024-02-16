@@ -32,14 +32,7 @@ export class MediaEmbedView extends MediaRemoteView {
     }
     return super.setState(state, result);
   }
-  getState(): MediaRemoteViewState {
-    const state = super.getState() as MediaRemoteViewState;
-    const url = this.store.getState().source?.url;
-    return {
-      ...state,
-      source: url ? url.jsonState.source : state.source,
-    };
-  }
+
   getDisplayText(): string {
     const source = hostTitleMap[this.sourceType] ?? "Embed";
     if (!this.playerTitle) return source;

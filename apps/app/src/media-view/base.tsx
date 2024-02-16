@@ -48,31 +48,10 @@ export function titleFromUrl(src: string): string {
 }
 
 export function addAction(player: PlayerComponent & ItemView) {
-  function noticeBehavior(action: string) {
-    const label = "mx:media-notetaking-notified";
-    const notified = localStorage.getItem(label);
-    if (notified) return;
-    new Notice(
-      createFragment((e) => {
-        e.appendText(
-          `You are taking ${action} from media player. By default, they will only be saved in the media note. `,
-        );
-        e.createEl("p", {
-          text: `To take ${action} or control playback from abritrary note, use command when focused on the note`,
-        });
-        e.createEl("p", {
-          text: "PS: you can assign a hotkey to each command in the settings",
-        });
-        e.appendText("Click to dismiss this notice.");
-      }),
-      0,
-    );
-    localStorage.setItem(label, "1");
-  }
   player.addAction("star", "Timestamp", () => {
     const info = player.getMediaInfo();
     if (!info) return;
-    noticeBehavior("timestamp");
+    noticeNotetaking("timestamp");
     openOrCreateMediaNote(info, player).then((ctx) => {
       takeTimestamp(player, ctx);
     });
@@ -81,11 +60,33 @@ export function addAction(player: PlayerComponent & ItemView) {
     player.addAction("camera", "Screenshot", () => {
       const info = player.getMediaInfo();
       if (!info) return;
-      noticeBehavior("screenshot");
+      noticeNotetaking("screenshot");
       openOrCreateMediaNote(info, player).then((ctx) =>
         saveScreenshot(player, ctx),
       );
     });
+}
+
+function noticeNotetaking(action: string) {
+  const label = "mx:media-notetaking-notified";
+  const notified = localStorage.getItem(label);
+  if (notified) return;
+  new Notice(
+    createFragment((e) => {
+      e.appendText(
+        `You are taking ${action} from media player. By default, they will only be saved in the media note. `,
+      );
+      e.createEl("p", {
+        text: `To take ${action} or control playback from abritrary note, use command when focused on the note`,
+      });
+      e.createEl("p", {
+        text: "PS: you can assign a hotkey to each command in the settings",
+      });
+      e.appendText("Click to dismiss this notice.");
+    }),
+    0,
+  );
+  localStorage.setItem(label, "1");
 }
 
 export function onPaneMenu<

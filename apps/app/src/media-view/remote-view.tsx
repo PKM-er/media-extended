@@ -88,6 +88,15 @@ export abstract class MediaRemoteView
     onPaneMenu(this, menu, menuSource);
   }
 
+  getState(): MediaRemoteViewState {
+    const state = super.getState() as MediaRemoteViewState;
+    const url = this.store.getState().source?.url;
+    return {
+      ...state,
+      source: url ? url.jsonState.source : state.source,
+    };
+  }
+
   setEphemeralState(state: any): void {
     if ("subpath" in state) {
       const { subpath } = state;

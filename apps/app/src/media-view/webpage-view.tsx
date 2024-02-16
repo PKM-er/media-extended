@@ -48,12 +48,4 @@ export class MediaWebpageView extends MediaRemoteView {
     }
     return super.setState(state, result);
   }
-  getState(): MediaWebpageViewState {
-    const state = super.getState() as MediaWebpageViewState;
-    const url = this.store.getState().source?.url;
-    return {
-      ...state,
-      source: url ? url.jsonState.source : state.source,
-    };
-  }
 }

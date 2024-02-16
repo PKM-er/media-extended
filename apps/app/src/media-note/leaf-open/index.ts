@@ -28,6 +28,8 @@ declare module "obsidian" {
   interface WorkspaceLeaf {
     activeTime: number;
     tabHeaderEl: HTMLDivElement;
+    pinned: boolean;
+    togglePinned(): void;
   }
   interface WorkspaceTabGroup {
     children: WorkspaceLeaf[];
@@ -125,7 +127,7 @@ export class LeafOpener extends Component {
       if (mediaInfo) {
         // if the note is a media note, only accept corresponding media leaves
         // don't use the latest media leaf as fallback
-        const leaf = this.findExistingPlayer(mediaInfo);
+        const leaf = this.findPlayerWithSameMedia(mediaInfo);
         return leaf;
       }
     }
@@ -133,12 +135,17 @@ export class LeafOpener extends Component {
     return fallback();
   }
 
-  findExistingPlayer(info: MediaInfo): MediaLeaf | null {
+  findPlayerWithSameMedia(info: MediaInfo): MediaLeaf | null {
     for (const type of this.plugin.urlViewType.getSupported(info)) {
       const leaves = getMediaLeavesOf(info, type, this.workspace);
       if (leaves.length > 0) return leaves[0];
     }
     return null;
+  }
+  findPinnedPlayer(): MediaLeaf | null {
+    return (
+      getAllMediaLeaves(this.workspace).filter((leaf) => leaf.pinned)[0] ?? null
+    );
   }
 
   get settings() {
@@ -181,7 +188,7 @@ export class LeafOpener extends Component {
   ): Promise<MediaLeaf> {
     const { workspace } = this.app;
     if (!newLeaf) {
-      const existing = this.#openInExistingPlayer(mediaInfo);
+      const existing = await this.#openInExistingPlayer(mediaInfo, viewType);
       if (existing) return existing;
     }
 
@@ -189,6 +196,14 @@ export class LeafOpener extends Component {
       (noRemap ? newLeaf : this.getSplitBehavior(newLeaf)) as "split",
       direction,
     );
+    return this.#openMedia(leaf, mediaInfo, viewType);
+  }
+
+  async #openMedia(
+    leaf: WorkspaceLeaf,
+    mediaInfo: MediaInfo,
+    viewType?: RemoteMediaViewType,
+  ) {
     if (isFileMediaInfo(mediaInfo)) {
       await leaf.openFile(mediaInfo.file, {
         eState: { subpath: mediaInfo.hash },
@@ -214,8 +229,15 @@ export class LeafOpener extends Component {
     return leaf as MediaLeaf;
   }
 
-  #openInExistingPlayer(info: MediaInfo): MediaLeaf | null {
-    const opened = this.findExistingPlayer(info);
+  async #openInExistingPlayer(
+    info: MediaInfo,
+    remoteViewType?: RemoteMediaViewType,
+  ): Promise<MediaLeaf | null> {
+    const pinned = this.findPinnedPlayer();
+    if (pinned) {
+      return await this.#openMedia(pinned, info, remoteViewType);
+    }
+    const opened = this.findPlayerWithSameMedia(info);
     if (opened) {
       updateHash(info.hash, opened);
       return opened;
