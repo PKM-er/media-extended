@@ -44,6 +44,7 @@ export class MediaWebpageView extends MediaRemoteView {
         console.warn("Invalid URL", state.source);
       } else {
         this.store.getState().setSource(url, { enableWebview: true });
+        this.render();
       }
     }
     return super.setState(state, result);

@@ -28,6 +28,7 @@ export class MediaEmbedView extends MediaRemoteView {
         console.warn("Invalid URL", state.source);
       } else {
         this.store.getState().setSource(url);
+        this.render();
       }
     }
     return super.setState(state, result);
