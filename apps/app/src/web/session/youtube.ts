@@ -15,7 +15,7 @@ function getParamFromHtml(html: string, key: string): string | null {
   const regex = new RegExp(`"${key}":\\s*"(?<value>[^"]+)"`);
   const match = html.match(regex)?.groups?.value;
   if (!match) return null;
-  const value = JSON.parse(`"${match}"`);
+  const value = JSON.parse(`"${match}"`) as string;
   return value;
 }
 

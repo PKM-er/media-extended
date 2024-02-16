@@ -3,6 +3,7 @@ import "@vidstack/react/player/styles/base.css";
 import type { MediaViewType } from "@vidstack/react";
 import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
 
+import { Notice } from "obsidian";
 import { useState } from "react";
 import { useTempFragHandler } from "@/components/hook/use-temporal-frag";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
@@ -42,9 +43,12 @@ export function Player() {
     const url = source.url.source.href;
     if (source.enableWebview) {
       // webview will create a new MediaURL instance
-      return encodeWebpageUrl(url);
+      return { src: encodeWebpageUrl(url) };
     }
-    return url;
+    return {
+      type: source.type,
+      src: url,
+    };
   });
   const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const load = useSettings((s) => s.loadStrategy);
@@ -67,6 +71,44 @@ export function Player() {
       title={title}
       viewType={viewType}
       ref={playerRef}
+      onError={(e) => {
+        new Notice(
+          createFragment((frag) => {
+            frag.appendText(`Failed to load media for ${src.src}: `);
+            frag.createEl("br");
+            switch (e.code) {
+              // MEDIA_ERR_ABORTED
+              case 1:
+                frag.appendText("The media playback was aborted");
+                break;
+              // MEDIA_ERR_NETWORK
+              case 2:
+                frag.appendText(
+                  "A network error caused the media playback to fail",
+                );
+                break;
+              // MEDIA_ERR_DECODE
+              case 3:
+                frag.appendText(
+                  "The media playback was aborted due to a corruption problem or because the media encoding is not supported",
+                );
+                break;
+              // MEDIA_ERR_SRC_NOT_SUPPORTED
+              case 4:
+                frag.appendText(
+                  "The media is not supported to open as regular video or audio, try open as webpage",
+                );
+                break;
+              default:
+                frag.appendText(
+                  e.message || "Unknown error, check console for more details",
+                );
+                console.error("Failed to load media", src.src, e);
+                break;
+            }
+          }),
+        );
+      }}
       {...hashProps}
     >
       <MediaProviderEnhanced>

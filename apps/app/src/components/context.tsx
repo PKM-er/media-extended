@@ -30,6 +30,7 @@ export interface SourceFacet {
    */
   title: string | true;
   enableWebview: boolean;
+  type: string;
 }
 
 export interface MediaViewState {
@@ -88,12 +89,13 @@ export function createMediaViewStore() {
         }, timeout);
       });
     },
-    setSource(url, { hash, enableWebview, title: givenTitle } = {}) {
+    setSource(url, { hash, enableWebview, title: givenTitle, type } = {}) {
       const title =
         givenTitle === true ? titleFromUrl(url.source.href) : givenTitle;
       set(({ source, title: ogTitle }) => ({
         source: {
           ...source,
+          type,
           url,
           enableWebview:
             enableWebview !== undefined ? enableWebview : source?.enableWebview,
