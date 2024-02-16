@@ -23,7 +23,10 @@ export async function takeScreenshot(
         quality ?? undefined,
       );
     } else if (provider instanceof WebiviewMediaProvider) {
-      return await provider.media.methods.screenshot(mimeType);
+      return await provider.media.methods.screenshot(
+        mimeType,
+        quality ?? undefined,
+      );
     } else {
       throw new Error("Unsupported provider for screenshot");
     }
