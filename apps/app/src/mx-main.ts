@@ -1,3 +1,4 @@
+import "@total-typescript/ts-reset";
 import "@vidstack/react/player/styles/base.css";
 import "./style.css";
 import "./icons";

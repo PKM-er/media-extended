@@ -156,7 +156,17 @@ export function createSettingsStore(plugin: MxPlugin) {
     setLinkHandler(pattern, type) {
       set((prev) => {
         const linkHandler = { ...prev.linkHandler };
-        linkHandler[type] = [...linkHandler[type], pattern];
+        for (const k of Object.keys(linkHandler)) {
+          const key = k as RemoteMediaViewType;
+          // exclude the same pattern
+          linkHandler[key] = linkHandler[key].filter((x) => {
+            if (typeof x === "string") return x !== pattern;
+            return typeof pattern === "string" || !compare(x, pattern);
+          });
+          if (key === type) {
+            linkHandler[key] = [...linkHandler[key], pattern];
+          }
+        }
         return { linkHandler };
       });
       save(get());
@@ -264,4 +274,14 @@ export function createSettingsStore(plugin: MxPlugin) {
       save(get());
     },
   }));
+}
+
+function compare(objA: Record<string, any>, objB: Record<string, any>) {
+  const keys = new Set([...Object.keys(objA), ...Object.keys(objB)]);
+  for (const key of keys) {
+    if (objA[key] !== objB[key]) {
+      return false;
+    }
+  }
+  return true;
 }

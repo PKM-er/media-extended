@@ -13,6 +13,7 @@
     "@codemirror/view": "^6.0.0",
     "@electron/remote": "^2.1.1",
     "@mx/config": "workspace:*",
+    "@total-typescript/ts-reset": "^0.5.1",
     "@types/eslint": "~8.4.6",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

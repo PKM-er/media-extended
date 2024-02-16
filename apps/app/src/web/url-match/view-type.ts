@@ -66,12 +66,17 @@ export class URLViewType extends Component {
   getPreferred(url: MediaURL): RemoteMediaViewType;
   getPreferred(url: MediaURL, noFallback?: true): RemoteMediaViewType | null {
     const supported = this.getSupported(url);
+    let matched: { type: RemoteMediaViewType; specifity: number } | null = null;
     for (const type of supported) {
       for (const matcher of this.matcher.get(type)!) {
-        if (matcher.test(url)) return type;
+        if (!matcher.test(url)) continue;
+        const specifity = getSpecifity(matcher);
+        if (!matched || specifity > matched.specifity) {
+          matched = { type, specifity };
+        }
       }
     }
-    return noFallback ? null : supported[0];
+    return matched?.type ?? (noFallback ? null : supported[0]);
   }
   setPreferred(pattern: URLMatchPattern, type: RemoteMediaViewType) {
     this.plugin.settings.getState().setLinkHandler(pattern, type);
@@ -109,4 +114,22 @@ export class URLViewType extends Component {
         assertNever(url.type);
     }
   }
+}
+
+function getSpecifity(url: URLPattern) {
+  return (
+    [
+      "protocol",
+      "username",
+      "password",
+      "hostname",
+      "port",
+      "pathname",
+      "search",
+      "hash",
+    ] as const
+  ).reduce((score, prop) => {
+    const value = url[prop];
+    return score + (value !== "*" ? 1 : 0);
+  }, 0);
 }
