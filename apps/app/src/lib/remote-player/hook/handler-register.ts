@@ -57,11 +57,11 @@ export function registerHandlers(this: MediaPlugin) {
       value: await (player as any)[prop](...args),
     }));
   });
-  port.handle("screenshot", async (type) => {
+  port.handle("screenshot", async (type, quality) => {
     if (!(player instanceof HTMLVideoElement))
       throw new Error("Cannot take screenshot of non-video element");
 
-    const value = await captureScreenshot(player, type);
+    const value = await captureScreenshot(player, type, quality);
     return {
       value,
       transfer: [value.blob.arrayBuffer],

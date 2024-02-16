@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { pathToFileURL } from "url";
 import type { PaneType } from "obsidian";
 import {
@@ -421,6 +422,59 @@ export class MxSettingTabs extends PluginSettingTab {
           }),
       )
       .then((s) => s.controlEl.appendText("s"));
+    new Setting(container)
+      .setName("Screenshot format")
+      .setDesc(
+        createFragment((frag) => {
+          frag.appendText("The format to use when taking screenshots");
+          frag.createEl("br");
+          frag.appendText(
+            "Note that the webp format falls back to jpeg in iOS or iPadOS",
+          );
+        }),
+      )
+      .addDropdown((d) =>
+        d
+          .addOptions({
+            "image/png": "PNG",
+            "image/jpeg": "JPEG",
+            "image/webp": "WEBP",
+          })
+          .setValue(this.state.screenshotFormat)
+          .onChange((val) =>
+            this.state.setScreenshotFormat(
+              val as "image/png" | "image/jpeg" | "image/webp",
+            ),
+          ),
+      );
+    new Setting(container)
+      .setName("Screenshot quality")
+      .setDesc("Quality of the screenshot")
+      .addSlider((slide) =>
+        slide
+          .setLimits(0, 1, 0.01)
+          .setValue(
+            this.state.screenshotQuality ??
+              (this.state.screenshotFormat === "image/webp" ? 0.8 : 0.92),
+          )
+          .onChange(this.state.setScreenshotQuality)
+          .then((slide) => {
+            this.sub((s, prev) => {
+              if (s.screenshotFormat === prev.screenshotFormat) return;
+              slide.setValue(
+                s.screenshotQuality ??
+                  (s.screenshotFormat === "image/webp" ? 0.8 : 0.92),
+              );
+            });
+          }),
+      )
+      .then((entry) => {
+        this.sub((s, prev) => {
+          if (s.screenshotFormat === prev.screenshotFormat) return;
+          entry.settingEl.style.display =
+            s.screenshotFormat === "image/png" ? "none" : "";
+        });
+      });
   }
 
   webpage() {

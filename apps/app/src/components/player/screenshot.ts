@@ -8,11 +8,20 @@ export function canProviderScreenshot(provider: MediaProviderAdapter | null) {
   return isVideoProvider(provider) || provider instanceof WebiviewMediaProvider;
 }
 
-export async function takeScreenshot(provider: MediaProviderAdapter) {
-  const mimeType = Platform.isSafari ? "image/jpeg" : "image/webp";
+export async function takeScreenshot(
+  provider: MediaProviderAdapter,
+  type: "image/jpeg" | "image/webp" | "image/png",
+  quality: number | null,
+) {
+  const mimeType =
+    Platform.isSafari && type === "image/webp" ? "image/jpeg" : type;
   try {
     if (isVideoProvider(provider)) {
-      return await captureScreenshot(provider.video, mimeType);
+      return await captureScreenshot(
+        provider.video,
+        mimeType,
+        quality ?? undefined,
+      );
     } else if (provider instanceof WebiviewMediaProvider) {
       return await provider.media.methods.screenshot(mimeType);
     } else {

@@ -31,7 +31,12 @@ import {
   PinIcon,
 } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { useIsEmbed, useScreenshot, useTimestamp } from "../context";
+import {
+  useIsEmbed,
+  useScreenshot,
+  useSettings,
+  useTimestamp,
+} from "../context";
 import { canProviderScreenshot, takeScreenshot } from "./screenshot";
 
 export const buttonClass =
@@ -167,12 +172,14 @@ export function useScreenshotHanlder() {
     canProviderScreenshot(provider),
   );
   const onScreenshot = useScreenshot();
+  const type = useSettings((s) => s.screenshotFormat),
+    quality = useSettings((s) => s.screenshotQuality);
   useEffect(() => {
     updateCanScreenshot(canProviderScreenshot(provider));
   }, [provider]);
   if (!canScreenshot || !onScreenshot || !provider) return null;
   return async () => {
-    onScreenshot(await takeScreenshot(provider));
+    onScreenshot(await takeScreenshot(provider, type, quality));
   };
 }
 

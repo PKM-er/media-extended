@@ -29,6 +29,8 @@ type MxSettingValues = {
   /** in seconds */
   timestampOffset: number;
   biliDefaultQuality: BilibiliQuality;
+  screenshotFormat: "image/png" | "image/jpeg" | "image/webp";
+  screenshotQuality: number | null;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -43,6 +45,8 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "insertBefore",
   "timestampOffset",
   "biliDefaultQuality",
+  "screenshotFormat",
+  "screenshotQuality",
 );
 
 const mxSettingsDefault = {
@@ -66,6 +70,8 @@ const mxSettingsDefault = {
   insertBefore: false,
   timestampOffset: 0,
   biliDefaultQuality: BilibiliQuality.FHD,
+  screenshotFormat: "image/webp",
+  screenshotQuality: null,
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -108,6 +114,10 @@ export type MxSettings = {
     key: "timestamp" | "screenshot" | "screenshotEmbed",
     value: string,
   ) => void;
+  setScreenshotFormat: (
+    format: "image/png" | "image/jpeg" | "image/webp",
+  ) => void;
+  setScreenshotQuality: (quality: number | null) => void;
   setTimestampOffset: (offset: number) => void;
   setInsertPosition: (pos: "before" | "after") => void;
   getUrlMappingData: () => MxSettingValues["urlMappingData"];
@@ -142,6 +152,14 @@ export function createSettingsStore(plugin: MxPlugin) {
   }, 1e3);
   return createStore<MxSettings>((set, get) => ({
     ...omit(mxSettingsDefault, ["urlMappingData"]),
+    setScreenshotFormat(format) {
+      set({ screenshotFormat: format });
+      save(get());
+    },
+    setScreenshotQuality(quality) {
+      set({ screenshotQuality: quality });
+      save(get());
+    },
     getUrlMappingData() {
       return toUrlMappingData(get().urlMapping);
     },

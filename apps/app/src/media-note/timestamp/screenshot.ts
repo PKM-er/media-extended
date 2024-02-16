@@ -39,7 +39,13 @@ export async function saveScreenshot<T extends PlayerComponent>(
     new Notice("Screenshot is not supported for this media");
     return;
   }
-  const { blob, time } = await takeScreenshot(player.provider);
+  const { screenshotQuality, screenshotFormat } =
+    playerComponent.plugin.settings.getState();
+  const { blob, time } = await takeScreenshot(
+    player.provider,
+    screenshotFormat,
+    screenshotQuality,
+  );
   const genTimestamp = timestampGenerator(time, mediaInfo, playerComponent);
 
   const ext = mime.getExtension(blob.type);

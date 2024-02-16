@@ -9,6 +9,7 @@ export interface ScreenshotInfo {
 export async function captureScreenshot(
   video: HTMLVideoElement,
   type?: string,
+  quality?: number,
 ): Promise<ScreenshotInfo> {
   const canvas = document.createElement("canvas");
 
@@ -28,11 +29,15 @@ export async function captureScreenshot(
   ctx.drawImage(video, 0, 0, width, height);
   const blob = await new Promise<Blob>((resolve, reject) => {
     try {
-      canvas.toBlob((blob) => {
-        // the image cannot be created for any reason
-        if (!blob) reject(new Error("Canvas to blob failed"));
-        else resolve(blob);
-      }, type);
+      canvas.toBlob(
+        (blob) => {
+          // the image cannot be created for any reason
+          if (!blob) reject(new Error("Canvas to blob failed"));
+          else resolve(blob);
+        },
+        type,
+        quality,
+      );
     } catch (e) {
       reject(e);
     }

@@ -180,7 +180,10 @@ export type MsgCtrlRemote = MessageController<
     pictureInPictureEnabled: () => { value: boolean };
   } & {
     loadPlugin(code?: string): void;
-    screenshot(type?: string): {
+    screenshot(
+      type?: string,
+      quality?: number,
+    ): {
       value: ScreenshotInfo;
       transfer: Transferable[];
     };
@@ -222,7 +225,7 @@ export type MsgCtrlLocal = MessageController<
     pictureInPictureEnabled: () => boolean;
   } & {
     loadPlugin(code?: string): void;
-    screenshot(type?: string): ScreenshotInfo;
+    screenshot(type?: string, quality?: number): ScreenshotInfo;
     fetch(
       url: string,
       init?: RequestInit & { gzip?: boolean },
