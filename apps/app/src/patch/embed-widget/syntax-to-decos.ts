@@ -3,10 +3,9 @@ import type { EditorState } from "@codemirror/state";
 import type { WidgetType } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 // import { editorInfoField } from "obsidian";
+import { shouldOpenMedia } from "@/media-note/link-click";
 import type MediaExtended from "@/mx-main";
 
-// import { getFileHashFromLinktext } from "../../player/thunk/set-media";
-import { MediaHost } from "@/web/url-match/supported";
 import { isMdFavorInternalLink } from "./utils";
 import { WidgetCtorMap } from "./widget";
 
@@ -55,7 +54,7 @@ const getPlayerDecos = (
           return;
         }
         const urlInfo = plugin.resolveUrl(imgUrlText);
-        if (urlInfo && urlInfo.type !== MediaHost.Generic) {
+        if (urlInfo && shouldOpenMedia(urlInfo, plugin)) {
           const viewType = plugin.urlViewType.getPreferred(urlInfo);
           const widget = new WidgetCtorMap[viewType](
             plugin,

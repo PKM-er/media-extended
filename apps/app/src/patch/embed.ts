@@ -1,6 +1,7 @@
 import type { EmbedCreator, Plugin } from "obsidian";
 import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle } from "@/lib/size-syntax";
+import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/view-type";
@@ -98,7 +99,7 @@ function injectUrlMediaEmbed(this: MxPlugin) {
 
     function replace({ title, url }: EmbedSource, target: HTMLElement) {
       const src = plguin.resolveUrl(url);
-      if (!src) return;
+      if (!src || !shouldOpenMedia(src, plguin)) return;
       const viewType = plguin.urlViewType.getPreferred(src);
       const newWarpper = createSpan({
         cls: ["media-embed", "external-embed", "is-loaded"],

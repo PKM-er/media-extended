@@ -9,7 +9,7 @@ import { checkMediaType } from "@/patch/media-type";
 import type { MediaURL } from "@/web/url-match";
 import { MediaHost } from "@/web/url-match/supported";
 
-function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
+export function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
   return !!(
     url.type !== MediaHost.Generic ||
     url.inferredType ||
