@@ -37,17 +37,15 @@ export default class MediaPlugin extends LifeCycle {
       this.injectStyle(style);
     }
     await super.load();
-    const isDirectPlay =
-      this.media.parentNode === document.body &&
-      this.media.getAttribute("name") === "media";
-    if (isDirectPlay) this.media.controls = false;
+    const isNativePlayer = this.media.controls === true;
+    if (isNativePlayer) this.media.controls = false;
     this.untilMediaReady("canplay").then(() => {
       this.register(
         this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
           document.body.classList.toggle("mx-show-controls", showWebsite);
         }),
       );
-      if (isDirectPlay) {
+      if (isNativePlayer) {
         this.register(
           this.controller.on(
             "mx-toggle-controls",
