@@ -290,7 +290,8 @@ class WebviewLoadError extends Error {
 }
 
 function notifyLogin() {
-  const notified = localStorage.getItem("mx:webview-login-notified");
+  const label = "mx:webview-login-notified";
+  const notified = localStorage.getItem(label);
   if (notified) return;
   new Notice(
     createFragment((e) => {
@@ -311,5 +312,5 @@ function notifyLogin() {
     }),
     0,
   );
-  localStorage.setItem("mx:webview-login-notified", "1");
+  localStorage.setItem(label, "1");
 }

@@ -49,7 +49,8 @@ export function titleFromUrl(src: string): string {
 
 export function addAction(player: PlayerComponent & ItemView) {
   function noticeBehavior(action: string) {
-    const notified = localStorage.getItem("mx:media-notetaking-notice");
+    const label = "mx:media-notetaking-notified";
+    const notified = localStorage.getItem(label);
     if (notified) return;
     new Notice(
       createFragment((e) => {
@@ -66,7 +67,7 @@ export function addAction(player: PlayerComponent & ItemView) {
       }),
       0,
     );
-    localStorage.setItem("mx:media-noting-notice", "1");
+    localStorage.setItem(label, "1");
   }
   player.addAction("star", "Timestamp", () => {
     const info = player.getMediaInfo();
