@@ -109,6 +109,8 @@ export class LeafOpener extends Component {
 
   detectActiveMediaLeaf(active: WorkspaceLeaf | null): MediaLeaf | null {
     const fallback = () => {
+      const pinned = this.findPinnedPlayer();
+      if (pinned) return pinned;
       const leaves = getAllMediaLeaves(this.workspace);
       const { activeTabGroup } = this.workspace;
       const activeMediaLeaf =
