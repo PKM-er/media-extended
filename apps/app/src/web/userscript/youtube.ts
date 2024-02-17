@@ -1,6 +1,7 @@
 // hugely inspired by https://greasyfork.org/zh-CN/scripts/4870-maximize-video
 
 const css = `
+body:not(.mx-player-ready) #movie_player, 
 ytd-watch-flexy[theater] #movie_player {
   position: fixed !important;
   top: 0 !important;
@@ -91,12 +92,12 @@ export default class BilibiliPlugin extends MediaPlugin {
   }
   async onload(): Promise<void> {
     await super.onload();
-
-    waitForSelector<HTMLElement>(".video-ads.ytp-ad-module", this.app).then(
-      (adModule) => this.removePlayerAD(adModule),
-    );
-
-    await Promise.all([this.disableAutoPlay()]);
+    Promise.all([
+      waitForSelector<HTMLElement>(".video-ads.ytp-ad-module", this.app).then(
+        (adModule) => this.removePlayerAD(adModule),
+      ),
+      this.disableAutoPlay(),
+    ]);
   }
 
   get app() {
@@ -182,23 +183,25 @@ export default class BilibiliPlugin extends MediaPlugin {
     }
   }
 
-  async enterWebFullscreen() {
+  enterWebFullscreen() {
     this.assignParentClass(this.moviePlayer);
 
-    const fsButton = await waitForSelector<HTMLButtonElement>(
-      "#movie_player .ytp-size-button",
-    );
-    const isCinematicsMode = () =>
-      !!this.app.querySelector("ytd-watch-flexy[theater]");
-    if (!isCinematicsMode()) {
-      console.log("Entering cinema mode");
-      do {
-        fsButton.click();
-        await sleep(200);
-      } while (!isCinematicsMode());
-      console.log("Entered cinema mode");
-    }
-    window.dispatchEvent(new Event("resize"));
+    (async () => {
+      const fsButton = await waitForSelector<HTMLButtonElement>(
+        "#movie_player .ytp-size-button",
+      );
+      const isCinematicsMode = () =>
+        !!this.app.querySelector("ytd-watch-flexy[theater]");
+      if (!isCinematicsMode()) {
+        console.log("Entering cinema mode");
+        do {
+          fsButton.click();
+          await sleep(200);
+        } while (!isCinematicsMode());
+        console.log("Entered cinema mode");
+      }
+      window.dispatchEvent(new Event("resize"));
+    })();
   }
 }
 

@@ -14,6 +14,7 @@ export interface PlayerContext {
   player: MediaPlayerInstance;
   source: MediaURL;
   plugin: MxPlugin;
+  reload: () => void;
   setTransform: MediaViewState["setTransform"];
   transform: MediaViewState["transform"];
   controls: boolean | undefined;
@@ -59,6 +60,22 @@ export default function registerMediaMenu(this: MxPlugin) {
   handleExternalLinkMenu(this);
   this.registerEvent(
     this.app.workspace.on("mx-media-menu", (menu, ctx, source) => {
+      if (
+        source === "more-options" ||
+        source === "sidebar-context-menu" ||
+        source === "tab-header" ||
+        source === "player-menu-embed"
+      ) {
+        menu.addItem((item) =>
+          item
+            .setTitle("Refresh")
+            .setSection("view")
+            .setIcon("reset")
+            .onClick(() => {
+              ctx.reload();
+            }),
+        );
+      }
       if (source !== "sidebar-context-menu" && source !== "tab-header") {
         menu.addItem((item) => speedMenu(item, ctx.player));
         if (ctx.player.state.viewType === "video") {

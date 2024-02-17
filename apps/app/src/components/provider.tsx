@@ -56,7 +56,7 @@ export function MediaProviderEnhanced({
             <WebView
               aria-hidden
               className={cn(
-                "data-[play-ready]:opacity-100 opacity-0 transition-opacity",
+                "data-[play-ready]:blur-none blur-lg transition-opacity",
                 controls && "pointer-events-none",
               )}
               webpreferences="autoplayPolicy=user-gesture-required"

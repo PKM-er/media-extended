@@ -168,7 +168,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     } else {
       assertNever(item);
     }
-    if (!item.inferredType) {
+    if (item.isFileUrl && !item.inferredType) {
       new Notice("Unsupported file type: " + item.pathname);
       return;
     }

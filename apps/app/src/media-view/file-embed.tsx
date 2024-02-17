@@ -53,7 +53,8 @@ export class MediaFileEmbed
     };
   }
 
-  onload(): void {
+  // eslint-disable-next-line react/require-render-return
+  render() {
     this.root?.unmount();
     this.root = ReactDOM.createRoot(this.info.containerEl);
     this.root.render(
@@ -61,12 +62,17 @@ export class MediaFileEmbed
         value={{
           plugin: this.plugin,
           store: this.store,
+          reload: () => this.render(),
           embed: true,
         }}
       >
         <Player />
       </MediaViewContext.Provider>,
     );
+  }
+  onload(): void {
+    super.onload();
+    this.render();
   }
 
   async loadFile() {

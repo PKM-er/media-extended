@@ -9,7 +9,7 @@ import type { WebviewTag } from "electron";
 import init from "inline:./scripts/initialize";
 
 import { isString } from "maverick.js/std";
-import { Notice } from "obsidian";
+import { ButtonComponent, Notice } from "obsidian";
 import type { WebviewElement } from "@/components/webview";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
 import { plugins } from "@/web/plugin";
@@ -195,14 +195,17 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
       });
     });
 
+    const timeoutLimit = 10e3;
     finishLoad
-      .then(() => Promise.race([playReady, timeout(10e3)]))
+      .then(() => {
+        return Promise.race([playReady, timeout(timeoutLimit)]);
+      })
       .then(() => {
         this.togglePlayReady(true);
       })
       .catch((err) => {
         if (err instanceof TimeoutError) {
-          new Notice("Webview failed to load plugin in time");
+          timeoutNotice(timeoutLimit);
         } else if (err instanceof WebviewLoadError) {
           new Notice("Webview failed to load website: " + err.message);
         } else {
@@ -313,4 +316,33 @@ function notifyLogin() {
     0,
   );
   localStorage.setItem(label, "1");
+}
+
+function timeoutNotice(timeout: number) {
+  const label = "mx:webview-timeout-ignore";
+  const ignore = localStorage.getItem(label);
+  if (ignore) return;
+  const timeoutLabel = (timeout / 1e3).toFixed(1);
+  const notice = new Notice(
+    createFragment((e) => {
+      e.createDiv({
+        text: `Webpage not fully loaded within ${timeoutLabel}s. You can still try to play.`,
+      });
+      e.createDiv({}, (div) => {
+        div.style.display = "flex";
+        div.style.justifyContent = "flex-end";
+        div.style.gap = "1em";
+        div.style.marginTop = "1em";
+        new ButtonComponent(div).setButtonText("OK");
+        new ButtonComponent(div)
+          .setButtonText("Don't show again")
+          .onClick(() => {
+            console.log("ignore webview timeout notice");
+            localStorage.setItem(label, "1");
+            notice.hide();
+          });
+      });
+    }),
+    5e3,
+  );
 }

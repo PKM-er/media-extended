@@ -26,7 +26,7 @@ export class MediaRenderChild
     return this.store.getState().setSource;
   }
 
-  onload(): void {
+  render() {
     this.root?.unmount();
     this.root = ReactDOM.createRoot(this.containerEl);
     this.root.render(
@@ -34,12 +34,17 @@ export class MediaRenderChild
         value={{
           plugin: this.plugin,
           store: this.store,
+          reload: () => this.render(),
           embed: true,
         }}
       >
         <Player />
       </MediaViewContext.Provider>,
     );
+  }
+  onload(): void {
+    super.onload();
+    this.render();
   }
 
   onunload() {

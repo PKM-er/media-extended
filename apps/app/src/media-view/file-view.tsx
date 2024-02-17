@@ -72,6 +72,7 @@ abstract class MediaFileView
         value={{
           plugin: this.plugin,
           store: this.store,
+          reload: () => this.render(),
           embed: false,
         }}
       >

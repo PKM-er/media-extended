@@ -92,6 +92,7 @@ function noticeNotetaking(action: string) {
 export function onPaneMenu<
   T extends PlayerComponent & {
     getViewType(): MediaViewType;
+    render(): void;
   } & View,
 >(
   view: T,
@@ -122,6 +123,7 @@ export function onPaneMenu<
       plugin: view.plugin,
       disableWebFullscreen,
       toggleWebFullscreen,
+      reload: () => view.render(),
     },
     menuSource,
     view.leaf,

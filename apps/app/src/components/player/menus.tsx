@@ -16,6 +16,7 @@ import {
   useMediaViewStore,
   useMediaViewStoreInst,
   usePlugin,
+  useReload,
 } from "../context";
 import { dataLpPassthrough } from "./buttons";
 
@@ -76,6 +77,7 @@ export function MoreOptions() {
   const workspace = useApp((app) => app.workspace);
   const plugin = usePlugin();
   const isEmbed = useIsEmbed();
+  const reload = useReload();
   const source = useMediaViewStore((state) => state.source?.url);
   const store = useMediaViewStoreInst();
   const onClick = useMenu((menu) => {
@@ -93,6 +95,7 @@ export function MoreOptions() {
       menu,
       {
         player,
+        reload,
         source,
         toggleControls,
         controls,

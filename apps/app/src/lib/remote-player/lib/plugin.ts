@@ -39,28 +39,24 @@ export default class MediaPlugin extends LifeCycle {
     await super.load();
     const isNativePlayer = this.media.controls === true;
     if (isNativePlayer) this.media.controls = false;
-    this.untilMediaReady("canplay").then(() => {
+    this.register(
+      this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
+        document.body.classList.toggle("mx-show-controls", showWebsite);
+      }),
+    );
+    if (isNativePlayer) {
       this.register(
         this.controller.on("mx-toggle-controls", ({ payload: showWebsite }) => {
-          document.body.classList.toggle("mx-show-controls", showWebsite);
+          this.media.controls = showWebsite;
         }),
       );
-      if (isNativePlayer) {
-        this.register(
-          this.controller.on(
-            "mx-toggle-controls",
-            ({ payload: showWebsite }) => {
-              this.media.controls = showWebsite;
-            },
-          ),
-        );
-      }
-      this.register(
-        this.controller.on("mx-toggle-webfs", ({ payload: enableWebFs }) => {
-          document.body.classList.toggle("mx-fs-enable", enableWebFs);
-        }),
-      );
-    });
+    }
+    this.register(
+      this.controller.on("mx-toggle-webfs", ({ payload: enableWebFs }) => {
+        document.body.classList.toggle("mx-fs-enable", enableWebFs);
+      }),
+    );
+    document.body.classList.add("mx-play-ready");
     this.controller.send("mx-play-ready", void 0);
     console.log("sent play ready");
   }

@@ -36,8 +36,8 @@ export default class BilibiliPlugin extends MediaPlugin {
     );
     await super.onload();
     this.revertAutoSeek();
-    await this.untilMediaReady("canplay");
-    await Promise.all([this.toggleDanmaku(false), this.untilWebFullscreen()]);
+    Promise.all([this.toggleDanmaku(false)]);
+    await this.untilWebFullscreen();
   }
 
   get player() {
@@ -91,20 +91,20 @@ export default class BilibiliPlugin extends MediaPlugin {
     return this.player.classList.contains("mode-webscreen");
   }
 
-  async enterWebFullscreen() {
+  enterWebFullscreen() {
     if (this.isWebFullscreen()) {
       console.log("Already in web fullscreen");
       return;
     }
-    const fsButton = await waitForSelector<HTMLDivElement>(
-      ".bpx-player-ctrl-web",
-      this.player,
+    waitForSelector<HTMLDivElement>(".bpx-player-ctrl-web", this.player).then(
+      (fsButton) => {
+        console.log("Clicking fullscreen button");
+        fsButton.click();
+      },
     );
-    console.log("Clicking fullscreen button");
-    fsButton.click();
   }
 
-  async revertAutoSeek() {
+  revertAutoSeek() {
     const plyaer = this.player;
     const toastContainer = plyaer.querySelector<HTMLDivElement>(
       ".bpx-player-toast-auto",

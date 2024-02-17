@@ -173,6 +173,7 @@ export const MediaViewContext = createContext<{
   store: MediaViewStoreApi;
   plugin: MediaExtended;
   embed: boolean;
+  reload: () => void;
   onScreenshot?: (info: ScreenshotInfo) => any;
   onTimestamp?: (timestamp: number) => any;
 }>(null as any);
@@ -196,6 +197,10 @@ export function useSettings<U>(selector: (state: MxSettings) => U): U {
 export function useMediaViewStoreInst() {
   const { store } = useContext(MediaViewContext);
   return store;
+}
+
+export function useReload() {
+  return useContext(MediaViewContext).reload;
 }
 
 export function useApp(): App;
