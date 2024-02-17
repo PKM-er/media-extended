@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { pathToFileURL } from "url";
 import iso from "iso-639-1";
-import tag from "language-tags";
 import type { PaneType } from "obsidian";
 import {
   TextComponent,
@@ -10,6 +9,7 @@ import {
   Menu,
   Platform,
 } from "obsidian";
+import { getGroupedLangExtra } from "@/lib/lang/lang";
 import { showAtButton } from "@/lib/menu";
 import { LoginModal } from "@/login/modal";
 import type MxPlugin from "@/mx-main";
@@ -326,27 +326,23 @@ export class MxSettingTabs extends PluginSettingTab {
       );
 
     const fallback = "_follow_";
+    const extra = getGroupedLangExtra();
     const locales = Object.fromEntries(
-      iso.getAllCodes().flatMap((code) => {
-        if (code === "zh") {
-          return [
-            ["zh-Hans", "zh-Hans (简体中文)"],
-            ["zh-Hant", "zh-Hant (繁體中文)"],
-          ];
-        }
-        return [[code, `${code} (${iso.getNativeName(code)})`]];
+      iso.getAllCodes().flatMap((lang) => {
+        if (!extra.has(lang)) return [[lang, iso.getNativeName(lang)]];
+        return [...extra.get(lang)!.values()];
       }),
     );
     new Setting(container)
       .setName("Default locale")
-      .setDesc("The default locale for media subtitles")
+      .setDesc("The default locale for subtitles")
       .addDropdown((dropdown) =>
         dropdown
           .addOption(fallback, "Follow obsidian locale")
           .addOptions(locales)
           .setValue(this.state.defaultLanguage ?? fallback)
           .onChange((val) =>
-            this.state.setDefaultLanguage(val === fallback ? null : tag(val)),
+            this.state.setDefaultLanguage(val === fallback ? null : val),
           ),
       );
   }

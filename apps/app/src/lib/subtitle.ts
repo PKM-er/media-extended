@@ -1,10 +1,11 @@
 import { readdir, readFile } from "fs/promises";
 import { basename, dirname, join } from "path";
 import type { TextTrackInit } from "@vidstack/react";
-import tag, { type Tag } from "language-tags";
 import type { Vault } from "obsidian";
 import { Notice, TFile } from "obsidian";
 import type { MediaURL } from "@/web/url-match";
+import { groupBy } from "./group-by";
+import { format, langCodeToLabel } from "./lang/lang";
 
 const supportedFormat = ["vtt", "ass", "ssa", "srt"] as const;
 function isCaptionsFile(ext: string): ext is (typeof supportedFormat)[number] {
@@ -14,67 +15,28 @@ function isCaptionsFile(ext: string): ext is (typeof supportedFormat)[number] {
 export function getTracks<F extends FileInfo>(
   mediaBasename: string,
   siblings: F[],
-  defaultLang?: string,
+  defaultLangCode?: string,
 ): LocalTrack<F>[] {
   const subtitles = siblings.flatMap((file) => {
     const track = toTrack(file, mediaBasename);
     if (!track) return [];
     return [track];
   });
-  const defaultLangTag = defaultLang ? tag(defaultLang) : undefined;
   const subtitlesByLang = groupBy(subtitles, (v) => v.language);
-  const allLanguages = [...subtitlesByLang.keys()].map((t) =>
-    t ? tag(t) : undefined,
-  );
-  const subtitleDefaultLang = !defaultLang
+  const allLanguages = [...subtitlesByLang.keys()];
+  const subtitleDefaultLang = !defaultLangCode
     ? allLanguages.filter((l) => !!l)[0]
-    : allLanguages.find((tag) => {
+    : allLanguages.find((code) => {
         // exact match
-        if (!tag) return;
-        return tag.format() === defaultLangTag?.format();
+        if (!code) return;
+        return code === defaultLangCode;
       }) ??
-      allLanguages.find((tag) => {
-        // script or region code match
-        if (!tag) return;
-        const lang = tag.language();
-        const langDefault = defaultLangTag?.language();
-        if (!lang || !langDefault || lang.format() !== langDefault.format())
-          return false;
-        const script = tag.script(),
-          scriptDefault = defaultLangTag?.script();
-        const region = tag.region(),
-          regionDefault = defaultLangTag?.region();
-        if (lang.format() === "zh") {
-          if (scriptDefault?.format() === "Hans") {
-            return (
-              script?.format() === "Hans" ||
-              region?.format() === "CN" ||
-              region?.format() === "SG"
-            );
-          } else if (scriptDefault?.format() === "Hant") {
-            return (
-              script?.format() === "Hant" ||
-              region?.format() === "TW" ||
-              region?.format() === "HK" ||
-              region?.format() === "MO"
-            );
-          }
-        }
-        return (
-          (script &&
-            scriptDefault &&
-            script.format() === scriptDefault.format()) ||
-          (region &&
-            regionDefault &&
-            region.format() === regionDefault.format())
-        );
-      }) ??
-      allLanguages.find((tag) => {
+      allLanguages.find((code) => {
         // only language match
-        if (!tag) return;
-        const lang = tag.language();
-        if (!lang) return;
-        return lang.format() === defaultLangTag!.language()?.format();
+        if (!code) return;
+        const lang = code.split("-")[0],
+          defaultLang = defaultLangCode.split("-")[0];
+        return lang === defaultLang;
       });
 
   const uniqueTracks: LocalTrack<F>[] = [];
@@ -84,8 +46,7 @@ export function getTracks<F extends FileInfo>(
       if (track) {
         uniqueTracks.push({
           ...track,
-          default:
-            !!subtitleDefaultLang && lang === subtitleDefaultLang.format(),
+          default: !!subtitleDefaultLang && lang === subtitleDefaultLang,
         });
         return;
       }
@@ -173,20 +134,6 @@ export async function getTracksInVault(
   );
 }
 
-function groupBy<T, K>(array: T[], getKey: (item: T) => K): Map<K, T[]> {
-  const map = new Map<K, T[]>();
-  for (const item of array) {
-    const key = getKey(item);
-    const group = map.get(key);
-    if (group) {
-      group.push(item);
-    } else {
-      map.set(key, [item]);
-    }
-  }
-  return map;
-}
-
 interface LocalTrack<F extends FileInfo> {
   id: string;
   kind: "subtitles";
@@ -224,30 +171,17 @@ function toTrack<F extends FileInfo>(
       default: false,
     };
   }
-  const [fileBasename, language, ...rest] = file.basename.split(".");
-  if (fileBasename !== basename || rest.length > 0 || !tag.check(language))
-    return null;
+  const [fileBasename, lan, ...rest] = file.basename.split(".");
+  const langCode = format(lan);
+  if (fileBasename !== basename || rest.length > 0 || !langCode) return null;
 
-  const langTag = tag(language);
   return {
     kind: "subtitles",
-    language: langTag.format(),
-    id: `${file.basename}.${file.extension}.${language}`,
+    language: langCode,
+    id: `${file.basename}.${file.extension}.${langCode}`,
     src: file,
     type: file.extension,
-    label: langTagToLabel(langTag, file.extension),
+    label: `${langCodeToLabel(langCode)} (${file.extension})`,
     default: false,
   };
-}
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-export function langTagToLabel(lang: Tag, comment: string) {
-  const primaryDesc = lang.descriptions()[0];
-  if (primaryDesc) return `${primaryDesc} (${comment})`;
-  const langDesc = lang.language()?.descriptions()[0];
-  const scriptDesc = lang.script()?.descriptions()[0];
-  const regionDesc = lang.region()?.descriptions()[0];
-  if (!langDesc) return `${lang.format()} (${comment})`;
-  if (!scriptDesc && !regionDesc) return langDesc;
-  return `${langDesc} (${scriptDesc || regionDesc}, ${comment})`;
 }
