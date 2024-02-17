@@ -21,6 +21,17 @@ const hostnamePattern =
   /^(?:(?:[a-zA-Z\d]|[a-zA-Z\d][a-zA-Z\d-]*[a-zA-Z\d])\.)*(?:[A-Za-z\d]|[A-Za-z\d][A-Za-z\d-]*[A-Za-z\d])$/;
 
 function toURLGuess(query: string): URL | null {
+  // simple check if absolute path
+  if (
+    (Platform.isWin && query.match(/^[a-zA-Z]+:[\\/]/)) ||
+    query.startsWith("/")
+  ) {
+    try {
+      return pathToFileURL(query) as globalThis.URL;
+    } catch {
+      // ignore
+    }
+  }
   const url = toURL(query);
   if (!url) return null;
   const { hostname } = url;
@@ -32,7 +43,7 @@ function toURLGuess(query: string): URL | null {
 export class MediaSwitcherModal extends SuggestModal<MediaURL> {
   constructor(public plugin: MxPlugin) {
     super(plugin.app);
-    this.setPlaceholder("Enter URL or media ID");
+    this.setPlaceholder("Enter file path, URL or media ID");
     this.setInstructions([
       { command: "↑↓", purpose: "to navigate" },
       { command: "↵", purpose: "to open url" },
@@ -78,7 +89,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
         guess.push(new URL(`https://www.youtube.com/watch?v=${query}`));
       }
       if (!match) {
-        const fixProtocol = toURL(`https://${query}`);
+        const fixProtocol = toURLGuess(`https://${query}`);
         if (fixProtocol) {
           guess.push(fixProtocol);
         }
@@ -103,7 +114,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     value: MediaURL | "file-picker" | "file-protocol-picker",
     el: HTMLElement,
   ) {
-    if (value instanceof MediaURL) el.setText(value.href);
+    if (value instanceof MediaURL) el.setText(decodeURI(value.href));
     else if (value === "file-picker") {
       el.setText("Open local file");
     } else if (value === "file-protocol-picker") {
