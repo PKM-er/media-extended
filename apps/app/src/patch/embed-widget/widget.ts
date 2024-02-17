@@ -106,7 +106,7 @@ abstract class UrlPlayerWidget extends WidgetType {
         this.setPos(domToUpdate);
       }
     } else {
-      info.child.setSource(this.media, { title: true });
+      info.child.setSource(this.media);
     }
     return true;
   }
@@ -130,7 +130,7 @@ abstract class UrlPlayerWidget extends WidgetType {
     //   (evt) => 0 === evt.button && view.hasFocus && evt.preventDefault(),
     // );
     const child = new UrlMediaRenderChild(container, this.plugin);
-    child.setSource(this.media, { title: true });
+    child.setSource(this.media);
     child.load();
     this.hookClickHandler(view, container);
     this.setInfo(container, child);

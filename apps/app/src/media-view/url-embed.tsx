@@ -2,8 +2,11 @@ import { MarkdownRenderChild } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
+import { getTracksLocal } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
+import type { MediaURL } from "@/web/url-match";
 import { type PlayerComponent } from "./base";
+import { MEDIA_URL_VIEW_TYPE, MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
 
 export class MediaRenderChild
   extends MarkdownRenderChild
@@ -22,8 +25,30 @@ export class MediaRenderChild
     return this.store.getState().source?.url ?? null;
   }
 
-  get setSource() {
-    return this.store.getState().setSource;
+  async setSource(
+    media: MediaURL,
+    other: Partial<{ title: string; hash: string }> = {},
+  ) {
+    const viewType = this.plugin.urlViewType.getPreferred(media);
+    const defaultLang = this.plugin.settings.getState().getDefaultLang();
+    this.store.getState().setSource(media, {
+      title: other.title ?? true,
+      hash: other.hash,
+      enableWebview: viewType === MEDIA_WEBPAGE_VIEW_TYPE,
+      type:
+        viewType === MEDIA_URL_VIEW_TYPE.video
+          ? "video/mp4"
+          : viewType === MEDIA_URL_VIEW_TYPE.audio
+          ? "audio/mp3"
+          : undefined,
+      textTracks:
+        viewType === MEDIA_URL_VIEW_TYPE.video
+          ? await getTracksLocal(media, defaultLang).catch((e) => {
+              console.error("Failed to get text tracks", e);
+              return [];
+            })
+          : [],
+    });
   }
 
   render() {

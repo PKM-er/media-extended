@@ -1,7 +1,7 @@
 import { readdir, readFile } from "fs/promises";
 import { basename, dirname, join } from "path";
 import type { TextTrackInit } from "@vidstack/react";
-import iso from "iso-639-1";
+import tag, { type Tag } from "language-tags";
 import type { Vault } from "obsidian";
 import { Notice, TFile } from "obsidian";
 import type { MediaURL } from "@/web/url-match";
@@ -21,16 +21,71 @@ export function getTracks<F extends FileInfo>(
     if (!track) return [];
     return [track];
   });
-  const byLang = groupBy(subtitles, (v) => v.language);
+  const defaultLangTag = defaultLang ? tag(defaultLang) : undefined;
+  const subtitlesByLang = groupBy(subtitles, (v) => v.language);
+  const allLanguages = [...subtitlesByLang.keys()].map((t) =>
+    t ? tag(t) : undefined,
+  );
+  const subtitleDefaultLang = !defaultLang
+    ? allLanguages.filter((l) => !!l)[0]
+    : allLanguages.find((tag) => {
+        // exact match
+        if (!tag) return;
+        return tag.format() === defaultLangTag?.format();
+      }) ??
+      allLanguages.find((tag) => {
+        // script or region code match
+        if (!tag) return;
+        const lang = tag.language();
+        const langDefault = defaultLangTag?.language();
+        if (!lang || !langDefault || lang.format() !== langDefault.format())
+          return false;
+        const script = tag.script(),
+          scriptDefault = defaultLangTag?.script();
+        const region = tag.region(),
+          regionDefault = defaultLangTag?.region();
+        if (lang.format() === "zh") {
+          if (scriptDefault?.format() === "Hans") {
+            return (
+              script?.format() === "Hans" ||
+              region?.format() === "CN" ||
+              region?.format() === "SG"
+            );
+          } else if (scriptDefault?.format() === "Hant") {
+            return (
+              script?.format() === "Hant" ||
+              region?.format() === "TW" ||
+              region?.format() === "HK" ||
+              region?.format() === "MO"
+            );
+          }
+        }
+        return (
+          (script &&
+            scriptDefault &&
+            script.format() === scriptDefault.format()) ||
+          (region &&
+            regionDefault &&
+            region.format() === regionDefault.format())
+        );
+      }) ??
+      allLanguages.find((tag) => {
+        // only language match
+        if (!tag) return;
+        const lang = tag.language();
+        if (!lang) return;
+        return lang.format() === defaultLangTag!.language()?.format();
+      });
+
   const uniqueTracks: LocalTrack<F>[] = [];
-  const hasDefaultLang = byLang.has(defaultLang);
-  byLang.forEach((tracks, lang) => {
+  subtitlesByLang.forEach((tracks, lang) => {
     for (const fmt of supportedFormat) {
       const track = tracks.find((track) => track.type === fmt);
       if (track) {
         uniqueTracks.push({
           ...track,
-          default: lang === defaultLang,
+          default:
+            !!subtitleDefaultLang && lang === subtitleDefaultLang.format(),
         });
         return;
       }
@@ -39,7 +94,7 @@ export function getTracks<F extends FileInfo>(
   if (uniqueTracks.length === 0) {
     return [];
   }
-  if (!hasDefaultLang) {
+  if (!subtitleDefaultLang) {
     uniqueTracks[0].default = true;
   }
   return uniqueTracks;
@@ -170,15 +225,29 @@ function toTrack<F extends FileInfo>(
     };
   }
   const [fileBasename, language, ...rest] = file.basename.split(".");
-  if (fileBasename !== basename || rest.length > 0 || !iso.validate(language))
+  if (fileBasename !== basename || rest.length > 0 || !tag.check(language))
     return null;
+
+  const langTag = tag(language);
   return {
     kind: "subtitles",
-    language,
+    language: langTag.format(),
     id: `${file.basename}.${file.extension}.${language}`,
     src: file,
     type: file.extension,
-    label: iso.getNativeName(language) || language,
+    label: langTagToLabel(langTag, file.extension),
     default: false,
   };
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+export function langTagToLabel(lang: Tag, comment: string) {
+  const primaryDesc = lang.descriptions()[0];
+  if (primaryDesc) return `${primaryDesc} (${comment})`;
+  const langDesc = lang.language()?.descriptions()[0];
+  const scriptDesc = lang.script()?.descriptions()[0];
+  const regionDesc = lang.region()?.descriptions()[0];
+  if (!langDesc) return `${lang.format()} (${comment})`;
+  if (!scriptDesc && !regionDesc) return langDesc;
+  return `${langDesc} (${scriptDesc || regionDesc}, ${comment})`;
 }

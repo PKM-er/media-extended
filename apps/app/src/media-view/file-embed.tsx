@@ -76,9 +76,11 @@ export class MediaFileEmbed
   }
 
   async loadFile() {
-    await this.store
-      .getState()
-      .loadFile(this.file, this.plugin.app.vault, this.subpath);
+    await this.store.getState().loadFile(this.file, {
+      vault: this.plugin.app.vault,
+      subpath: this.subpath,
+      defaultLang: this.plugin.settings.getState().getDefaultLang(),
+    });
   }
 
   onunload() {

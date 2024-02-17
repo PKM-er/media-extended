@@ -48,7 +48,10 @@ export interface MediaViewState {
   hash: HashProps;
   setHash: (hash: string) => void;
   getPlayer(): Promise<MediaPlayerInstance>;
-  loadFile(file: TFile, vault: Vault, subpath?: string): Promise<void>;
+  loadFile(
+    file: TFile,
+    ctx: { vault: Vault; subpath?: string; defaultLang: string },
+  ): Promise<void>;
   setSource(url: MediaURL, other?: Partial<SourceFacet>): void;
   transform: Partial<TransformConfig> | null;
   setTransform: (transform: Partial<TransformConfig> | null) => void;
@@ -112,8 +115,8 @@ export function createMediaViewStore() {
       set((og) => ({ hash: { ...og.hash, ...parseHashProps(hash) } }));
       applyTempFrag(get());
     },
-    async loadFile(file, vault, subpath) {
-      const textTracks = await getTracksInVault(file, vault);
+    async loadFile(file, { vault, subpath, defaultLang }) {
+      const textTracks = await getTracksInVault(file, vault, defaultLang);
       set(({ source, hash }) => ({
         source: { ...source, url: fromFile(file, vault) },
         textTracks,

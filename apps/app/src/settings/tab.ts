@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { pathToFileURL } from "url";
+import iso from "iso-639-1";
+import tag from "language-tags";
 import type { PaneType } from "obsidian";
 import {
   TextComponent,
@@ -320,6 +322,31 @@ export class MxSettingTabs extends PluginSettingTab {
           .setValue(this.state.loadStrategy)
           .onChange((val) =>
             this.state.setLoadStrategy(val as "play" | "eager"),
+          ),
+      );
+
+    const fallback = "_follow_";
+    const locales = Object.fromEntries(
+      iso.getAllCodes().flatMap((code) => {
+        if (code === "zh") {
+          return [
+            ["zh-Hans", "zh-Hans (简体中文)"],
+            ["zh-Hant", "zh-Hant (繁體中文)"],
+          ];
+        }
+        return [[code, `${code} (${iso.getNativeName(code)})`]];
+      }),
+    );
+    new Setting(container)
+      .setName("Default locale")
+      .setDesc("The default locale for media subtitles")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption(fallback, "Follow obsidian locale")
+          .addOptions(locales)
+          .setValue(this.state.defaultLanguage ?? fallback)
+          .onChange((val) =>
+            this.state.setDefaultLanguage(val === fallback ? null : tag(val)),
           ),
       );
   }

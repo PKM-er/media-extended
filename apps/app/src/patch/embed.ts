@@ -1,12 +1,9 @@
 import type { EmbedCreator, Plugin } from "obsidian";
 import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle } from "@/lib/size-syntax";
-import { getTracksLocal } from "@/lib/subtitle";
 import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
-import { MEDIA_WEBPAGE_VIEW_TYPE } from "@/media-view/view-type";
-import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import setupEmbedWidget from "./embed-widget";
@@ -63,23 +60,14 @@ function injectFileMediaEmbed(this: Plugin, embedCreator: EmbedCreator) {
 class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
   constructor(
     public info: MediaURL,
-    public viewType: RemoteMediaViewType,
     public containerEl: HTMLElement,
     public plugin: MxPlugin,
   ) {
     super(containerEl, plugin);
     containerEl.addClasses(["mx-external-media-embed"]);
   }
-  async onload() {
-    const textTracks = await getTracksLocal(this.info).catch((e) => {
-      console.error("Failed to get text tracks", e);
-      return [];
-    });
-    this.setSource(this.info, {
-      textTracks,
-      title: true,
-      enableWebview: this.viewType === MEDIA_WEBPAGE_VIEW_TYPE,
-    });
+  onload() {
+    this.setSource(this.info);
   }
 }
 
@@ -108,7 +96,6 @@ function injectUrlMediaEmbed(this: MxPlugin) {
     function replace({ title, url }: EmbedSource, target: HTMLElement) {
       const src = plguin.resolveUrl(url);
       if (!src || !shouldOpenMedia(src, plguin)) return;
-      const viewType = plguin.urlViewType.getPreferred(src);
       const newWarpper = createSpan({
         cls: ["media-embed", "external-embed", "is-loaded"],
         attr: {
@@ -117,9 +104,7 @@ function injectUrlMediaEmbed(this: MxPlugin) {
         },
       });
       target.replaceWith(newWarpper);
-      ctx.addChild(
-        new UrlEmbedMarkdownRenderChild(src, viewType, newWarpper, plguin),
-      );
+      ctx.addChild(new UrlEmbedMarkdownRenderChild(src, newWarpper, plguin));
     }
   });
 }

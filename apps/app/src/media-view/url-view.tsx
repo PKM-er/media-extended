@@ -30,7 +30,8 @@ export class VideoUrlView extends MediaUrlView {
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
-        const textTracks = await getTracksLocal(url).catch((e) => {
+        const defaultLang = this.plugin.settings.getState().getDefaultLang();
+        const textTracks = await getTracksLocal(url, defaultLang).catch((e) => {
           console.error("Failed to get text tracks", e);
           return [];
         });

@@ -50,6 +50,9 @@ importers:
       iso-639-1:
         specifier: ^3.1.0
         version: 3.1.0
+      language-tags:
+        specifier: ^1.0.9
+        version: 1.0.9
       maverick.js:
         specifier: 0.41.2
         version: 0.41.2
@@ -105,6 +108,9 @@ importers:
       '@types/eslint':
         specifier: ~8.4.6
         version: 8.4.10
+      '@types/language-tags':
+        specifier: ^1.0.4
+        version: 1.0.4
       '@types/react':
         specifier: ^18.0.0
         version: 18.2.48
@@ -2653,6 +2659,10 @@ packages:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
       '@types/node': 17.0.45
+    dev: true
+
+  /@types/language-tags@1.0.4:
+    resolution: {integrity: sha512-20PQbifv3v/djCT+KlXybv0KqO5ofoR1qD1wkinN59kfggTPVTWGmPFgL/1yWuDyRcsQP/POvkqK+fnl5nOwTg==}
     dev: true
 
   /@types/less@3.0.6:

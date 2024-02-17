@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { assertNever } from "assert-never";
+import type { Tag } from "language-tags";
+import tag from "language-tags";
 import type { PaneType } from "obsidian";
-import { Platform, debounce } from "obsidian";
+import { Notice, Platform, debounce, moment } from "obsidian";
 import { createStore } from "zustand";
 import { enumerate } from "@/lib/must-include";
 import { pick, omit } from "@/lib/pick";
@@ -20,6 +22,7 @@ type MxSettingValues = {
     click: OpenLinkBehavior;
     alt: OpenLinkBehavior;
   };
+  defaultLanguage?: string;
   loadStrategy: "play" | "eager";
   linkHandler: Record<RemoteMediaViewType, URLMatchPattern[]>;
   timestampTemplate: string;
@@ -47,6 +50,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "biliDefaultQuality",
   "screenshotFormat",
   "screenshotQuality",
+  "defaultLanguage",
 );
 
 const mxSettingsDefault = {
@@ -116,6 +120,8 @@ export type MxSettings = {
   setScreenshotFormat: (
     format: "image/png" | "image/jpeg" | "image/webp",
   ) => void;
+  setDefaultLanguage: (lang: Tag | null) => void;
+  getDefaultLang(): string;
   setScreenshotQuality: (quality: number | null) => void;
   setTimestampOffset: (offset: number) => void;
   setInsertPosition: (pos: "before" | "after") => void;
@@ -158,6 +164,23 @@ export function createSettingsStore(plugin: MxPlugin) {
     setScreenshotQuality(quality) {
       set({ screenshotQuality: quality ?? undefined });
       save(get());
+    },
+    setDefaultLanguage(lang) {
+      set({ defaultLanguage: lang?.format() });
+      save(get());
+    },
+    getDefaultLang() {
+      const userDefaultLang = get().defaultLanguage;
+      const globalDefaultLang = moment.locale();
+      if (userDefaultLang && !tag.check(userDefaultLang)) {
+        new Notice(
+          `Invalid language code detected in preferences: ${userDefaultLang}, reverting to ${globalDefaultLang}.`,
+        );
+        set({ defaultLanguage: undefined });
+        save(get());
+        return globalDefaultLang;
+      }
+      return userDefaultLang ?? moment.locale();
     },
     getUrlMappingData() {
       return toUrlMappingData(get().urlMapping);
