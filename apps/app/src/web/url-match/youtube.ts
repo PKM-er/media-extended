@@ -5,12 +5,23 @@ import { removeHashTempFragment, type URLResolver } from "./base";
 import { MediaHost } from "./supported";
 
 function parseVideoId(url: URL): string | null {
+  const pathSegments = url.pathname.split("/");
+  // http://youtu.be/0zM3nApSvMg
   if (url.hostname === "youtu.be") {
-    const seg = url.pathname.split("/");
-    if (seg.length === 2) return seg[1];
+    if (pathSegments.length === 2) return pathSegments[1];
   }
-  if (url.hostname === "www.youtube.com") {
-    return url.searchParams.get("v");
+  if (url.hostname === "www.youtube.com" || url.hostname === "youtube.com") {
+    // https://youtube.com/shorts/0dPkkQeRwTI?feature=share
+    if (pathSegments.length === 2 && pathSegments[1] === "watch") {
+      return url.searchParams.get("v");
+    }
+    // http://www.youtube.com/v/0zM3nApSvMg
+    // http://www.youtube.com/embed/0zM3nApSvMg?rel=0
+    // https://youtube.com/shorts/0dPkkQeRwTI
+    const idInPath = ["shorts", "embed", "v"];
+    if (pathSegments.length === 3 && idInPath.includes(pathSegments[1])) {
+      return pathSegments[2];
+    }
   }
   return null;
 }
