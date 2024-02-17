@@ -11,22 +11,15 @@ export function canProviderScreenshot(provider: MediaProviderAdapter | null) {
 export async function takeScreenshot(
   provider: MediaProviderAdapter,
   type: "image/jpeg" | "image/webp" | "image/png",
-  quality: number | null,
+  quality: number | undefined,
 ) {
   const mimeType =
     Platform.isSafari && type === "image/webp" ? "image/jpeg" : type;
   try {
     if (isVideoProvider(provider)) {
-      return await captureScreenshot(
-        provider.video,
-        mimeType,
-        quality ?? undefined,
-      );
+      return await captureScreenshot(provider.video, mimeType, quality);
     } else if (provider instanceof WebiviewMediaProvider) {
-      return await provider.media.methods.screenshot(
-        mimeType,
-        quality ?? undefined,
-      );
+      return await provider.media.methods.screenshot(mimeType, quality);
     } else {
       throw new Error("Unsupported provider for screenshot");
     }
