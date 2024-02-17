@@ -30,18 +30,18 @@ export function registerProtocol(plugin: MxPlugin) {
     );
   }
 
-  plugin.registerObsidianProtocolHandler("mx-open", (params) => {
+  plugin.registerObsidianProtocolHandler("mx-open", async (params) => {
     const url = toURL(params.url);
     if (!url) {
       new Notice("Invalid URL: " + params.url);
       return;
     }
-    handleUrl(url);
+    await handleUrl(url);
   });
 
-  function handlePathnameProtocol(params: ObsidianProtocolData) {
+  async function handlePathnameProtocol(params: ObsidianProtocolData) {
     // remove "mx-open/"
-    const base = decodeURI(params.action.substring(ACTION.length + 1));
+    const base = params.action.substring(ACTION.length + 1);
     const url = toURL(base);
     const search = new URLSearchParams(params);
     search.delete("action");
@@ -51,14 +51,31 @@ export function registerProtocol(plugin: MxPlugin) {
       return;
     }
     url.search = search.toString();
-    handleUrl(url);
+    await handleUrl(url);
   }
-  function handleUrl(url: URL) {
+  async function handleUrl(url: URL) {
     const urlInfo = MediaURL.create(url);
     if (!urlInfo) {
       new Notice("Invail URL: " + url.href);
       return;
     }
-    plugin.leafOpener.openMedia(urlInfo, undefined);
+    new Notice(
+      createFragment((e) => {
+        e.appendText(
+          `Opening ${urlInfo.type} ${
+            urlInfo.inferredType ?? "content"
+          } from browser: `,
+        );
+        e.createEl("br");
+        e.createEl("a", {
+          text:
+            url.href.length > 50
+              ? url.href.slice(0, 25) + "..." + url.href.slice(-25)
+              : url.href,
+          href: url.href,
+        });
+      }),
+    );
+    await plugin.leafOpener.openMedia(urlInfo, "tab");
   }
 }
