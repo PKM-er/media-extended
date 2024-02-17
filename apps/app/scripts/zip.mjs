@@ -15,7 +15,7 @@ for (const filename of assets) {
 const version = JSON.parse(readFileSync(join("package.json"), "utf-8")).version;
 const out = join("dist", `media-extended.zip`)
 await pipeline(
-  zip.generateNodeStream({ type: "nodebuffer", streamFiles: true }),
+  zip.generateNodeStream({ type: "nodebuffer", streamFiles: true, compression: "DEFLATE" }),
   createWriteStream(out),
 );
 console.log(out + " written.");
