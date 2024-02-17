@@ -1,4 +1,8 @@
 {
   "install": "Install",
-  "first-note": "First Media Note"
+  "first-note": "First Media Note",
+  "webpage": "Webpage player",
+  "subtitle": "Load External Subtitle",
+  "template": "Template",
+  "media-clip": "Media Clip"
 }

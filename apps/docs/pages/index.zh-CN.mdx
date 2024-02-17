@@ -1,1 +1,48 @@
-你好！
+import { Cards, Card } from "nextra/components";
+import { FaDownload, FaHammer } from "react-icons/fa6";
+
+# Media Extended
+
+为 Obsidian.md 提供增强的视频、音频播放体验 🎥📚 
+
+该插件致力于让您在 Obsidian.md 中的笔记整合中轻松加入视频、音频等多媒体内容。无论您是学生、研究员还是内容创作者，都可以方便地在您的数字笔记内直接嵌入、控制及引用音视频材料。
+
+import { Bleed } from "nextra-theme-docs";
+
+<Bleed>
+  ![Media Extended 插件展示播放器和媒体笔记](./getting-started/first-note.jpg)
+</Bleed>
+
+## 开始使用 🚀 [#getting-started]
+
+<Cards>
+  <Card
+    icon={<FaDownload />}
+    title="安装指南"
+    href="/getting-started/install/"
+  />
+  <Card
+    icon={<FaHammer />}
+    title="基础操作"
+    href="/getting-started/first-note/"
+  />
+</Cards>
+
+## 核心功能 🌟 [#features]
+
+- **与 Obsidian 完美融合** 🤝: 支持实时预览和多窗口，为您的工作流程带来无缝体验。
+- **多媒体文件嵌入** 📁: 轻松地将本地或网络的视频与音频文件嵌入笔记中，扩展笔记的信息维度和参考价值。
+- **灵活的播放控制** ⏯️: 通过命令和快捷键实现播放、暂停、跳转及时间戳快速引用，提高效率。
+- **覆盖多个视频平台** 🌐: 支持 YouTube、Vimeo、Coursera、Bilibili 等主流平台，理论上来说，只要是能在网页上播放的视频，我们都能够提供支持。
+- **支持本地字幕** 📑: 添加 SRT、VTT 和 ASS 格式的本地字幕，帮助您更好地跟随或理解不同语言的内容。
+- **精确的媒体片段** 🎞️: 精选特定片段播放，专注于讲座或展示的关键部分。
+
+## 即将推出 🔮 [#features-next]
+
+- **移动端支持**📱
+- **元数据与字幕提取** 📊: 直接从 YouTube 和 Bilibili 中提取信息和字幕。
+- **播放列表功能** 📋: 创建合集整理媒体文件。
+- ** Canvas 支持** 🎨：让您的思维导图变得更加灵活
+- (付费特性) **AI 概要总结** 🤖: 对媒体内容进行简要总结。
+- (付费特性) **图像文字识别(OCR)** 📷: 从截图中提取文字、表格，便于引用和整合。
+- (付费特性) **视频转文字记录** 📝: 自动将视频内容转化为文字记录。

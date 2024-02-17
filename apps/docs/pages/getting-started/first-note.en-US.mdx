@@ -1,21 +1,27 @@
 # Create Your First Media Note 
 
-Welcome to your first adventure in efficient video note-taking with Media Extended. We've made everything straightforward, so even if you're just starting, you'll find it incredibly easy to dive in and begin capturing media notes right away. Let's leave the complexity behind and enjoy a smooth, intuitive experience together.
+Welcome to your first adventure in efficient video note-taking with Media Extended. We've made everything straightforward, so even if you're just starting, you'll find it incredibly easy to dive in and begin capturing media notes right away. 
 
 ## Opening a player [#open-player]
 
 To kick off, let's try opening a YouTube video directly within Obsidian. You can easily do this by clicking on the link to ["Me at the zoo" video](obsidian://mx-open?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DjNQXAC9IVRw)
 
+import { Bleed } from "nextra-theme-docs";
+
+<Bleed>
 ![first player with youtube video](./first-player.png)
+</Bleed>
 
 Upon opening the video in the enhanced player provided by the plugin, you'll notice two essential buttons at the top of the player: the **Screenshot** and **Timestamp** buttons.
 
-- **Timestamp Button**: Clicking this button will create a new note within Obsidian that includes a timestamp linked directly to the moment in the video you're watching. This feature is invaluable for creating precise, contextual notes on video content.
-- **Screenshot Button**: This button allows you to capture a screenshot of the current video frame and save it as an image file within your vault, alongside the timestamp and video link. This feature is perfect for capturing visual content that you want to reference in your notes.
+- **Timestamp ⭐ **: Clicking this button will create a new note within Obsidian that includes a timestamp linked directly to the moment in the video you're watching. 
+- **Screenshot 📷 **: This button allows you to capture a screenshot of the current video frame and save it as an image file within your vault, alongside the timestamp and video link. 
 
 When you're ready to start taking notes, simply click the **Timestamp** or **Screenshot** button to begin capturing your thoughts and observations.
 
+<Bleed>
 ![first media note](./first-note.png)
+</Bleed>
 
 ## Taking Notes [#taking-notes]
 
@@ -23,7 +29,9 @@ Now you've opened your first media note, it's time to start taking notes. The Me
 
 To do more with the player while taking notes, you can open the command palette and search for `Media Extended:` to see all available commands. Here you can fast forward, rewind, pause, play, and more. Per obsidian spec for plugin, no hotkeys are assigned by default, but you can assign them yourself following [this guide](https://help.obsidian.md/User+interface/Hotkeys).
 
+<Bleed>
 ![media commands](./media-commands.png)
+</Bleed>
 
 You may notice that the player is now marked as "active" with a red icon in tab header. This indicates that the player is currently being used to take notes. This is useful when you're working inside notes that is not nessessarily a media note, but you still want to control the player.
 
@@ -31,45 +39,49 @@ You may notice that the player is now marked as "active" with a red icon in tab 
 
 When working with multiple notes with different media, you could find it annoying to switch between players. Media Extended solves this problem by integrating obsidian's native "pin tab" feature. Just right-click on the player tab and select "Pin". Now, this player will be shared across all notes, and you can easily switch between notes without being spammed with multiple players.
 
+<Bleed>
 ![pin player](./pin-player.png)
+</Bleed>
 
 ## Opening from different sources [#different-sources]
 
 import { Tabs, Callout } from 'nextra/components'
 
-
 Here are guides for opening media from different sources:
 
 <Tabs items={['Local file', 'Websites']}>
   <Tabs.Tab>
-  1. For media in your vault, just open it as you would any other file. The plugin will recognize it and open it in the enhanced player.
-  2. For other files on your computer, use [media quick switcher](#quick-switcher) by either entering path or using the file picker by invoking "Open local file".
-  </Tabs.Tab>
-  <Tabs.Tab>
-  Whether you're using a self-hosted media server, a NAS or public media host like YouTube, Vimeo, bilibili, you can open the media in the enhanced player, as long as direct url ends with file extension or webpage that contains the media is available.
+    1. For media in your vault, just open it as you would any other file. The plugin will recognize it and open it in the enhanced player.
+    2. For other files on your computer, use [media quick switcher](#quick-switcher) by either entering path or using the file picker by invoking "Open local file".
+    </Tabs.Tab>
+    <Tabs.Tab>
+    Whether you're using a self-hosted media server, a NAS or public media host like YouTube, Vimeo, bilibili, you can open the media in the enhanced player, as long as direct url ends with file extension or webpage that contains the media is available.
 
-  1. In [media quick switcher](#quick-switcher), enter the url or media ID (for YouTube and bilibili) and press enter.
-  2. In your browser, add the following prefix to whatever url you want to open, and press enter: 
-  ```txt copy
-  obsidian://mx-open/
-  ```
+    1. In [media quick switcher](#quick-switcher), enter the url or media ID (for YouTube and bilibili) and press enter.
+    2. In your browser, add the following prefix to whatever url you want to open, and press enter: 
+    ```txt copy
+    obsidian://mx-open/
+    ```
 
-  <Callout type="warning">
-    If website requires login to access content or request login during playback, you can open a browser page to login from the plugin's settings, or Login command. 
-    
-    It's required by bilibili, since it will interrupt playback to request login.
+    <Callout type="warning">
+        If website requires login to access content or request login during playback, you can open a browser page to login from the plugin's settings, or `Login website` command. 
+        
+        It's required by bilibili, since it will interrupt playback to request login.
 
-    ![login from setting tab](./login-setting.png)
-  </Callout>
-  <Callout type="warning">
-    If your media require DRM, it won't work with the plugin as obsidian.md doesn't support it.
-  </Callout>
-  </Tabs.Tab>
+        <Bleed>
+        ![login from setting tab](./login-setting.png)
+        </Bleed>
+    </Callout>
+    <Callout type="warning">
+        If your media require DRM, it won't work with the plugin as obsidian.md doesn't support it.
+    </Callout>
+    </Tabs.Tab>
 </Tabs>
 
 ### Media Quick Switcher [#quick-switcher]
 
 If you're opening a media file not in your vault, you can use the media quick switcher to open it. You can invoke it by click on play button in the ribbon or using the command palette to search for `Media Extended: Open media`.
 
+<Bleed>
 ![quick switcher](./quick-switcher.png)
-
+</Bleed>
