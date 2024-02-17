@@ -15,7 +15,7 @@ const config: DocsThemeConfig = {
   ],
   logo: (
     <div className="flex gap-2 items-center">
-      <Image alt="Media Extended logo" src="/img/logo.svg" width={32} height={32} />
+      {/* <Image alt="Media Extended logo" src="/img/logo.svg" width={32} height={32} /> */}
       <b>Media Extended</b>
     </div>
   ),
