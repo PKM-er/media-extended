@@ -110,6 +110,7 @@ export abstract class MediaRemoteView
     } else {
       const now = this.store.getState().source?.url;
       if (!url.compare(now)) {
+        this.render();
         await this.setSource(url);
       }
     }
@@ -142,7 +143,14 @@ export abstract class MediaRemoteView
   }
 
   render() {
-    this.root?.unmount();
+    if (this.root) {
+      // this.contentEl
+      //   .querySelectorAll<HTMLIFrameElement>("iframe, webview")
+      //   .forEach((el) => {
+      //     el.src = "";
+      //   });
+      this.root.unmount();
+    }
     this.root = ReactDOM.createRoot(this.contentEl);
     this.root.render(
       <MediaViewContext.Provider
