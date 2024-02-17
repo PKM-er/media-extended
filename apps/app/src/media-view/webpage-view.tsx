@@ -1,5 +1,5 @@
-import type { ViewStateResult } from "obsidian";
 import { handlePaneMigration } from "@/lib/window-migration";
+import type { MediaURL } from "@/web/url-match";
 import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
@@ -34,19 +34,7 @@ export class MediaWebpageView extends MediaRemoteView {
     return `${this.playerTitle} - ${mediaHostDisplayName[this.getHost()]}`;
   }
 
-  async setState(
-    state: MediaWebpageViewState,
-    result: ViewStateResult,
-  ): Promise<void> {
-    if (typeof state.source === "string") {
-      const url = this.plugin.resolveUrl(state.source);
-      if (!url) {
-        console.warn("Invalid URL", state.source);
-      } else {
-        this.store.getState().setSource(url, { enableWebview: true });
-        this.render();
-      }
-    }
-    return super.setState(state, result);
+  setSource(url: MediaURL) {
+    this.store.getState().setSource(url, { enableWebview: true });
   }
 }

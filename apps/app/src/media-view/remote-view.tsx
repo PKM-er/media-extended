@@ -1,5 +1,5 @@
 import { around } from "monkey-around";
-import type { WorkspaceLeaf, Menu } from "obsidian";
+import type { WorkspaceLeaf, Menu, ViewStateResult } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
 import {
@@ -10,6 +10,7 @@ import {
 import { Player } from "@/components/player";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
+import type { MediaURL } from "@/web/url-match";
 import type { PlayerComponent } from "./base";
 import { addAction, onPaneMenu } from "./base";
 import type { RemoteMediaViewType } from "./view-type";
@@ -29,6 +30,9 @@ export abstract class MediaRemoteView
   root: ReactDOM.Root | null = null;
   navigation = true;
 
+  setSource(url: MediaURL): any {
+    this.store.getState().setSource(url);
+  }
   getMediaInfo() {
     return this.store.getState().source?.url ?? null;
   }
@@ -95,6 +99,20 @@ export abstract class MediaRemoteView
       ...state,
       source: url ? url.jsonState.source : state.source,
     };
+  }
+
+  async setState(state: any, result: ViewStateResult): Promise<void> {
+    await super.setState(state, result);
+    if (!("source" in state)) return;
+    const url = this.plugin.resolveUrl(state.source);
+    if (!url) {
+      console.warn("Invalid URL", state.source);
+    } else {
+      const now = this.store.getState().source?.url;
+      if (!url.compare(now)) {
+        await this.setSource(url);
+      }
+    }
   }
 
   setEphemeralState(state: any): void {

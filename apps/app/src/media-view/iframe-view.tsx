@@ -1,4 +1,3 @@
-import type { ViewStateResult } from "obsidian";
 import { handlePaneMigration } from "@/lib/window-migration";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
@@ -17,21 +16,6 @@ export class MediaEmbedView extends MediaRemoteView {
     super.onload();
     this.registerRemoteTitleChange();
     handlePaneMigration(this, () => this.render());
-  }
-  async setState(
-    state: MediaRemoteViewState,
-    result: ViewStateResult,
-  ): Promise<void> {
-    if (typeof state.source === "string") {
-      const url = this.plugin.resolveUrl(state.source);
-      if (!url) {
-        console.warn("Invalid URL", state.source);
-      } else {
-        this.store.getState().setSource(url);
-        this.render();
-      }
-    }
-    return super.setState(state, result);
   }
 
   getDisplayText(): string {

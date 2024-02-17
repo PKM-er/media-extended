@@ -56,7 +56,7 @@ export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
 
   resolveUrl(url: string | URL | null | undefined): MediaURL | null {
-    if (!url) return null;
+    if (!url || (typeof url !== "string" && !(url instanceof URL))) return null;
     return resolveMxProtocol(toURL(url), this.settings.getState());
   }
   api: MxAPI = {

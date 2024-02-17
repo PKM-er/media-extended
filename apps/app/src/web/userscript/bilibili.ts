@@ -160,11 +160,10 @@ export default class BilibiliPlugin extends MediaPlugin {
         }
       });
       observer.observe(playerEl, { attributes: true });
-      // timeout after 2 seconds
       setTimeout(() => {
         observer.disconnect();
         resolve(undefined);
-      }, 2e3);
+      }, 6e3);
     });
   }
 }

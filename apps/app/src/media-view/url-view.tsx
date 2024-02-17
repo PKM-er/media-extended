@@ -1,5 +1,5 @@
-import type { ViewStateResult } from "obsidian";
 import { getTracksLocal } from "@/lib/subtitle";
+import type { MediaURL } from "@/web/url-match";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";
@@ -21,28 +21,18 @@ export class VideoUrlView extends MediaUrlView {
   getDisplayText(): string {
     return this.playerTitle || "Video";
   }
-  async setState(
-    state: MediaUrlViewState,
-    result: ViewStateResult,
-  ): Promise<void> {
-    if (typeof state.source === "string") {
-      const url = this.plugin.resolveUrl(state.source);
-      if (!url) {
-        console.warn("Invalid URL", state.source);
-      } else {
-        const defaultLang = this.plugin.settings.getState().getDefaultLang();
-        const textTracks = await getTracksLocal(url, defaultLang).catch((e) => {
-          console.error("Failed to get text tracks", e);
-          return [];
-        });
-        this.store.getState().setSource(url, {
-          title: true,
-          textTracks,
-          type: "video/mp4",
-        });
-      }
-    }
-    return super.setState(state, result);
+
+  async setSource(url: MediaURL) {
+    const defaultLang = this.plugin.settings.getState().getDefaultLang();
+    const textTracks = await getTracksLocal(url, defaultLang).catch((e) => {
+      console.error("Failed to get text tracks", e);
+      return [];
+    });
+    this.store.getState().setSource(url, {
+      title: true,
+      textTracks,
+      type: "video/mp4",
+    });
   }
 }
 
@@ -56,22 +46,11 @@ export class AudioUrlView extends MediaUrlView {
   getViewType() {
     return MEDIA_URL_VIEW_TYPE.audio;
   }
-  async setState(
-    state: MediaUrlViewState,
-    result: ViewStateResult,
-  ): Promise<void> {
-    if (typeof state.source === "string") {
-      const url = this.plugin.resolveUrl(state.source);
-      if (!url) {
-        console.warn("Invalid URL", state.source);
-      } else {
-        this.store.getState().setSource(url, {
-          title: true,
-          type: "audio/mp3",
-        });
-      }
-    }
-    return super.setState(state, result);
+  async setSource(url: MediaURL) {
+    this.store.getState().setSource(url, {
+      title: true,
+      type: "audio/mp3",
+    });
   }
 }
 
