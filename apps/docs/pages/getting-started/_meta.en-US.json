@@ -2,7 +2,8 @@
   "install": "Install",
   "first-note": "First Media Note",
   "webpage": "Webpage player",
-  "subtitle": "Load External Subtitle",
   "template": "Template",
+  "custom-protocol": "Custom Protocol",
+  "subtitle": "Load External Subtitle",
   "media-clip": "Media Clip"
 }

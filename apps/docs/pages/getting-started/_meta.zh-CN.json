@@ -2,7 +2,8 @@
   "install": "安装",
   "first-note": "第一个视频笔记",
   "webpage": "网页播放器",
-  "subtitle": "加载外挂字幕",
   "template": "模板",
+  "custom-protocol": "自定义链接",
+  "subtitle": "加载外挂字幕",
   "media-clip": "音视频片段"
 }
