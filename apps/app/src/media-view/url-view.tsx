@@ -1,4 +1,5 @@
 import type { ViewStateResult } from "obsidian";
+import { getTracksLocal } from "@/lib/subtitle";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";
@@ -29,8 +30,13 @@ export class VideoUrlView extends MediaUrlView {
       if (!url) {
         console.warn("Invalid URL", state.source);
       } else {
+        const textTracks = await getTracksLocal(url).catch((e) => {
+          console.error("Failed to get text tracks", e);
+          return [];
+        });
         this.store.getState().setSource(url, {
           title: true,
+          textTracks,
           type: "video/mp4",
         });
       }

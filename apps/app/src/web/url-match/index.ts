@@ -1,3 +1,4 @@
+import { fileURLToPath } from "url";
 import type { TFile, Vault } from "obsidian";
 import { Platform } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
@@ -35,6 +36,12 @@ export class MediaURL extends URL implements URLResolveResult {
 
   get isFileUrl(): boolean {
     return this.protocol === "file:";
+  }
+  get filePath(): string | null {
+    if (this.isFileUrl) {
+      return fileURLToPath(this);
+    }
+    return null;
   }
 
   compare(other: MediaURL | null | undefined): boolean {

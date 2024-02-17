@@ -22,7 +22,7 @@ export class MediaRenderChild
     return this.store.getState().source?.url ?? null;
   }
 
-  get update() {
+  get setSource() {
     return this.store.getState().setSource;
   }
 

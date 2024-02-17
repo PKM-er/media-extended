@@ -1,6 +1,7 @@
 import type { EmbedCreator, Plugin } from "obsidian";
 import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle } from "@/lib/size-syntax";
+import { getTracksLocal } from "@/lib/subtitle";
 import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
@@ -68,9 +69,16 @@ class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
   ) {
     super(containerEl, plugin);
     containerEl.addClasses(["mx-external-media-embed"]);
-    this.update(info, {
+  }
+  async onload() {
+    const textTracks = await getTracksLocal(this.info).catch((e) => {
+      console.error("Failed to get text tracks", e);
+      return [];
+    });
+    this.setSource(this.info, {
+      textTracks,
       title: true,
-      enableWebview: viewType === MEDIA_WEBPAGE_VIEW_TYPE,
+      enableWebview: this.viewType === MEDIA_WEBPAGE_VIEW_TYPE,
     });
   }
 }

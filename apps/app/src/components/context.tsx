@@ -8,7 +8,7 @@ import { TimeoutError } from "@/lib/message";
 import noop from "@/lib/no-op";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
-import { getTracks } from "@/lib/subtitle";
+import { getTracksInVault } from "@/lib/subtitle";
 import { titleFromUrl } from "@/media-view/base";
 import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
@@ -31,6 +31,7 @@ export interface SourceFacet {
   title: string | true;
   enableWebview: boolean;
   type: string;
+  textTracks: TextTrackInit[];
 }
 
 export interface MediaViewState {
@@ -89,33 +90,35 @@ export function createMediaViewStore() {
         }, timeout);
       });
     },
-    setSource(url, { hash, enableWebview, title: givenTitle, type } = {}) {
-      const title =
-        givenTitle === true ? titleFromUrl(url.source.href) : givenTitle;
-      set(({ source, title: ogTitle }) => ({
+    setSource(
+      url,
+      { hash, enableWebview, title: title, type, textTracks } = {},
+    ) {
+      set((og) => ({
         source: {
-          ...source,
-          type,
+          ...og.source,
+          type: type ?? og.source?.type,
           url,
-          enableWebview:
-            enableWebview !== undefined ? enableWebview : source?.enableWebview,
+          enableWebview: enableWebview ?? og.source?.enableWebview,
         },
-        hash: parseHashProps(hash || url.hash),
-        title: title ?? ogTitle,
+        textTracks: textTracks ?? og.textTracks,
+        hash: { ...og.hash, ...parseHashProps(hash || url.hash) },
+        title:
+          (title === true ? titleFromUrl(url.source.href) : title) ?? og.title,
       }));
       applyTempFrag(get());
     },
     setHash(hash) {
-      set({ hash: parseHashProps(hash) });
+      set((og) => ({ hash: { ...og.hash, ...parseHashProps(hash) } }));
       applyTempFrag(get());
     },
     async loadFile(file, vault, subpath) {
-      const textTracks = await getTracks(file, vault);
+      const textTracks = await getTracksInVault(file, vault);
       set(({ source, hash }) => ({
         source: { ...source, url: fromFile(file, vault) },
         textTracks,
         title: file.name,
-        hash: subpath ? parseHashProps(subpath) : hash,
+        hash: subpath ? { ...hash, ...parseHashProps(subpath) } : hash,
       }));
       await applyTempFrag(get());
     },
