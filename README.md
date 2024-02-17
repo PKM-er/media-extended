@@ -1,73 +1,34 @@
 # Media Extended
 
-Enhanced media playback for obsidian.md
+Enhanced media playback for obsidian.md 🎥📚
+
+![Media Extended plugin with player and media note](./apps/docs/pages/getting-started/first-note.jpg)
+
+This plugin is designed to enrich your note-taking experience in obsidian.md by seamlessly integrating multimedia content into your notes. Whether you're a student, researcher, or content creator, this plugin makes it easier to incorporate, control, and reference audio and video materials directly within your digital notebook.
+
+## Getting Started 🚀
+
+Go to [media-extended documentation](https://media-extended.vercel.app/#getting-started) for more information.
 
 > [!TIP]
->
-> 🚀 Media Extended v3.0 for Desktop is now available for beta testing! 🚀
->
-> Live Preview, inline field, multi-window support, webpage player and more...
->
-> Join the beta testing by adding `PKM-er/media-extended` to BRAT beta plugin list.
->
+> TL;DR: Click on [this link](https://obsidian.md/plugins?id=media-extended) to install the plugin, 
+> and open `obsidian://mx-open/https://www.youtube.com/watch?v=jNQXAC9IVRw` to see the plugin in action.
 
-## Intro
+## Features 🌟
 
-This plugin introduce some new features that enhance media (video/audio) playback: 
+- **Seamless Integration with Obsidian** 🤝: Works perfectly with Obsidian's live preview and multi-window support, ensuring a smooth workflow.
+- **Embed Multimedia Files** 📁: Easily embed both local or hosted video and audio files directly into your notes, bringing your content to life.
+- **Playback Control** ⏯️: Utilize commands and keyboard shortcuts for efficient playback control, including play, pause, skip, and timestamping for quick references.
+- **Support for Multiple Video Platforms** 🌐: Enjoy support for popular platforms like YouTube, Vimeo, Coursera, Bilibili, and more. If it can be played in a web browser, it can be embedded in your notes.
+- **Local Subtitle Support** 📑: Enhance your media with local subtitle files in SRT, VTT, and ASS formats, making it easier to follow along or understand content in another language.
+- **Media Fragments** 🎞️: Create media fragments that play only within a specified range, perfect for focusing on specific parts of a lecture or presentation.
 
-- Player Enhancement
-    - [Speed control](https://github.com/aidenlx/media-extended/wiki/Speed-Control)
-    - [Inline options](https://github.com/aidenlx/media-extended/wiki/Inline-Options) for loop/autoplay/mute/hide controls
-    - [Embed/Link for online media](https://github.com/aidenlx/media-extended/wiki/Create-Online-Media-Embed-Link)
-    - [Caption/Subtitle support](https://github.com/aidenlx/media-extended/wiki/Caption-Subtitle-Support)
-- Notetaking
-    - [Create timestamp link/media fragment](https://github.com/aidenlx/media-extended/wiki/Restrict-Play-Range)
-    - Dedicated media view binded to document to open media links
-    - [Get timestamp from existing media file](https://github.com/aidenlx/media-extended/wiki/Get-Timestamp)
-    - [Take timestamp from audio recorder](https://github.com/aidenlx/media-extended/wiki/Audio-Recorder)
+## Coming Next 🔮
 
-## Demo
-
-https://user-images.githubusercontent.com/31102694/118903647-c9d79780-b94a-11eb-8beb-ab507117790f.mp4
-
-https://user-images.githubusercontent.com/31102694/119340113-a3a45580-bcc4-11eb-9098-a27a16e9d6e0.mp4
-
-https://user-images.githubusercontent.com/31102694/118903678-dd82fe00-b94a-11eb-8ef3-7b5044a2bab8.mp4
-
-https://user-images.githubusercontent.com/31102694/127543453-011d13b2-40e4-41e5-861e-3549d19be23f.mp4
-
-## How to use
-
-Go to [Media Extended Wiki](https://github.com/aidenlx/media-extended/wiki) for more details
-
-***
-
-Note: for bilibili users, [bilibili plugin](https://github.com/aidenlx/mx-bili-plugin) is required for advanced features from v2.9.0
-
-注意：v2.9.0开始，bilibili用户需要安装[bilibili plugin](https://github.com/aidenlx/mx-bili-plugin)以启用`高级bilibili功能`
-
-## Compatibility
-
-The required API feature is only available for Obsidian v0.12.2+.
-
-## Installation
-
-### From Obsidian
-
-1. Open `Settings` > `Third-party plugin`
-2. Make sure Safe mode is **off**
-3. Click `Browse community plugins`
-4. Search for this plugin
-5. Click `Install`
-6. Once installed, close the community plugins window and the patch is ready to use.
-
-### From GitHub
-
-1. Download the Latest Release from the Releases section of the GitHub Repository
-2. Put files to your vault's plugins folder: `<vault>/.obsidian/plugins/media-extended`
-3. Reload Obsidian
-4. If prompted about Safe Mode, you can disable safe mode and enable the plugin.
-   Otherwise, head to Settings, third-party plugins, make sure safe mode is off and
-   enable the plugin from there.
-
-> Note: The `.obsidian` folder may be hidden. On macOS, you should be able to press `Command+Shift+Dot` to show the folder in Finder.
+- [ ] **Mobile support**📱
+- [ ] **Metadata and Subtitle Extraction** 📊: Pull metadata and subtitles directly from YouTube and Bilibili.
+- [ ] **Playlist Support** 📋: Organize your media files into playlists for continuous playback.
+- [ ] **Canvas Support** 🎨: Get creative with how you integrate and display media within your notes.
+- [ ] (Paid Features) **AI Summary for Transcript** 🤖: Get concise summaries of your media's content.
+- [ ] (Paid Features) **Table/Text OCR for Screenshots** 📷: Extract text from images for easy reference and integration.
+- [ ] (Paid Features) **Transcript Generation from Video** 📝: Automatically generate text transcripts from your video content.
