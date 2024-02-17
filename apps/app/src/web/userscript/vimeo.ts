@@ -1,11 +1,8 @@
 // hugely inspired by https://greasyfork.org/zh-CN/scripts/4870-maximize-video
 
 const css = `
-.vp-player-ui-overlays {
+body:not(.mx-show-controls) .vp-player-ui-overlays {
   opacity: 0 !important;
-}
-.mx-show-controls .vp-player-ui-overlays {
-  opacity: 100 !important;
 }
 `;
 

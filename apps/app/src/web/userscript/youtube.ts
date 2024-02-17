@@ -39,11 +39,8 @@ html, body {
 ytd-app .html5-endscreen {
   opacity: 0 !important;
 }
-ytd-app .ytp-chrome-bottom {
+body:not(.mx-show-controls) ytd-app .ytp-chrome-bottom {
   opacity: 0 !important;
-}
-.mx-show-controls ytd-app .ytp-chrome-bottom {
-  opacity: 100 !important;
 }
 `.trim();
 
