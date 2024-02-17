@@ -30,7 +30,7 @@ type MxSettingValues = {
   timestampOffset: number;
   biliDefaultQuality: BilibiliQuality;
   screenshotFormat: "image/png" | "image/jpeg" | "image/webp";
-  screenshotQuality: number | null;
+  screenshotQuality?: number;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -71,7 +71,6 @@ const mxSettingsDefault = {
   timestampOffset: 0,
   biliDefaultQuality: BilibiliQuality.FHD,
   screenshotFormat: "image/webp",
-  screenshotQuality: null,
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -157,7 +156,7 @@ export function createSettingsStore(plugin: MxPlugin) {
       save(get());
     },
     setScreenshotQuality(quality) {
-      set({ screenshotQuality: quality });
+      set({ screenshotQuality: quality ?? undefined });
       save(get());
     },
     getUrlMappingData() {

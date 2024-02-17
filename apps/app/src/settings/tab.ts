@@ -15,7 +15,7 @@ import "./style.global.less";
 import type { BilibiliQuality } from "@/web/session/bilibili";
 import { bilibiliQualityLabels } from "@/web/session/bilibili";
 import { getDialog } from "@/web/session/utils";
-import type { OpenLinkBehavior } from "./def";
+import type { MxSettings, OpenLinkBehavior } from "./def";
 
 export class MxSettingTabs extends PluginSettingTab {
   plugin: MxPlugin;
@@ -324,22 +324,11 @@ export class MxSettingTabs extends PluginSettingTab {
       );
   }
 
-  noteTaking() {
+  timestamp() {
     const { containerEl: container } = this;
 
-    new Setting(container).setHeading().setName("Note taking");
-    new Setting(container)
-      .setDesc("Configure where timestamps and screenshots are inserted")
-      .setName("Insert location")
-      .addDropdown((d) =>
-        d
-          .addOption("before", "Latest content on top")
-          .addOption("after", "Latest content at end")
-          .setValue(this.state.insertBefore === true ? "before" : "after")
-          .onChange((val) =>
-            this.state.setInsertPosition(val as "before" | "after"),
-          ),
-      );
+    new Setting(container).setHeading().setName("Timestamp");
+
     new Setting(container)
       .setName("Timestamp template")
       .setDesc(
@@ -356,42 +345,7 @@ export class MxSettingTabs extends PluginSettingTab {
         text.inputEl.rows = 5;
         text.inputEl.cols = 40;
       });
-    new Setting(container)
-      .setName("Screenshot linktext template")
-      .setDesc(
-        createFragment((descEl) => {
-          descEl.appendText("The template used to create screenshot linktext.");
-          descEl.createEl("br");
-          descEl.appendText("Supported placeholders: {{DURATION}}, {{TITLE}}");
-        }),
-      )
-      .addTextArea((text) => {
-        text
-          .setValue(this.state.screenshotEmbedTemplate)
-          .onChange((val) => this.state.setTemplate("screenshotEmbed", val));
-        text.inputEl.rows = 5;
-        text.inputEl.cols = 40;
-      });
-    new Setting(container)
-      .setName("Screenshot template")
-      .setDesc(
-        createFragment((descEl) => {
-          descEl.appendText("The template used to insert screenshot.");
-          descEl.createEl("br");
-          descEl.appendText("Supported placeholders: ");
-          descEl.createEl("br");
-          descEl.appendText("{{SCREENSHOT}} - screenshot link");
-          descEl.createEl("br");
-          descEl.appendText("{{TIMESTAMP}} - timestamp link");
-        }),
-      )
-      .addTextArea((text) => {
-        text
-          .setValue(this.state.screenshotTemplate)
-          .onChange((val) => this.state.setTemplate("screenshot", val));
-        text.inputEl.rows = 5;
-        text.inputEl.cols = 40;
-      });
+
     new Setting(container)
       .setName("Timestamp offset")
       .setDesc("Offset in seconds to add to the timestamp")
@@ -422,6 +376,56 @@ export class MxSettingTabs extends PluginSettingTab {
           }),
       )
       .then((s) => s.controlEl.appendText("s"));
+  }
+
+  screenshot() {
+    const { containerEl: container } = this;
+
+    new Setting(container).setHeading().setName("Screenshot");
+
+    new Setting(container)
+      .setName("Screenshot linktext template")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("The template used to create screenshot linktext.");
+          descEl.createEl("br");
+          descEl.appendText("Supported placeholders: {{DURATION}}, {{TITLE}}");
+          descEl.createEl("br");
+          descEl.appendText("Remove `|50` suffix to embed image in full size");
+        }),
+      )
+      .addTextArea((text) => {
+        text
+          .setValue(this.state.screenshotEmbedTemplate)
+          .onChange((val) => this.state.setTemplate("screenshotEmbed", val));
+        text.inputEl.rows = 5;
+        text.inputEl.cols = 40;
+      });
+    new Setting(container)
+      .setName("Screenshot template")
+      .setDesc(
+        createFragment((descEl) => {
+          descEl.appendText("The template used to insert screenshot.");
+          descEl.createEl("br");
+          descEl.appendText("Supported placeholders: ");
+          descEl.createEl("ul", {}, (ul) => {
+            ul.createEl("li").appendText("{{TIMESTAMP}} - timestamp link");
+            ul.createEl("li", {}, (li) => {
+              li.appendText("{{SCREENSHOT}} - link to screenshot");
+              li.createEl("br");
+              li.appendText("add `!` prefix to insert as image embed");
+            });
+          });
+        }),
+      )
+      .addTextArea((text) => {
+        text
+          .setValue(this.state.screenshotTemplate)
+          .onChange((val) => this.state.setTemplate("screenshot", val));
+        text.inputEl.rows = 5;
+        text.inputEl.cols = 40;
+      });
+
     new Setting(container)
       .setName("Screenshot format")
       .setDesc(
@@ -447,24 +451,44 @@ export class MxSettingTabs extends PluginSettingTab {
             ),
           ),
       );
+
+    const qualVal = (state: MxSettings) =>
+      state.screenshotFormat === "image/webp" ? 0.8 : 0.92;
     new Setting(container)
       .setName("Screenshot quality")
       .setDesc("Quality of the screenshot")
-      .addSlider((slide) =>
-        slide
-          .setLimits(0, 1, 0.01)
-          .setValue(
-            this.state.screenshotQuality ??
-              (this.state.screenshotFormat === "image/webp" ? 0.8 : 0.92),
-          )
-          .onChange(this.state.setScreenshotQuality)
-          .then((slide) => {
+      .addText((text) =>
+        text
+          .setValue(this.state.screenshotQuality?.toString() ?? "")
+          .setPlaceholder(qualVal(this.state).toString())
+          .onChange(handleFloat(this.state.setScreenshotQuality))
+          .then((input) => {
+            setLimits.call(input, 0, 1, 0.01);
+            input.inputEl.type = "number";
+            input.inputEl.style.textAlign = "center";
             this.sub((s, prev) => {
-              if (s.screenshotFormat === prev.screenshotFormat) return;
-              slide.setValue(
-                s.screenshotQuality ??
-                  (s.screenshotFormat === "image/webp" ? 0.8 : 0.92),
-              );
+              if (s.screenshotFormat !== prev.screenshotFormat) {
+                input.setPlaceholder(qualVal(this.state).toString());
+              }
+              if (s.screenshotQuality !== prev.screenshotQuality) {
+                input.setValue(s.screenshotQuality?.toString() ?? "");
+              }
+            });
+          }),
+      )
+      .addButton((btn) =>
+        btn
+          .setTooltip("Reset to default")
+          .setIcon("reset")
+          .onClick(() => {
+            this.state.setScreenshotQuality(null);
+          })
+          .setDisabled(this.state.screenshotQuality === null)
+          .then(() => {
+            this.sub((s, prev) => {
+              if (s.screenshotQuality !== prev.screenshotQuality) {
+                btn.setDisabled(s.screenshotQuality === null);
+              }
             });
           }),
       )
@@ -475,6 +499,27 @@ export class MxSettingTabs extends PluginSettingTab {
             s.screenshotFormat === "image/png" ? "none" : "";
         });
       });
+  }
+
+  noteTaking() {
+    const { containerEl: container } = this;
+
+    new Setting(container).setHeading().setName("Note taking");
+    new Setting(container)
+      .setDesc("Configure where timestamps and screenshots are inserted")
+      .setName("Insert location")
+      .addDropdown((d) =>
+        d
+          .addOption("before", "Latest content on top")
+          .addOption("after", "Latest content at end")
+          .setValue(this.state.insertBefore === true ? "before" : "after")
+          .onChange((val) =>
+            this.state.setInsertPosition(val as "before" | "after"),
+          ),
+      );
+
+    this.timestamp();
+    this.screenshot();
   }
 
   webpage() {
