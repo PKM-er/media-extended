@@ -1,4 +1,5 @@
 import { pathToFileURL } from "url";
+import { assertNever } from "assert-never";
 import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import { pickFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
@@ -15,6 +16,18 @@ const avId = /^av(?<id>\d+)$/i;
 const bvId = /^BV1(?<id>[1-9A-HJ-NP-Za-km-z]{9})$/;
 
 const youtubeId = /^[\w-]{11}$/;
+
+const hostnamePattern =
+  /^(?:(?:[a-zA-Z\d]|[a-zA-Z\d][a-zA-Z\d-]*[a-zA-Z\d])\.)*(?:[A-Za-z\d]|[A-Za-z\d][A-Za-z\d-]*[A-Za-z\d])$/;
+
+function toURLGuess(query: string): URL | null {
+  const url = toURL(query);
+  if (!url) return null;
+  const { hostname } = url;
+  // valid hostname
+  if (!hostnamePattern.test(hostname)) return null;
+  return url;
+}
 
 export class MediaSwitcherModal extends SuggestModal<MediaURL> {
   constructor(public plugin: MxPlugin) {
@@ -49,7 +62,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
   }
 
   getSuggestions(query: string): MediaURL[] {
-    const url = toURL(query);
+    const url = toURLGuess(query);
     const guess: URL[] = [];
     if (!url) {
       let match;
@@ -95,6 +108,8 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
       el.setText("Open local file");
     } else if (value === "file-protocol-picker") {
       el.setText("Pick from folders defined in custom protocol");
+    } else {
+      assertNever(value);
     }
   }
   async onChooseSuggestion(
@@ -138,7 +153,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
         console.error("Failed to generate file protocol url", e, file);
         return;
       }
-    } else {
+    } else if (item === "file-picker") {
       const mediaFile = await pickFile(mediaExtensions);
       if (!mediaFile) return;
       try {
@@ -148,6 +163,10 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
         console.error("Failed to generate file url", e, mediaFile);
         return;
       }
+    } else if (item instanceof MediaURL) {
+      // do nothing
+    } else {
+      assertNever(item);
     }
     if (!item.inferredType) {
       new Notice("Unsupported file type: " + item.pathname);
