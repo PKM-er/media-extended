@@ -11,8 +11,13 @@ This plugin is designed to enrich your note-taking experience in obsidian.md by 
 Go to [media-extended documentation](https://media-extended.vercel.app/#getting-started) for more information.
 
 > [!TIP]
-> TL;DR: Click on [this link](https://obsidian.md/plugins?id=media-extended) to install the plugin, 
-> and open `obsidian://mx-open/https://www.youtube.com/watch?v=jNQXAC9IVRw` to see the plugin in action.
+> TL;DR:
+> 1. Click to install: [![install - obsidian](https://img.shields.io/badge/media_extended-v3-6c31e3?logo=obsidian)](https://obsidian.md/plugins?id=media-extended)
+> 2. open the following link in browser to see the plugin in action.
+> ```
+> obsidian://mx-open/https://www.youtube.com/watch?v=jNQXAC9IVRw
+> ```
+
 
 ## Features 🌟
 
