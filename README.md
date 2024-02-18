@@ -8,7 +8,7 @@ This plugin is designed to enrich your note-taking experience in obsidian.md by 
 
 ## Getting Started 🚀
 
-Go to [media-extended documentation](https://media-extended.vercel.app/#getting-started) for more information.
+Go to [media-extended documentation](https://mx.pkmer.net/#getting-started) for more information.
 
 > [!TIP]
 > TL;DR:
