@@ -1,6 +1,7 @@
 import { pathToFileURL } from "url";
 import { assertNever } from "assert-never";
 import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
+import path from "@/lib/path";
 import { pickFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
 import type MxPlugin from "@/mx-main";
@@ -21,11 +22,7 @@ const hostnamePattern =
   /^(?:(?:[a-zA-Z\d]|[a-zA-Z\d][a-zA-Z\d-]*[a-zA-Z\d])\.)*(?:[A-Za-z\d]|[A-Za-z\d][A-Za-z\d-]*[A-Za-z\d])$/;
 
 function toURLGuess(query: string): URL | null {
-  // simple check if absolute path
-  if (
-    (Platform.isWin && query.match(/^[a-zA-Z]+:[\\/]/)) ||
-    query.startsWith("/")
-  ) {
+  if (path.isAbsolute(query)) {
     try {
       return pathToFileURL(query) as globalThis.URL;
     } catch {

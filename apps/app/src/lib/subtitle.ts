@@ -1,11 +1,11 @@
 import { readdir, readFile } from "fs/promises";
-import { basename, dirname, join } from "path";
 import type { TextTrackInit } from "@vidstack/react";
 import type { Vault } from "obsidian";
 import { Notice, TFile } from "obsidian";
 import type { MediaURL } from "@/web/url-match";
 import { groupBy } from "./group-by";
 import { format, langCodeToLabel } from "./lang/lang";
+import path from "./path";
 
 const supportedFormat = ["vtt", "ass", "ssa", "srt"] as const;
 function isCaptionsFile(ext: string): ext is (typeof supportedFormat)[number] {
@@ -64,9 +64,9 @@ export function getTracks<F extends FileInfo>(
 export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
   const filePath = media.filePath;
   if (!filePath || !media.inferredType) return [];
-  const mediaName = basename(filePath);
+  const mediaName = path.basename(filePath);
   const mediaBaseame = mediaName.split(".").slice(0, -1).join(".");
-  const parentDir = dirname(filePath);
+  const parentDir = path.dirname(filePath);
 
   const siblings = (
     await readdir(parentDir, {
@@ -84,7 +84,7 @@ export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
       (f): FileInfo => ({
         extension: f.name.split(".").pop()!,
         basename: f.name.split(".").slice(0, -1).join("."),
-        path: join(parentDir, f.name),
+        path: path.join(parentDir, f.name),
       }),
     );
 
