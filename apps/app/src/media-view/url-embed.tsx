@@ -44,7 +44,12 @@ export class MediaRenderChild
       textTracks:
         viewType === MEDIA_URL_VIEW_TYPE.video
           ? await getTracksLocal(media, defaultLang).catch((e) => {
-              console.error("Failed to get text tracks", e);
+              console.error(
+                "Failed to get text tracks",
+                e,
+                media.href,
+                defaultLang,
+              );
               return [];
             })
           : [],

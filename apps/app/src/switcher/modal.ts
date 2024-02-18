@@ -176,6 +176,8 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
       return;
     }
 
+    console.log("media selected", item.href);
+
     if (Keymap.isModifier(evt, "Mod") && Keymap.isModifier(evt, "Alt")) {
       this.plugin.leafOpener.openMedia(item, "split", {
         direction: "vertical",

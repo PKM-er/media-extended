@@ -25,7 +25,7 @@ export class VideoUrlView extends MediaUrlView {
   async setSource(url: MediaURL) {
     const defaultLang = this.plugin.settings.getState().getDefaultLang();
     const textTracks = await getTracksLocal(url, defaultLang).catch((e) => {
-      console.error("Failed to get text tracks", e);
+      console.error("Failed to get text tracks", e, url.href, defaultLang);
       return [];
     });
     this.store.getState().setSource(url, {
