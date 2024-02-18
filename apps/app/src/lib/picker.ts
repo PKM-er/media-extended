@@ -1,4 +1,31 @@
 import mime from "mime";
+import { Platform } from "obsidian";
+import { MediaFileExtensions } from "@/patch/media-type";
+import { getDialog } from "@/web/session/utils";
+
+/**
+ * @returns absolute path of the picked file, or null if canceled
+ */
+export async function pickMediaFile(
+  defaultPath?: string,
+): Promise<string | null> {
+  if (!Platform.isDesktopApp) {
+    throw new Error("Not supported in web");
+  }
+  const result = await getDialog().showOpenDialog({
+    title: "Pick a media file",
+    message: "Pick a media file to open",
+    buttonLabel: "Pick",
+    properties: ["openFile"],
+    filters: [
+      { extensions: MediaFileExtensions.video, name: "Video" },
+      { extensions: MediaFileExtensions.audio, name: "Audio" },
+    ],
+    defaultPath,
+  });
+  if (result.canceled) return null;
+  return result.filePaths[0] ?? null;
+}
 
 export function pickFile(exts: string[] = []) {
   return new Promise<string | null>((resolve) => {

@@ -2,11 +2,9 @@ import { pathToFileURL } from "url";
 import { assertNever } from "assert-never";
 import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import path from "@/lib/path";
-import { pickFile } from "@/lib/picker";
+import { pickMediaFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
 import type MxPlugin from "@/mx-main";
-import { MediaFileExtensions, mediaExtensions } from "@/patch/media-type";
-import { getDialog } from "@/web/session/utils";
 import { MediaURL } from "@/web/url-match";
 import { FileProtocolModal } from "./protocol-select";
 
@@ -21,13 +19,25 @@ const youtubeId = /^[\w-]{11}$/;
 const hostnamePattern =
   /^(?:(?:[a-zA-Z\d]|[a-zA-Z\d][a-zA-Z\d-]*[a-zA-Z\d])\.)*(?:[A-Za-z\d]|[A-Za-z\d][A-Za-z\d-]*[A-Za-z\d])$/;
 
+function toFileURL(path: string) {
+  try {
+    const url = pathToFileURL(path) as globalThis.URL;
+    if (url.hostname) {
+      new Notice(
+        "Network path is not supported in obsidian, you need to map it to a local path",
+      );
+      return null;
+    }
+    return url;
+  } catch (e) {
+    console.error(`Failed to convert path ${path} to URL: `, e);
+    return null;
+  }
+}
+
 function toURLGuess(query: string): URL | null {
   if (path.isAbsolute(query)) {
-    try {
-      return pathToFileURL(query) as globalThis.URL;
-    } catch {
-      // ignore
-    }
+    return toFileURL(query);
   }
   const url = toURL(query);
   if (!url) return null;
@@ -127,50 +137,35 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     if (item === "file-protocol-picker") {
       const fileProtocol = await FileProtocolModal.choose(this.plugin);
       if (!fileProtocol) return;
-      const file = (
-        await getDialog().showOpenDialog({
-          title: "Pick a media file",
-          message: "Pick a media file to open",
-          buttonLabel: "Pick",
-          properties: ["openFile"],
-          filters: [
-            { extensions: MediaFileExtensions.video, name: "Video" },
-            { extensions: MediaFileExtensions.audio, name: "Audio" },
-          ],
-          defaultPath: fileProtocol.path,
-        })
-      ).filePaths[0];
-      if (!file?.startsWith(fileProtocol.path)) {
-        new Notice("File outside of protocol path: " + fileProtocol.path);
-        return;
-      }
-      try {
-        const url = pathToFileURL(file);
-        const resolved = this.plugin.resolveUrl(
-          url.href.replace(
-            fileProtocol.url.replace(/\/*$/, "/"),
-            `mx://${fileProtocol.action}/`,
-          ),
-        );
-        if (!resolved) {
-          new Notice("Failed to resolve file protocol url: " + url.href);
-          return;
-        }
-        item = resolved;
-      } catch (e) {
-        console.error("Failed to generate file protocol url", e, file);
-        return;
-      }
-    } else if (item === "file-picker") {
-      const mediaFile = await pickFile(mediaExtensions);
+      const mediaFile = await pickMediaFile(fileProtocol.path);
       if (!mediaFile) return;
-      try {
-        const url = pathToFileURL(mediaFile);
-        item = new MediaURL(url.href);
-      } catch (e) {
-        console.error("Failed to generate file url", e, mediaFile);
+      if (!mediaFile.startsWith(fileProtocol.path)) {
+        new Notice(
+          `For protocol ${fileProtocol.action}, the file must be in ${fileProtocol.path}`,
+        );
         return;
       }
+      const url = toFileURL(mediaFile);
+      if (!url) return;
+      const resolved = this.plugin.resolveUrl(
+        url.href.replace(
+          fileProtocol.url.replace(/\/*$/, "/"),
+          `mx://${fileProtocol.action}/`,
+        ),
+      );
+      if (!resolved) {
+        new Notice(
+          `Failed to resolve file protocol url: ${url.href} with ${fileProtocol.url}`,
+        );
+        return;
+      }
+      item = resolved;
+    } else if (item === "file-picker") {
+      const mediaFile = await pickMediaFile();
+      if (!mediaFile) return;
+      const url = toFileURL(mediaFile);
+      if (!url) return;
+      item = new MediaURL(url.href);
     } else if (item instanceof MediaURL) {
       // do nothing
     } else {
