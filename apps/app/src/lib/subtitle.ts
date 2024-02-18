@@ -161,27 +161,17 @@ function toTrack<F extends FileInfo>(
   // - "./hello.en.srt", "./hello.zh.srt" (muiltple files)
   // - "./hello.srt" (single file)
 
-  if (file.basename === basename) {
-    return {
-      kind: "subtitles",
-      src: file,
-      id: `${file.basename}.${file.extension}.unknown`,
-      type: file.extension,
-      label: "Unknown",
-      default: false,
-    };
-  }
   const [fileBasename, lan, ...rest] = file.basename.split(".");
+  if (rest.length > 0 || fileBasename !== basename) return null;
   const langCode = format(lan);
-  if (fileBasename !== basename || rest.length > 0 || !langCode) return null;
-
+  const label = langCode ? langCodeToLabel(langCode) : "Unknown";
   return {
     kind: "subtitles",
-    language: langCode,
-    id: `${file.basename}.${file.extension}.${langCode}`,
+    language: langCode ?? undefined,
+    id: `${file.basename}.${file.extension}.${langCode ?? "unknown"}`,
     src: file,
     type: file.extension,
-    label: `${langCodeToLabel(langCode)} (${file.extension})`,
+    label: `${label} (${file.extension})`,
     default: false,
   };
 }

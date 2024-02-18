@@ -55,7 +55,8 @@ function detectChs(subtag: string) {
   return "zh";
 }
 
-export function vaildate(code: string) {
+export function vaildate(code: string | undefined) {
+  if (!code) return false;
   const lang = code.split("-")[0].toLowerCase();
   return iso.validate(lang);
 }
