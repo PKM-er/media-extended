@@ -1,6 +1,7 @@
 import { around } from "monkey-around";
-import { Keymap, MarkdownView } from "obsidian";
+import { MarkdownView } from "obsidian";
 import type MxPlugin from "@/mx-main";
+import { isModEvent } from "./mod-evt";
 
 export default function patchInlineUrl(this: MxPlugin) {
   const clickHandler = (e: MouseEvent) => {
@@ -10,8 +11,7 @@ export default function patchInlineUrl(this: MxPlugin) {
     const urlInfo = this.resolveUrl(target.textContent);
     if (!urlInfo) return;
     e.stopImmediatePropagation();
-    const newLeaf = Keymap.isModEvent(e);
-    this.leafOpener.openMedia(urlInfo, newLeaf === true ? "tab" : newLeaf);
+    this.leafOpener.openMedia(urlInfo, isModEvent(e), { fromUser: true });
   };
   const unload = around(MarkdownView.prototype, {
     onload: (next) =>

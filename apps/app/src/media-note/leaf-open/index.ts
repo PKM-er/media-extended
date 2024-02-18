@@ -175,17 +175,24 @@ export class LeafOpener extends Component {
     return newLeaf;
   }
 
+  /**
+   * @param newLeaf if undefined, use default behavior
+   */
   async openMedia(
     mediaInfo: MediaInfo,
     newLeaf?: PaneType | false,
     {
       direction,
       viewType,
-      noRemap,
+      fromUser,
     }: {
       viewType?: RemoteMediaViewType;
       direction?: SplitDirection;
-      noRemap?: boolean;
+      /**
+       * if true, treat newLeaf as click action
+       * and apply preference behavior
+       */
+      fromUser?: boolean;
     } = {},
   ): Promise<MediaLeaf> {
     const { workspace } = this.app;
@@ -195,7 +202,7 @@ export class LeafOpener extends Component {
     }
 
     const leaf = workspace.getLeaf(
-      (noRemap ? newLeaf : this.getSplitBehavior(newLeaf)) as "split",
+      (!fromUser ? newLeaf : this.getSplitBehavior(newLeaf)) as "split",
       direction,
     );
     return this.#openMedia(leaf, mediaInfo, viewType);

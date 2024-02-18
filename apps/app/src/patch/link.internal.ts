@@ -2,6 +2,7 @@ import { around } from "monkey-around";
 import { type Workspace } from "obsidian";
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "./event";
+import { toPaneAction } from "./mod-evt";
 
 export default function patchLinktextOpen(
   this: MxPlugin,
@@ -35,7 +36,7 @@ export default function patchLinktextOpen(
               plugin,
               linktext,
               sourcePath,
-              newLeaf === true ? "tab" : newLeaf,
+              toPaneAction(newLeaf),
               fallback,
             );
           } catch (e) {

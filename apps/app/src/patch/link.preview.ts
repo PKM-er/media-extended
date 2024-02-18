@@ -1,8 +1,9 @@
 import { around } from "monkey-around";
 import type { PreviewEventHanlder } from "obsidian";
-import { MarkdownPreviewRenderer, Keymap } from "obsidian";
+import { MarkdownPreviewRenderer } from "obsidian";
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "./event";
+import { isModEvent } from "./mod-evt";
 import { getInstancePrototype } from "./utils";
 
 export default function patchPreviewClick(
@@ -38,12 +39,11 @@ function patchPreviewEventHanlder(
           const fallback = () => next.call(this, evt, target, link, ...args);
           if (!onExternalLinkClick) return fallback();
           evt.preventDefault();
-          const paneCreateType = Keymap.isModEvent(evt);
           try {
             await onExternalLinkClick.call(
               plugin,
               link,
-              paneCreateType === true ? "tab" : paneCreateType,
+              isModEvent(evt),
               fallback,
             );
           } catch (e) {

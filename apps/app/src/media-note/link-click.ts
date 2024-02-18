@@ -26,7 +26,7 @@ export const onExternalLinkClick: LinkEvent["onExternalLinkClick"] =
       fallback();
       return;
     }
-    await this.leafOpener.openMedia(url, newLeaf);
+    await this.leafOpener.openMedia(url, newLeaf, { fromUser: true });
   };
 
 const mediaTypeDisplay: Record<
@@ -66,7 +66,10 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
           setLabel(item, viewType)
             .setSection("mx-link")
             .onClick(async () => {
-              await plugin.leafOpener.openMedia(url, undefined, { viewType });
+              await plugin.leafOpener.openMedia(url, undefined, {
+                viewType,
+                fromUser: true,
+              });
             }),
         );
       });
@@ -87,6 +90,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
                 );
                 await plugin.leafOpener.openMedia(url, undefined, {
                   viewType,
+                  fromUser: true,
                 });
               }),
           );
@@ -110,6 +114,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
                   );
                   await plugin.leafOpener.openMedia(url, undefined, {
                     viewType,
+                    fromUser: true,
                   });
                 }),
             );
@@ -135,5 +140,5 @@ export const onInternalLinkClick: LinkEvent["onInternalLinkClick"] =
       type: mediaType,
       viewType: MEDIA_FILE_VIEW_TYPE[mediaType],
     };
-    await this.leafOpener.openMedia(mediaInfo, newLeaf);
+    await this.leafOpener.openMedia(mediaInfo, newLeaf, { fromUser: true });
   };

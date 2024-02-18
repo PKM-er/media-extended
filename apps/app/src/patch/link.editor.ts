@@ -3,6 +3,7 @@ import type { MarkdownEditView } from "obsidian";
 
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "./event";
+import { toPaneAction } from "./mod-evt";
 import { getInstancePrototype, getRunningViewInstance } from "./utils";
 
 declare module "obsidian" {
@@ -57,7 +58,7 @@ export default function patchEditorClick(
                 await onExternalLinkClick.call(
                   plugin,
                   token.text,
-                  newLeaf === true ? "tab" : newLeaf,
+                  toPaneAction(newLeaf),
                   fallback,
                 );
               } catch (e) {

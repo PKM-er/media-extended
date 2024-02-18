@@ -68,7 +68,6 @@ export default class MxPlugin extends Plugin {
       }
       await this.leafOpener.openMedia(urlInfo, newLeaf, {
         direction,
-        noRemap: true,
       });
     },
   };
