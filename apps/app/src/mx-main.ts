@@ -34,6 +34,7 @@ import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
 import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
+import { patchWin32FileUrl } from "./patch/win-file-url";
 import { createSettingsStore } from "./settings/def";
 import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
@@ -56,8 +57,9 @@ export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
 
   resolveUrl(url: string | URL | null | undefined): MediaURL | null {
-    if (!url || (typeof url !== "string" && !(url instanceof URL))) return null;
-    return resolveMxProtocol(toURL(url), this.settings.getState());
+    const patched = patchWin32FileUrl(url);
+    if (!patched) return null;
+    return resolveMxProtocol(toURL(patched), this.settings.getState());
   }
   api: MxAPI = {
     openUrl: async (url, newLeaf, direction) => {
