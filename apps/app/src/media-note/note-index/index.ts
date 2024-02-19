@@ -1,6 +1,5 @@
 import { Component, TFolder, TFile, parseLinktext } from "obsidian";
 import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
-import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
 import type { MediaInfo } from "../../media-view/media-info";
@@ -195,7 +194,6 @@ function getField(
     if (!mediaType) return null;
     return {
       type: mediaType,
-      viewType: MEDIA_FILE_VIEW_TYPE[mediaType],
       file: mediaFile,
       hash: subpath,
     };

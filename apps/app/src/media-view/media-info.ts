@@ -1,24 +1,18 @@
 import type { Vault } from "obsidian";
 import { TFile } from "obsidian";
-import type { MediaFileViewType } from "@/media-view/view-type";
-import {
-  isMediaFileViewType,
-  MEDIA_FILE_VIEW_TYPE,
-} from "@/media-view/view-type";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MediaURL } from "@/web/url-match";
 
 export type MediaInfo = FileMediaInfo | MediaURL;
 
 export interface FileMediaInfo {
-  viewType: MediaFileViewType;
   type: MediaType;
   file: TFile;
   hash: string;
 }
 
 export function isFileMediaInfo(info: unknown): info is FileMediaInfo {
-  return isMediaFileViewType((info as FileMediaInfo).viewType);
+  return (info as FileMediaInfo).file instanceof TFile;
 }
 
 export function parseFileInfo(
@@ -34,6 +28,5 @@ export function parseFileInfo(
     type,
     file,
     hash,
-    viewType: MEDIA_FILE_VIEW_TYPE[type],
   };
 }

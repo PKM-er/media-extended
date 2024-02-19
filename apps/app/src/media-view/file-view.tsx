@@ -101,7 +101,6 @@ export class VideoFileView extends MediaFileView {
       type: "video",
       file: this.file,
       hash: this.getEphemeralState().subpath,
-      viewType: this.getViewType(),
     };
   }
   getViewType() {
@@ -125,7 +124,6 @@ export class AudioFileView extends MediaFileView {
       type: "audio",
       file: this.file,
       hash: this.getEphemeralState().subpath,
-      viewType: this.getViewType(),
     };
   }
   canAcceptExtension(extension: string): boolean {

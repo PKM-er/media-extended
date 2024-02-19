@@ -5,6 +5,7 @@ export const MediaFileExtensions = {
 };
 
 export function checkMediaType(ext: string): MediaType | null {
+  ext = ext.replace(/^\./, "").toLowerCase();
   for (const type of Object.keys(
     MediaFileExtensions,
   ) as (keyof typeof MediaFileExtensions)[]) {

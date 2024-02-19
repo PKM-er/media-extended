@@ -12,6 +12,7 @@ import {
   MEDIA_URL_VIEW_TYPE,
   MEDIA_EMBED_VIEW_TYPE,
   MEDIA_WEBPAGE_VIEW_TYPE,
+  MEDIA_FILE_VIEW_TYPE,
 } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { MediaHost } from "./supported";
@@ -87,7 +88,7 @@ export class URLViewType extends Component {
   getSupported(url: MediaInfo): MediaViewType[];
   getSupported(url: MediaInfo): MediaViewType[] {
     if (!(url instanceof MediaURL)) {
-      return [url.viewType];
+      return [MEDIA_FILE_VIEW_TYPE[url.type]];
     }
     if (url.type === MediaHost.Generic) {
       switch (url.inferredType) {

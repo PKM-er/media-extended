@@ -1,10 +1,13 @@
 import { pathToFileURL } from "url";
 import { assertNever } from "assert-never";
-import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
+import { Keymap, Notice, Platform, SuggestModal, TFile } from "obsidian";
 import path from "@/lib/path";
 import { pickMediaFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
+import type { FileMediaInfo, MediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
+import { checkMediaType } from "@/patch/media-type";
+import { getFsPromise } from "@/web/session/utils";
 import { MediaURL } from "@/web/url-match";
 import { FileProtocolModal } from "./protocol-select";
 
@@ -50,7 +53,30 @@ function toURLGuess(query: string): URL | null {
 export class MediaSwitcherModal extends SuggestModal<MediaURL> {
   constructor(public plugin: MxPlugin) {
     super(plugin.app);
-    this.setPlaceholder("Enter file path, URL or media ID");
+    this.inputEl.addEventListener("drop", (evt) => {
+      if (!evt.dataTransfer) return;
+      if (evt.dataTransfer.files.length === 0) return;
+      const files = [...evt.dataTransfer.files];
+      const mediaFiles = [...evt.dataTransfer.files].filter((f) =>
+        checkMediaType(path.extname(f.name)),
+      );
+      if (mediaFiles.length === 0) {
+        new Notice(
+          `Cannot open dropped file${
+            files.length > 1 ? "s" : ""
+          }, not supported media file type`,
+        );
+        return;
+      }
+      const media = mediaFiles[0];
+      evt.preventDefault();
+      const target = evt.target as HTMLInputElement;
+      target.value = media.path;
+      target.dispatchEvent(new Event("input"));
+    });
+    this.setPlaceholder(
+      "Enter file path, URL or media id, or drop a media file here",
+    );
     this.setInstructions([
       { command: "↑↓", purpose: "to navigate" },
       { command: "↵", purpose: "to open url" },
@@ -134,6 +160,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     item: MediaURL | "file-picker" | "file-protocol-picker",
     evt: MouseEvent | KeyboardEvent,
   ) {
+    let mediaInfo: MediaInfo;
     if (item === "file-protocol-picker") {
       const fileProtocol = await FileProtocolModal.choose(this.plugin);
       if (!fileProtocol) return;
@@ -159,33 +186,79 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
         );
         return;
       }
-      item = resolved;
+      mediaInfo = resolved;
     } else if (item === "file-picker") {
       const mediaFile = await pickMediaFile();
       if (!mediaFile) return;
       const url = toFileURL(mediaFile);
       if (!url) return;
-      item = new MediaURL(url.href);
+      mediaInfo = new MediaURL(url.href);
     } else if (item instanceof MediaURL) {
-      // do nothing
+      mediaInfo = item;
     } else {
       assertNever(item);
     }
-    if (item.isFileUrl && !item.inferredType) {
-      new Notice("Unsupported file type: " + item.pathname);
+    if (mediaInfo.isFileUrl && !mediaInfo.inferredType) {
+      new Notice("Unsupported file type: " + mediaInfo.pathname);
       return;
     }
 
-    console.log("media selected", item.href);
+    const inVaultFile = mediaInfo.getVaultFile(this.plugin.app.vault);
+    if (inVaultFile !== false) {
+      if (!inVaultFile) {
+        new Notice("File not found in vault: " + mediaInfo.href);
+        return;
+      }
+      if (!(inVaultFile instanceof TFile)) {
+        new Notice("Not a file: " + mediaInfo.href);
+        return;
+      }
+      const mediaType = checkMediaType(inVaultFile.extension);
+      if (!mediaType) {
+        new Notice("Unsupported file type: " + inVaultFile.path);
+        return;
+      }
+      mediaInfo = {
+        file: inVaultFile,
+        hash: mediaInfo.hash,
+        type: mediaType,
+      } as FileMediaInfo;
+    } else if (mediaInfo.isFileUrl) {
+      const fs = getFsPromise();
+      if (!fs) {
+        new Notice("File path is only supported in desktop app");
+        return;
+      }
+      try {
+        const s = await fs.stat(mediaInfo);
+        if (!s.isFile()) {
+          new Notice("Not a file: " + mediaInfo.href);
+          return;
+        }
+      } catch (e) {
+        const err = e as NodeJS.ErrnoException;
+        const filePath = mediaInfo.filePath ?? mediaInfo.href;
+        if (err.code === "ENOENT") {
+          new Notice("File not found: " + filePath);
+        } else if (err.code === "EACCES") {
+          new Notice("Permission denied: " + filePath);
+        } else {
+          new Notice(`Failed to access file (${err.code}): ` + filePath);
+        }
+        return;
+      }
+    }
+
+    console.log("media selected", mediaInfo);
 
     if (Keymap.isModifier(evt, "Mod") && Keymap.isModifier(evt, "Alt")) {
-      this.plugin.leafOpener.openMedia(item, "split", {
+      this.plugin.leafOpener.openMedia(mediaInfo, "split", {
         direction: "vertical",
       });
     } else if (Keymap.isModifier(evt, "Mod")) {
-      this.plugin.leafOpener.openMedia(item, "tab");
+      this.plugin.leafOpener.openMedia(mediaInfo, "tab");
     } else {
-      this.plugin.leafOpener.openMedia(item, false);
+      this.plugin.leafOpener.openMedia(mediaInfo, false);
     }
   }
 }

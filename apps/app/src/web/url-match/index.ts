@@ -1,8 +1,9 @@
 import { fileURLToPath } from "url";
-import type { TFile, Vault } from "obsidian";
-import { Platform } from "obsidian";
+import type { TAbstractFile, TFile, Vault } from "obsidian";
+import { FileSystemAdapter, Platform, normalizePath } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
+import path from "@/lib/path";
 import { noHash } from "@/lib/url";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
@@ -39,9 +40,24 @@ export class MediaURL extends URL implements URLResolveResult {
   }
   get filePath(): string | null {
     if (this.isFileUrl) {
-      return fileURLToPath(this);
+      try {
+        return fileURLToPath(this);
+      } catch (e) {
+        console.error("Failed to convert file url to path", e, this.href);
+        return null;
+      }
     }
     return null;
+  }
+  getVaultFile(vault: Vault): TAbstractFile | null | false {
+    if (!(vault.adapter instanceof FileSystemAdapter)) return false;
+    const filePath = this.filePath;
+    const vaultBasePath = vault.adapter.getBasePath();
+    if (!filePath) return false;
+    const relative = path.relative(vaultBasePath, filePath);
+    if (!relative || relative.startsWith("..")) return false;
+    const normalized = normalizePath(relative);
+    return vault.getAbstractFileByPath(normalized);
   }
 
   compare(other: MediaURL | null | undefined): boolean {

@@ -8,7 +8,6 @@ import type { FileMediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
 import { type PlayerComponent } from "./base";
-import { MEDIA_FILE_VIEW_TYPE } from "./view-type";
 
 export class MediaFileEmbed
   extends Component
@@ -49,7 +48,6 @@ export class MediaFileEmbed
       type,
       file: this.file,
       hash: this.subpath,
-      viewType: MEDIA_FILE_VIEW_TYPE[type],
     };
   }
 
