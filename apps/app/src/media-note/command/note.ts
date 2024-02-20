@@ -1,4 +1,5 @@
 import type { Editor, TFile } from "obsidian";
+import { noticeNotetaking } from "@/media-view/notice-notetaking";
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { saveScreenshot } from "../timestamp/screenshot";
@@ -15,7 +16,10 @@ export function registerNoteCommands(plugin: MxPlugin) {
       icon: "star",
       menu: true,
       section: "selection-link",
-      ...logic(takeTimestamp),
+      ...logic(async (p, ctx) => {
+        if (ctx.from === "player") noticeNotetaking("timestamp");
+        await takeTimestamp(p, ctx);
+      }),
     },
     plugin,
   );
@@ -26,7 +30,10 @@ export function registerNoteCommands(plugin: MxPlugin) {
       icon: "camera",
       section: "selection-link",
       menu: true,
-      ...logic(saveScreenshot),
+      ...logic(async (p, ctx) => {
+        if (ctx.from === "player") noticeNotetaking("screenshot");
+        await saveScreenshot(p, ctx);
+      }),
     },
     plugin,
   );
@@ -37,6 +44,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
       ctx: {
         file: TFile;
         editor: Editor;
+        from: "player" | "note";
       },
     ) => any,
   ): MediaViewCallback {
@@ -45,7 +53,9 @@ export function registerNoteCommands(plugin: MxPlugin) {
         const mediaInfo = view.getMediaInfo();
         if (!mediaInfo) return false;
         if (checking) return true;
-        openOrCreateMediaNote(mediaInfo, view).then((ctx) => action(view, ctx));
+        openOrCreateMediaNote(mediaInfo, view).then((ctx) =>
+          action(view, { ...ctx, from: "player" }),
+        );
       },
       noteCheckCallback: (checking, view, { isMediaNote, ...ctx }) => {
         let _view: Promise<MediaView>;
@@ -60,7 +70,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
           plugin.app.workspace.revealLeaf(view.leaf);
           _view = Promise.resolve(view);
         }
-        _view.then((v) => action(v, ctx));
+        _view.then((v) => action(v, { ...ctx, from: "note" }));
       },
     };
   }

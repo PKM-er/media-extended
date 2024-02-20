@@ -1,10 +1,4 @@
-import {
-  type Component,
-  type Menu,
-  type View,
-  type ItemView,
-  Notice,
-} from "obsidian";
+import { type Component, type Menu, type View, type ItemView } from "obsidian";
 import type ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
 import { toURL } from "@/lib/url";
@@ -13,6 +7,7 @@ import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
 import type { MediaInfo } from "./media-info";
+import { noticeNotetaking } from "./notice-notetaking";
 import { MEDIA_EMBED_VIEW_TYPE, type MediaViewType } from "./view-type";
 
 export interface PlayerComponent extends Component {
@@ -65,28 +60,6 @@ export function addAction(player: PlayerComponent & ItemView) {
         saveScreenshot(player, ctx),
       );
     });
-}
-
-function noticeNotetaking(action: string) {
-  const label = "mx:media-notetaking-notified";
-  const notified = localStorage.getItem(label);
-  if (notified) return;
-  new Notice(
-    createFragment((e) => {
-      e.appendText(
-        `You are taking ${action} from media player. By default, they will only be saved in the media note. `,
-      );
-      e.createEl("p", {
-        text: `To take ${action} or control playback from abritrary note, use command when focused on the note`,
-      });
-      e.createEl("p", {
-        text: "PS: you can assign a hotkey to each command in the settings",
-      });
-      e.appendText("Click to dismiss this notice.");
-    }),
-    0,
-  );
-  localStorage.setItem(label, "1");
 }
 
 export function onPaneMenu<
