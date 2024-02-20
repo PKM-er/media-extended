@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { MenuItem } from "obsidian";
-import { parseLinktext } from "obsidian";
+import { Notice, Platform, parseLinktext } from "obsidian";
 import type { RemoteMediaViewType } from "@/media-view/view-type";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
@@ -39,11 +39,67 @@ const mediaTypeDisplay: Record<
   "mx-webpage": { label: "webpage", icon: "globe" },
 };
 
+async function showItemInFolder(fullpath: string) {
+  if (!Platform.isDesktopApp) return;
+  const electron = (window as any).electron;
+  if (!electron) return;
+  const shell = (
+    Platform.isMacOS ? electron.remote.shell : electron.shell
+  ) as typeof Electron.shell;
+  await shell.showItemInFolder(fullpath);
+}
+async function openPath(fullpath: string) {
+  if (!Platform.isDesktopApp) return;
+  const electron = (window as any).electron;
+  if (!electron) return;
+  const shell = (
+    Platform.isMacOS ? electron.remote.shell : electron.shell
+  ) as typeof Electron.shell;
+  const err = await shell.openPath(fullpath);
+  if (err) throw new Error(err);
+}
+
 export function handleExternalLinkMenu(plugin: MxPlugin) {
   plugin.registerEvent(
     plugin.app.workspace.on("url-menu", (menu, link) => {
       const url = plugin.resolveUrl(link);
       if (!url) return;
+
+      if (Platform.isDesktopApp && url.isFileUrl && url.filePath) {
+        const filePath = url.filePath;
+        menu
+          .addItem((item) =>
+            item
+              .setIcon("folder")
+              .setTitle(
+                Platform.isMacOS
+                  ? "Reveal in Finder"
+                  : "Show in system explorer",
+              )
+              .onClick(() => {
+                showItemInFolder(filePath).catch((err) => {
+                  new Notice(
+                    `Failed to open file in file explorer: ${err.message}`,
+                  );
+                  console.error("Failed to open file in file explorer", err);
+                });
+              }),
+          )
+          .addItem((item) =>
+            item
+              .setIcon("arrow-up-right")
+              .setTitle("Open in system player")
+              .onClick(() => {
+                openPath(filePath).catch((err) => {
+                  new Notice(
+                    `Failed to open file in system player: ${err.message}`,
+                  );
+                  console.error("Failed to open file in system player", err);
+                });
+              }),
+          );
+      }
+
       const { protocol, hostname, pathname, host, port } = url;
       const supported = plugin.urlViewType.getSupported(url);
       const preferred = plugin.urlViewType.getPreferred(url);
