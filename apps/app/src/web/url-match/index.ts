@@ -163,7 +163,7 @@ export function resolveMxProtocol(
   { getUrlMapping }: MxSettings,
 ): MediaURL | null {
   if (!src) return null;
-  if (src.protocol !== "mx:") return new MediaURL(src);
+  if (src.protocol !== "mx:") return MediaURL.create(src);
 
   // custom protocol take // as part of the pathname
   const [, , mxProtocol] = src.pathname.split("/");
