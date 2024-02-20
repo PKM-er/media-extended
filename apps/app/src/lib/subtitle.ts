@@ -155,15 +155,16 @@ function toTrack<F extends FileInfo>(
   basename: string,
 ): LocalTrack<F> | null {
   if (!isCaptionsFile(file.extension)) return null;
-
   // for video file "hello.mp4"
   // vaild subtitle:
   // - "./hello.en.srt", "./hello.zh.srt" (muiltple files)
   // - "./hello.srt" (single file)
 
-  const [fileBasename, lan, ...rest] = file.basename.split(".");
-  if (rest.length > 0 || fileBasename !== basename) return null;
-  const langCode = format(lan);
+  const segments = file.basename.split(".");
+  const lastSeg = segments.at(-1),
+    fileBasename = segments.slice(0, -1).join(".");
+  if (!lastSeg || !fileBasename || fileBasename !== basename) return null;
+  const langCode = format(lastSeg);
   const label = langCode ? langCodeToLabel(langCode) : "Unknown";
   return {
     kind: "subtitles",
