@@ -160,11 +160,19 @@ function toTrack<F extends FileInfo>(
   // - "./hello.en.srt", "./hello.zh.srt" (muiltple files)
   // - "./hello.srt" (single file)
 
-  const segments = file.basename.split(".");
-  const lastSeg = segments.at(-1),
-    fileBasename = segments.slice(0, -1).join(".");
-  if (!lastSeg || !fileBasename || fileBasename !== basename) return null;
-  const langCode = format(lastSeg);
+  if (!file.basename.startsWith(basename)) return null;
+
+  const suffix = file.basename.substring(basename.length);
+
+  let langCode: string | null;
+  if (!suffix) {
+    // exact match without lang code
+    langCode = null;
+  } else {
+    langCode = format(suffix.replace(/^\./, ""));
+    if (!langCode) return null;
+  }
+
   const label = langCode ? langCodeToLabel(langCode) : "Unknown";
   return {
     kind: "subtitles",
