@@ -11,12 +11,25 @@ interface InfoLabels {
   required: string;
 }
 
+const infoLabels = {
+  en: {
+    required: "Required Obsidian Version:",
+    latest: "Latest Version:",
+  },
+  "zh-CN": {
+    required: "最低 Obsidian 版本：",
+    latest: "插件最新版本：",
+  },
+} satisfies Record<string, InfoLabels>;
+
+type InfoLanguage = keyof typeof infoLabels;
+
 export const ObsidianInfo = ({
   channel = "main",
-  labels,
+  lang,
 }: {
   channel?: Channel[] | Channel;
-  labels: InfoLabels;
+  lang: InfoLanguage;
 }) => {
   const props = useData() as ObsidianInstallProps;
 
@@ -31,23 +44,23 @@ export const ObsidianInfo = ({
   return (
     <Callout type="info">
       <div>
-        {labels.latest}
+        {infoLabels[lang].latest}
         <Versions values={[version]} />
       </div>
       <div>
-        {labels.required}
+        {infoLabels[lang].required}
         <Versions values={[requireObsdian]} />
       </div>
     </Callout>
   );
 };
 
-export function ViaObsidianInfo({ labels }: { labels: InfoLabels }) {
+export function ViaObsidianInfo({ lang }: { lang: InfoLanguage }) {
   const { enlisted } = useData() as ObsidianInstallProps;
   if (!enlisted) {
     return <Callout type="error">Not yet Available</Callout>;
   }
-  return <ObsidianInfo labels={labels} />;
+  return <ObsidianInfo lang={lang} />;
 }
 
 const toDownloadLink = (file: string, ver: string | null = null) => {
