@@ -110,8 +110,11 @@ export abstract class MediaRemoteView
     } else {
       const now = this.store.getState().source?.url;
       if (!url.compare(now)) {
-        this.render();
         await this.setSource(url);
+        // workaround for vidstack issue when refresh source
+        // including subtitle default not applied
+        // provider not loaded properly when switched
+        this.render();
       }
     }
   }

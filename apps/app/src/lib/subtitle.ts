@@ -20,13 +20,21 @@ export function getTracks<F extends FileInfo>(
   siblings: F[],
   defaultLangCode?: string,
 ): LocalTrack<F>[] {
-  console.debug("Search subtitles for media", media);
+  console.debug("Search subtitles for media", {
+    basename: media.basename,
+    path: media.path,
+    defaultLangCode,
+  });
   console.debug(`${siblings.length} siblings`, siblings);
   const subtitles = siblings.filter(isCaptionsFile).flatMap((file) => {
     const track = toTrack(file, media.basename);
     if (!track) return [];
     return [track];
   });
+  if (subtitles.length === 0) {
+    console.debug("No subtitles found");
+    return subtitles;
+  }
   console.debug(
     `Found ${subtitles.length} subtitles: `,
     subtitles.map((f) => f.src.path),
@@ -67,9 +75,13 @@ export function getTracks<F extends FileInfo>(
     uniqueTracks.map((f) => f.src.path),
   );
   console.debug(`Final tracks details`, uniqueTracks);
+
   if (uniqueTracks.length === 0) {
-    return [];
+    return uniqueTracks;
   }
+  console.debug(
+    `Final default lang: ${subtitleDefaultLang ?? uniqueTracks[0].id}`,
+  );
   if (!subtitleDefaultLang) {
     uniqueTracks[0].default = true;
   }
