@@ -25,12 +25,6 @@ const hostnamePattern =
 function toFileURL(path: string) {
   try {
     const url = pathToFileURL(path) as globalThis.URL;
-    if (url.hostname) {
-      new Notice(
-        "Network path is not supported in obsidian, you need to map it to a local path",
-      );
-      return null;
-    }
     return url;
   } catch (e) {
     console.error(`Failed to convert path ${path} to URL: `, e);
@@ -39,14 +33,15 @@ function toFileURL(path: string) {
 }
 
 function toURLGuess(query: string): URL | null {
-  if (path.isAbsolute(query)) {
-    return toFileURL(query);
-  }
-  const url = toURL(query);
+  const url = path.isAbsolute(query) ? toFileURL(query) : toURL(query);
   if (!url) return null;
-  const { hostname } = url;
-  // valid hostname
-  if (!hostnamePattern.test(hostname)) return null;
+  if (
+    ["http:", "https:"].includes(url.protocol) &&
+    !hostnamePattern.test(url.hostname)
+  ) {
+    // invalid hostname
+    return null;
+  }
   return url;
 }
 
@@ -198,9 +193,19 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     } else {
       assertNever(item);
     }
-    if (mediaInfo.isFileUrl && !mediaInfo.inferredType) {
-      new Notice("Unsupported file type: " + mediaInfo.pathname);
-      return;
+    if (mediaInfo.isFileUrl) {
+      if (!mediaInfo.inferredType) {
+        new Notice("Unsupported file type: " + mediaInfo.pathname);
+        return;
+      }
+      if (mediaInfo.hostname) {
+        new Notice(
+          `Network path is not supported in obsidian, you need to map it to a local path: ${
+            mediaInfo.filePath ?? mediaInfo.href
+          }`,
+        );
+        return;
+      }
     }
 
     const inVaultFile = mediaInfo.getVaultFile(this.plugin.app.vault);

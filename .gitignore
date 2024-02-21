@@ -22,3 +22,5 @@ yarn-error.log*
 # Misc
 .DS_Store
 .vercel
+
+.obsidian/workspace.json
