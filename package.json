@@ -5,6 +5,11 @@
   "devDependencies": {
     "turbo": "latest"
   },
+  "scripts": {
+    "build": "turbo run build",
+    "build-docs": "turbo run build --filter=./apps/docs/",
+    "dev": "turbo run dev"
+  },
   "pnpm": {
     "neverBuiltDependencies": [
       "electron"
