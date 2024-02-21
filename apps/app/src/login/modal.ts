@@ -52,7 +52,7 @@ export class LoginModal extends Modal {
         this.webview.goBack();
       } catch (e) {
         new Notice("Failed to go back, see console for details");
-        console.error(e);
+        console.error("err go back", e);
       }
     });
   forwardButton = new ButtonComponent(this.navEl)
@@ -65,7 +65,7 @@ export class LoginModal extends Modal {
         this.webview.goForward();
       } catch (e) {
         new Notice("Failed to go forward, see console for details");
-        console.error(e);
+        console.error("err go forward", e);
       }
     });
   refreshButton = new ButtonComponent(this.navEl)
@@ -78,7 +78,7 @@ export class LoginModal extends Modal {
         this.webview.reload();
       } catch (e) {
         new Notice("Failed to refresh, see console for details");
-        console.error(e);
+        console.error("err refresh", e);
       }
     });
 
@@ -152,7 +152,7 @@ export class LoginModal extends Modal {
             new Notice("Cache cleared");
           } catch (e) {
             new Notice("Failed to clear cache, see console for details");
-            console.error(e);
+            console.error("err clear cache", e);
           }
         }),
     );

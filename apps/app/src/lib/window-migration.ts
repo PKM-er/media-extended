@@ -176,7 +176,6 @@ function onParentMigrated(
     const currLeaf = view.leaf.parent;
     if (currWin === prevWin) {
       if (currLeaf !== prevTab) {
-        console.log("currLeaf", currLeaf, "prevLeaf", prevTab);
         handler(currLeaf, prevTab);
         prevTab = currLeaf;
       }

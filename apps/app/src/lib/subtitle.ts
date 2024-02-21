@@ -16,24 +16,22 @@ function isCaptionsFile<T extends FileInfo>(
 }
 
 export function getTracks<F extends FileInfo>(
-  mediaBasename: string,
+  media: Omit<F, "extension">,
   siblings: F[],
   defaultLangCode?: string,
 ): LocalTrack<F>[] {
-  console.debug(
-    `Search subtitles for media, siblings ${siblings.length}`,
-    siblings,
-  );
+  console.debug("Search subtitles for media", media);
+  console.debug(`${siblings.length} siblings`, siblings);
   const subtitles = siblings.filter(isCaptionsFile).flatMap((file) => {
-    const track = toTrack(file, mediaBasename);
+    const track = toTrack(file, media.basename);
     if (!track) return [];
     return [track];
   });
   console.debug(
     `Found ${subtitles.length} subtitles: `,
     subtitles.map((f) => f.src.path),
-    subtitles,
   );
+  console.debug(`Subtitles details: `, subtitles);
   const subtitlesByLang = groupBy(subtitles, (v) => v.language);
   const allLanguages = [...subtitlesByLang.keys()];
   const subtitleDefaultLang = !defaultLangCode
@@ -65,10 +63,10 @@ export function getTracks<F extends FileInfo>(
     }
   });
   console.debug(
-    `Found ${uniqueTracks.length} unique tracks: `,
+    `Final tracks: ${uniqueTracks.length}`,
     uniqueTracks.map((f) => f.src.path),
-    uniqueTracks,
   );
+  console.debug(`Final tracks details`, uniqueTracks);
   if (uniqueTracks.length === 0) {
     return [];
   }
@@ -113,7 +111,11 @@ export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
       };
     });
 
-  const uniqueTracks = getTracks(mediaBaseame, siblings, defaultLang);
+  const uniqueTracks = getTracks(
+    { basename: mediaBaseame, path: filePath },
+    siblings,
+    defaultLang,
+  );
 
   return (
     await Promise.all(
@@ -139,12 +141,11 @@ export async function getTracksInVault(
   vault: Vault,
   defaultLang?: string,
 ) {
-  const { basename: videoName, parent: folder } = media;
-  if (!folder) return [];
+  if (!media.parent) return [];
 
   const uniqueTracks = getTracks(
-    videoName,
-    folder.children.filter((f): f is TFile => f instanceof TFile),
+    media,
+    media.parent.children.filter((f): f is TFile => f instanceof TFile),
     defaultLang,
   );
 

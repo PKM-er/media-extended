@@ -194,7 +194,7 @@ export class MessageController<
         this.port.postMessage(msg, { transfer: result.transfer });
       }
     } catch (e) {
-      console.error(e);
+      console.error("port messaging error", e);
       if (e instanceof Error) {
         msg.error = { message: e.message, stack: e.stack };
       } else {

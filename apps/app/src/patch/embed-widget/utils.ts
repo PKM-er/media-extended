@@ -12,14 +12,6 @@ export const isMdFavorInternalLink = (e: string) => {
     !(!e.startsWith("./") && !e.startsWith("../")) || -1 === e.indexOf(":")
   );
 };
-export const toVaildURL = (url: string) => {
-  try {
-    return new URL(url).toString();
-  } catch (e) {
-    console.log(e);
-  }
-  return encodeURI(decodeURI(url));
-};
 export const parseLinktextAlias = (linktext: string) => {
   let title = "";
   const pipeLoc = linktext.indexOf("|"),

@@ -8,7 +8,6 @@ import { toSerilizableTimeRange } from "../lib/time-range";
 export function handleReadyState(plugin: MediaPlugin) {
   const player = plugin.media;
   const port = plugin.controller;
-  console.log("BIND", player.readyState);
   plugin.registerDomEvent(player, "loadstart", onLoadStart);
   plugin.registerDomEvent(player, "loadeddata", onLoadedData);
   plugin.registerDomEvent(player, "loadedmetadata", onLoadedMetadata);

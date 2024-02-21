@@ -62,7 +62,7 @@ const getTimeSpan = (
     startTime = -1;
     endTime = convertTime(endRaw);
   } else {
-    console.error(start, end);
+    console.error("Missing startTime and endTime", start, end);
     throw new Error("Missing startTime and endTime");
   }
 
