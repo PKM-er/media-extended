@@ -6,10 +6,17 @@ import Versions from "../version";
 
 type Channel = "main" | "beta";
 
+interface InfoLabels {
+  latest: string;
+  required: string;
+}
+
 export const ObsidianInfo = ({
   channel = "main",
+  labels,
 }: {
   channel?: Channel[] | Channel;
+  labels: InfoLabels;
 }) => {
   const props = useData() as ObsidianInstallProps;
 
@@ -24,23 +31,23 @@ export const ObsidianInfo = ({
   return (
     <Callout type="info">
       <div>
-        Latest Version:
+        {labels.latest}
         <Versions values={[version]} />
       </div>
       <div>
-        Required Obsidian Version:
+        {labels.required}
         <Versions values={[requireObsdian]} />
       </div>
     </Callout>
   );
 };
 
-export function ViaObsidianInfo() {
+export function ViaObsidianInfo({ labels }: { labels: InfoLabels }) {
   const { enlisted } = useData() as ObsidianInstallProps;
   if (!enlisted) {
     return <Callout type="error">Not yet Available</Callout>;
   }
-  return <ObsidianInfo />;
+  return <ObsidianInfo labels={labels} />;
 }
 
 const toDownloadLink = (file: string, ver: string | null = null) => {
