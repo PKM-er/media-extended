@@ -1,5 +1,5 @@
 import type { MediaState } from "@vidstack/react";
-import type { Editor } from "obsidian";
+import { Notice, type Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
@@ -14,24 +14,36 @@ export function insertTimestamp(
     insertBefore,
   }: { template: string; editor: Editor; insertBefore?: boolean },
 ) {
+  console.debug("insert timestamp", { timestamp, screenshot, template });
   let toInsert = template.replace("{{TIMESTAMP}}", timestamp);
   if (screenshot) {
     toInsert = toInsert.replace("{{SCREENSHOT}}", screenshot);
   }
+  console.debug("content to insert", toInsert);
 
-  if (insertBefore) {
-    insertBeforeCursor(toInsert, editor);
-  } else {
-    insertToCursor(toInsert, editor);
+  try {
+    console.debug(
+      `inserting timestamp ${insertBefore ? "before" : "after"} cursor`,
+    );
+    if (insertBefore) {
+      insertBeforeCursor(toInsert, editor);
+    } else {
+      insertToCursor(toInsert, editor);
+    }
+  } catch (error) {
+    new Notice("Failed to insert timestamp, see console for details");
+    console.error("Failed to insert timestamp", error);
   }
 }
 function insertToCursor(str: string, editor: Editor) {
   const cursor = editor.getCursor("to");
+  console.debug("insert to cursor [to]", cursor.ch, cursor.line);
   editor.replaceRange(str, cursor, cursor);
   editor.setCursor(editor.offsetToPos(editor.posToOffset(cursor) + str.length));
 }
 function insertBeforeCursor(str: string, editor: Editor) {
   const cursor = editor.getCursor("from");
+  console.debug("insert before cursor [from]", cursor.ch, cursor.line);
   editor.replaceRange(str, cursor, cursor);
   // editor.setCursor(editor.offsetToPos(editor.posToOffset(cursor) + str.length));
 }

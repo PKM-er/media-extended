@@ -20,9 +20,14 @@ export async function takeTimestamp<T extends PlayerComponent>(
   const time = player.currentTime;
   const genTimestamp = timestampGenerator(time, mediaInfo, playerComponent);
 
-  if (time > 0) {
-    const { insertBefore, timestampTemplate: template } =
-      playerComponent.plugin.settings.getState();
+  if (time <= 0) {
+    new Notice("Playback not started yet");
+    return;
+  }
+  const { insertBefore, timestampTemplate: template } =
+    playerComponent.plugin.settings.getState();
+
+  try {
     insertTimestamp(
       { timestamp: genTimestamp(mediaNote.path) },
       {
@@ -31,7 +36,8 @@ export async function takeTimestamp<T extends PlayerComponent>(
         insertBefore,
       },
     );
-  } else {
-    new Notice("Playback not started yet");
+  } catch (e) {
+    new Notice("Failed to insert timestamp, see console for details");
+    console.error("Failed to insert timestamp", e);
   }
 }

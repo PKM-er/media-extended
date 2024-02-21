@@ -72,24 +72,29 @@ export async function saveScreenshot<T extends PlayerComponent>(
   const { insertBefore, screenshotTemplate, screenshotEmbedTemplate } =
     playerComponent.plugin.settings.getState();
 
-  const timestamp = genTimestamp(newNote.path),
-    screenshotLink = fileManager
-      .generateMarkdownLink(
-        screenshotFile,
-        newNote.path,
-        "",
-        screenshotEmbedTemplate
-          .replaceAll("{{TITLE}}", title)
-          .replaceAll("{{DURATION}}", humanizedDuration),
-      )
-      .replace(/^!/, "");
-
-  insertTimestamp(
-    { timestamp, screenshot: screenshotLink },
-    {
-      editor,
-      template: screenshotTemplate,
-      insertBefore,
-    },
-  );
+  try {
+    insertTimestamp(
+      {
+        timestamp: genTimestamp(newNote.path),
+        screenshot: fileManager
+          .generateMarkdownLink(
+            screenshotFile,
+            newNote.path,
+            "",
+            screenshotEmbedTemplate
+              .replaceAll("{{TITLE}}", title)
+              .replaceAll("{{DURATION}}", humanizedDuration),
+          )
+          .replace(/^!/, ""),
+      },
+      {
+        editor,
+        template: screenshotTemplate,
+        insertBefore,
+      },
+    );
+  } catch (e) {
+    new Notice("Failed to insert screenshot, see console for details");
+    console.error("Failed to insert screenshot", e);
+  }
 }
