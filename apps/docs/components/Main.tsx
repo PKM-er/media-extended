@@ -25,7 +25,7 @@ export default function Main({ children }: { children: React.ReactNode }) {
           inputPosition="top"
           loading="lazy"
           theme={mounted && isDark ? "dark" : "light"}
-          lang={locale === "en-US" ? "en" : locale}
+          lang={locale?.startsWith("en-") ? "en" : locale}
         />
       )}
     </>

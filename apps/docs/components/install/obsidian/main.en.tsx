@@ -1,7 +1,7 @@
 import { Tab, Tabs } from "nextra/components";
-import ViaObsidian from "./obsidian.en-US.mdx";
-import ViaBRAT from "./brat.en-US.mdx";
-import Manual from "./manual.en-US.mdx";
+import ViaObsidian from "./obsidian.en.mdx";
+import ViaBRAT from "./brat.en.mdx";
+import Manual from "./manual.en.mdx";
 import { useMethods } from "./use-method";
 
 export default function ObsidianInstall() {

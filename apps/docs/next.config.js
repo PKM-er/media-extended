@@ -8,7 +8,7 @@ const withNextra = require("nextra")({
  */
 const config = {
   i18n: {
-    locales: ["en-US", "zh-CN"],
+    locales: ["en", "zh-CN"],
     defaultLocale: "zh-CN",
     localeDetection: false,
   },
