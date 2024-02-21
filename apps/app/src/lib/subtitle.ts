@@ -8,8 +8,11 @@ import { format, langCodeToLabel } from "./lang/lang";
 import path from "./path";
 
 const supportedFormat = ["vtt", "ass", "ssa", "srt"] as const;
-function isCaptionsFile(ext: string): ext is (typeof supportedFormat)[number] {
-  return supportedFormat.includes(ext as any);
+type SupportedSubtitleFormat = (typeof supportedFormat)[number];
+function isCaptionsFile<T extends FileInfo>(
+  file: T,
+): file is T & { extension: SupportedSubtitleFormat } {
+  return supportedFormat.includes(file.extension);
 }
 
 export function getTracks<F extends FileInfo>(
@@ -17,11 +20,20 @@ export function getTracks<F extends FileInfo>(
   siblings: F[],
   defaultLangCode?: string,
 ): LocalTrack<F>[] {
-  const subtitles = siblings.flatMap((file) => {
+  console.debug(
+    `Search subtitles for media, siblings ${siblings.length}`,
+    siblings,
+  );
+  const subtitles = siblings.filter(isCaptionsFile).flatMap((file) => {
     const track = toTrack(file, mediaBasename);
     if (!track) return [];
     return [track];
   });
+  console.debug(
+    `Found ${subtitles.length} subtitles: `,
+    subtitles.map((f) => f.src.path),
+    subtitles,
+  );
   const subtitlesByLang = groupBy(subtitles, (v) => v.language);
   const allLanguages = [...subtitlesByLang.keys()];
   const subtitleDefaultLang = !defaultLangCode
@@ -52,6 +64,11 @@ export function getTracks<F extends FileInfo>(
       }
     }
   });
+  console.debug(
+    `Found ${uniqueTracks.length} unique tracks: `,
+    uniqueTracks.map((f) => f.src.path),
+    uniqueTracks,
+  );
   if (uniqueTracks.length === 0) {
     return [];
   }
@@ -80,13 +97,21 @@ export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
     })
   )
     .filter((f) => f.name !== mediaName && (f.isFile() || f.isSymbolicLink()))
-    .map(
-      (f): FileInfo => ({
-        extension: f.name.split(".").pop()!,
-        basename: f.name.split(".").slice(0, -1).join("."),
+    .map((f): FileInfo => {
+      const segs = f.name.split(".");
+      if (segs.length === 1)
+        return {
+          extension: "",
+          basename: f.name,
+          path: path.join(parentDir, f.name),
+        };
+
+      return {
+        extension: segs.at(-1)!,
+        basename: segs.slice(0, -1).join("."),
         path: path.join(parentDir, f.name),
-      }),
-    );
+      };
+    });
 
   const uniqueTracks = getTracks(mediaBaseame, siblings, defaultLang);
 
@@ -151,18 +176,17 @@ interface FileInfo {
 }
 
 function toTrack<F extends FileInfo>(
-  file: F,
+  trackFile: F & { extension: SupportedSubtitleFormat },
   basename: string,
 ): LocalTrack<F> | null {
-  if (!isCaptionsFile(file.extension)) return null;
   // for video file "hello.mp4"
   // vaild subtitle:
   // - "./hello.en.srt", "./hello.zh.srt" (muiltple files)
   // - "./hello.srt" (single file)
 
-  if (!file.basename.startsWith(basename)) return null;
+  if (!trackFile.basename.startsWith(basename)) return null;
 
-  const suffix = file.basename.substring(basename.length);
+  const suffix = trackFile.basename.substring(basename.length);
 
   let langCode: string | null;
   if (!suffix) {
@@ -177,10 +201,10 @@ function toTrack<F extends FileInfo>(
   return {
     kind: "subtitles",
     language: langCode ?? undefined,
-    id: `${file.basename}.${file.extension}.${langCode ?? "unknown"}`,
-    src: file,
-    type: file.extension,
-    label: `${label} (${file.extension})`,
+    id: `${trackFile.basename}.${trackFile.extension}.${langCode ?? "unknown"}`,
+    src: trackFile,
+    type: trackFile.extension,
+    label: `${label} (${trackFile.extension})`,
     default: false,
   };
 }
