@@ -3,11 +3,9 @@ import type { ObsidianInstallProps } from "./data";
 import { useCallback, useEffect, useState } from "react";
 
 function useHash() {
-  const [hash, setHash] = useState("");
-
-  const hashChangeHandler = useCallback(() => {
-    setHash(window.location.hash.replace(/^#/, ""));
-  }, []);
+  const [hash, setHash] = useState(() =>
+    typeof window === "undefined" ? "" : window.location.hash.replace(/^#/, "")
+  );
 
   useEffect(() => {
     hashChangeHandler();
@@ -15,6 +13,9 @@ function useHash() {
     return () => {
       window.removeEventListener("hashchange", hashChangeHandler);
     };
+    function hashChangeHandler() {
+      setHash(window.location.hash.replace(/^#/, ""));
+    }
   }, []);
 
   const updateHash = useCallback(
