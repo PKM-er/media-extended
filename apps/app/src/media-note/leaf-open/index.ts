@@ -340,7 +340,7 @@ export type MediaLeaf = WorkspaceLeaf & { view: MediaView };
  */
 function getAllMediaLeaves(workspace: Workspace) {
   const leaves: WorkspaceLeaf[] = [];
-  workspace.iterateAllLeaves((leaf) => {
+  workspace.iterateRootLeaves((leaf) => {
     if (isMediaViewType(leaf.view.getViewType())) {
       leaves.push(leaf);
     }
@@ -369,7 +369,7 @@ export function isMediaLeaf(leaf: WorkspaceLeaf | null): leaf is MediaLeaf {
   return !!leaf && isMediaViewType(leaf.view.getViewType());
 }
 
-function byActiveTime(a: WorkspaceLeaf, b: WorkspaceLeaf) {
+export function byActiveTime(a: WorkspaceLeaf, b: WorkspaceLeaf) {
   return b.activeTime - a.activeTime;
 }
 

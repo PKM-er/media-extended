@@ -1,7 +1,14 @@
-import type { Editor, TFile } from "obsidian";
-import { noticeNotetaking } from "@/media-view/notice-notetaking";
+import {
+  type MarkdownView,
+  type App,
+  type Editor,
+  type TFile,
+  type WorkspaceLeaf,
+  Notice,
+} from "obsidian";
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
+import { byActiveTime } from "../leaf-open";
 import { saveScreenshot } from "../timestamp/screenshot";
 import { takeTimestamp } from "../timestamp/timestamp";
 import { openOrCreateMediaNote } from "../timestamp/utils";
@@ -9,6 +16,7 @@ import type { MediaViewCallback } from "./utils";
 import { addMediaViewCommand } from "./utils";
 
 export function registerNoteCommands(plugin: MxPlugin) {
+  let prevTarget: TFile | null = null;
   addMediaViewCommand(
     {
       id: "take-timestamp",
@@ -16,9 +24,16 @@ export function registerNoteCommands(plugin: MxPlugin) {
       icon: "star",
       menu: true,
       section: "selection-link",
-      ...logic(async (p, ctx) => {
-        if (ctx.from === "player") noticeNotetaking("timestamp");
-        await takeTimestamp(p, ctx);
+      ...basicLogic(async (p, ctx) => {
+        const prev = prevTarget;
+        prevTarget = ctx.file;
+        if (
+          (await takeTimestamp(p, ctx)) &&
+          ctx.from === "player" &&
+          prev !== ctx.file
+        ) {
+          new Notice(`Timestamp taken in "${ctx.file.basename}"`);
+        }
       }),
     },
     plugin,
@@ -30,15 +45,58 @@ export function registerNoteCommands(plugin: MxPlugin) {
       icon: "camera",
       section: "selection-link",
       menu: true,
-      ...logic(async (p, ctx) => {
-        if (ctx.from === "player") noticeNotetaking("screenshot");
-        await saveScreenshot(p, ctx);
+      ...basicLogic(async (p, ctx) => {
+        const prev = prevTarget;
+        prevTarget = ctx.file;
+        if (
+          (await saveScreenshot(p, ctx)) &&
+          ctx.from === "player" &&
+          prev !== ctx.file
+        ) {
+          new Notice(`Taking screenshot in "${ctx.file.basename}"`);
+        }
       }),
     },
     plugin,
   );
+  addMediaViewCommand(
+    {
+      id: "take-timestamp-media-note",
+      name: "Take timestamp in media note",
+      icon: "star",
+      menu: true,
+      section: "selection-link",
+      playerCheckCallback(checking, view) {
+        const mediaInfo = view.getMediaInfo();
+        if (!mediaInfo) return false;
+        if (checking) return true;
+        openOrCreateMediaNote(mediaInfo, view).then((ctx) =>
+          takeTimestamp(view, ctx),
+        );
+      },
+    },
+    plugin,
+  );
+  addMediaViewCommand(
+    {
+      id: "save-screenshot-media-note",
+      name: "Save screenshot in media note",
+      icon: "camera",
+      section: "selection-link",
+      menu: true,
+      playerCheckCallback(checking, view) {
+        const mediaInfo = view.getMediaInfo();
+        if (!mediaInfo) return false;
+        if (checking) return true;
+        openOrCreateMediaNote(mediaInfo, view).then((ctx) =>
+          saveScreenshot(view, ctx),
+        );
+      },
+    },
+    plugin,
+  );
 
-  function logic(
+  function basicLogic(
     action: (
       playerComponent: MediaView,
       ctx: {
@@ -50,12 +108,19 @@ export function registerNoteCommands(plugin: MxPlugin) {
   ): MediaViewCallback {
     return {
       playerCheckCallback: (checking, view) => {
-        const mediaInfo = view.getMediaInfo();
-        if (!mediaInfo) return false;
+        // find last active note in editor mode and inset the note
+        const active = getMostRecentEditorLeaf(plugin.app);
+        if (!active) {
+          if (checking) return false;
+          new Notice("No active note can be edited");
+          return;
+        }
         if (checking) return true;
-        openOrCreateMediaNote(mediaInfo, view).then((ctx) =>
-          action(view, { ...ctx, from: "player" }),
-        );
+        action(view, {
+          file: active.view.file,
+          editor: active.view.editor,
+          from: "player",
+        });
       },
       noteCheckCallback: (checking, view, { isMediaNote, ...ctx }) => {
         let _view: Promise<MediaView>;
@@ -74,4 +139,20 @@ export function registerNoteCommands(plugin: MxPlugin) {
       },
     };
   }
+}
+
+function getMostRecentEditorLeaf(app: App) {
+  const leaf = app.workspace
+    .getLeavesOfType("markdown")
+    .filter((l) => {
+      const view = l.view as MarkdownView;
+      return view.file && view.getMode() === "source";
+    })
+    .sort(byActiveTime);
+
+  return (
+    (leaf[0] as
+      | (WorkspaceLeaf & { view: MarkdownView & { file: TFile } })
+      | undefined) ?? null
+  );
 }

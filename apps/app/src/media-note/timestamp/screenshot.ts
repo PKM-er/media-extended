@@ -23,21 +23,21 @@ declare module "obsidian" {
 export async function saveScreenshot<T extends PlayerComponent>(
   playerComponent: T,
   { file: newNote, editor }: { file: TFile; editor: Editor },
-) {
+): Promise<boolean> {
   const { fileManager, vault } = playerComponent.plugin.app;
   const player = playerComponent.store.getState().player;
   if (!player) {
     new Notice("Player not initialized");
-    return;
+    return false;
   }
   const mediaInfo = playerComponent.getMediaInfo();
   if (!mediaInfo) {
     new Notice("No media is opened");
-    return;
+    return false;
   }
   if (!player?.provider || !canProviderScreenshot(player.provider)) {
     new Notice("Screenshot is not supported for this media");
-    return;
+    return false;
   }
   const { screenshotQuality, screenshotFormat } =
     playerComponent.plugin.settings.getState();
@@ -51,7 +51,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
   const ext = mime.getExtension(blob.type);
   if (!ext) {
     new Notice("Unknown mime type: " + blob.type);
-    return;
+    return false;
   }
 
   const title = mediaTitle(mediaInfo, player.state);
@@ -93,8 +93,10 @@ export async function saveScreenshot<T extends PlayerComponent>(
         insertBefore,
       },
     );
+    return true;
   } catch (e) {
     new Notice("Failed to insert screenshot, see console for details");
     console.error("Failed to insert screenshot", e);
+    return false;
   }
 }

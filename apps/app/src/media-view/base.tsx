@@ -43,7 +43,7 @@ export function titleFromUrl(src: string): string {
 }
 
 export function addAction(player: PlayerComponent & ItemView) {
-  player.addAction("star", "Timestamp", () => {
+  player.addAction("star", "Take timestamp in media note", () => {
     const info = player.getMediaInfo();
     if (!info) return;
     noticeNotetaking("timestamp");
@@ -52,7 +52,7 @@ export function addAction(player: PlayerComponent & ItemView) {
     });
   });
   if (player.getViewType() !== MEDIA_EMBED_VIEW_TYPE)
-    player.addAction("camera", "Screenshot", () => {
+    player.addAction("camera", "Take screenshot in media", () => {
       const info = player.getMediaInfo();
       if (!info) return;
       noticeNotetaking("screenshot");
