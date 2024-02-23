@@ -21,6 +21,7 @@ import { noHash } from "../url";
 import { decodeWebpageUrl } from "./encode";
 import { HTMLMediaEvents } from "./html–media-events";
 import { evalInWebview } from "./lib/inline-eval";
+import { WebviewLoadError, webviewErrorMessage } from "./net-err";
 import type { MediaPictureInPictureAdapter } from "./pip";
 import { WebpagePictureInPicture } from "./pip";
 import type { MsgCtrlLocal } from "./type";
@@ -207,7 +208,31 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
         if (err instanceof TimeoutError) {
           timeoutNotice(timeoutLimit);
         } else if (err instanceof WebviewLoadError) {
-          new Notice("Webview failed to load website: " + err.message);
+          const desc = webviewErrorMessage(err);
+          new Notice(
+            createFragment((el) => {
+              el.appendText(`Failed to load webpage: ${desc}`);
+              el.createEl("p", { text: "Click to copy " }, (p) =>
+                p.createEl(
+                  "a",
+                  {
+                    href: err.url,
+                    text:
+                      err.url.length > 50
+                        ? `${err.url.substring(0, 50)}...`
+                        : err.url,
+                  },
+                  (a) => {
+                    a.addEventListener("click", (e) => {
+                      e.preventDefault();
+                      navigator.clipboard.writeText(err.url);
+                      new Notice("URL copied to clipboard.");
+                    });
+                  },
+                ),
+              );
+            }),
+          );
         } else {
           throw err;
         }
@@ -219,7 +244,6 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
 
   onDomReady = async (evt: Event) => {
     const webview = this._webview;
-    this.handlePlayReady();
     new HTMLMediaEvents(this, this._ctx);
     this._updateTitle(evt);
     // prepare to recieve port, handle plugin load
@@ -253,6 +277,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     const webview = this._webview;
     this.togglePlayReady(false);
     webview.removeEventListener("dom-ready", this.onDomReady);
+    this.handlePlayReady();
     return new Promise<void>((resolve, reject) => {
       const onDomReady = (evt: Event) => {
         this.onDomReady(evt).then(resolve).catch(reject);
@@ -283,12 +308,6 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
       !webview.src || noHash(url.source) !== noHash(webview.src);
     webview.src = url.href;
     if (shouldReload) await this.untilPluginReady();
-  }
-}
-
-class WebviewLoadError extends Error {
-  constructor(evt: Electron.DidFailLoadEvent) {
-    super(`${evt.errorCode}: ${evt.errorDescription}`);
   }
 }
 
