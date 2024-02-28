@@ -9,7 +9,11 @@ import {
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { byActiveTime } from "../leaf-open";
-import { saveScreenshot } from "../timestamp/screenshot";
+import {
+  copyScreenshot,
+  saveScreenshot,
+  validateProvider,
+} from "../timestamp/screenshot";
 import { takeTimestamp } from "../timestamp/timestamp";
 import { openOrCreateMediaNote } from "../timestamp/utils";
 import type { MediaViewCallback } from "./utils";
@@ -17,6 +21,25 @@ import { addMediaViewCommand } from "./utils";
 
 export function registerNoteCommands(plugin: MxPlugin) {
   let prevTarget: TFile | null = null;
+  addMediaViewCommand(
+    {
+      id: "copy-screenshot",
+      name: "Copy screenshot",
+      icon: "copy",
+      playerCheckCallback(checking, view) {
+        if (checking) return true;
+        const player = validateProvider(view);
+        if (!player) return;
+        copyScreenshot(player);
+      },
+      noteCheckCallback: basicLogic((view) => {
+        const player = validateProvider(view);
+        if (!player) return;
+        copyScreenshot(player);
+      }).noteCheckCallback,
+    },
+    plugin,
+  );
   addMediaViewCommand(
     {
       id: "take-timestamp",

@@ -1,9 +1,11 @@
 import type { MediaState } from "@vidstack/react";
-import { Notice, type Editor } from "obsidian";
+import { Notice } from "obsidian";
+import type { App, Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaInfo, FileMediaInfo } from "@/media-view/media-info";
+import type { MxSettings } from "@/settings/def";
 import type { MediaURL } from "@/web/url-match";
 
 export function insertTimestamp(
@@ -94,12 +96,12 @@ export function openOrCreateMediaNote(
 export function timestampGenerator(
   time: number,
   mediaInfo: MediaInfo,
-  playerComponent: PlayerComponent,
+  {
+    app: { fileManager },
+    settings: { timestampOffset },
+    state: { duration },
+  }: { app: App; settings: MxSettings; state: Readonly<MediaState> },
 ): (newNotePath: string) => string {
-  const { fileManager } = playerComponent.plugin.app;
-  const { timestampOffset } = playerComponent.plugin.settings.getState();
-  const duration = playerComponent.store.getState().player?.state.duration;
-
   time += timestampOffset;
   if (time < 0) time = 0;
   if (duration && time > duration) time = duration;

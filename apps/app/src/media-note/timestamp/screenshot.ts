@@ -1,13 +1,17 @@
+import type { MediaPlayerState, VideoProvider } from "@vidstack/react";
 import filenamify from "filenamify/browser";
 import mime from "mime";
-import type { Editor, TFile } from "obsidian";
+import type { App, Editor, TFile } from "obsidian";
 import { Notice } from "obsidian";
 import {
   canProviderScreenshot,
   takeScreenshot,
 } from "@/components/player/screenshot";
 import { formatDuration, toDurationISOString } from "@/lib/hash/format";
+import type { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { PlayerComponent } from "@/media-view/base";
+import type { MediaInfo } from "@/media-view/media-info";
+import type { MxSettings } from "@/settings/def";
 import { timestampGenerator, insertTimestamp, mediaTitle } from "./utils";
 
 declare module "obsidian" {
@@ -20,11 +24,17 @@ declare module "obsidian" {
   }
 }
 
-export async function saveScreenshot<T extends PlayerComponent>(
+interface Player {
+  media: MediaInfo;
+  provider: VideoProvider | WebiviewMediaProvider;
+  state: Readonly<MediaPlayerState>;
+  app: App;
+  settings: MxSettings;
+}
+
+export function validateProvider<T extends PlayerComponent>(
   playerComponent: T,
-  { file: newNote, editor }: { file: TFile; editor: Editor },
-): Promise<boolean> {
-  const { fileManager, vault } = playerComponent.plugin.app;
+) {
   const player = playerComponent.store.getState().player;
   if (!player) {
     new Notice("Player not initialized");
@@ -39,14 +49,42 @@ export async function saveScreenshot<T extends PlayerComponent>(
     new Notice("Screenshot is not supported for this media");
     return false;
   }
-  const { screenshotQuality, screenshotFormat } =
-    playerComponent.plugin.settings.getState();
+
+  return {
+    media: mediaInfo,
+    provider: player.provider,
+    state: player.state,
+    app: playerComponent.plugin.app,
+    settings: playerComponent.plugin.settings.getState(),
+  };
+}
+
+export async function saveScreenshot<T extends PlayerComponent>(
+  playerComponent: T,
+  { file: newNote, editor }: { file: TFile; editor: Editor },
+): Promise<boolean> {
+  const result = validateProvider(playerComponent);
+  if (!result) return false;
+  const {
+    provider,
+    state,
+    media,
+    app: { fileManager, vault },
+    settings: {
+      insertBefore,
+      screenshotTemplate,
+      screenshotEmbedTemplate,
+      screenshotQuality,
+      screenshotFormat,
+    },
+  } = result;
+
   const { blob, time } = await takeScreenshot(
-    player.provider,
+    provider,
     screenshotFormat,
     screenshotQuality,
   );
-  const genTimestamp = timestampGenerator(time, mediaInfo, playerComponent);
+  const genTimestamp = timestampGenerator(time, media, result);
 
   const ext = mime.getExtension(blob.type);
   if (!ext) {
@@ -54,7 +92,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
     return false;
   }
 
-  const title = mediaTitle(mediaInfo, player.state);
+  const title = mediaTitle(media, state);
   const screenshotName =
     filenamify(title, { replacement: "_" }) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
@@ -69,8 +107,6 @@ export async function saveScreenshot<T extends PlayerComponent>(
     blob.arrayBuffer,
   );
   new Notice("Screenshot saved to " + screenshotFile.path);
-  const { insertBefore, screenshotTemplate, screenshotEmbedTemplate } =
-    playerComponent.plugin.settings.getState();
 
   try {
     insertTimestamp(
@@ -100,3 +136,22 @@ export async function saveScreenshot<T extends PlayerComponent>(
     return false;
   }
 }
+
+export async function copyScreenshot(player: Player) {
+  const { provider } = player;
+  const {
+    blob: { arrayBuffer, type },
+  } = await takeScreenshot(provider, "image/png", undefined);
+  let item: ClipboardItem;
+  try {
+    item = new ClipboardItem({ [type]: new Blob([arrayBuffer], { type }) });
+  } catch (e) {
+    new Notice("Failed to copy screenshot, see console for details");
+    console.error("Failed to copy screenshot", e);
+    return false;
+  }
+  await navigator.clipboard.write([item]);
+  new Notice("Screenshot copied to clipboard");
+}
+
+// TODO: copy html with timestamp link & screenshot encoded in base64

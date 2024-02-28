@@ -1,6 +1,8 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { MediaViewState } from "@/components/context";
+import { canProviderScreenshot } from "@/components/player/screenshot";
 import { handleExternalLinkMenu } from "@/media-note/link-click";
+import { copyScreenshot } from "@/media-note/timestamp/screenshot";
 import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import { muteMenu } from "./mute";
@@ -119,6 +121,30 @@ export default function registerMediaMenu(this: MxPlugin) {
       webpageMenu(menu, ctx, source);
       if (source === "player-menu-embed" || source === "more-options") {
         urlMenu(menu, ctx);
+      }
+
+      const provider = ctx.player.provider;
+      if (
+        (source === "player-menu-embed" ||
+          source === "more-options" ||
+          source === "sidebar-context-menu") &&
+        canProviderScreenshot(provider)
+      ) {
+        menu.addItem((item) =>
+          item
+            .setTitle("Copy Screenshot")
+            .setSection("view")
+            .setIcon("copy")
+            .onClick(() => {
+              copyScreenshot({
+                app: this.app,
+                media: ctx.source,
+                provider,
+                settings: this.settings.getState(),
+                state: ctx.player.state,
+              });
+            }),
+        );
       }
     }),
   );

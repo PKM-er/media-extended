@@ -1,10 +1,12 @@
-import type { MediaProviderAdapter } from "@vidstack/react";
+import type { MediaProviderAdapter, VideoProvider } from "@vidstack/react";
 import { isVideoProvider } from "@vidstack/react";
 import { Notice, Platform } from "obsidian";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { captureScreenshot } from "@/lib/screenshot";
 
-export function canProviderScreenshot(provider: MediaProviderAdapter | null) {
+export function canProviderScreenshot(
+  provider: MediaProviderAdapter | null,
+): provider is VideoProvider | WebiviewMediaProvider {
   return isVideoProvider(provider) || provider instanceof WebiviewMediaProvider;
 }
 

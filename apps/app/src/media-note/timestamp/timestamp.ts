@@ -18,7 +18,11 @@ export async function takeTimestamp<T extends PlayerComponent>(
     return false;
   }
   const time = player.currentTime;
-  const genTimestamp = timestampGenerator(time, mediaInfo, playerComponent);
+  const genTimestamp = timestampGenerator(time, mediaInfo, {
+    app: playerComponent.plugin.app,
+    settings: playerComponent.plugin.settings.getState(),
+    state: player.state,
+  });
 
   if (time <= 0) {
     new Notice("Playback not started yet");
