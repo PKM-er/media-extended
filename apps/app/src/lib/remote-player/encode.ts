@@ -6,6 +6,6 @@ export function decodeWebpageUrl(url: string): string {
   return atob(url.replace(/^webpage::/, ""));
 }
 
-export function isWebpageUrl(url: string): boolean {
-  return url.startsWith("webpage::");
+export function isWebpageUrl(url: unknown): boolean {
+  return typeof url === "string" && url.startsWith("webpage::");
 }
