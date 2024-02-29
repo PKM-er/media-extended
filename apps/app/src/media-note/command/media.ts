@@ -129,6 +129,36 @@ function speed(): Controls[] {
         notify(`Speed set to ${newSpeed}x`);
       },
     },
+    {
+      id: "increase-speed-granular",
+      label: "Increase playback speed by 0.1x",
+      icon: "arrow-up",
+      action: (media) => {
+        const curr = media.playbackRate;
+        if (curr >= speedOptions.last()!) {
+          notifyAllowDup("Cannot increase speed further");
+          return;
+        }
+        const next = Math.round((curr + 0.1) * 10) / 10;
+        media.playbackRate = next;
+        notify(`Speed increased to ${next}x`);
+      },
+    },
+    {
+      id: "decrease-speed-granular",
+      label: "Decrease playback speed by 0.1x",
+      icon: "arrow-down",
+      action: (media) => {
+        const curr = media.playbackRate;
+        if (curr <= speedOptions.first()!) {
+          notifyAllowDup("Cannot decrease speed further");
+          return;
+        }
+        const prev = Math.round((curr - 0.1) * 10) / 10;
+        media.playbackRate = prev;
+        notify(`Speed decreased to ${prev}x`);
+      },
+    },
   ];
 }
 interface Controls {
