@@ -193,14 +193,13 @@ export class MxSettingTabs extends PluginSettingTab {
         case "split":
           if (Platform.isMacOS) return "click holding ⌘+⌥";
           return "click holding Ctrl+Alt";
-        case "tab":
-          if (Platform.isMacOS) return "click holding ⌘ or middle-click";
-          return "middle-click or click holding Ctrl";
         case "window":
           if (Platform.isMacOS) return "click holding ⌘+⌥+⇧";
           return "click holding Ctrl+Alt+Shift";
+        case "tab":
         default:
-          return "";
+          if (Platform.isMacOS) return "click holding ⌘ or middle-click";
+          return "middle-click or click holding Ctrl";
       }
     };
     const toLabel = (val: OpenLinkBehavior): OpenLinkLabelled => {
@@ -257,7 +256,7 @@ export class MxSettingTabs extends PluginSettingTab {
           ),
       );
     function onClickCfgUpdate(click: OpenLinkBehavior) {
-      altCfg.settingEl.style.display = !click ? "none" : "";
+      // altCfg.settingEl.style.display = !click ? "none" : "";
       const keyDesc = toKeyDesc(click);
       altCfg.setDesc(
         "Configure link open behavior" + keyDesc ? ` when ${keyDesc}` : "",
