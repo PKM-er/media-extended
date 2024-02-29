@@ -1,6 +1,6 @@
 import { pathToFileURL } from "url";
 import { assertNever } from "assert-never";
-import { Keymap, Notice, Platform, SuggestModal, TFile } from "obsidian";
+import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import path from "@/lib/path";
 import { pickMediaFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
@@ -201,7 +201,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
       if (mediaInfo.hostname) {
         new Notice(
           `Network path is not supported in obsidian, you need to map it to a local path: ${
-            mediaInfo.filePath ?? mediaInfo.href
+            mediaInfo.filePath ?? mediaInfo.readableHref
           }`,
         );
         return;
@@ -209,15 +209,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     }
 
     const inVaultFile = mediaInfo.getVaultFile(this.plugin.app.vault);
-    if (inVaultFile !== false) {
-      if (!inVaultFile) {
-        new Notice("File not found in vault: " + mediaInfo.href);
-        return;
-      }
-      if (!(inVaultFile instanceof TFile)) {
-        new Notice("Not a file: " + mediaInfo.href);
-        return;
-      }
+    if (inVaultFile) {
       const mediaType = checkMediaType(inVaultFile.extension);
       if (!mediaType) {
         new Notice("Unsupported file type: " + inVaultFile.path);
@@ -237,7 +229,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
       try {
         const s = await fs.stat(mediaInfo);
         if (!s.isFile()) {
-          new Notice("Not a file: " + mediaInfo.href);
+          new Notice("Not a file: " + mediaInfo.readableHref);
           return;
         }
       } catch (e) {

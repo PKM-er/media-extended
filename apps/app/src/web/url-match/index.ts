@@ -1,6 +1,6 @@
 import { fileURLToPath } from "url";
-import type { TAbstractFile, TFile, Vault } from "obsidian";
-import { FileSystemAdapter, Platform, normalizePath } from "obsidian";
+import type { Vault } from "obsidian";
+import { TFile, FileSystemAdapter, Platform, normalizePath } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
 import path from "@/lib/path";
@@ -49,15 +49,18 @@ export class MediaURL extends URL implements URLResolveResult {
     }
     return null;
   }
-  getVaultFile(vault: Vault): TAbstractFile | null | false {
-    if (!(vault.adapter instanceof FileSystemAdapter)) return false;
+
+  getVaultFile(vault: Vault): TFile | null {
+    if (!(vault.adapter instanceof FileSystemAdapter)) return null;
     const filePath = this.filePath;
     const vaultBasePath = vault.adapter.getBasePath();
-    if (!filePath) return false;
+    if (!filePath) return null;
     const relative = path.relative(vaultBasePath, filePath);
-    if (!relative || relative.startsWith("..")) return false;
+    if (/^\.\.[/\\]/.test(relative) || path.isAbsolute(relative)) return null;
     const normalized = normalizePath(relative);
-    return vault.getAbstractFileByPath(normalized);
+    const ab = vault.getAbstractFileByPath(normalized);
+    if (ab instanceof TFile) return ab;
+    return null;
   }
 
   compare(other: MediaURL | null | undefined): boolean {
@@ -93,6 +96,10 @@ export class MediaURL extends URL implements URLResolveResult {
 
   clone() {
     return new MediaURL(this, this.mxUrl ?? undefined);
+  }
+
+  get readableHref() {
+    return decodeURI(this.href);
   }
 
   #resolved: URLResolveResult;
