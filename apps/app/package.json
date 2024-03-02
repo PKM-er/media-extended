@@ -27,7 +27,7 @@
     "globby": "^14.0.1",
     "jszip": "^3.10.1",
     "less": "^4.2.0",
-    "obsidian": "~1.4.11",
+    "obsidian": "1.5.7-1",
     "postcss": "^8.4.32",
     "postcss-discard": "^2.0.0",
     "postcss-prefix-selector": "^1.16.0",

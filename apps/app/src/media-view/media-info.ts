@@ -20,8 +20,8 @@ export function parseFileInfo(
   hash: string,
   vault: Vault,
 ): FileMediaInfo | null {
-  const file = vault.getAbstractFileByPath(filePath);
-  if (!file || !(file instanceof TFile)) return null;
+  const file = vault.getFileByPath(filePath);
+  if (!file) return null;
   const type = checkMediaType(file.extension);
   if (!type) return null;
   return {

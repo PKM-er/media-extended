@@ -1,4 +1,5 @@
 /* eslint-disable deprecation/deprecation */
+import filenamify from "filenamify/browser";
 import type {
   App,
   Editor,
@@ -282,7 +283,8 @@ export class LeafOpener extends Component {
 
     let targetNote: TFile;
     if (notes.length === 0) {
-      const filename = `Media Note - ${newNoteInfo.title}`;
+      const title = filenamify(newNoteInfo.title, { replacement: "_" });
+      const filename = `Media Note - ${title}`;
       targetNote = await this.#createNewNote(
         filename,
         newNoteInfo.fm,

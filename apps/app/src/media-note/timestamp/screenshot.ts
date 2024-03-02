@@ -14,16 +14,6 @@ import type { MediaInfo } from "@/media-view/media-info";
 import type { MxSettings } from "@/settings/def";
 import { timestampGenerator, insertTimestamp, mediaTitle } from "./utils";
 
-declare module "obsidian" {
-  interface Vault {
-    getAvailablePathForAttachments(
-      fileName: string,
-      extension: string,
-      activeFile: TFile | null,
-    ): Promise<string>;
-  }
-}
-
 interface Player {
   media: MediaInfo;
   provider: VideoProvider | WebiviewMediaProvider;
@@ -97,10 +87,9 @@ export async function saveScreenshot<T extends PlayerComponent>(
     filenamify(title, { replacement: "_" }) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
 
-  const screenshotPath = await vault.getAvailablePathForAttachments(
-    screenshotName,
-    ext,
-    newNote,
+  const screenshotPath = await fileManager.getAvailablePathForAttachment(
+    `${screenshotName}.${ext}`,
+    newNote.path,
   );
   const screenshotFile = await vault.createBinary(
     screenshotPath,

@@ -145,8 +145,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       obsidian:
-        specifier: ~1.4.11
-        version: 1.4.11(@codemirror/state@6.4.0)(@codemirror/view@6.23.1)
+        specifier: 1.5.7-1
+        version: 1.5.7-1(@codemirror/state@6.4.0)(@codemirror/view@6.23.1)
       postcss:
         specifier: ^8.4.32
         version: 8.4.33
@@ -239,7 +239,7 @@ importers:
         specifier: ^6.0.0
         version: 6.4.0
       '@codemirror/view':
-        specifier: ^6.0.0
+        specifier: ^6.23.0
         version: 6.23.1
       '@lezer/common':
         specifier: ^1.1.0
@@ -7993,8 +7993,8 @@ packages:
       es-abstract: 1.22.3
     dev: false
 
-  /obsidian@1.4.11(@codemirror/state@6.4.0)(@codemirror/view@6.23.1):
-    resolution: {integrity: sha512-BCVYTvaXxElJMl6MMbDdY/CGK+aq18SdtDY/7vH8v6BxCBQ6KF4kKxL0vG9UZ0o5qh139KpUoJHNm+6O5dllKA==}
+  /obsidian@1.5.7-1(@codemirror/state@6.4.0)(@codemirror/view@6.23.1):
+    resolution: {integrity: sha512-T5ZRuQ1FnfXqEoakTTHVDYvzUEEoT8zSPnQCW31PVgYwG4D4tZCQfKHN2hTz1ifnCe8upvwa6mBTAP2WUA5Vng==}
     peerDependencies:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0

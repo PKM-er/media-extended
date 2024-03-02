@@ -1,6 +1,6 @@
 import { fileURLToPath } from "url";
-import type { Vault } from "obsidian";
-import { TFile, FileSystemAdapter, Platform, normalizePath } from "obsidian";
+import type { Vault, TFile } from "obsidian";
+import { FileSystemAdapter, Platform, normalizePath } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
 import path from "@/lib/path";
@@ -58,9 +58,7 @@ export class MediaURL extends URL implements URLResolveResult {
     const relative = path.relative(vaultBasePath, filePath);
     if (/^\.\.[/\\]/.test(relative) || path.isAbsolute(relative)) return null;
     const normalized = normalizePath(relative);
-    const ab = vault.getAbstractFileByPath(normalized);
-    if (ab instanceof TFile) return ab;
-    return null;
+    return vault.getFileByPath(normalized);
   }
 
   compare(other: MediaURL | null | undefined): boolean {
