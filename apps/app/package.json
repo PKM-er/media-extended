@@ -1,6 +1,6 @@
 {
   "name": "media-extended",
-  "version": "3.0.3-beta.1",
+  "version": "3.0.3",
   "scripts": {
     "dev": "cross-env BUILD=development node esbuild.config.mjs",
     "build": "tsc --build && cross-env BUILD=production node esbuild.config.mjs",
