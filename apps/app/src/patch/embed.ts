@@ -81,7 +81,7 @@ function injectUrlMediaEmbed(this: MxPlugin) {
       replace(info, img);
     }
     for (const iframe of el.querySelectorAll<HTMLIFrameElement>(
-      'iframe[src*="youtube.com/embed/"]',
+      'iframe.external-embed[src*="youtube.com/embed/"]',
     )) {
       const sourceText = ctx.getSectionInfo(iframe)?.text;
       const info =
