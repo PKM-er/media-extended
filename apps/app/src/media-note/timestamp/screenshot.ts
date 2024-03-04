@@ -1,5 +1,4 @@
 import type { MediaPlayerState, VideoProvider } from "@vidstack/react";
-import filenamify from "filenamify/browser";
 import mime from "mime";
 import type { App, Editor, TFile } from "obsidian";
 import { Notice } from "obsidian";
@@ -8,6 +7,7 @@ import {
   takeScreenshot,
 } from "@/components/player/screenshot";
 import { formatDuration, toDurationISOString } from "@/lib/hash/format";
+import { normalizeFilename } from "@/lib/norm";
 import type { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { PlayerComponent } from "@/media-view/base";
 import type { MediaInfo } from "@/media-view/media-info";
@@ -83,8 +83,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
   }
 
   const title = mediaTitle(media, state);
-  const screenshotName =
-    filenamify(title, { replacement: "_" }) + toDurationISOString(time);
+  const screenshotName = normalizeFilename(title) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
 
   const screenshotPath = await fileManager.getAvailablePathForAttachment(

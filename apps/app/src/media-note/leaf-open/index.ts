@@ -1,5 +1,4 @@
 /* eslint-disable deprecation/deprecation */
-import filenamify from "filenamify/browser";
 import type {
   App,
   Editor,
@@ -10,6 +9,7 @@ import type {
   WorkspaceLeaf,
 } from "obsidian";
 import { Component, MarkdownView, debounce } from "obsidian";
+import { normalizeFilename } from "@/lib/norm";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaInfo } from "@/media-view/media-info";
 import { isFileMediaInfo } from "@/media-view/media-info";
@@ -283,7 +283,7 @@ export class LeafOpener extends Component {
 
     let targetNote: TFile;
     if (notes.length === 0) {
-      const title = filenamify(newNoteInfo.title, { replacement: "_" });
+      const title = normalizeFilename(newNoteInfo.title);
       const filename = `Media Note - ${title}`;
       targetNote = await this.#createNewNote(
         filename,
