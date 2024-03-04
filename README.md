@@ -2,7 +2,7 @@
 
 Enhanced media playback for obsidian.md 🎥📚
 
-![Media Extended plugin with player and media note](./apps/docs/pages/getting-started/first-note.jpg)
+![Media Extended plugin with player and media note](./first-note.jpg)
 
 This plugin is designed to enrich your note-taking experience in obsidian.md by seamlessly integrating multimedia content into your notes. Whether you're a student, researcher, or content creator, this plugin makes it easier to incorporate, control, and reference audio and video materials directly within your digital notebook.
 
