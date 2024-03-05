@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { assertNever } from "assert-never";
 import type { PaneType } from "obsidian";
-import { Notice, Platform, debounce, moment } from "obsidian";
+import { Notice, Platform, debounce, moment, normalizePath } from "obsidian";
 import { createStore } from "zustand";
 import { vaildate } from "@/lib/lang/lang";
 import { enumerate } from "@/lib/must-include";
@@ -33,6 +33,7 @@ type MxSettingValues = {
   biliDefaultQuality: BilibiliQuality;
   screenshotFormat: "image/png" | "image/jpeg" | "image/webp";
   screenshotQuality?: number;
+  screenshotFolderPath?: string;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -50,6 +51,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "screenshotFormat",
   "screenshotQuality",
   "defaultLanguage",
+  "screenshotFolderPath",
 );
 
 const mxSettingsDefault = {
@@ -130,6 +132,7 @@ export type MxSettings = {
   setLinkHandler: (pattern: URLMatchPattern, type: RemoteMediaViewType) => void;
   setLoadStrategy: (strategy: "play" | "eager") => void;
   setBiliDefaultQuality: (quality: BilibiliQuality) => void;
+  setScreenshotFolder: (path: string | null) => void;
   load: () => Promise<void>;
   save: () => void;
 } & Omit<MxSettingValues, "urlMappingData">;
@@ -302,6 +305,19 @@ export function createSettingsStore(plugin: MxPlugin) {
     setLoadStrategy: (strategy) => {
       set({ loadStrategy: strategy });
       save(get());
+    },
+    setScreenshotFolder(path: string | null) {
+      if (path !== null) {
+        path = normalizePath(path);
+        if (path === ".") {
+          path = "/";
+        } else if (path.startsWith("./")) {
+          path = path.slice(2);
+        }
+        set({ screenshotFolderPath: path });
+      } else {
+        set({ screenshotFolderPath: undefined });
+      }
     },
     load: async () => {
       const data: Partial<MxSettingValues> = await plugin.loadData();

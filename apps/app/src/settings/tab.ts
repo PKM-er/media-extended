@@ -481,6 +481,42 @@ export class MxSettingTabs extends PluginSettingTab {
           ),
       );
 
+    new Setting(container)
+      .setName("Default location for new screenshots")
+      .setDesc("Where newly added attachments are placed.")
+      .addDropdown((d) =>
+        d
+          .addOptions({
+            default: "In attachment folder",
+            specific: "In the folder specified below",
+          })
+          .onChange((d) => {
+            this.state.setScreenshotFolder(d === "specific" ? "" : null);
+          }),
+      );
+
+    new Setting(container)
+      .setName("Attachment folder path")
+      .setDesc("Place newly created screenshot files in this folder.")
+      .addText((t) =>
+        t
+          .setPlaceholder("Example: folder 1/folder")
+          .setValue(this.state.screenshotFolderPath ?? "")
+          .onChange(this.state.setScreenshotFolder),
+      )
+      .then((setting) => {
+        setting.settingEl.style.display =
+          this.state.screenshotFolderPath !== undefined ? "" : "none";
+        this.sub((s, prev) => {
+          if (
+            typeof s.screenshotFolderPath === typeof prev.screenshotFolderPath
+          )
+            return;
+          setting.settingEl.style.display =
+            s.screenshotFolderPath !== undefined ? "" : "none";
+        });
+      });
+
     const qualVal = (state: MxSettings) =>
       state.screenshotFormat === "image/webp" ? 0.8 : 0.92;
     new Setting(container)

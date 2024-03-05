@@ -1,7 +1,7 @@
 import type { MediaPlayerState, VideoProvider } from "@vidstack/react";
 import mime from "mime";
-import type { App, Editor, TFile } from "obsidian";
-import { Notice } from "obsidian";
+import type { App, Editor } from "obsidian";
+import { Notice, TFolder, normalizePath, TFile } from "obsidian";
 import {
   canProviderScreenshot,
   takeScreenshot,
@@ -66,6 +66,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
       screenshotEmbedTemplate,
       screenshotQuality,
       screenshotFormat,
+      screenshotFolderPath,
     },
   } = result;
 
@@ -85,16 +86,68 @@ export async function saveScreenshot<T extends PlayerComponent>(
   const title = mediaTitle(media, state);
   const screenshotName = normalizeFilename(title) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
+  let screenshotPath: string;
+  const screenshotFilename = `${screenshotName}.${ext}`;
+  if (screenshotFolderPath === undefined) {
+    const random = `${Date.now()}.${Math.random()
+      .toString(36)
+      .substring(2)}.${ext}`;
+    const attachementFolder = (
+      await fileManager.getAvailablePathForAttachment(random, newNote.path)
+    ).replace(random, "");
+    screenshotPath = normalizePath(
+      `${attachementFolder}/${screenshotFilename}`,
+    );
+  } else {
+    let folder = vault.getAbstractFileByPath(screenshotFolderPath);
+    if (folder === null) {
+      folder = await vault.createFolder(screenshotFolderPath).catch((e) => {
+        new Notice(
+          `Failed to create screenshot folder ${screenshotFolderPath}: ${
+            e instanceof Error ? e.message : e
+          }`,
+        );
+        throw e;
+      });
+    } else if (!(folder instanceof TFolder)) {
+      new Notice(
+        `Screenshot folder occupied, check your preferences: ${folder.path}`,
+      );
+      return false;
+    }
+    screenshotPath = `${folder.path}/${screenshotFilename}`;
+  }
 
-  const screenshotPath = await fileManager.getAvailablePathForAttachment(
-    `${screenshotName}.${ext}`,
-    newNote.path,
+  let isNew = false;
+  let screenshotFile = vault.getAbstractFileByPath(screenshotPath);
+  if (screenshotFile instanceof TFile) {
+    await vault.modifyBinary(screenshotFile, blob.arrayBuffer).catch((e) => {
+      new Notice(
+        `Failed to save screenshot to ${screenshotFile}: ${
+          e instanceof Error ? e.message : e
+        }`,
+      );
+      throw e;
+    });
+  } else if (screenshotFile === null) {
+    isNew = true;
+    screenshotFile = await vault
+      .createBinary(screenshotPath, blob.arrayBuffer)
+      .catch((e) => {
+        new Notice(
+          `Failed to create screenshot in ${screenshotFile}: ${
+            e instanceof Error ? e.message : e
+          }`,
+        );
+        throw e;
+      });
+  } else {
+    new Notice(`Screenshot file occupied by a folder: ${screenshotFile.path}`);
+    return false;
+  }
+  new Notice(
+    `Screenshot ${isNew ? "created in" : "save to"} ${screenshotFile.path}`,
   );
-  const screenshotFile = await vault.createBinary(
-    screenshotPath,
-    blob.arrayBuffer,
-  );
-  new Notice("Screenshot saved to " + screenshotFile.path);
 
   try {
     insertTimestamp(
@@ -102,7 +155,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
         timestamp: genTimestamp(newNote.path),
         screenshot: fileManager
           .generateMarkdownLink(
-            screenshotFile,
+            screenshotFile as TFile,
             newNote.path,
             "",
             screenshotEmbedTemplate
