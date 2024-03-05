@@ -120,6 +120,7 @@ export async function buildFetchForBilibili(
 ): Promise<BilibiliFetch> {
   if (!Platform.isDesktopApp) throw new Error("Not desktop app");
   const session = getSession(appId);
+  if (!session) throw new Error("No session");
   const cookies = session.cookies;
   return async function bilibiliFetch(
     url,

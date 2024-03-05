@@ -22,18 +22,21 @@ const playerV2 = {
   types: ["xhr"],
 } as const;
 export function buildMainProcessScript(webContentId: number, app: App) {
+  const partition = getPartition(app.appId);
+  if (!partition) {
+    console.log("partition disabled, cannot watch requests");
+    return "";
+  }
   return json`
 const { session, webContents, net } = require("electron");
-const webviewSession = session.fromPartition(${getPartition(app.appId)});
+const webviewSession = session.fromPartition(${partition});
 const webContent = webContents.fromId(${webContentId});
 webviewSession.webRequest.onSendHeaders(
   { 
     urls: ${playerV2.filter}, type: ${playerV2.types}
   }, ({url, method, requestHeaders, webContentsId}) => {
     if (method !== "GET" || webContentsId===undefined) return;
-    webContent.send(${channelId}, {type:${
-    playerV2.type
-  } ,url, method, requestHeaders, webContentsId});
+    webContent.send(${channelId}, {type:${playerV2.type} ,url, method, requestHeaders, webContentsId});
   })
 `.trim();
 }

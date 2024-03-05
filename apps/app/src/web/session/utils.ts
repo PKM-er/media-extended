@@ -4,9 +4,12 @@ import { getPartition } from "@/lib/remote-player/const";
 export function getSession(appId: string) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const remote = require("@electron/remote");
-  return (remote.session as typeof Electron.Session).fromPartition(
-    getPartition(appId),
-  );
+  const partition = getPartition(appId);
+  if (!partition) {
+    console.log("No partition, skip modifying session");
+    return null;
+  }
+  return (remote.session as typeof Electron.Session).fromPartition(partition);
 }
 
 export function getFsPromise() {

@@ -37,7 +37,7 @@ export class LoginModal extends Modal {
 
   webview = createEl("webview" as "iframe", {
     attr: {
-      partition: this.partition,
+      partition: this.partition as string,
       allowpopups: "",
     },
   }) as unknown as Electron.WebviewTag;
@@ -148,7 +148,7 @@ export class LoginModal extends Modal {
           );
           if (!yes) return;
           try {
-            await this.getSession().clearCache();
+            await this.getSession()?.clearCache();
             new Notice("Cache cleared");
           } catch (e) {
             new Notice("Failed to clear cache, see console for details");

@@ -1,7 +1,7 @@
 import { useMediaPlayer, type MediaPlayerInstance } from "@vidstack/react";
 import { useEffect } from "react";
 import { isTimestamp, type TempFragment } from "@/lib/hash/temporal-frag";
-import { isWebpageUrl } from "@/lib/remote-player/encode";
+// import { isWebpageUrl } from "@/lib/remote-player/encode";
 import type { MediaViewStoreApi } from "../context";
 import { useMediaViewStoreInst } from "../context";
 
@@ -15,13 +15,13 @@ export function useTempFragHandler() {
 }
 
 function handleTempFrag(player: MediaPlayerInstance, store: MediaViewStoreApi) {
-  if (
-    localStorage.getItem("MX_DEV_DISABLE_WEBVIEW_TEMP_FRAG") === "1" &&
-    isWebpageUrl(player.state.source.src)
-  ) {
-    console.log("DEV: temporal fragment handling in webpage disabled");
-    return;
-  }
+  // if (
+  //   localStorage.getItem("MX_DEV_DISABLE_WEBVIEW_TEMP_FRAG") === "1" &&
+  //   isWebpageUrl(player.state.source.src)
+  // ) {
+  //   console.log("DEV: temporal fragment handling in webpage disabled");
+  //   return;
+  // }
   const prev = {
     currentTime: player.state.currentTime,
     paused: player.state.paused,
