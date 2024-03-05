@@ -24,3 +24,7 @@ yarn-error.log*
 .vercel
 
 **/.obsidian/workspace.json
+
+robots.txt
+sitemap.xml
+sitemap-0.xml
