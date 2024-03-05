@@ -1,4 +1,4 @@
-import filenamify from "filenamify";
+import filenamify from "filenamify/browser";
 
 /**
  * normalize a string to be used as a file name in obsidian
