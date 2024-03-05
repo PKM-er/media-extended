@@ -22,6 +22,8 @@ import type {
 import { isMediaViewType } from "@/media-view/view-type";
 import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
+import { toPaneAction } from "@/patch/mod-evt";
+import type { OpenLinkBehavior } from "@/settings/def";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
 import "./active.global.less";
 
@@ -157,7 +159,12 @@ export class LeafOpener extends Component {
 
   getSplitBehavior(
     newLeaf: PaneType | boolean | undefined,
-  ): PaneType | boolean {
+    fromUser: boolean,
+  ): NonNullable<OpenLinkBehavior> {
+    if (!fromUser) {
+      return toPaneAction(newLeaf) ?? false;
+    }
+    newLeaf = toPaneAction(newLeaf);
     const {
       defaultMxLinkClick: { click, alt },
     } = this.settings;
@@ -177,15 +184,15 @@ export class LeafOpener extends Component {
   }
 
   /**
-   * @param newLeaf if undefined, use default behavior
+   * @param _newLeaf if undefined, use default behavior
    */
   async openMedia(
     mediaInfo: MediaInfo,
-    newLeaf?: PaneType | false,
+    _newLeaf?: PaneType | false,
     {
       direction,
       viewType,
-      fromUser,
+      fromUser = false,
     }: {
       viewType?: RemoteMediaViewType;
       direction?: SplitDirection;
@@ -197,15 +204,19 @@ export class LeafOpener extends Component {
     } = {},
   ): Promise<MediaLeaf> {
     const { workspace } = this.app;
-    if (!newLeaf) {
+    if (!_newLeaf) {
       const existing = await this.#openInExistingPlayer(mediaInfo, viewType);
       if (existing) return existing;
     }
 
-    const leaf = workspace.getLeaf(
-      (!fromUser ? newLeaf : this.getSplitBehavior(newLeaf)) as "split",
-      direction,
-    );
+    const newLeaf = this.getSplitBehavior(_newLeaf, fromUser);
+
+    let leaf;
+    if (newLeaf === "split-horizontal") {
+      leaf = workspace.getLeaf("split", direction ?? "horizontal");
+    } else {
+      leaf = workspace.getLeaf(newLeaf as "split", direction);
+    }
     return this.#openMedia(leaf, mediaInfo, viewType);
   }
 

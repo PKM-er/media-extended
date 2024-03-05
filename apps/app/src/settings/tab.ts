@@ -168,18 +168,22 @@ export class MxSettingTabs extends PluginSettingTab {
       });
     });
   }
-
   linkOpen() {
     const { containerEl: container } = this;
     new Setting(container)
       .setHeading()
       .setName("Link open")
       .setDesc("Configure how links to media are opened");
-    type OpenLinkLabelled = PaneType | "replace" | "default";
+    type OpenLinkLabelled =
+      | PaneType
+      | "split-horizontal"
+      | "replace"
+      | "default";
     const options = {
       default: "Default obsidian behavior",
       replace: "In current pane",
-      split: "New pane on the side",
+      split: "New pane on the right",
+      "split-horizontal": "New pane on the bottom",
       tab: "New tab",
       window: "New window",
     } satisfies Record<OpenLinkLabelled, string>;
@@ -191,6 +195,7 @@ export class MxSettingTabs extends PluginSettingTab {
       // Returns 'window' if Cmd/Ctrl+Alt+Shift is pressed.
       switch (val) {
         case "split":
+        case "split-horizontal":
           if (Platform.isMacOS) return "click holding ⌘+⌥";
           return "click holding Ctrl+Alt";
         case "window":
@@ -216,6 +221,8 @@ export class MxSettingTabs extends PluginSettingTab {
         case "window":
           return val as PaneType;
         // case "default":
+        case "split-horizontal":
+          return "split-horizontal";
         default:
           return null;
       }

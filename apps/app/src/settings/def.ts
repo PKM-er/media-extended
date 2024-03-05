@@ -11,7 +11,7 @@ import type MxPlugin from "@/mx-main";
 import { BilibiliQuality } from "@/web/session/bilibili";
 import type { URLMatchPattern } from "@/web/url-match/view-type";
 
-export type OpenLinkBehavior = false | PaneType | null;
+export type OpenLinkBehavior = false | PaneType | "split-horizontal" | null;
 
 type MxSettingValues = {
   defaultVolume: number;
@@ -216,7 +216,7 @@ export function createSettingsStore(plugin: MxPlugin) {
     },
     setDefaultMxLinkBehavior: (click) => {
       let alt: OpenLinkBehavior;
-      if (click === "split") alt = "window";
+      if (click === "split" || click === "split-horizontal") alt = "window";
       else if (click === "window") alt = "tab";
       else if (click === "tab") alt = "split";
       else alt = null;
