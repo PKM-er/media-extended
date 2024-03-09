@@ -50,6 +50,9 @@ export function Player() {
       src: url,
     };
   });
+  const isWebm = useMediaViewStore(({ source }) => {
+    return Boolean(source?.url.source.pathname.endsWith(".webm"));
+  });
   const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const load = useSettings((s) => s.loadStrategy);
   const isEmbed = useIsEmbed();
@@ -116,7 +119,16 @@ export function Player() {
           <Track {...props} key={props.id} />
         ))}
       </MediaProviderEnhanced>
-      <HookLoader onViewTypeChange={setViewType} />
+      <HookLoader
+        onViewTypeChange={(viewType) => {
+          setViewType(viewType);
+          if (!isWebm && viewType === "audio") {
+            new Notice(
+              "Unable to show video content due to a potentially unsupported codec by Obsidian. For verification, please disable this plugin, add the video to the vault, and check if video playback resumes normally.",
+            );
+          }
+        }}
+      />
       <PlayerLayout />
     </MediaPlayer>
   );
