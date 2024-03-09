@@ -353,7 +353,7 @@ export type MediaLeaf = WorkspaceLeaf & { view: MediaView };
  */
 function getAllMediaLeaves(workspace: Workspace) {
   const leaves: WorkspaceLeaf[] = [];
-  workspace.iterateRootLeaves((leaf) => {
+  workspace.iterateAllLeaves((leaf) => {
     if (isMediaViewType(leaf.view.getViewType())) {
       leaves.push(leaf);
     }
