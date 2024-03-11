@@ -142,5 +142,19 @@ export default class MxPlugin extends Plugin {
     this.fixLinkLabel();
     this.patchInlineUrl();
     this.patchLinktextOpen({ onInternalLinkClick });
+
+    this.addCommand({
+      id: "dev.disable-partition",
+      name: "DEV: Disable Partition",
+      callback: () => {
+        if (localStorage.getItem("MX_DEV_DISABLE_PARTITION") === "1") {
+          localStorage.removeItem("MX_DEV_DISABLE_PARTITION");
+          new Notice("Partition enabled, restart obsidian to take effect. ");
+        } else {
+          localStorage.setItem("MX_DEV_DISABLE_PARTITION", "1");
+          new Notice("Partition disabled, restart obsidian to take effect. ");
+        }
+      },
+    });
   }
 }
