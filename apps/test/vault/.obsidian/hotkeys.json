@@ -1,0 +1,32 @@
+{
+  "media-extended:repeat": [
+    {
+      "modifiers": [
+        "Ctrl"
+      ],
+      "key": "R"
+    },
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "R"
+    }
+  ],
+  "media-extended:forward-5s": [
+    {
+      "modifiers": [
+        "Ctrl"
+      ],
+      "key": "R"
+    }
+  ],
+  "media-extended:fast-forward-10x": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "R"
+    }
+  ]
+}
