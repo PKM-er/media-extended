@@ -1,6 +1,14 @@
 /* eslint-disable deprecation/deprecation */
-import type { Editor, MarkdownFileInfo, App, Command, TFile } from "obsidian";
-import { MarkdownView } from "obsidian";
+import type {
+  Editor,
+  MarkdownFileInfo,
+  App,
+  Command,
+  TFile,
+  Plugin,
+  Modifier,
+} from "obsidian";
+import { Keymap, MarkdownView } from "obsidian";
 import type { MediaInfo } from "@/media-view/media-info";
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
@@ -120,4 +128,90 @@ export function addMediaViewCommand(
     }),
   );
   return cmd;
+}
+
+export function handleRepeatHotkey<Params extends any[]>(
+  plugin: Plugin,
+  {
+    onKeyDown,
+    onTrigger,
+    onKeyUp,
+  }: {
+    onKeyDown: (evt: KeyboardEvent, ...params: Params) => void;
+    onTrigger?: (...params: Params) => void;
+    onKeyUp?: (evt: KeyboardEvent, ...params: Params) => void;
+  },
+) {
+  let disbatched: Params | null = null;
+  const keyupHandlers = new Set<(...arg: any[]) => void>();
+  plugin.register(() => {
+    keyupHandlers.forEach((handler) => {
+      window.removeEventListener("keyup", handler, { capture: true });
+    });
+  });
+  plugin.registerDomEvent(
+    window,
+    "keydown",
+    (evt) => {
+      if (!disbatched) return;
+      const target = evt.target as HTMLElement;
+      if (
+        target.instanceOf(HTMLElement) &&
+        target.matches("input.prompt-input")
+      )
+        return;
+
+      // if keydown event is not fired
+      const hotkey = evt;
+      onKeyDown(evt, ...disbatched);
+      if (onKeyUp) {
+        const params = disbatched;
+        const handler = (evt: KeyboardEvent) => {
+          const modifiers = toModifiers(hotkey);
+          // in macOS, regular key up will not fired when meta key is pressed, only meta keyup is fired
+          if (
+            (evt.code === hotkey.code &&
+              modifiers.every((m) => Keymap.isModifier(evt, m))) ||
+            modifiers.some((m) => evt.key === m)
+          ) {
+            onKeyUp(evt, ...params);
+            window.removeEventListener("keyup", handler, { capture: true });
+            keyupHandlers.delete(handler);
+          }
+        };
+        keyupHandlers.add(handler);
+        window.addEventListener("keyup", handler, {
+          passive: true,
+          capture: true,
+        });
+      }
+      disbatched = null;
+    },
+    true,
+  );
+  return {
+    callback: (...params: Params) => {
+      disbatched = params;
+      setTimeout(() => {
+        // macrotask are executed after all event handlers
+        // here check if the event is handled by keydown handler
+        if (disbatched === null) {
+          // console.debug("command evoked from keyboard");
+        } else {
+          // console.log("command evoked from command");
+          onTrigger?.(...params);
+          disbatched = null;
+        }
+      }, 0);
+    },
+  };
+}
+
+function toModifiers(evt: KeyboardEvent) {
+  const modifiers = [] as Modifier[];
+  if (evt.ctrlKey) modifiers.push("Ctrl");
+  if (evt.altKey) modifiers.push("Alt");
+  if (evt.shiftKey) modifiers.push("Shift");
+  if (evt.metaKey) modifiers.push("Meta");
+  return modifiers;
 }

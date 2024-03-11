@@ -1,11 +1,12 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
+import type { Plugin } from "obsidian";
 import { Notice, debounce } from "obsidian";
 import { PlaybackSpeedPrompt } from "@/media-view/menu/prompt";
 import { speedOptions } from "@/media-view/menu/speed";
 import type MxPlugin from "@/mx-main";
-import { addMediaViewCommand } from "./utils";
+import { addMediaViewCommand, handleRepeatHotkey } from "./utils";
 
-const mediaCommands: Controls[] = [
+const createMediaCommands = (plugin: Plugin): Controls[] => [
   {
     id: "toggle-play",
     label: "Play/pause",
@@ -55,9 +56,9 @@ const mediaCommands: Controls[] = [
       }
     },
   },
-  ...speed(),
+  ...speed(plugin),
 ];
-function speed(): Controls[] {
+function speed(plugin: Plugin): Controls[] {
   // reuse notice if user is spamming speed change
   let notice: Notice | null = null;
   const hide = debounce(() => notice?.hide(), 2000, true);
@@ -69,10 +70,44 @@ function speed(): Controls[] {
     }
     hide();
   }
+  function notifyManualHide(message: string) {
+    if (!notice || notice.noticeEl.isConnected === false) {
+      notice = new Notice(message, 0);
+    } else {
+      notice.setMessage(message);
+    }
+  }
   function notifyAllowDup(message: string) {
     new Notice(message, 2000);
   }
   return [
+    ...speedOptions
+      .filter((s) => s > 1)
+      .map((speed): Controls => {
+        let repeated = false;
+        const { callback } = handleRepeatHotkey<[MediaPlayerInstance]>(plugin, {
+          onKeyDown(evt, media) {
+            if (evt.repeat) {
+              repeated = true;
+              media.playbackRate = speed;
+              notifyManualHide(`Fast forwarding at ${speed}x`);
+            }
+          },
+          onKeyUp(_evt, media) {
+            if (repeated) {
+              media.playbackRate = 1;
+              notice?.hide();
+            }
+          },
+        });
+        return {
+          id: `fast-forward-${speed}x`,
+          label: `Fast forward at ${speed}x by holding hotkey`,
+          icon: "forward",
+          action: callback,
+          repeat: true,
+        };
+      }),
     {
       id: "reset-speed",
       label: "Reset playback speed",
@@ -171,31 +206,33 @@ interface Controls {
 }
 
 export function registerControlCommands(plugin: MxPlugin) {
-  mediaCommands.forEach(({ id, label, icon, action, repeat, check }) => {
-    addMediaViewCommand(
-      {
-        id,
-        name: label,
-        icon,
-        repeatable: repeat,
-        playerCheckCallback: (checking, view) => {
-          if (!view) return false;
-          const player = view.store.getState().player;
-          if (!player) return false;
-          if (check && !check(player)) return false;
-          if (checking) return true;
-          action(player);
+  createMediaCommands(plugin).forEach(
+    ({ id, label, icon, action, repeat, check }) => {
+      addMediaViewCommand(
+        {
+          id,
+          name: label,
+          icon,
+          repeatable: repeat,
+          playerCheckCallback: (checking, view) => {
+            if (!view) return false;
+            const player = view.store.getState().player;
+            if (!player) return false;
+            if (check && !check(player)) return false;
+            if (checking) return true;
+            action(player);
+          },
+          noteCheckCallback(checking, view) {
+            if (!view) return false;
+            const player = view.store.getState().player;
+            if (!player) return false;
+            if (check && !check(player)) return false;
+            if (checking) return true;
+            action(player);
+          },
         },
-        noteCheckCallback(checking, view) {
-          if (!view) return false;
-          const player = view.store.getState().player;
-          if (!player) return false;
-          if (check && !check(player)) return false;
-          if (checking) return true;
-          action(player);
-        },
-      },
-      plugin,
-    );
-  });
+        plugin,
+      );
+    },
+  );
 }
