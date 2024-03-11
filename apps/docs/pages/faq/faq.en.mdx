@@ -10,6 +10,20 @@ When working with multiple notes with different media, you could find it annoyin
 ![pin player](../pin-player.png)
 </Bleed>
 
+## I want to open website from browser [#open-website]
+
+You can use the following bookmarklet to open the current website in obsidian. Just create a new bookmark in your browser and paste the following code in the URL field.
+
+```javascript copy
+javascript:(()=>{const o=document.querySelector("video, audio")?.currentTime;let e=window.location.href;o===null?e+="":window.location.hash?e+=`&t=${o}`:e+=`#t=${o}`;window.open(`obsidian://mx-open?url=${encodeURIComponent(e)}`);})();
+```
+
+Additionally, you can do this manually by appending the following part to the URL you want to open in obsidian in browser's address bar and hit enter:
+
+```text copy
+obsidian://mx-open/
+```
+
 ## I want "Link with pane" behavior to take timestamp/screenshot from non-media note [#restore-link-with-pane]
 
 ["Link with pane"](https://github.com/PKM-er/media-extended/wiki/Open-Links-in-One-Shared-Player) is a feature that has been refactored in v3. Now you can control the player with commands or your own assigned shortcuts on any active note, without having to associate the player with the note explicitly as before.
