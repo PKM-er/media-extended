@@ -41,8 +41,6 @@ import { Bleed } from "nextra-theme-docs";
 
 </Callout>
 
-
-
 ## 共享播放器 [#shared-player]
 
 当您需要处理含有不同媒体的多份笔记时，频繁切换播放器可能会很烦人。Media Extended 通过与 Obsidian 的“固定标签页”功能集成，巧妙解决了这一问题。只需右键点击播放器标签并选择“固定”，即可实现播放器跨笔记共享，使您能够在不同笔记间自如切换，避免播放器堆积。
@@ -60,7 +58,10 @@ import { Tabs, Callout } from 'nextra/components'
 <Tabs items={['本地文件', '网页']}>
     <Tabs.Tab>
     1. 对于存储在您的资料库中的媒体，你不需要学习额外的操作。插件会自动识别并在增强播放器中打开它。
-    2. 对于计算机上的其他文件，可以通过 [媒体快速切换器](#quick-switcher) 来打开。你可以直接输入路径，也可以通过 `Open local file` 选项使用文件选择器。
+    2. 对于计算机上的其他文件，可以通过 [媒体快速切换器](#quick-switcher) 来打开。你可以
+        1. 输入文件路径，然后按回车。
+        2. 把文件拖放到输入框中，然后按回车。
+        3. 用"Open media"命令在文件选择弹窗中选择文件。
     </Tabs.Tab>
     <Tabs.Tab>
     无论是使用自建媒体服务器、NAS 还是公共媒体托管服务（如 YouTube、Vimeo、bilibili），只要直接 URL 以文件扩展名结束或可获取包含媒体的网页，即可在增强播放器中打开媒体。
