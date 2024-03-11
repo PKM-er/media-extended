@@ -1,0 +1,25 @@
+import { Tabs, Callout } from 'nextra/components'
+
+# Known Issues
+
+## YouTube Video Auto Pause Issue in Webpage Player [#youtube-video-auto-pause-issue]
+
+[Issue #219](https://github.com/PKM-er/media-extended/issues/219)
+
+A persistent issue was reported where YouTube videos would automatically pause when they began to play in a webpage player. Users experienced the video playing for a single frame before pausing again. Despite various attempts to resolve the issue, including installing different versions and applying suggested fixes, the problem showed intermittent behavior, affecting some versions and not others.
+
+### Solution
+
+A potential fix for this issue involves setting a specific flag with command in v3.0.5+:
+
+```text copy
+DEV: Disable Partition
+```
+
+After applying this command, users should reload the application to activate the fix. This flag is intended to prevent the auto-pausing issue by disabling a particular feature that could be causing the problem. The effectiveness of this solution may vary, and further testing is required to ensure its reliability.
+
+In light of these challenges, we strongly encourage users who apply this workaround to share their experiences, including any improvements or persisting issues. To facilitate detailed and helpful contributions, please provide comprehensive environment details by using the `show debug info` command obsidian provides and report in original issue discussion on GitHub [here](https://github.com/PKM-er/media-extended/issues/219#top). 
+
+<Callout type="info">
+  The auto-pausing issue may stem from an underlying problem with the Electron framework, specifically related to how the [`webview` tag's `partition` attribute](https://www.electronjs.org/docs/latest/api/webview-tag#partition) is managed. Due to the complexity of this issue, a complete resolution might not be achievable.
+</Callout>
