@@ -15,7 +15,7 @@ const createMediaCommands = (plugin: Plugin): Controls[] => [
       media.paused = !media.paused;
     },
   },
-  ...[5, 30].flatMap((sec): Controls[] => [
+  ...[0.5, 1, 2, 5, 10, 30, 60].flatMap((sec): Controls[] => [
     {
       id: `forward-${sec}s`,
       label: `Forward ${sec}s`,
