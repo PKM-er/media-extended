@@ -135,12 +135,15 @@ function* iterateMediaNote(ctx: {
   }
 }
 
-export const mediaSourceField = {
+export const mediaSourceFieldMap = {
   generic: "media",
   video: "video",
   audio: "audio",
 } as const;
-type MediaType = (typeof mediaSourceField)[keyof typeof mediaSourceField];
+type MediaType = (typeof mediaSourceFieldMap)[keyof typeof mediaSourceFieldMap];
+export const mediaSourceFields = Object.values(
+  mediaSourceFieldMap,
+) as MediaType[];
 
 export interface InternalLinkField {
   type: "internal";
@@ -168,9 +171,9 @@ function getMediaNoteMeta(
 
   // prefer explicit typed media
   return (
-    getField(mediaSourceField.video, meta, ctx) ??
-    getField(mediaSourceField.audio, meta, ctx) ??
-    getField(mediaSourceField.generic, meta, ctx)
+    getField(mediaSourceFieldMap.video, meta, ctx) ??
+    getField(mediaSourceFieldMap.audio, meta, ctx) ??
+    getField(mediaSourceFieldMap.generic, meta, ctx)
   );
 }
 
