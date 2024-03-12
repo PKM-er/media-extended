@@ -1,5 +1,5 @@
 import { around } from "monkey-around";
-import { type Workspace } from "obsidian";
+import { Workspace } from "obsidian";
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "./event";
 import { toPaneAction } from "./mod-evt";
@@ -12,7 +12,7 @@ export default function patchLinktextOpen(
   const plugin = this;
 
   this.register(
-    around(this.app.workspace, {
+    around(Workspace.prototype, {
       openLinkText: (next) =>
         async function (
           this: Workspace,
