@@ -18,7 +18,7 @@ Go to [media-extended documentation](https://mx.pkmer.net/#getting-started) for 
 > obsidian://mx-open/https://www.youtube.com/watch?v=jNQXAC9IVRw
 > ```
 
-For common question, please refer to the [FAQ](https://mx.pkmer.net/faq/faq), and before open an issue, please check [Known issues](https://mx.pkmer.net/faq/known-issue) first.
+For common question, please refer to the [FAQ](https://mx.pkmer.net/faq), and before open an issue, please check [Known issues](https://mx.pkmer.net/faq/known-issue) first.
 
 ## Features 🌟
 

@@ -1,21 +1,40 @@
 import { Bleed } from "nextra-theme-docs";
 
+import { FaExclamationTriangle } from "react-icons/fa";
+
 # Fequently Asked
+
+import { Cards, Card } from "nextra/components";
+
+<Cards>
+  <Card
+    icon={<FaExclamationTriangle />}
+    title="Known Issues"
+    href="/faq/known-issue"
+  />
+</Cards>
 
 ## I don't want to open the player in a new tab [#shared-player]
 
 When working with multiple notes with different media, you could find it annoying to keep open new players for each video. Media Extended solves this problem by integrating obsidian's native "pin tab" feature. Just right-click on the player tab and select "Pin". Now, this player will be shared across all notes and media, and you can easily switch between notes without being spammed with multiple players.
 
-<Bleed>
-![pin player](../pin-player.png)
-</Bleed>
+<Bleed>![pin player](./pin-player.png)</Bleed>
 
 ## I want to open website from browser [#open-website]
 
 You can use the following bookmarklet to open the current website in obsidian. Just create a new bookmark in your browser and paste the following code in the URL field.
 
 ```javascript copy
-javascript:(()=>{const o=document.querySelector("video, audio")?.currentTime;let e=window.location.href;o===null?e+="":window.location.hash?e+=`&t=${o}`:e+=`#t=${o}`;window.open(`obsidian://mx-open?url=${encodeURIComponent(e)}`);})();
+javascript: (() => {
+  const o = document.querySelector("video, audio")?.currentTime;
+  let e = window.location.href;
+  o === null
+    ? (e += "")
+    : window.location.hash
+    ? (e += `&t=${o}`)
+    : (e += `#t=${o}`);
+  window.open(`obsidian://mx-open?url=${encodeURIComponent(e)}`);
+})();
 ```
 
 Additionally, you can do this manually by appending the following part to the URL you want to open in obsidian in browser's address bar and hit enter:
@@ -28,7 +47,6 @@ obsidian://mx-open/
 
 ["Link with pane"](https://github.com/PKM-er/media-extended/wiki/Open-Links-in-One-Shared-Player) is a feature that has been refactored in v3. Now you can control the player with commands or your own assigned shortcuts on any active note, without having to associate the player with the note explicitly as before.
 
-You may notice that the player is now marked as "active" with a red icon 🟥 in tab header. This indicates that the player is currently being used to take notes. 
-
+You may notice that the player is now marked as "active" with a red icon 🟥 in tab header. This indicates that the player is currently being used to take notes.
 
 For more details about the media commands, please refer to [#Taking Notes](/getting-started/first-note#taking-notes)

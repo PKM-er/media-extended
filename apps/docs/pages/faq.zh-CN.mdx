@@ -1,13 +1,25 @@
 import { Bleed } from "nextra-theme-docs";
 
+import { FaExclamationTriangle } from "react-icons/fa";
+
 # 常见问题解答
+
+import { Cards, Card } from "nextra/components";
+
+<Cards>
+  <Card
+    icon={<FaExclamationTriangle />}
+    title="已知 Bug"
+    href="/faq/known-issue"
+  />
+</Cards>
 
 ## 我不想每个媒体都打开单独的播放器 [#shared-player]
 
 当您需要处理含有不同媒体的多份笔记时，频繁打开新的播放器可能会很烦人。Media Extended 通过与 Obsidian 的“固定标签页”功能集成，巧妙解决了这一问题。只需右键点击播放器标签并选择“固定”，即可实现多个视频在同一个播放器打开。
 
 <Bleed>
-![pin player](../pin-player.png)
+![pin player](./pin-player.png)
 </Bleed>
 
 ## 我想在 Obsidian 中打开浏览器中的网页 [#open-website]
