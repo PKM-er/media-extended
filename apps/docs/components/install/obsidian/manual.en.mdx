@@ -1,4 +1,4 @@
-import { Callout, Steps } from "nextra/components";
+import { Callout, Steps, FileTree } from "nextra/components";
 import { ObsidianInfo, ReleaseLink } from "./info";
 
 <ObsidianInfo channel={["main", "beta"]} lang="en" />
@@ -34,7 +34,19 @@ The `.obsidian` folder may be hidden. On macOS, you should be able to press `Com
 
 Create a new folder `media-extended` and put files from `media-extended.zip` into the folder
 
-There should be three files in the folder: `main.js`, `manifest.json` and `styles.css`
+Finally, the folder structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="<vault>/.obsidian/plugins" open>
+    <FileTree.Folder name="media-extended" open>
+      <FileTree.File name="main.js" />
+      <FileTree.File name="manifest.json" />
+      <FileTree.File name="styles.css" />
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+Make sure three files are in the plugin folder: `main.js`, `manifest.json` and `styles.css`
 
 ### Reload & Enable
 

@@ -1,4 +1,4 @@
-import { Callout, Steps } from "nextra/components";
+import { Callout, Steps, FileTree } from "nextra/components";
 import { ObsidianInfo, ReleaseLink } from "./info";
 
 <ObsidianInfo channel={["main", "beta"]} lang="zh-CN" />
@@ -33,7 +33,19 @@ import { ObsidianInfo, ReleaseLink } from "./info";
 
 创建一个名为 `media-extended` 的新文件夹，并将 `media-extended.zip` 中的文件放入该文件夹
 
-文件夹中应该有三个文件：`main.js`、`manifest.json` 和 `styles.css`
+最后，文件夹结构应该如下所示：
+
+<FileTree>
+  <FileTree.Folder name="<vault>/.obsidian/plugins" open>
+    <FileTree.Folder name="media-extended" open>
+      <FileTree.File name="main.js" />
+      <FileTree.File name="manifest.json" />
+      <FileTree.File name="styles.css" />
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+确保插件文件夹中有三个文件：`main.js`、`manifest.json` 和 `styles.css`
 
 ### 刷新和启用
 
