@@ -1,6 +1,6 @@
 import type { EmbedCreator, Plugin } from "obsidian";
 import type { Size } from "@/lib/size-syntax";
-import { parseSizeFromLinkTitle } from "@/lib/size-syntax";
+import { parseSizeFromLinkTitle, setSize } from "@/lib/size-syntax";
 import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
@@ -94,16 +94,14 @@ function injectUrlMediaEmbed(this: MxPlugin) {
       replace(info, iframe);
     }
 
-    function replace({ title, url }: EmbedSource, target: HTMLElement) {
-      const src = plguin.resolveUrl(url);
+    function replace(embed: EmbedSource, target: HTMLElement) {
+      const src = plguin.resolveUrl(embed.url);
       if (!src || !shouldOpenMedia(src, plguin)) return;
-      const newWarpper = createSpan({
+      const newWarpper = createDiv({
         cls: ["media-embed", "external-embed", "is-loaded"],
-        attr: {
-          src: src.href,
-          alt: title,
-        },
+        attr: { src: src.href },
       });
+      setSize(newWarpper, embed);
       target.replaceWith(newWarpper);
       const child = new UrlEmbedMarkdownRenderChild(src, newWarpper, plguin);
       ctx.addChild(child);
@@ -123,8 +121,7 @@ function extractSourceFromImg(img: HTMLImageElement): EmbedSource | null {
 
   if (!srcText) return null;
 
-  const [title, size] = parseSizeFromLinkTitle(linkTitle);
-  return { url: srcText, title, size };
+  return { url: srcText, ...parseSizeFromLinkTitle(linkTitle) };
 }
 
 function extractSourceFromMarkdown(
@@ -135,8 +132,7 @@ function extractSourceFromMarkdown(
   if (!match) return null;
   const { alt: linkTitle, src: srcText } = match.groups!;
   if (!srcText) return null;
-  const [title, size] = parseSizeFromLinkTitle(linkTitle);
-  return { url: srcText, title, size };
+  return { url: srcText, ...parseSizeFromLinkTitle(linkTitle) };
 }
 
 function extractSourceFromIframe(

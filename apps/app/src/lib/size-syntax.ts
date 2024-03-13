@@ -18,7 +18,7 @@ export const parseSizeSyntax = (str: string | undefined): Size | null => {
 
 export const parseSizeFromLinkTitle = (
   linkTitle: string,
-): [title: string, size: Size | null] => {
+): { title: string; size: Size | null } => {
   const pipeLoc = linkTitle.lastIndexOf("|");
   let size,
     title = linkTitle;
@@ -29,5 +29,27 @@ export const parseSizeFromLinkTitle = (
     size = parseSizeSyntax(title.substring(pipeLoc + 1));
     if (size) title = title.substring(0, pipeLoc);
   }
-  return [title, size];
+  return { title, size };
 };
+
+export function setSize(
+  dom: HTMLElement,
+  { title, size }: { title: string; size: Size | null },
+): void {
+  if (title) {
+    dom.setAttr("alt", title);
+  } else {
+    dom.removeAttribute("alt");
+  }
+  const apply = (attr: "width" | "height", val: number) => {
+    if (val < 0) dom.style.removeProperty(attr);
+    else dom.style[attr] = `${val}px`;
+  };
+  if (size) {
+    apply("width", size[0]);
+    apply("height", size[1]);
+  } else {
+    apply("width", -1);
+    apply("height", -1);
+  }
+}

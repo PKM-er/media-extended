@@ -3,7 +3,7 @@ import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { Platform } from "obsidian";
 import { dataLpPassthrough } from "@/components/player/buttons";
-import { parseSizeSyntax } from "@/lib/size-syntax";
+import { parseSizeFromLinkTitle, setSize } from "@/lib/size-syntax";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MediaExtended from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
@@ -137,39 +137,7 @@ abstract class UrlPlayerWidget extends WidgetType {
     this.resizeWidget(view, container);
   }
   private applyTitle(dom: HTMLElement) {
-    if (!this.title) {
-      dom.removeAttribute("alt");
-      dom.style.removeProperty("width");
-      dom.style.removeProperty("height");
-      return;
-    }
-    const pipeLoc = this.title.lastIndexOf("|");
-    let size,
-      title = this.title;
-    if (pipeLoc === -1) {
-      size = parseSizeSyntax(this.title);
-      if (size) title = "";
-    } else {
-      size = parseSizeSyntax(title.substring(pipeLoc + 1));
-      if (size) title = title.substring(0, pipeLoc);
-    }
-
-    if (title) {
-      dom.setAttr("alt", title);
-    } else {
-      dom.removeAttribute("alt");
-    }
-    const apply = (attr: "width" | "height", val: number) => {
-      if (val < 0) dom.style.removeProperty(attr);
-      else dom.style[attr] = `${val}px`;
-    };
-    if (size) {
-      apply("width", size[0]);
-      apply("height", size[1]);
-    } else {
-      apply("width", -1);
-      apply("height", -1);
-    }
+    setSize(dom, parseSizeFromLinkTitle(this.title));
   }
   toDOM(view: EditorView): HTMLDivElement {
     const container = createDiv();
