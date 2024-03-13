@@ -6,7 +6,7 @@ import { getTracksLocal } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import { type PlayerComponent } from "./base";
-import { MEDIA_URL_VIEW_TYPE, MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
+import { MEDIA_URL_VIEW_TYPE } from "./view-type";
 
 export class MediaRenderChild
   extends MarkdownRenderChild
@@ -34,13 +34,7 @@ export class MediaRenderChild
     this.store.getState().setSource(media, {
       title: other.title ?? true,
       hash: other.hash,
-      enableWebview: viewType === MEDIA_WEBPAGE_VIEW_TYPE,
-      type:
-        viewType === MEDIA_URL_VIEW_TYPE.video
-          ? "video/mp4"
-          : viewType === MEDIA_URL_VIEW_TYPE.audio
-          ? "audio/mp3"
-          : undefined,
+      viewType,
       textTracks:
         viewType === MEDIA_URL_VIEW_TYPE.video
           ? await getTracksLocal(media, defaultLang).catch((e) => {

@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { MenuItem } from "obsidian";
 import { Notice, Platform, parseLinktext } from "obsidian";
-import type { RemoteMediaViewType } from "@/media-view/view-type";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "@/patch/event";
 import { checkMediaType } from "@/patch/media-type";
 import type { MediaURL } from "@/web/url-match";
 import { MediaHost } from "@/web/url-match/supported";
+import { openAsMenu } from "../media-view/menu/open-as";
 
 export function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
   return !!(
@@ -28,16 +27,6 @@ export const onExternalLinkClick: LinkEvent["onExternalLinkClick"] =
     }
     await this.leafOpener.openMedia(url, newLeaf, { fromUser: true });
   };
-
-const mediaTypeDisplay: Record<
-  RemoteMediaViewType,
-  { label: string; icon: string }
-> = {
-  "mx-embed": { label: "iframe", icon: "code" },
-  "mx-url-audio": { label: "regular audio", icon: "headphones" },
-  "mx-url-video": { label: "regular video", icon: "film" },
-  "mx-webpage": { label: "webpage", icon: "globe" },
-};
 
 async function showItemInFolder(fullpath: string) {
   if (!Platform.isDesktopApp) return;
@@ -100,82 +89,13 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
           );
       }
 
-      const { protocol, hostname, pathname, host, port } = url;
       const supported = plugin.urlViewType.getSupported(url);
       const preferred = plugin.urlViewType.getPreferred(url);
-      const showInMenu = shouldOpenMedia(url, plugin)
+      const targetViewTypes = shouldOpenMedia(url, plugin)
         ? supported.filter((t) => t !== preferred)
         : supported;
-      if (showInMenu.length === 0) return;
-      function setLabel(
-        item: MenuItem,
-        viewType: RemoteMediaViewType,
-        noPrefix = false,
-      ) {
-        const label = mediaTypeDisplay[viewType].label;
-        return item
-          .setTitle(noPrefix ? label : `Open as ${label}`)
-          .setIcon(mediaTypeDisplay[viewType].icon);
-      }
-      showInMenu.forEach((viewType) => {
-        menu.addItem((item) =>
-          setLabel(item, viewType)
-            .setSection("mx-link")
-            .onClick(async () => {
-              await plugin.leafOpener.openMedia(url, undefined, {
-                viewType,
-                fromUser: true,
-              });
-            }),
-        );
-      });
-      menu.addItem((item) => {
-        const matchUrl = item
-          .setTitle("Always open this url as")
-          .setIcon("external-link")
-          .setSection("mx-link")
-          .setSubmenu();
-        showInMenu.forEach((viewType) => {
-          matchUrl.addItem((item) =>
-            setLabel(item, viewType, true)
-              .setSection("mx-link")
-              .onClick(async () => {
-                plugin.urlViewType.setPreferred(
-                  { protocol, hostname, pathname, port },
-                  viewType,
-                );
-                await plugin.leafOpener.openMedia(url, undefined, {
-                  viewType,
-                  fromUser: true,
-                });
-              }),
-          );
-        });
-      });
-      if (hostname)
-        menu.addItem((item) => {
-          const matchHostname = item
-            .setTitle(`Always open ${host} as`)
-            .setIcon("external-link")
-            .setSection("mx-link")
-            .setSubmenu();
-          showInMenu.forEach((viewType) => {
-            matchHostname.addItem((item) =>
-              setLabel(item, viewType, true)
-                .setSection("mx-link")
-                .onClick(async () => {
-                  plugin.urlViewType.setPreferred(
-                    { protocol, hostname, port },
-                    viewType,
-                  );
-                  await plugin.leafOpener.openMedia(url, undefined, {
-                    viewType,
-                    fromUser: true,
-                  });
-                }),
-            );
-          });
-        });
+      openAsMenu(menu, { targetViewTypes, url, mode: "once", plugin });
+      openAsMenu(menu, { targetViewTypes, url, mode: "always", plugin });
     }),
   );
 }

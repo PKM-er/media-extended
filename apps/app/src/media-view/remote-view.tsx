@@ -31,7 +31,7 @@ export abstract class MediaRemoteView
   navigation = true;
 
   setSource(url: MediaURL): any {
-    this.store.getState().setSource(url);
+    this.store.getState().setSource(url, { viewType: this.getViewType() });
   }
   getMediaInfo() {
     return this.store.getState().source?.url ?? null;

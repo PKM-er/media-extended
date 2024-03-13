@@ -10,6 +10,10 @@ import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import { getTracksInVault } from "@/lib/subtitle";
 import { titleFromUrl } from "@/media-view/base";
+import {
+  MEDIA_FILE_VIEW_TYPE,
+  type MediaViewType,
+} from "@/media-view/view-type";
 import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
 import { fromFile, type MediaURL } from "@/web/url-match";
@@ -24,14 +28,13 @@ export interface TransformConfig {
 }
 
 export interface SourceFacet {
-  hash: string;
+  hash?: string;
   /**
    * true: auto detect title from url
    */
-  title: string | true;
-  enableWebview: boolean;
-  type: string;
-  textTracks: TextTrackInit[];
+  title?: string | true;
+  viewType: MediaViewType;
+  textTracks?: TextTrackInit[];
 }
 
 export interface MediaViewState {
@@ -40,8 +43,7 @@ export interface MediaViewState {
   source:
     | {
         url: MediaURL;
-        enableWebview?: boolean;
-        type?: string;
+        viewType: MediaViewType;
       }
     | undefined;
   title: string;
@@ -52,7 +54,7 @@ export interface MediaViewState {
     file: TFile,
     ctx: { vault: Vault; subpath?: string; defaultLang: string },
   ): Promise<void>;
-  setSource(url: MediaURL, other?: Partial<SourceFacet>): void;
+  setSource(url: MediaURL, other: SourceFacet): void;
   transform: Partial<TransformConfig> | null;
   setTransform: (transform: Partial<TransformConfig> | null) => void;
   controls?: boolean;
@@ -93,16 +95,12 @@ export function createMediaViewStore() {
         }, timeout);
       });
     },
-    setSource(
-      url,
-      { hash, enableWebview, title: title, type, textTracks } = {},
-    ) {
+    setSource(url, { hash, viewType, title, textTracks }) {
       set((og) => ({
         source: {
           ...og.source,
-          type: type ?? og.source?.type,
+          viewType,
           url,
-          enableWebview: enableWebview ?? og.source?.enableWebview,
         },
         textTracks: textTracks ?? og.textTracks,
         hash: { ...og.hash, ...parseHashProps(hash || url.hash) },
@@ -117,8 +115,11 @@ export function createMediaViewStore() {
     },
     async loadFile(file, { vault, subpath, defaultLang }) {
       const textTracks = await getTracksInVault(file, vault, defaultLang);
+      const url = fromFile(file, vault);
+      if (!url.inferredType) throw new Error("Unsupported media type");
+      const viewType = MEDIA_FILE_VIEW_TYPE[url.inferredType];
       set(({ source, hash }) => ({
-        source: { ...source, url: fromFile(file, vault) },
+        source: { ...source, url, viewType },
         textTracks,
         title: file.name,
         hash: subpath ? { ...hash, ...parseHashProps(subpath) } : hash,

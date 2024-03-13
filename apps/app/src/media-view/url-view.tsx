@@ -31,7 +31,7 @@ export class VideoUrlView extends MediaUrlView {
     this.store.getState().setSource(url, {
       title: true,
       textTracks,
-      type: "video/mp4",
+      viewType: this.getViewType(),
     });
   }
 }
@@ -49,7 +49,7 @@ export class AudioUrlView extends MediaUrlView {
   async setSource(url: MediaURL) {
     this.store.getState().setSource(url, {
       title: true,
-      type: "audio/mp3",
+      viewType: this.getViewType(),
     });
   }
 }

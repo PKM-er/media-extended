@@ -1,5 +1,4 @@
 import { handlePaneMigration } from "@/lib/window-migration";
-import type { MediaURL } from "@/web/url-match";
 import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
@@ -32,9 +31,5 @@ export class MediaWebpageView extends MediaRemoteView {
   getDisplayText(): string {
     if (!this.playerTitle) return "Webpage";
     return `${this.playerTitle} - ${mediaHostDisplayName[this.getHost()]}`;
-  }
-
-  setSource(url: MediaURL) {
-    this.store.getState().setSource(url, { enableWebview: true });
   }
 }

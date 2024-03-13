@@ -73,3 +73,9 @@ export type MediaViewType =
 export function isMediaViewType(type: string): type is MediaViewType {
   return isMediaFileViewType(type) || isRemoteMediaViewType(type);
 }
+
+export const screenshotAllowed = new Set([
+  MEDIA_URL_VIEW_TYPE.video,
+  MEDIA_FILE_VIEW_TYPE.video,
+  MEDIA_WEBPAGE_VIEW_TYPE,
+]);

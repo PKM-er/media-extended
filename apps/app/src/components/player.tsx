@@ -41,12 +41,16 @@ export function Player() {
   const src = useMediaViewStore(({ source }) => {
     if (!source) return;
     const url = source.url.source.href;
-    if (source.enableWebview) {
+    if (source.viewType === "mx-webpage") {
       // webview will create a new MediaURL instance
       return { src: encodeWebpageUrl(url) };
     }
     return {
-      type: source.type,
+      type: source.viewType.endsWith("video")
+        ? "video/mp4"
+        : source.viewType.endsWith("audio")
+        ? "audio/mp3"
+        : undefined,
       src: url,
     };
   });

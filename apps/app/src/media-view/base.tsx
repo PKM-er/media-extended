@@ -8,13 +8,7 @@ import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
 import type { MediaInfo } from "./media-info";
 import { noticeNotetaking } from "./notice-notetaking";
-import {
-  MEDIA_EMBED_VIEW_TYPE,
-  MEDIA_FILE_VIEW_TYPE,
-  MEDIA_URL_VIEW_TYPE,
-  MEDIA_WEBPAGE_VIEW_TYPE,
-  type MediaViewType,
-} from "./view-type";
+import { screenshotAllowed, type MediaViewType } from "./view-type";
 
 export interface PlayerComponent extends Component {
   plugin: MediaExtended;
@@ -58,13 +52,7 @@ export function addAction(player: PlayerComponent & ItemView) {
     });
   });
   const viewType = player.getViewType();
-  if (
-    [
-      MEDIA_URL_VIEW_TYPE.video,
-      MEDIA_FILE_VIEW_TYPE.video,
-      MEDIA_WEBPAGE_VIEW_TYPE,
-    ].includes(viewType)
-  )
+  if (screenshotAllowed.has(viewType))
     player.addAction("camera", "Take screenshot in media", () => {
       const info = player.getMediaInfo();
       if (!info) return;
@@ -101,6 +89,7 @@ export function onPaneMenu<
     menu,
     {
       source: source.url,
+      viewType: source.viewType,
       player,
       toggleControls,
       controls,

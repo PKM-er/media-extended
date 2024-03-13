@@ -78,7 +78,7 @@ export function MoreOptions() {
   const plugin = usePlugin();
   const isEmbed = useIsEmbed();
   const reload = useReload();
-  const source = useMediaViewStore((state) => state.source?.url);
+  const source = useMediaViewStore((state) => state.source);
   const store = useMediaViewStoreInst();
   const onClick = useMenu((menu) => {
     if (!player || !source) return false;
@@ -96,7 +96,8 @@ export function MoreOptions() {
       {
         player,
         reload,
-        source,
+        source: source.url,
+        viewType: source.viewType,
         toggleControls,
         controls,
         setTransform,
