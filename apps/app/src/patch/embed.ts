@@ -68,6 +68,7 @@ class UrlEmbedMarkdownRenderChild extends MediaRenderChild {
   }
   onload() {
     this.setSource(this.info);
+    super.onload();
   }
 }
 
@@ -104,7 +105,8 @@ function injectUrlMediaEmbed(this: MxPlugin) {
         },
       });
       target.replaceWith(newWarpper);
-      ctx.addChild(new UrlEmbedMarkdownRenderChild(src, newWarpper, plguin));
+      const child = new UrlEmbedMarkdownRenderChild(src, newWarpper, plguin);
+      ctx.addChild(child);
     }
   });
 }
