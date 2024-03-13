@@ -15,6 +15,9 @@ export async function captureScreenshot(
 
   // set canvas size to fit video's
   const { videoWidth: width, videoHeight: height } = video;
+  if (!width || !height) {
+    throw new Error("Cannot screenshot video without width or height");
+  }
   Object.assign(canvas, { width, height });
 
   // set alpha to false as video background is opaque
