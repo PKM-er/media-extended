@@ -2,6 +2,7 @@ import type { MediaState } from "@vidstack/react";
 import { Notice } from "obsidian";
 import type { App, Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
+import type { TempFragment } from "@/lib/hash/temporal-frag";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaInfo, FileMediaInfo } from "@/media-view/media-info";
@@ -107,8 +108,9 @@ export function timestampGenerator(
   if (duration && time > duration) time = duration;
 
   const timeInDuration = formatDuration(time);
-  const hash =
-    time > 0 ? `#${toTempFragString({ start: time, end: -1 })!}` : "";
+  const frag =
+    time > 0 ? ({ start: time, end: -1 } satisfies TempFragment) : undefined;
+  const hash = frag ? `#${toTempFragString(frag)!}` : "";
   if (isFileMediaInfo(mediaInfo)) {
     const { file } = mediaInfo;
     return (newNotePath: string) =>
@@ -116,7 +118,7 @@ export function timestampGenerator(
         .generateMarkdownLink(file, newNotePath, hash, timeInDuration)
         .replace(/^!/, "");
   } else {
-    const sourceUrl = mediaInfo.jsonState.source;
+    const sourceUrl = mediaInfo.print(frag);
     return () => `[${timeInDuration}](${sourceUrl}${hash})`;
   }
 }

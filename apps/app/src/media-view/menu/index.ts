@@ -7,7 +7,6 @@ import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import type { MediaViewType } from "../view-type";
 import { muteMenu } from "./mute";
-import { openAsMenu } from "./open-as";
 import { pipMenu } from "./pip";
 import { speedMenu } from "./speed";
 import { transformMenu } from "./transform";
@@ -80,18 +79,6 @@ export default function registerMediaMenu(this: MxPlugin) {
               ctx.reload();
             }),
         );
-        if (!ctx.source.isFileUrl) {
-          const supported = ctx.plugin.urlViewType.getSupported(ctx.source);
-          const current = ctx.viewType;
-          const targetViewTypes = supported.filter((t) => t !== current);
-          openAsMenu(menu, {
-            mode: "always",
-            open: false,
-            url: ctx.source,
-            plugin: ctx.plugin,
-            targetViewTypes,
-          });
-        }
       }
       if (source !== "sidebar-context-menu" && source !== "tab-header") {
         menu.addItem((item) => speedMenu(item, ctx.player));

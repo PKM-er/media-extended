@@ -1,3 +1,4 @@
+import type { TempFragment } from "@/lib/hash/temporal-frag";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
 import {
@@ -45,22 +46,31 @@ export const bilibiliResolver: URLResolver = (url) => {
     params.delete(key);
   });
   cleaned.searchParams.sort();
+  const pid = cleaned.searchParams.get("p") ?? "1";
 
-  const source = new URL(cleaned);
+  let source = new URL(cleaned);
   if (!tempFrag && time > 0) {
     tempFrag = { start: time, end: -1 };
   }
 
   if (tempFrag && isTimestamp(tempFrag)) {
-    source.searchParams.set("t", String(tempFrag.start));
+    source = addBilibiliTime(source, tempFrag);
   }
+  source = removeHashTempFragment(source);
 
   return {
-    source: removeHashTempFragment(source),
+    source,
     cleaned,
-    id: vid || undefined,
+    print: (frag) => addBilibiliTime(source, frag).href,
+    id: `${pid}@${vid}` || undefined,
   };
 };
+
+function addBilibiliTime(url: URL, frag: TempFragment) {
+  const newUrl = new URL(url.href);
+  newUrl.searchParams.set("t", String(frag.start));
+  return newUrl;
+}
 
 function parseTimeFromBilibiliUrl(url: URL) {
   const _time = url.searchParams.get("t");

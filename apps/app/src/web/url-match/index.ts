@@ -65,6 +65,13 @@ export class MediaURL extends URL implements URLResolveResult {
     return !!other && this.jsonState.source === other.jsonState.source;
   }
 
+  print(frag?: TempFragment): string {
+    if (this.mxUrl) return this.mxUrl.href;
+    if (!frag) return this.source.href;
+    if (this.#resolved.print) return this.#resolved.print(frag);
+    return this.source.href;
+  }
+
   get tempFrag(): TempFragment | null {
     return parseTempFrag(this.hash);
   }

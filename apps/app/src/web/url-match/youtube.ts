@@ -1,4 +1,5 @@
 import { toTempFrag } from "@/lib/hash/format";
+import type { TempFragment } from "@/lib/hash/temporal-frag";
 import { isTimestamp, parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
 import { removeHashTempFragment, type URLResolver } from "./base";
@@ -43,7 +44,7 @@ export const youtubeResolver: URLResolver = (url) => {
     v: vid,
   }).toString();
 
-  const source = new URL(cleaned);
+  let source = new URL(cleaned);
   if (url.searchParams.has("list")) {
     source.searchParams.set("list", url.searchParams.get("list")!);
   }
@@ -60,30 +61,38 @@ export const youtubeResolver: URLResolver = (url) => {
   }
   // use native timestamp and range
   if (tempFrag) {
-    const ytStart = toYoutubeTime(tempFrag.start),
-      ytEnd = toYoutubeTime(tempFrag.end);
-    if (isTimestamp(tempFrag)) {
-      source.searchParams.set("t", ytStart);
-    } else {
-      if (tempFrag.start > 0 && tempFrag.end > 0 && ytStart === ytEnd) {
-        source.searchParams.set("t", ytStart);
-      } else {
-        if (tempFrag.start > 0) {
-          source.searchParams.set("start", ytStart);
-        }
-        if (tempFrag.end > 0) {
-          source.searchParams.set("end", ytEnd);
-        }
-      }
-    }
+    source = addYoutubeTime(source, tempFrag);
   }
+  source = removeHashTempFragment(source);
 
   return {
-    source: removeHashTempFragment(source),
+    source,
     cleaned,
+    print: (frag) => addYoutubeTime(source, frag).href,
     id: vid,
   };
 };
+
+function addYoutubeTime(url: URL, tempFrag: TempFragment) {
+  const newUrl = new URL(url);
+  const ytStart = toYoutubeTime(tempFrag.start),
+    ytEnd = toYoutubeTime(tempFrag.end);
+  if (isTimestamp(tempFrag)) {
+    newUrl.searchParams.set("t", ytStart);
+  } else {
+    if (tempFrag.start > 0 && tempFrag.end > 0 && ytStart === ytEnd) {
+      newUrl.searchParams.set("t", ytStart);
+    } else {
+      if (tempFrag.start > 0) {
+        newUrl.searchParams.set("start", ytStart);
+      }
+      if (tempFrag.end > 0) {
+        newUrl.searchParams.set("end", ytEnd);
+      }
+    }
+  }
+  return newUrl;
+}
 
 function toYoutubeTime(time: number) {
   return time.toFixed(0);
