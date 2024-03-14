@@ -9,12 +9,4 @@ declare module "obsidian" {
   }
 }
 
-const disablePartition =
-  localStorage.getItem("MX_DEV_DISABLE_PARTITION") === "1";
-if (disablePartition) {
-  console.log("DEV: disable partition");
-}
-
-export const getPartition = disablePartition
-  ? () => undefined
-  : (id: string) => `persist:mx-player-${id}`;
+export const getPartition = (id: string) => `persist:mx-player-${id}`;

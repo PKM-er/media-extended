@@ -90,6 +90,13 @@ export default class YouTubePlugin extends MediaPlugin {
   async onload(): Promise<void> {
     await super.onload();
     this.disableAutoPlay();
+    waitForSelector("ytd-consent-bump-v2-lightbox", this.app).then(() => {
+      this.controller.send("mx-open-browser", {
+        message:
+          "Seems like YouTube is showing a consent popup that block playback. To continue playback, you should handle it in dedicated login browser. ",
+        url: "https://youtube.com",
+      });
+    });
   }
 
   get app() {

@@ -12,6 +12,7 @@ import { isString } from "maverick.js/std";
 import { ButtonComponent, Notice } from "obsidian";
 import type { WebviewElement } from "@/components/webview";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
+import { LoginModal } from "@/login/modal";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MediaURL } from "@/web/url-match";
@@ -65,6 +66,20 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
     onDispose(() => {
       this._webview.removeEventListener("dom-ready", this.onDomReady);
     });
+    onDispose(
+      this._port.on("mx-open-browser", ({ payload: { url, message = "" } }) => {
+        noticeWithOK({
+          message: message + `Open ${url} in login browser?`,
+          cancelText: "No",
+          onConfirm: () => {
+            // eslint-disable-next-line deprecation/deprecation
+            const modal = new LoginModal(app);
+            modal.open();
+            modal.setUrl(url);
+          },
+        });
+      }),
+    );
   }
 
   get type() {
@@ -342,26 +357,57 @@ function timeoutNotice(timeout: number) {
   const ignore = localStorage.getItem(label);
   if (ignore) return;
   const timeoutLabel = (timeout / 1e3).toFixed(1);
+  noticeWithOK({
+    message: `Webpage not fully loaded within ${timeoutLabel}s. You can still try to play.`,
+    onCancel() {
+      console.log("ignore webview timeout notice");
+      localStorage.setItem(label, "1");
+    },
+    cancelText: "Don't show again",
+    timeout: 5e3,
+  });
+}
+
+function noticeWithOK({
+  message,
+  cancelText = "Ignore",
+  confirmText = "OK",
+  onConfirm,
+  onCancel,
+  timeout,
+}: {
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => any;
+  onCancel?: () => any;
+  timeout?: number;
+}) {
   const notice = new Notice(
     createFragment((e) => {
-      e.createDiv({
-        text: `Webpage not fully loaded within ${timeoutLabel}s. You can still try to play.`,
-      });
+      e.createDiv({ text: message });
       e.createDiv({}, (div) => {
         div.style.display = "flex";
         div.style.justifyContent = "flex-end";
         div.style.gap = "1em";
         div.style.marginTop = "1em";
-        new ButtonComponent(div).setButtonText("OK");
-        new ButtonComponent(div)
-          .setButtonText("Don't show again")
-          .onClick(() => {
-            console.log("ignore webview timeout notice");
-            localStorage.setItem(label, "1");
+        const ok = new ButtonComponent(div).setButtonText(confirmText);
+        if (onConfirm) {
+          ok.onClick(async () => {
+            await onConfirm();
             notice.hide();
           });
+        }
+        const cancel = new ButtonComponent(div).setButtonText(cancelText);
+        if (onCancel) {
+          cancel.onClick(async () => {
+            await onCancel();
+            notice.hide();
+          });
+        }
       });
     }),
-    5e3,
+    timeout,
   );
+  return notice;
 }

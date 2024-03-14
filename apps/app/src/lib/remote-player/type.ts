@@ -206,8 +206,12 @@ export type MsgCtrlRemote = MessageController<
     "mx-toggle-controls": boolean;
     "mx-toggle-webfs": boolean;
   },
-  Record<CustomEvent, void> & MediaEventPayloadMap
+  Record<CustomEvent, void> & MediaEventPayloadMap & CustomEventWithPayload
 >;
+
+type CustomEventWithPayload = {
+  "mx-open-browser": { url: string; message?: string };
+};
 
 export type MsgCtrlLocal = MessageController<
   Nil,
@@ -234,7 +238,7 @@ export type MsgCtrlLocal = MessageController<
     exitPictureInPicture(): void;
     bili_getManifest(): Promise<BilibiliPlayerManifest>;
   },
-  Record<CustomEvent, void> & MediaEventPayloadMap,
+  Record<CustomEvent, void> & MediaEventPayloadMap & CustomEventWithPayload,
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;

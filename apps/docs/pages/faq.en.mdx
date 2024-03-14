@@ -6,13 +6,13 @@ import { FaExclamationTriangle } from "react-icons/fa";
 
 import { Cards, Card } from "nextra/components";
 
-<Cards>
+{/* <Cards>
   <Card
     icon={<FaExclamationTriangle />}
     title="Known Issues"
     href="/faq/known-issue"
   />
-</Cards>
+</Cards> */}
 
 ## I don't want to open the player in a new tab [#shared-player]
 
@@ -43,6 +43,8 @@ Additionally, you can do this manually by appending the following part to the UR
 obsidian://mx-open/
 ```
 
+## XXX website won't work in the player [#website-not-working]
+
 ## I want "Link with pane" behavior to take timestamp/screenshot from non-media note [#restore-link-with-pane]
 
 ["Link with pane"](https://github.com/PKM-er/media-extended/wiki/Open-Links-in-One-Shared-Player) is a feature that has been refactored in v3. Now you can control the player with commands or your own assigned shortcuts on any active note, without having to associate the player with the note explicitly as before.
@@ -50,3 +52,11 @@ obsidian://mx-open/
 You may notice that the player is now marked as "active" with a red icon 🟥 in tab header. This indicates that the player is currently being used to take notes.
 
 For more details about the media commands, please refer to [#Taking Notes](/getting-started/first-note#taking-notes)
+
+## YouTube Video Auto Pausing in Webpage Player [#youtube-auto-pause]
+
+This usually means that YouTube is asking for your consent to use cookies. You can fix this by open [youtube.com](https://youtube.com) in login browser using command "Login website"
+
+In Media Extended v3.0.7, there should be a notice asking you to handle consent when you open a YouTube video. 
+
+[Issue #219](https://github.com/PKM-er/media-extended/issues/219)
