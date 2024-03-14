@@ -68,6 +68,7 @@ export const youtubeResolver: URLResolver = (url) => {
   return {
     source,
     cleaned,
+    tempFrag,
     print: (frag) => addYoutubeTime(source, frag).href,
     id: vid,
   };

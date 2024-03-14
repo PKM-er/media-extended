@@ -1,3 +1,4 @@
+import { parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
 import {
   removeHashTempFragment,
@@ -19,5 +20,6 @@ export const courseraResolver: URLResolver = (url) => {
   return {
     cleaned,
     source: removeHashTempFragment(source),
+    tempFrag: parseTempFrag(url.hash),
   };
 };

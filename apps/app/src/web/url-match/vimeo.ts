@@ -1,3 +1,4 @@
+import { parseTempFrag } from "@/lib/hash/temporal-frag";
 import { noHashUrl } from "@/lib/url";
 import {
   removeHashTempFragment,
@@ -25,6 +26,7 @@ export const vimeoResolver: URLResolver = (url) => {
   return {
     cleaned,
     source: removeHashTempFragment(source),
+    tempFrag: parseTempFrag(url.hash),
     id: vid,
   };
 };

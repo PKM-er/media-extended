@@ -231,11 +231,12 @@ export class LeafOpener extends Component {
         active: true,
       });
     } else {
+      const { hash, source } = mediaInfo.jsonState;
       const state:
         | MediaEmbedViewState
         | MediaWebpageViewState
         | MediaUrlViewState = {
-        source: mediaInfo.jsonState.source,
+        source,
       };
       viewType ??= this.plugin.urlViewType.getPreferred(mediaInfo);
       await leaf.setViewState(
@@ -244,7 +245,7 @@ export class LeafOpener extends Component {
           state,
           active: true,
         },
-        { subpath: mediaInfo.hash },
+        { subpath: hash },
       );
     }
     return leaf as MediaLeaf;

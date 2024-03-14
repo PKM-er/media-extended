@@ -29,8 +29,14 @@ export function removeTempFrag(hash: string) {
   return hash.replace(/t=[^&]+/, "");
 }
 
-export function addTempFrag(hash: string, tempFrag: TempFragment) {
+export function addTempFrag(
+  hash: string,
+  tempFrag: TempFragment | null,
+): string {
+  hash = removeTempFrag(hash.trim().replace(/^#/, ""));
+  if (!tempFrag) return hash;
   const tempFragString = toTempFragString(tempFrag);
+  if (!hash) return tempFragString ?? "";
   return `${hash}&${tempFragString}`;
 }
 

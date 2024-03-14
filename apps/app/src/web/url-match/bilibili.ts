@@ -61,6 +61,7 @@ export const bilibiliResolver: URLResolver = (url) => {
   return {
     source,
     cleaned,
+    tempFrag,
     print: (frag) => addBilibiliTime(source, frag).href,
     id: `${pid}@${vid}` || undefined,
   };

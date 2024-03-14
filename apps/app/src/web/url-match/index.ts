@@ -120,8 +120,11 @@ export class MediaURL extends URL implements URLResolveResult {
   }
   readonly type: MediaHost;
 
-  get jsonState(): { source: string } {
-    return { source: noHash(this.mxUrl ?? this.cleaned) };
+  get jsonState(): { source: string; hash: string } {
+    return {
+      source: noHash(this.mxUrl ?? this.cleaned),
+      hash: addTempFrag(this.hash, this.#resolved.tempFrag),
+    };
   }
 
   mxUrl: URL | null;

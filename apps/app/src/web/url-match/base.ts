@@ -10,6 +10,7 @@ export interface URLResolveResult {
   source: URL;
   cleaned: URL;
   print?: (frag: TempFragment) => string;
+  tempFrag: TempFragment | null;
   id?: string;
 }
 
