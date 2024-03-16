@@ -26,12 +26,15 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
           </Controls.Group>
           <Controls.Group className="-mt-0.5 flex w-full items-center px-2 pb-2">
             <Buttons.Play />
+            <Buttons.Previous />
+            <Buttons.Next />
             <Buttons.Mute />
             <Sliders.Volume />
             <TimeGroup />
             <Title />
             <div className="flex-1" />
             <Menus.Captions />
+            <Menus.Playlist />
             <Buttons.Screenshot />
             <Buttons.Fullscreen />
             <Buttons.EditorEdit />

@@ -76,6 +76,9 @@ abstract class MediaFileView
           plugin: this.plugin,
           store: this.store,
           reload: () => this.render(),
+          onPlaylistChange: (item) => {
+            this.plugin.leafOpener.openMediaIn(this.leaf, item.media);
+          },
           embed: false,
         }}
       >

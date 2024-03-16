@@ -29,14 +29,19 @@ import {
   EditIcon,
   ImageDownIcon,
   PinIcon,
+  NextIcon,
+  PreviousIcon,
 } from "@/components/icon";
 import { cn } from "@/lib/utils";
+import { findWithMedia, isWithMedia } from "@/media-note/note-index/playlist";
 import {
   useIsEmbed,
+  usePlaylistChange,
   useScreenshot,
   useSettings,
   useTimestamp,
 } from "../context";
+import { usePlaylist } from "../hook/use-playlist";
 import { canProviderScreenshot, takeScreenshot } from "./screenshot";
 
 export const buttonClass =
@@ -210,6 +215,55 @@ export function Timestamp() {
       aria-label="Take timestamp"
     >
       <PinIcon className="w-7 h-7" />
+    </button>
+  );
+}
+
+export function Next() {
+  const onPlaylistChange = usePlaylistChange();
+  const playlist = usePlaylist()[0];
+  if (!playlist || !onPlaylistChange) return null;
+  const curr = playlist.list[playlist.active];
+  if (!(curr && isWithMedia(curr))) return null;
+  const next = findWithMedia(
+    playlist.list,
+    (li) => !curr.media.compare(li.media),
+    { fromIndex: playlist.active + 1 },
+  );
+  if (!next) return null;
+  return (
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      onClick={() => {
+        onPlaylistChange(next, playlist);
+      }}
+      aria-label={`Next: ${next.title}`}
+    >
+      <NextIcon className="w-7 h-7" />
+    </button>
+  );
+}
+export function Previous() {
+  const onPlaylistChange = usePlaylistChange();
+  const playlist = usePlaylist()[0];
+  if (!playlist || !onPlaylistChange) return null;
+  const curr = playlist.list[playlist.active];
+  if (!(curr && isWithMedia(curr))) return null;
+  const prev = findWithMedia(
+    playlist.list,
+    (li) => !curr.media.compare(li.media),
+    { fromIndex: playlist.active - 1, reverse: true },
+  );
+  if (!prev) return null;
+  return (
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      onClick={() => {
+        onPlaylistChange(prev, playlist);
+      }}
+      aria-label={`Prev: ${prev.title}`}
+    >
+      <PreviousIcon className="w-7 h-7" />
     </button>
   );
 }

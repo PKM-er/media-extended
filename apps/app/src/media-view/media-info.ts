@@ -15,7 +15,7 @@ export function isFileMediaInfo(info: unknown): info is FileMediaInfo {
   return (info as FileMediaInfo).file instanceof TFile;
 }
 
-export function getFileMediaInfo(
+export function getMediaInfoFor(
   file: TFile | null,
   hash: string,
 ): FileMediaInfo | null {
@@ -32,11 +32,5 @@ export function parseFileInfo(
 ): FileMediaInfo | null {
   const file = vault.getFileByPath(filePath);
   if (!file) return null;
-  const type = checkMediaType(file.extension);
-  if (!type) return null;
-  return {
-    type,
-    file,
-    hash,
-  };
+  return getMediaInfoFor(file, hash);
 }

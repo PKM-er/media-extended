@@ -5,6 +5,7 @@ import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
 import path from "@/lib/path";
 import { noHash } from "@/lib/url";
+import { isFileMediaInfo, type MediaInfo } from "@/media-view/media-info";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
 import type { URLResolveResult, URLResolver } from "./base";
@@ -190,12 +191,21 @@ export function resolveMxProtocol(
   );
 }
 
-export function fromFile(file: TFile, vault: Vault): MediaURL {
+export function fromFile(file: TFile, hash: string, vault: Vault): MediaURL {
   if (checkMediaType(file.extension) === null) {
     throw new Error(`Unknown media type ${file.extension}`);
   }
   const resouceUrl = vault.getResourcePath(file);
   return new MediaURL(
-    "file:///" + resouceUrl.substring(Platform.resourcePathPrefix.length),
+    "file:///" +
+      resouceUrl.substring(Platform.resourcePathPrefix.length) +
+      "#" +
+      hash,
   );
+}
+
+export function mediaInfoToURL(mediaInfo: MediaInfo, vault: Vault): MediaURL {
+  return isFileMediaInfo(mediaInfo)
+    ? fromFile(mediaInfo.file, mediaInfo.hash, vault)
+    : mediaInfo;
 }

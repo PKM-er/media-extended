@@ -25,12 +25,15 @@ export function AudioLayout({ thumbnails }: VideoLayoutProps) {
             <Buttons.Rewind seconds={30} />
             <Buttons.Play />
             <Buttons.FastForward seconds={30} />
+            <Buttons.Previous />
+            <Buttons.Next />
             <Buttons.Mute />
             <Sliders.Volume />
             <TimeGroup />
             <Title />
             <div className="flex-1" />
             <Buttons.EditorEdit />
+            <Menus.Playlist />
             <Menus.MoreOptions />
           </Controls.Group>
         </Tooltip.Provider>

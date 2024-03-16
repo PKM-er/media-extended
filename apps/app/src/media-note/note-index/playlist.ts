@@ -7,11 +7,10 @@ import type {
   LinkCache,
   ListItemCache,
 } from "obsidian";
-import { getFileMediaInfo, isFileMediaInfo } from "@/media-view/media-info";
-import type { FileMediaInfo, MediaInfo } from "@/media-view/media-info";
+import { getMediaInfoFor } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import type { MediaType } from "@/patch/media-type";
-import { fromFile } from "@/web/url-match";
+import { mediaInfoToURL, type MediaURL } from "@/web/url-match";
 import {
   extractFirstMarkdownLink,
   extractListItemMainText,
@@ -19,11 +18,15 @@ import {
 } from "./syntax";
 
 export interface Playlist {
+  file: TFile;
   title: string;
   list: PlaylistItem[];
 }
+export interface PlaylistWithActive extends Playlist {
+  active: number;
+}
 export interface PlaylistItem {
-  media: MediaInfo | null;
+  media: MediaURL | null;
   title: string;
   type: MediaTaskSymbolType;
   /**
@@ -31,8 +34,40 @@ export interface PlaylistItem {
    */
   parent: number;
 }
+export interface PlaylistItemWithMedia extends PlaylistItem {
+  media: MediaURL;
+}
 
-const emptyLists: Playlist[] = [];
+export function isWithMedia(item: PlaylistItem): item is PlaylistItemWithMedia {
+  return !!item.media;
+}
+export function findWithMedia(
+  list: PlaylistItem[],
+  predicate: (
+    item: PlaylistItemWithMedia,
+    i: number,
+    arr: PlaylistItem[],
+  ) => boolean,
+  {
+    fromIndex,
+    reverse = false,
+  }: { fromIndex?: number; reverse?: boolean } = {},
+): PlaylistItemWithMedia | null {
+  if (reverse) {
+    for (let i = fromIndex ?? list.length - 1; i >= 0; i--) {
+      const item = list[i];
+      if (item && isWithMedia(item) && predicate(item, i, list)) return item;
+    }
+  } else {
+    for (let i = fromIndex ?? 0; i < list.length; i++) {
+      const item = list[i];
+      if (item && isWithMedia(item) && predicate(item, i, list)) return item;
+    }
+  }
+  return null;
+}
+
+const emptyLists: PlaylistWithActive[] = [];
 
 declare module "obsidian" {
   interface MetadataCache {
@@ -55,19 +90,16 @@ export class PlaylistIndex extends Component {
     this.app = plugin.app;
   }
 
-  /**
-   * @param media MediaURL.jsonState.source
-   */
-  get(media: string | undefined) {
+  get(media: MediaURL | undefined) {
     if (!media) return emptyLists;
-    return this.mediaToPlaylistIndex.get(media) ?? emptyLists;
+    return this.mediaToPlaylistIndex.get(media.jsonState.source) ?? emptyLists;
   }
 
   /**
    * immutable update playlist array holding the media
    * to make reactivity work
    */
-  private mediaToPlaylistIndex = new Map<string, Playlist[]>();
+  private mediaToPlaylistIndex = new Map<string, PlaylistWithActive[]>();
   private listFileCache = new Map<string, Playlist>();
 
   private onResolve() {
@@ -138,16 +170,13 @@ export class PlaylistIndex extends Component {
     // make sure only one instance of the playlist is stored
     const uniqCache = new Set<string>();
     data.list.forEach((item) => {
-      if (!item.media) return;
-      const key = (
-        isFileMediaInfo(item.media)
-          ? fromFile(item.media.file, this.app.vault)
-          : item.media
-      ).jsonState.source;
+      const { media } = item;
+      if (!media) return;
+      const key = media.jsonState.source;
       if (uniqCache.has(key)) return;
       this.mediaToPlaylistIndex.set(key, [
         ...(this.mediaToPlaylistIndex.get(key) ?? []),
-        data,
+        { ...data, active: data.list.findIndex((i) => media.compare(i.media)) },
       ]);
       uniqCache.add(key);
     });
@@ -203,7 +232,7 @@ async function getPlaylistMeta(
   const ctx = { source: file, plugin };
   const list = await parsePlaylist(meta, ctx);
   if (!list) return null;
-  return { title: getFileTitle(meta, file), list };
+  return { title: getFileTitle(meta, file), list, file };
 }
 
 async function parsePlaylist(
@@ -242,7 +271,7 @@ async function parsePlaylist(
       const internalLink = links[internalLinkIdx];
       const last = links.findLastIndex((link) => within(link, listItem));
       links.splice(internalLinkIdx, last - internalLinkIdx + 1);
-      const media = getMediaInfo(internalLink);
+      const media = mediaInfoFromInternalLink(internalLink);
       return {
         media,
         type: type ?? "generic",
@@ -268,10 +297,12 @@ async function parsePlaylist(
   });
   return playlist;
 
-  function getMediaInfo({ link }: LinkCache): FileMediaInfo | null {
+  function mediaInfoFromInternalLink({ link }: LinkCache): MediaURL | null {
     const { path, subpath } = parseLinktext(link);
     const file = metadataCache.getFirstLinkpathDest(path, ctx.source.path);
-    return getFileMediaInfo(file, subpath);
+    const mediaInfo = getMediaInfoFor(file, subpath);
+    if (!mediaInfo) return null;
+    return mediaInfoToURL(mediaInfo, vault);
   }
 }
 

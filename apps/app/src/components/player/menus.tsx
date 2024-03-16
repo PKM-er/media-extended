@@ -8,16 +8,19 @@ import {
 import { around } from "monkey-around";
 import { Menu } from "obsidian";
 import { useRef } from "react";
-import { MoreIcon, SubtitlesIcon } from "@/components/icon";
+import { MoreIcon, PlaylistIcon, SubtitlesIcon } from "@/components/icon";
 import { showAtButton } from "@/lib/menu";
+import { isWithMedia } from "@/media-note/note-index/playlist";
 import {
   useApp,
   useIsEmbed,
   useMediaViewStore,
   useMediaViewStoreInst,
+  usePlaylistChange,
   usePlugin,
   useReload,
 } from "../context";
+import { usePlaylist } from "../hook/use-playlist";
 import { dataLpPassthrough } from "./buttons";
 
 function useMenu(onMenu: (menu: Menu) => boolean) {
@@ -41,6 +44,59 @@ function useMenu(onMenu: (menu: Menu) => boolean) {
       menu.close();
     }
   };
+}
+
+export function Playlist() {
+  const playlists = usePlaylist();
+  const onPlaylistChange = usePlaylistChange();
+  const current = useMediaViewStore((s) => s.source?.url);
+  const app = useApp();
+  const playlist = playlists.first();
+  const onClick = useMenu((mainMenu) => {
+    if (!onPlaylistChange || !current || !playlist) return false;
+    mainMenu
+      .addItem((item) =>
+        item
+          .setTitle(playlist.title)
+          .setIsLabel(true)
+          .onClick(() => {
+            app.workspace.openLinkText(playlist.file.path, "", "tab");
+          }),
+      )
+      .addSeparator();
+
+    playlist.list.forEach((li) => {
+      if (li.type === "subtitle") return;
+      mainMenu.addItem((item) => {
+        if (current.compare(li?.media)) {
+          item.setChecked(true);
+        }
+        const title = li.parent >= 0 ? `(${li.parent})${li.title}` : li.title;
+        item.setTitle(title);
+        if (isWithMedia(li) && !li.media.compare(current)) {
+          item.onClick(() => {
+            onPlaylistChange(li, playlists[0]);
+          });
+        } else {
+          item.setIsLabel(true);
+        }
+      });
+    });
+    return true;
+  });
+
+  if (!onPlaylistChange || !current || !playlist) return null;
+
+  return (
+    <button
+      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
+      {...{ [dataLpPassthrough]: true }}
+      onClick={onClick}
+      aria-label="Select Playlist"
+    >
+      <PlaylistIcon className="w-7 h-7" />
+    </button>
+  );
 }
 
 export function Captions() {

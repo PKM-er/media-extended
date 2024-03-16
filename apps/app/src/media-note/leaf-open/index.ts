@@ -24,6 +24,7 @@ import type { MediaWebpageViewState } from "@/media-view/webpage-view";
 import type MxPlugin from "@/mx-main";
 import { toPaneAction } from "@/patch/mod-evt";
 import type { OpenLinkBehavior } from "@/settings/def";
+import { mediaInfoToURL } from "@/web/url-match";
 import { filterFileLeaf, filterUrlLeaf, sortByMtime } from "./utils";
 import "./active.global.less";
 
@@ -217,28 +218,30 @@ export class LeafOpener extends Component {
     } else {
       leaf = workspace.getLeaf(newLeaf as "split", direction);
     }
-    return this.#openMedia(leaf, mediaInfo, viewType);
+    return this.openMediaIn(leaf, mediaInfo, viewType);
   }
 
-  async #openMedia(
+  async openMediaIn(
     leaf: WorkspaceLeaf,
     mediaInfo: MediaInfo,
     viewType?: RemoteMediaViewType,
   ) {
-    if (isFileMediaInfo(mediaInfo)) {
-      await leaf.openFile(mediaInfo.file, {
-        eState: { subpath: mediaInfo.hash },
+    const url = mediaInfoToURL(mediaInfo, this.app.vault);
+    const file = url.getVaultFile(this.app.vault);
+    if (file) {
+      await leaf.openFile(file, {
+        eState: { subpath: url.hash },
         active: true,
       });
     } else {
-      const { hash, source } = mediaInfo.jsonState;
+      const { hash, source } = url.jsonState;
       const state:
         | MediaEmbedViewState
         | MediaWebpageViewState
         | MediaUrlViewState = {
         source,
       };
-      viewType ??= this.plugin.urlViewType.getPreferred(mediaInfo);
+      viewType ??= this.plugin.urlViewType.getPreferred(url);
       await leaf.setViewState(
         {
           type: viewType,
@@ -257,7 +260,7 @@ export class LeafOpener extends Component {
   ): Promise<MediaLeaf | null> {
     const pinned = this.findPinnedPlayer();
     if (pinned) {
-      return await this.#openMedia(pinned, info, remoteViewType);
+      return await this.openMediaIn(pinned, info, remoteViewType);
     }
     const opened = this.findPlayerWithSameMedia(info);
     if (opened) {

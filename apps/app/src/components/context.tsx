@@ -9,6 +9,11 @@ import noop from "@/lib/no-op";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
 import { getTracksInVault } from "@/lib/subtitle";
+import type {
+  Playlist,
+  PlaylistItem,
+  PlaylistItemWithMedia,
+} from "@/media-note/note-index/playlist";
 import { titleFromUrl } from "@/media-view/base";
 import {
   MEDIA_FILE_VIEW_TYPE,
@@ -115,7 +120,7 @@ export function createMediaViewStore() {
     },
     async loadFile(file, { vault, subpath, defaultLang }) {
       const textTracks = await getTracksInVault(file, vault, defaultLang);
-      const url = fromFile(file, vault);
+      const url = fromFile(file, subpath ?? "", vault);
       if (!url.inferredType) throw new Error("Unsupported media type");
       const viewType = MEDIA_FILE_VIEW_TYPE[url.inferredType];
       set(({ source, hash }) => ({
@@ -183,6 +188,7 @@ export const MediaViewContext = createContext<{
   reload: () => void;
   onScreenshot?: (info: ScreenshotInfo) => any;
   onTimestamp?: (timestamp: number) => any;
+  onPlaylistChange?: (item: PlaylistItemWithMedia, list: Playlist) => any;
 }>(null as any);
 
 export function useMediaViewStore<U>(
@@ -223,6 +229,9 @@ export function usePlugin() {
 
 export function useScreenshot() {
   return useContext(MediaViewContext).onScreenshot;
+}
+export function usePlaylistChange() {
+  return useContext(MediaViewContext).onPlaylistChange;
 }
 export function useTimestamp() {
   return useContext(MediaViewContext).onTimestamp;

@@ -1,13 +1,13 @@
 import type { MediaState } from "@vidstack/react";
 import { Notice } from "obsidian";
-import type { App, Editor } from "obsidian";
+import type { App, Editor, Vault } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import type { TempFragment } from "@/lib/hash/temporal-frag";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
-import type { MediaInfo, FileMediaInfo } from "@/media-view/media-info";
+import type { MediaInfo } from "@/media-view/media-info";
 import type { MxSettings } from "@/settings/def";
-import type { MediaURL } from "@/web/url-match";
+import { mediaInfoToURL, type MediaURL } from "@/web/url-match";
 
 export function insertTimestamp(
   { timestamp, screenshot }: { timestamp: string; screenshot?: string },
@@ -51,36 +51,43 @@ function insertBeforeCursor(str: string, editor: Editor) {
   // editor.setCursor(editor.offsetToPos(editor.posToOffset(cursor) + str.length));
 }
 
-function fileTitle(media: FileMediaInfo) {
-  return media.file.basename;
-}
-
-function urlTitle({ source }: MediaURL, playerState: MediaState) {
+function urlTitle(url: MediaURL, playerState: MediaState) {
+  if (playerState.title) return playerState.title;
+  if (url.isFileUrl) {
+    const filenameSeg = url.pathname.split("/").pop()?.split(".");
+    filenameSeg?.pop();
+    const basename = filenameSeg?.join(".");
+    if (basename) return basename;
+  }
   return (
-    playerState.title ??
-    source.hostname + decodeURI(source.pathname).replaceAll("/", "_")
+    url.source.hostname + decodeURI(url.source.pathname).replaceAll("/", "_")
   );
 }
 
-export function mediaTitle(mediaInfo: MediaInfo, playerState: MediaState) {
-  return isFileMediaInfo(mediaInfo)
-    ? fileTitle(mediaInfo)
-    : urlTitle(mediaInfo, playerState);
+export function mediaTitle(
+  mediaInfo: MediaInfo,
+  { state, vault }: { state: MediaState; vault: Vault },
+) {
+  const url = mediaInfoToURL(mediaInfo, vault);
+  return urlTitle(url, state);
 }
 
 export function openOrCreateMediaNote(
   mediaInfo: MediaInfo,
   playerComponent: PlayerComponent,
 ) {
-  const { metadataCache } = playerComponent.plugin.app;
+  const { metadataCache, vault } = playerComponent.plugin.app;
   const player = playerComponent.store.getState().player;
   if (!player) {
     throw new Error("Player not initialized");
   }
-  if (isFileMediaInfo(mediaInfo)) {
-    const { file, type: mediaType } = mediaInfo;
+  const url = mediaInfoToURL(mediaInfo, vault);
+  const title = urlTitle(url, player.state);
+  const file = url.getVaultFile(vault);
+  const mediaType = url.inferredType ?? ("media" as const);
+  if (file) {
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
-      title: fileTitle(mediaInfo),
+      title,
       fm: (newNotePath) => ({
         [mediaType]: `[[${metadataCache.fileToLinktext(file, newNotePath)}]]`,
       }),
@@ -88,8 +95,8 @@ export function openOrCreateMediaNote(
     });
   } else {
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
-      title: urlTitle(mediaInfo, player.state),
-      fm: () => ({ media: mediaInfo.jsonState.source }),
+      title,
+      fm: () => ({ [mediaType]: url.jsonState.source }),
     });
   }
 }

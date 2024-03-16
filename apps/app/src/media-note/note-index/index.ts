@@ -2,8 +2,8 @@ import { Component, TFolder, TFile, parseLinktext } from "obsidian";
 import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
+import { mediaInfoToURL } from "@/web/url-match";
 import type { MediaInfo } from "../../media-view/media-info";
-import { isFileMediaInfo } from "../../media-view/media-info";
 
 declare module "obsidian" {
   interface MetadataCache {
@@ -24,7 +24,7 @@ export class MediaNoteIndex extends Component {
   private mediaToNoteIndex = new Map<string, Set<TFile>>();
 
   findNotes(media: MediaInfo): TFile[] {
-    const notes = this.mediaToNoteIndex.get(mediaInfoToString(media));
+    const notes = this.mediaToNoteIndex.get(this.mediaInfoToString(media));
     if (!notes) return [];
     return [...notes];
   }
@@ -67,11 +67,16 @@ export class MediaNoteIndex extends Component {
     );
   }
 
+  private mediaInfoToString(info: MediaInfo) {
+    const url = mediaInfoToURL(info, this.app.vault);
+    return `url:${url.jsonState.source}`;
+  }
+
   removeMediaNote(toRemove: TFile) {
     const mediaInfo = this.noteToMediaIndex.get(toRemove.path)!;
     if (!mediaInfo) return;
     this.noteToMediaIndex.delete(toRemove.path);
-    const mediaInfoKey = mediaInfoToString(mediaInfo);
+    const mediaInfoKey = this.mediaInfoToString(mediaInfo);
     const mediaNotes = this.mediaToNoteIndex.get(mediaInfoKey);
     if (!mediaNotes) return;
     mediaNotes.delete(toRemove);
@@ -81,12 +86,10 @@ export class MediaNoteIndex extends Component {
   }
   addMediaNote(mediaInfo: MediaInfo, newNote: TFile) {
     this.noteToMediaIndex.set(newNote.path, mediaInfo);
-    const mediaNotes = this.mediaToNoteIndex.get(mediaInfoToString(mediaInfo));
+    const key = this.mediaInfoToString(mediaInfo);
+    const mediaNotes = this.mediaToNoteIndex.get(key);
     if (!mediaNotes) {
-      this.mediaToNoteIndex.set(
-        mediaInfoToString(mediaInfo),
-        new Set([newNote]),
-      );
+      this.mediaToNoteIndex.set(key, new Set([newNote]));
     } else {
       mediaNotes.add(newNote);
     }
@@ -204,12 +207,4 @@ function getField(
   const content = frontmatter[key];
   if (typeof content !== "string") return null;
   return ctx.plugin.resolveUrl(content);
-}
-
-function mediaInfoToString(info: MediaInfo) {
-  if (isFileMediaInfo(info)) {
-    return `file:${info.file.path}`;
-  } else {
-    return `url:${info.jsonState.source}`;
-  }
 }
