@@ -108,6 +108,17 @@ function speed(plugin: Plugin): Controls[] {
           repeat: true,
         };
       }),
+    ...speedOptions.map(
+      (speed): Controls => ({
+        id: `set-speed-${speed}x`,
+        label: `Set playback speed to ${speed}x`,
+        icon: "gauge",
+        action: async (media) => {
+          media.playbackRate = speed;
+          notify(`Speed set to ${speed}x`);
+        },
+      }),
+    ),
     {
       id: "reset-speed",
       label: "Reset playback speed",
@@ -155,7 +166,7 @@ function speed(plugin: Plugin): Controls[] {
     },
     {
       id: "set-speed",
-      label: "Set playback speed",
+      label: "Set playback speed to custom value",
       icon: "gauge",
       action: async (media) => {
         const newSpeed = await PlaybackSpeedPrompt.run();
