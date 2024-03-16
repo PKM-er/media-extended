@@ -14,6 +14,7 @@ import {
   onInternalLinkClick,
 } from "./media-note/link-click";
 import { MediaNoteIndex } from "./media-note/note-index";
+import { PlaylistIndex } from "./media-note/note-index/playlist";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
@@ -92,6 +93,7 @@ export default class MxPlugin extends Plugin {
   }
 
   mediaNote = this.addChild(new MediaNoteIndex(this));
+  playlist = this.addChild(new PlaylistIndex(this));
   biliReq = this.addChild(new BilibiliRequestHacker(this));
   leafOpener = this.addChild(new LeafOpener(this));
   handleMediaNote = handleMediaNote;

@@ -4,9 +4,8 @@ import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
 import { dataLpPassthrough } from "@/components/player/buttons";
-import type { FileMediaInfo } from "@/media-view/media-info";
+import { getFileMediaInfo, type FileMediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
-import { checkMediaType } from "@/patch/media-type";
 import { type PlayerComponent } from "./base";
 
 export class MediaFileEmbed
@@ -41,14 +40,7 @@ export class MediaFileEmbed
   }
 
   getMediaInfo(): FileMediaInfo | null {
-    if (!this.file) return null;
-    const type = checkMediaType(this.file.extension);
-    if (!type) return null;
-    return {
-      type,
-      file: this.file,
-      hash: this.subpath,
-    };
+    return getFileMediaInfo(this.file, this.subpath);
   }
 
   // eslint-disable-next-line react/require-render-return

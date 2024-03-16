@@ -15,6 +15,16 @@ export function isFileMediaInfo(info: unknown): info is FileMediaInfo {
   return (info as FileMediaInfo).file instanceof TFile;
 }
 
+export function getFileMediaInfo(
+  file: TFile | null,
+  hash: string,
+): FileMediaInfo | null {
+  if (!file) return null;
+  const type = checkMediaType(file.extension);
+  if (!type) return null;
+  return { type, file, hash };
+}
+
 export function parseFileInfo(
   filePath: string,
   hash: string,
