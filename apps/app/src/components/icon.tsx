@@ -53,6 +53,6 @@ export const PlayIcon = makeIcon("play"),
   MoreIcon = makeIcon("more-horizontal"),
   PlusIcon = makeIcon("plus"),
   TrashIcon = makeIcon("trash"),
-  PlaylistIcon = makeIcon("list-music"),
+  PlaylistIcon = makeIcon("list-video"),
   NextIcon = makeIcon("skip-forward"),
   PreviousIcon = makeIcon("skip-back");

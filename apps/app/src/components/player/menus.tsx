@@ -6,10 +6,12 @@ import {
   useMediaState,
 } from "@vidstack/react";
 import { around } from "monkey-around";
+import type { MenuItem } from "obsidian";
 import { Menu } from "obsidian";
 import { useRef } from "react";
 import { MoreIcon, PlaylistIcon, SubtitlesIcon } from "@/components/icon";
 import { showAtButton } from "@/lib/menu";
+import type { PlaylistItem } from "@/media-note/playlist/def";
 import { isWithMedia } from "@/media-note/playlist/def";
 import {
   useApp,
@@ -22,6 +24,7 @@ import {
 } from "../context";
 import { usePlaylist } from "../hook/use-playlist";
 import { dataLpPassthrough } from "./buttons";
+import { addItemsToMenu } from "./playlist-menu";
 
 function useMenu(onMenu: (menu: Menu) => boolean) {
   const menuRef = useRef<Menu | null>(null);
@@ -53,33 +56,54 @@ export function Playlist() {
   const app = useApp();
   const onClick = useMenu((mainMenu) => {
     if (!onPlaylistChange || !current || !playlist) return false;
+
     mainMenu
       .addItem((item) =>
         item
           .setTitle(playlist.title)
-          .setIsLabel(true)
+          .setIcon("list-video")
           .onClick(() => {
             app.workspace.openLinkText(playlist.file.path, "", "tab");
           }),
       )
       .addSeparator();
 
-    playlist.list.forEach((li) => {
-      if (li.type === "subtitle") return;
-      mainMenu.addItem((item) => {
-        if (current.compare(li?.media)) {
-          item.setChecked(true);
-        }
-        const title = li.parent >= 0 ? `(${li.parent})${li.title}` : li.title;
-        item.setTitle(title);
-        if (isWithMedia(li) && !li.media.compare(current)) {
-          item.onClick(() => {
+    addItemsToMenu(mainMenu, playlist.list, (menu, li, submenu) => {
+      if (li.type === "subtitle") return null;
+      let subTrigger: MenuItem | null = null;
+      if (isWithMedia(li)) {
+        const renderExtra = li.children.length > 0;
+        menu.addItem((item) => {
+          item.setTitle(li.title).onClick(() => {
             onPlaylistChange(li, playlist);
           });
-        } else {
-          item.setIsLabel(true);
-        }
-      });
+          if (current.compare(li.media)) {
+            item.setChecked(true);
+            const checkParent = (node: PlaylistItem) => {
+              if (node.parent < 0) return;
+              submenu.get(node.parent)?.setChecked(true);
+              const parent = playlist.list[node.parent];
+              if (!parent) return;
+              checkParent(parent);
+            };
+            checkParent(li);
+          }
+          if (!renderExtra) subTrigger = item;
+        });
+        if (renderExtra)
+          // render an extra menu item as submenu trigger
+          menu.addItem((item) => {
+            item.setTitle("  ↳");
+            subTrigger = item;
+          });
+      } else {
+        // render label
+        menu.addItem((item) => {
+          item.setTitle(li.title).setIcon("hash");
+          subTrigger = item;
+        });
+      }
+      return subTrigger;
     });
     return true;
   });

@@ -4,7 +4,7 @@ import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
 import path from "@/lib/path";
 import { pickMediaFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
-import type { FileMediaInfo, MediaInfo } from "@/media-view/media-info";
+import { isFileMediaInfo, type MediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
 import { getFsPromise } from "@/web/session/utils";
@@ -45,7 +45,7 @@ function toURLGuess(query: string): URL | null {
   return url;
 }
 
-export class MediaSwitcherModal extends SuggestModal<MediaURL> {
+export class MediaSwitcherModal extends SuggestModal<MediaInfo> {
   constructor(public plugin: MxPlugin) {
     super(plugin.app);
     this.inputEl.addEventListener("drop", (evt) => {
@@ -100,7 +100,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     });
   }
 
-  getSuggestions(query: string): MediaURL[] {
+  getSuggestions(query: string): MediaInfo[] {
     const url = toURLGuess(query);
     const guess: URL[] = [];
     if (!url) {
@@ -139,10 +139,11 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     this.chooser.setSuggestions(["file-picker", "file-protocol-picker"]);
   }
   renderSuggestion(
-    value: MediaURL | "file-picker" | "file-protocol-picker",
+    value: MediaInfo | "file-picker" | "file-protocol-picker",
     el: HTMLElement,
   ) {
     if (value instanceof MediaURL) el.setText(decodeURI(value.href));
+    else if (isFileMediaInfo(value)) el.setText(value.file.path);
     else if (value === "file-picker") {
       el.setText("Open local file");
     } else if (value === "file-protocol-picker") {
@@ -152,7 +153,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
     }
   }
   async onChooseSuggestion(
-    item: MediaURL | "file-picker" | "file-protocol-picker",
+    item: MediaInfo | "file-picker" | "file-protocol-picker",
     evt: MouseEvent | KeyboardEvent,
   ) {
     let mediaInfo: MediaInfo;
@@ -186,18 +187,22 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
       const mediaFile = await pickMediaFile();
       if (!mediaFile) return;
       const url = toFileURL(mediaFile);
-      if (!url) return;
-      mediaInfo = new MediaURL(url.href);
-    } else if (item instanceof MediaURL) {
-      mediaInfo = item;
-    } else {
-      assertNever(item);
-    }
-    if (mediaInfo.isFileUrl) {
-      if (!mediaInfo.inferredType) {
-        new Notice("Unsupported file type: " + mediaInfo.pathname);
+      if (!url) {
+        new Notice("Failed to convert file path to URL: " + mediaFile);
         return;
       }
+      const resolved = this.plugin.resolveUrl(url);
+      if (!resolved) {
+        new Notice("Failed to resolve file: " + mediaFile);
+        return;
+      }
+      mediaInfo = resolved;
+    } else {
+      mediaInfo = item;
+    }
+    if (isFileMediaInfo(mediaInfo)) {
+      // do nothing, already checked in resolveUrl
+    } else if (mediaInfo.isFileUrl) {
       if (mediaInfo.hostname) {
         new Notice(
           `Network path is not supported in obsidian, you need to map it to a local path: ${
@@ -206,21 +211,7 @@ export class MediaSwitcherModal extends SuggestModal<MediaURL> {
         );
         return;
       }
-    }
 
-    const inVaultFile = mediaInfo.getVaultFile(this.plugin.app.vault);
-    if (inVaultFile) {
-      const mediaType = checkMediaType(inVaultFile.extension);
-      if (!mediaType) {
-        new Notice("Unsupported file type: " + inVaultFile.path);
-        return;
-      }
-      mediaInfo = {
-        file: inVaultFile,
-        hash: mediaInfo.hash,
-        type: mediaType,
-      } as FileMediaInfo;
-    } else if (mediaInfo.isFileUrl) {
       const fs = getFsPromise();
       if (!fs) {
         new Notice("File path is only supported in desktop app");

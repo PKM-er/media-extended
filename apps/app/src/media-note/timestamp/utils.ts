@@ -6,9 +6,10 @@ import type { TempFragment } from "@/lib/hash/temporal-frag";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaInfo } from "@/media-view/media-info";
+import { checkMediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
-import { mediaInfoToURL } from "@/web/url-match";
-import { urlTitle } from "../title";
+import type { MediaSourceFieldType } from "../note-index";
+import { mediaTitle } from "../title";
 
 export function insertTimestamp(
   { timestamp, screenshot }: { timestamp: string; screenshot?: string },
@@ -56,16 +57,15 @@ export function openOrCreateMediaNote(
   mediaInfo: MediaInfo,
   playerComponent: PlayerComponent,
 ) {
-  const { metadataCache, vault } = playerComponent.plugin.app;
+  const { metadataCache } = playerComponent.plugin.app;
   const player = playerComponent.store.getState().player;
   if (!player) {
     throw new Error("Player not initialized");
   }
-  const url = mediaInfoToURL(mediaInfo, vault);
-  const title = urlTitle(url, player.state);
-  const file = url.getVaultFile(vault);
-  const mediaType = url.inferredType ?? ("media" as const);
-  if (file) {
+  const title = mediaTitle(mediaInfo, { state: player.state });
+  if (isFileMediaInfo(mediaInfo)) {
+    const mediaType = checkMediaType(mediaInfo.file.extension)!;
+    const file = mediaInfo.file;
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
       title,
       fm: (newNotePath) => ({
@@ -74,9 +74,10 @@ export function openOrCreateMediaNote(
       sourcePath: file.path,
     });
   } else {
+    const type: MediaSourceFieldType = mediaInfo.inferredType ?? "media";
     return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
       title,
-      fm: () => ({ [mediaType]: url.jsonState.source }),
+      fm: () => ({ [type]: mediaInfo.jsonState.source }),
     });
   }
 }
@@ -98,6 +99,7 @@ export function timestampGenerator(
   const frag =
     time > 0 ? ({ start: time, end: -1 } satisfies TempFragment) : undefined;
   const hash = frag ? `#${toTempFragString(frag)!}` : "";
+
   if (isFileMediaInfo(mediaInfo)) {
     const { file } = mediaInfo;
     return (newNotePath: string) =>

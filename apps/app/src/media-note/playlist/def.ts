@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { TFile } from "obsidian";
+import type { MediaInfo } from "@/media-view/media-info";
 import type { MediaType } from "@/patch/media-type";
 import { type MediaURL } from "@/web/url-match";
 
@@ -36,7 +37,7 @@ export interface PlaylistWithActive extends Playlist {
   active: number;
 }
 export interface PlaylistItem {
-  media: MediaURL | null;
+  media: MediaInfo | null;
   title: string;
   type: MediaTaskSymbolType;
   /**

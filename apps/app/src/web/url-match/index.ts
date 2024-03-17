@@ -1,11 +1,15 @@
 import { fileURLToPath } from "url";
-import type { Vault, TFile } from "obsidian";
+import type { Vault, TFile, App } from "obsidian";
 import { FileSystemAdapter, Platform, normalizePath } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
 import path from "@/lib/path";
 import { noHash } from "@/lib/url";
-import { isFileMediaInfo, type MediaInfo } from "@/media-view/media-info";
+import {
+  getMediaInfoFor,
+  isFileMediaInfo,
+  type MediaInfo,
+} from "@/media-view/media-info";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
 import type { URLResolveResult, URLResolver } from "./base";
@@ -181,18 +185,32 @@ export function resolveUrl(url: MediaURL): URLResolveResult {
 export function resolveMxProtocol(
   src: URL | null,
   { getUrlMapping }: MxSettings,
-): MediaURL | null {
+  app: App,
+): MediaInfo | null {
   if (!src) return null;
-  if (src.protocol !== "mx:") return MediaURL.create(src);
+  if (src.protocol !== "mx:") return checkInVault(src);
 
   // custom protocol take // as part of the pathname
   const [, , mxProtocol] = src.pathname.split("/");
   const replace = getUrlMapping(mxProtocol);
   if (!replace) return null;
-  return MediaURL.create(
+  return checkInVault(
     src.href.replace(`mx://${mxProtocol}/`, replace.replace(/\/*$/, "/")),
     src,
   );
+
+  function checkInVault(url: string | URL, mx?: string | URL) {
+    const media = MediaURL.create(url, mx);
+    if (!media) return null;
+    if (!media.isFileUrl) return media;
+    const file = media.getVaultFile(app.vault);
+    if (!file) {
+      if (media.inferredType === null) return null;
+      return media;
+    }
+    if (checkMediaType(file.extension) === null) return null;
+    return getMediaInfoFor(file, media.hash);
+  }
 }
 
 export function fromFile(file: TFile, hash: string, vault: Vault): MediaURL {

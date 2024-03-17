@@ -3,6 +3,7 @@ import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle, setSize } from "@/lib/size-syntax";
 import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
+import { isFileMediaInfo } from "@/media-view/media-info";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MxPlugin from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
@@ -96,7 +97,7 @@ function injectUrlMediaEmbed(this: MxPlugin) {
 
     function replace(embed: EmbedSource, target: HTMLElement) {
       const src = plguin.resolveUrl(embed.url);
-      if (!src || !shouldOpenMedia(src, plguin)) return;
+      if (!src || isFileMediaInfo(src) || !shouldOpenMedia(src, plguin)) return;
       const newWarpper = createDiv({
         cls: ["media-embed", "external-embed", "is-loaded"],
         attr: { src: src.href },

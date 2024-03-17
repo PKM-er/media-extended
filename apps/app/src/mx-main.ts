@@ -18,6 +18,7 @@ import { PlaylistIndex } from "./media-note/playlist";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
+import type { MediaInfo } from "./media-view/media-info";
 import registerMediaMenu from "./media-view/menu";
 import { AudioUrlView, VideoUrlView } from "./media-view/url-view";
 import {
@@ -42,7 +43,6 @@ import { initSwitcher } from "./switcher";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import "./login/modal";
-import type { MediaURL } from "./web/url-match";
 import { resolveMxProtocol } from "./web/url-match";
 import { URLViewType } from "./web/url-match/view-type";
 
@@ -57,10 +57,14 @@ interface MxAPI {
 export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
 
-  resolveUrl(url: string | URL | null | undefined): MediaURL | null {
+  resolveUrl(url: string | URL | null | undefined): MediaInfo | null {
     const patched = patchWin32FileUrl(url);
     if (!patched) return null;
-    return resolveMxProtocol(toURL(patched), this.settings.getState());
+    return resolveMxProtocol(
+      toURL(patched),
+      this.settings.getState(),
+      this.app,
+    );
   }
   api: MxAPI = {
     openUrl: async (url, newLeaf, direction) => {

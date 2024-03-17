@@ -7,9 +7,9 @@ import type {
   ListItemCache,
   TFile,
 } from "obsidian";
+import type { MediaInfo } from "@/media-view/media-info";
 import { getMediaInfoFor } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
-import { mediaInfoToURL, type MediaURL } from "@/web/url-match";
 import { mediaTitle } from "../title";
 import { isMediaTaskSymbol, taskSymbolMediaTypeMap } from "./def";
 import type { MediaTaskSymbol, PlaylistItem, Playlist } from "./def";
@@ -83,7 +83,7 @@ async function parsePlaylist(
       const media = ctx.plugin.resolveUrl(url);
       let { display } = externalLink;
       if (media && (display === url || !display)) {
-        display = mediaTitle(media, { vault });
+        display = mediaTitle(media);
       }
       return { media, title: display, type: type || "generic", parent };
     }
@@ -96,12 +96,10 @@ async function parsePlaylist(
   });
   return playlist;
 
-  function mediaInfoFromInternalLink({ link }: LinkCache): MediaURL | null {
+  function mediaInfoFromInternalLink({ link }: LinkCache): MediaInfo | null {
     const { path, subpath } = parseLinktext(link);
     const file = metadataCache.getFirstLinkpathDest(path, ctx.source.path);
-    const mediaInfo = getMediaInfoFor(file, subpath);
-    if (!mediaInfo) return null;
-    return mediaInfoToURL(mediaInfo, vault);
+    return getMediaInfoFor(file, subpath);
   }
 }
 

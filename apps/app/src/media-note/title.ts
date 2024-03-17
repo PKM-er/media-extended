@@ -1,7 +1,6 @@
 import type { MediaState } from "@vidstack/react";
-import type { Vault } from "obsidian";
-import type { MediaInfo } from "@/media-view/media-info";
-import { mediaInfoToURL, type MediaURL } from "@/web/url-match";
+import { isFileMediaInfo, type MediaInfo } from "@/media-view/media-info";
+import { type MediaURL } from "@/web/url-match";
 import { MediaHost } from "@/web/url-match/supported";
 
 export function urlTitle(url: MediaURL, playerState?: MediaState) {
@@ -22,8 +21,10 @@ export function urlTitle(url: MediaURL, playerState?: MediaState) {
 
 export function mediaTitle(
   mediaInfo: MediaInfo,
-  { state, vault }: { state?: MediaState; vault: Vault },
+  { state }: { state?: MediaState } = {},
 ) {
-  const url = mediaInfoToURL(mediaInfo, vault);
-  return urlTitle(url, state);
+  if (isFileMediaInfo(mediaInfo)) {
+    return mediaInfo.file.basename;
+  }
+  return urlTitle(mediaInfo, state);
 }

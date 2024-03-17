@@ -4,7 +4,6 @@ import type { ObsidianProtocolData } from "obsidian";
 import { Notice } from "obsidian";
 import { toURL } from "@/lib/url";
 import type MxPlugin from "@/mx-main";
-import { MediaURL } from "@/web/url-match";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -54,18 +53,14 @@ export function registerProtocol(plugin: MxPlugin) {
     await handleUrl(url);
   }
   async function handleUrl(url: URL) {
-    const urlInfo = MediaURL.create(url);
+    const urlInfo = plugin.resolveUrl(url);
     if (!urlInfo) {
       new Notice("Invail URL: " + url.href);
       return;
     }
     new Notice(
       createFragment((e) => {
-        e.appendText(
-          `Opening ${urlInfo.type} ${
-            urlInfo.inferredType ?? "content"
-          } from browser: `,
-        );
+        e.appendText(`Opening ${urlInfo.type} from browser: `);
         e.createEl("br");
         e.createEl("a", {
           text:

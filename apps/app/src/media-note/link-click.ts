@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Notice, Platform, parseLinktext } from "obsidian";
+import { isFileMediaInfo } from "@/media-view/media-info";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "@/patch/event";
@@ -21,6 +22,11 @@ export function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
 export const onExternalLinkClick: LinkEvent["onExternalLinkClick"] =
   async function (this, link, newLeaf, fallback) {
     const url = this.resolveUrl(link);
+    if (isFileMediaInfo(url)) {
+      new Notice("For in-vault media, use internal link instead");
+      fallback();
+      return;
+    }
     if (!url || !shouldOpenMedia(url, this)) {
       fallback();
       return;
@@ -53,6 +59,10 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
     plugin.app.workspace.on("url-menu", (menu, link) => {
       const url = plugin.resolveUrl(link);
       if (!url) return;
+      if (isFileMediaInfo(url)) {
+        new Notice("For in-vault media, use internal link instead");
+        return;
+      }
 
       if (Platform.isDesktopApp && url.isFileUrl && url.filePath) {
         const filePath = url.filePath;

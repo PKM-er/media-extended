@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, TFolder, TFile, debounce } from "obsidian";
 import { waitUntilResolve } from "@/lib/meta-resolve";
+import type { MediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import { type MediaURL } from "@/web/url-match";
+import { toInfoKey } from "../note-index";
 import { emptyLists } from "./def";
 import type { PlaylistWithActive, Playlist } from "./def";
 import { getPlaylistMeta } from "./extract";
@@ -14,9 +16,9 @@ export class PlaylistIndex extends Component {
     this.app = plugin.app;
   }
 
-  get(media: MediaURL | undefined) {
+  get(media: MediaInfo | undefined) {
     if (!media) return emptyLists;
-    return this.mediaToPlaylistIndex.get(media.jsonState.source) ?? emptyLists;
+    return this.mediaToPlaylistIndex.get(toInfoKey(media)) ?? emptyLists;
   }
 
   /**
@@ -113,12 +115,14 @@ export class PlaylistIndex extends Component {
     data.list.forEach((item) => {
       const { media } = item;
       if (!media) return;
-      const key = media.jsonState.source;
+      const key = toInfoKey(media);
       if (uniqCache.has(key)) return;
       const others = this.mediaToPlaylistIndex.get(key) ?? [];
       const curr = {
         ...data,
-        active: data.list.findIndex((i) => media.compare(i.media)),
+        active: data.list.findIndex(
+          (i) => i.media && key === toInfoKey(i.media),
+        ),
       };
       this.listVariantMap.set(curr, data);
       this.mediaToPlaylistIndex.set(key, [...others, curr]);

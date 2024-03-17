@@ -3,8 +3,7 @@ import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
 import { waitUntilResolve } from "@/lib/meta-resolve";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
-import { mediaInfoToURL } from "@/web/url-match";
-import type { MediaInfo } from "../../media-view/media-info";
+import { isFileMediaInfo, type MediaInfo } from "../../media-view/media-info";
 
 declare module "obsidian" {
   interface MetadataCache {
@@ -25,7 +24,7 @@ export class MediaNoteIndex extends Component {
   private mediaToNoteIndex = new Map<string, Set<TFile>>();
 
   findNotes(media: MediaInfo): TFile[] {
-    const notes = this.mediaToNoteIndex.get(this.mediaInfoToString(media));
+    const notes = this.mediaToNoteIndex.get(toInfoKey(media));
     if (!notes) return [];
     return [...notes];
   }
@@ -68,16 +67,11 @@ export class MediaNoteIndex extends Component {
     );
   }
 
-  private mediaInfoToString(info: MediaInfo) {
-    const url = mediaInfoToURL(info, this.app.vault);
-    return `url:${url.jsonState.source}`;
-  }
-
   removeMediaNote(toRemove: TFile) {
     const mediaInfo = this.noteToMediaIndex.get(toRemove.path)!;
     if (!mediaInfo) return;
     this.noteToMediaIndex.delete(toRemove.path);
-    const mediaInfoKey = this.mediaInfoToString(mediaInfo);
+    const mediaInfoKey = toInfoKey(mediaInfo);
     const mediaNotes = this.mediaToNoteIndex.get(mediaInfoKey);
     if (!mediaNotes) return;
     mediaNotes.delete(toRemove);
@@ -87,7 +81,7 @@ export class MediaNoteIndex extends Component {
   }
   addMediaNote(mediaInfo: MediaInfo, newNote: TFile) {
     this.noteToMediaIndex.set(newNote.path, mediaInfo);
-    const key = this.mediaInfoToString(mediaInfo);
+    const key = toInfoKey(mediaInfo);
     const mediaNotes = this.mediaToNoteIndex.get(key);
     if (!mediaNotes) {
       this.mediaToNoteIndex.set(key, new Set([newNote]));
@@ -131,10 +125,18 @@ export const mediaSourceFieldMap = {
   video: "video",
   audio: "audio",
 } as const;
-type MediaType = (typeof mediaSourceFieldMap)[keyof typeof mediaSourceFieldMap];
+export type MediaSourceFieldType =
+  (typeof mediaSourceFieldMap)[keyof typeof mediaSourceFieldMap];
 export const mediaSourceFields = Object.values(
   mediaSourceFieldMap,
-) as MediaType[];
+) as MediaSourceFieldType[];
+
+export function toInfoKey(mediaInfo: MediaInfo) {
+  if (isFileMediaInfo(mediaInfo)) {
+    return `file:${mediaInfo.file.path}`;
+  }
+  return `url:${mediaInfo.jsonState.source}`;
+}
 
 export interface InternalLinkField {
   type: "internal";
@@ -145,7 +147,7 @@ export interface InternalLinkField {
 }
 export interface ExternalLinkField {
   type: "external";
-  media: MediaType;
+  media: MediaSourceFieldType;
   source: URL;
   subpath: string;
   original: string;
@@ -169,7 +171,7 @@ function getMediaNoteMeta(
 }
 
 function getField(
-  key: MediaType,
+  key: MediaSourceFieldType,
   meta: CachedMetadata,
   ctx: { metadataCache: MetadataCache; sourcePath: string; plugin: MxPlugin },
 ): MediaInfo | null {

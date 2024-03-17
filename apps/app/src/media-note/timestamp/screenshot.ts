@@ -84,7 +84,7 @@ export async function saveScreenshot<T extends PlayerComponent>(
     return false;
   }
 
-  const title = mediaTitle(media, { state: state, vault });
+  const title = mediaTitle(media, { state });
   const screenshotName = normalizeFilename(title) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
   let screenshotPath: string;

@@ -13,6 +13,7 @@ import type MediaExtended from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import type { PlayerComponent } from "./base";
 import { addAction, onPaneMenu } from "./base";
+import { isFileMediaInfo } from "./media-info";
 import type { RemoteMediaViewType } from "./view-type";
 
 export interface MediaRemoteViewState {
@@ -107,6 +108,8 @@ export abstract class MediaRemoteView
     const url = this.plugin.resolveUrl(state.source);
     if (!url) {
       console.warn("Invalid URL", state.source);
+    } else if (isFileMediaInfo(url)) {
+      console.warn("Open in-vault media in remote view", url);
     } else {
       const now = this.store.getState().source?.url;
       if (!url.compare(now)) {

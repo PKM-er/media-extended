@@ -4,6 +4,7 @@ import type { WidgetType } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 // import { editorInfoField } from "obsidian";
 import { shouldOpenMedia } from "@/media-note/link-click";
+import { isFileMediaInfo } from "@/media-view/media-info";
 import type MediaExtended from "@/mx-main";
 
 import { isMdFavorInternalLink } from "./utils";
@@ -54,7 +55,11 @@ const getPlayerDecos = (
           return;
         }
         const urlInfo = plugin.resolveUrl(imgUrlText);
-        if (urlInfo && shouldOpenMedia(urlInfo, plugin)) {
+        if (
+          urlInfo &&
+          !isFileMediaInfo(urlInfo) &&
+          shouldOpenMedia(urlInfo, plugin)
+        ) {
           const viewType = plugin.urlViewType.getPreferred(urlInfo);
           const widget = new WidgetCtorMap[viewType](
             plugin,
