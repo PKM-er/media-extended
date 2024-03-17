@@ -47,11 +47,10 @@ function useMenu(onMenu: (menu: Menu) => boolean) {
 }
 
 export function Playlist() {
-  const playlists = usePlaylist();
+  const playlist = usePlaylist();
   const onPlaylistChange = usePlaylistChange();
   const current = useMediaViewStore((s) => s.source?.url);
   const app = useApp();
-  const playlist = playlists.first();
   const onClick = useMenu((mainMenu) => {
     if (!onPlaylistChange || !current || !playlist) return false;
     mainMenu
@@ -75,7 +74,7 @@ export function Playlist() {
         item.setTitle(title);
         if (isWithMedia(li) && !li.media.compare(current)) {
           item.onClick(() => {
-            onPlaylistChange(li, playlists[0]);
+            onPlaylistChange(li, playlist);
           });
         } else {
           item.setIsLabel(true);

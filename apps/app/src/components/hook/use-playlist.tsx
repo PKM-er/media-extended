@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import type { PlaylistWithActive } from "@/media-note/note-index/playlist";
 import { useMediaViewStore, usePlugin } from "../context";
 
-export function usePlaylist() {
+export function usePlaylist(): PlaylistWithActive | undefined {
   const media = useMediaViewStore((s) => s.source?.url);
   const plugin = usePlugin();
   const [playlist, setPlaylist] = useState(() => plugin.playlist.get(media));
@@ -15,5 +16,6 @@ export function usePlaylist() {
       plugin.app.metadataCache.off("mx-playlist-change", onPlaylistChange);
     };
   }, [media, plugin.playlist, plugin.app.metadataCache]);
-  return playlist;
+  // get latest updated playlist
+  return playlist.sort((a, b) => a.file.stat.mtime - b.file.stat.mtime).last();
 }

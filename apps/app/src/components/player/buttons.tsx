@@ -221,7 +221,7 @@ export function Timestamp() {
 
 export function Next() {
   const onPlaylistChange = usePlaylistChange();
-  const playlist = usePlaylist()[0];
+  const playlist = usePlaylist();
   if (!playlist || !onPlaylistChange) return null;
   const curr = playlist.list[playlist.active];
   if (!(curr && isWithMedia(curr))) return null;
@@ -245,7 +245,7 @@ export function Next() {
 }
 export function Previous() {
   const onPlaylistChange = usePlaylistChange();
-  const playlist = usePlaylist()[0];
+  const playlist = usePlaylist();
   if (!playlist || !onPlaylistChange) return null;
   const curr = playlist.list[playlist.active];
   if (!(curr && isWithMedia(curr))) return null;

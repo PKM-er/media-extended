@@ -267,7 +267,7 @@ async function parsePlaylist(
 
   const links = meta.links?.filter(withinListSection) ?? [];
   const fileContent = await vault.cachedRead(ctx.source);
-  const playlist = listItems.map((listItem, i, arr): PlaylistItem => {
+  const playlist = listItems.map((listItem, _i, arr): PlaylistItem => {
     const internalLinkIdx = links.findIndex((link) => within(link, listItem));
     const { parent: _parent, task } = listItem;
     const type = task && taskSymbolMediaTypeMap[task];
@@ -334,9 +334,11 @@ type MediaTaskSymbolType = (typeof taskSymbolMediaTypeMap)[MediaTaskSymbol];
 function isPlaylistItems(
   list: ListItemCache[],
 ): list is (ListItemCache & { task?: MediaTaskSymbol })[] {
-  return list.some(
-    (i) => i.task && taskSymbolMediaTypeMap[i.task as MediaTaskSymbol],
-  );
+  return true;
+  // remove restriction for being a media task
+  // return list.some(
+  //   (i) => i.task && taskSymbolMediaTypeMap[i.task as MediaTaskSymbol],
+  // );
 }
 
 function getFileTitle(meta: CachedMetadata, file: TFile): string {
