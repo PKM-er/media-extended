@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { PlaylistWithActive } from "@/media-note/note-index/playlist";
+import type { PlaylistWithActive } from "@/media-note/playlist/def";
 import { useMediaViewStore, usePlugin } from "../context";
 
 export function usePlaylist(): PlaylistWithActive | undefined {

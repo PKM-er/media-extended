@@ -33,7 +33,7 @@ import {
   PreviousIcon,
 } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { findWithMedia, isWithMedia } from "@/media-note/note-index/playlist";
+import { isWithMedia, findWithMedia } from "@/media-note/playlist/def";
 import {
   useIsEmbed,
   usePlaylistChange,

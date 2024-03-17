@@ -11,9 +11,8 @@ import type { ScreenshotInfo } from "@/lib/screenshot";
 import { getTracksInVault } from "@/lib/subtitle";
 import type {
   Playlist,
-  PlaylistItem,
   PlaylistItemWithMedia,
-} from "@/media-note/note-index/playlist";
+} from "@/media-note/playlist/def";
 import { titleFromUrl } from "@/media-view/base";
 import {
   MEDIA_FILE_VIEW_TYPE,

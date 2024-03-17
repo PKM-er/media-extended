@@ -12,7 +12,8 @@ import type { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { PlayerComponent } from "@/media-view/base";
 import type { MediaInfo } from "@/media-view/media-info";
 import type { MxSettings } from "@/settings/def";
-import { timestampGenerator, insertTimestamp, mediaTitle } from "./utils";
+import { mediaTitle } from "../title";
+import { timestampGenerator, insertTimestamp } from "./utils";
 
 interface Player {
   media: MediaInfo;

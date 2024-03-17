@@ -14,7 +14,7 @@ import {
   onInternalLinkClick,
 } from "./media-note/link-click";
 import { MediaNoteIndex } from "./media-note/note-index";
-import { PlaylistIndex } from "./media-note/note-index/playlist";
+import { PlaylistIndex } from "./media-note/playlist";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";

@@ -1,5 +1,6 @@
 import { Component, TFolder, TFile, parseLinktext } from "obsidian";
 import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
+import { waitUntilResolve } from "@/lib/meta-resolve";
 import type MxPlugin from "@/mx-main";
 import { checkMediaType } from "@/patch/media-type";
 import { mediaInfoToURL } from "@/web/url-match";
@@ -102,19 +103,6 @@ export class MediaNoteIndex extends Component {
   }
 }
 
-function waitUntilResolve(
-  meta: MetadataCache,
-  component?: Component,
-): Promise<void> {
-  if (meta.initialized) return Promise.resolve();
-  return new Promise((resolve) => {
-    const evt = meta.on("initialized", () => {
-      meta.offref(evt);
-      resolve();
-    });
-    component?.registerEvent(evt);
-  });
-}
 function* iterateFiles(folder: TFolder): IterableIterator<TFile> {
   for (const child of folder.children) {
     if (child instanceof TFolder) {

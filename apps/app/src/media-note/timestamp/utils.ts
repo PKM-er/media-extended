@@ -1,14 +1,14 @@
 import type { MediaState } from "@vidstack/react";
 import { Notice } from "obsidian";
-import type { App, Editor, Vault } from "obsidian";
+import type { App, Editor } from "obsidian";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import type { TempFragment } from "@/lib/hash/temporal-frag";
 import type { PlayerComponent } from "@/media-view/base";
 import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaInfo } from "@/media-view/media-info";
 import type { MxSettings } from "@/settings/def";
-import { mediaInfoToURL, type MediaURL } from "@/web/url-match";
-import { MediaHost } from "@/web/url-match/supported";
+import { mediaInfoToURL } from "@/web/url-match";
+import { urlTitle } from "../title";
 
 export function insertTimestamp(
   { timestamp, screenshot }: { timestamp: string; screenshot?: string },
@@ -50,30 +50,6 @@ function insertBeforeCursor(str: string, editor: Editor) {
   console.debug("insert before cursor [from]", cursor.ch, cursor.line);
   editor.replaceRange(str, cursor, cursor);
   // editor.setCursor(editor.offsetToPos(editor.posToOffset(cursor) + str.length));
-}
-
-function urlTitle(url: MediaURL, playerState?: MediaState) {
-  if (playerState?.title) return playerState.title;
-  if (url.isFileUrl) {
-    const filenameSeg = url.pathname.split("/").pop()?.split(".");
-    filenameSeg?.pop();
-    const basename = filenameSeg?.join(".");
-    if (basename) return basename;
-  }
-  if (url.type !== MediaHost.Generic && url.id) {
-    return `${url.type}: ${url.id}`;
-  }
-  return (
-    url.source.hostname + decodeURI(url.source.pathname).replaceAll("/", "_")
-  );
-}
-
-export function mediaTitle(
-  mediaInfo: MediaInfo,
-  { state, vault }: { state?: MediaState; vault: Vault },
-) {
-  const url = mediaInfoToURL(mediaInfo, vault);
-  return urlTitle(url, state);
 }
 
 export function openOrCreateMediaNote(

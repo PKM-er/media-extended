@@ -10,7 +10,7 @@ import { Menu } from "obsidian";
 import { useRef } from "react";
 import { MoreIcon, PlaylistIcon, SubtitlesIcon } from "@/components/icon";
 import { showAtButton } from "@/lib/menu";
-import { isWithMedia } from "@/media-note/note-index/playlist";
+import { isWithMedia } from "@/media-note/playlist/def";
 import {
   useApp,
   useIsEmbed,
