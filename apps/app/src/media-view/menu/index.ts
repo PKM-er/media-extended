@@ -73,7 +73,7 @@ export default function registerMediaMenu(this: MxPlugin) {
         menu.addItem((item) =>
           item
             .setTitle("Refresh")
-            .setSection("view")
+            .setSection("action")
             .setIcon("reset")
             .onClick(() => {
               ctx.reload();
@@ -96,7 +96,7 @@ export default function registerMediaMenu(this: MxPlugin) {
             item
               .setTitle("Open to the right")
               .setIcon("separator-vertical")
-              .setSection("view")
+              .setSection("open")
               .onClick(() => {
                 this.leafOpener.openMedia(mediaInfo, "split");
               }),
@@ -104,7 +104,7 @@ export default function registerMediaMenu(this: MxPlugin) {
           .addItem((item) =>
             item
               .setTitle("Open in new tab")
-              .setSection("view")
+              .setSection("open")
               .setIcon("file-plus")
               .onClick(() => {
                 this.leafOpener.openMedia(mediaInfo, "tab");
@@ -113,7 +113,7 @@ export default function registerMediaMenu(this: MxPlugin) {
           .addItem((item) =>
             item
               .setTitle("Open in new window")
-              .setSection("view")
+              .setSection("open")
               .setIcon("maximize")
               .onClick(() => {
                 this.leafOpener.openMedia(mediaInfo, "window");
@@ -135,8 +135,8 @@ export default function registerMediaMenu(this: MxPlugin) {
         menu.addItem((item) =>
           item
             .setTitle("Copy Screenshot")
-            .setSection("view")
-            .setIcon("copy")
+            .setSection("action")
+            .setIcon("focus")
             .onClick(() => {
               copyScreenshot({
                 app: this.app,

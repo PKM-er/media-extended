@@ -7,6 +7,7 @@ import type { LinkEvent } from "@/patch/event";
 import { checkMediaType } from "@/patch/media-type";
 import type { MediaURL } from "@/web/url-match";
 import { MediaHost } from "@/web/url-match/supported";
+import { fileOperations } from "../media-view/menu/file-op";
 import { openAsMenu } from "../media-view/menu/open-as";
 
 export function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
@@ -34,7 +35,7 @@ export const onExternalLinkClick: LinkEvent["onExternalLinkClick"] =
     await this.leafOpener.openMedia(url, newLeaf, { fromUser: true });
   };
 
-async function showItemInFolder(fullpath: string) {
+export async function showItemInFolder(fullpath: string) {
   if (!Platform.isDesktopApp) return;
   const electron = (window as any).electron;
   if (!electron) return;
@@ -43,7 +44,7 @@ async function showItemInFolder(fullpath: string) {
   ) as typeof Electron.shell;
   await shell.showItemInFolder(fullpath);
 }
-async function openPath(fullpath: string) {
+export async function openPath(fullpath: string) {
   if (!Platform.isDesktopApp) return;
   const electron = (window as any).electron;
   if (!electron) return;
@@ -63,42 +64,7 @@ export function handleExternalLinkMenu(plugin: MxPlugin) {
         new Notice("For in-vault media, use internal link instead");
         return;
       }
-
-      if (Platform.isDesktopApp && url.isFileUrl && url.filePath) {
-        const filePath = url.filePath;
-        menu
-          .addItem((item) =>
-            item
-              .setIcon("folder")
-              .setTitle(
-                Platform.isMacOS
-                  ? "Reveal in Finder"
-                  : "Show in system explorer",
-              )
-              .onClick(() => {
-                showItemInFolder(filePath).catch((err) => {
-                  new Notice(
-                    `Failed to open file in file explorer: ${err.message}`,
-                  );
-                  console.error("Failed to open file in file explorer", err);
-                });
-              }),
-          )
-          .addItem((item) =>
-            item
-              .setIcon("arrow-up-right")
-              .setTitle("Open in system player")
-              .onClick(() => {
-                openPath(filePath).catch((err) => {
-                  new Notice(
-                    `Failed to open file in system player: ${err.message}`,
-                  );
-                  console.error("Failed to open file in system player", err);
-                });
-              }),
-          );
-      }
-
+      fileOperations(url, menu);
       const supported = plugin.urlViewType.getSupported(url);
       const preferred = plugin.urlViewType.getPreferred(url);
       const targetViewTypes = shouldOpenMedia(url, plugin)

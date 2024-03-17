@@ -1,4 +1,5 @@
 import { Notice, type Menu } from "obsidian";
+import { fileOperations } from "./file-op";
 import { openAsMenu } from "./open-as";
 import type { PlayerContext } from ".";
 
@@ -6,14 +7,17 @@ export function urlMenu(
   menu: Menu,
   { source, plugin, viewType, player }: PlayerContext,
 ) {
-  if (source.isFileUrl) return;
+  if (source.isFileUrl) {
+    fileOperations(source, menu);
+    return;
+  }
   const original = source.jsonState.source;
   const withTime = source.print({ start: player.currentTime, end: -1 });
   menu.addItem((item) =>
     item
       .setTitle("Copy URL")
-      .setIcon("clipboard")
-      .setSection("view")
+      .setIcon("copy")
+      .setSection("action")
       .onClick(() => {
         navigator.clipboard.writeText(original);
         new Notice("URL copied to clipboard");
@@ -22,19 +26,19 @@ export function urlMenu(
   if (withTime !== original) {
     menu.addItem((item) =>
       item
-        .setTitle("Copy URL with time")
-        .setIcon("clipboard")
-        .setSection("view")
+        .setTitle("Copy URL with timestamp")
+        .setIcon("copy-check")
+        .setSection("action")
         .onClick(() => {
           navigator.clipboard.writeText(withTime);
-          new Notice("URL with time copied to clipboard");
+          new Notice("URL with timestamp copied");
         }),
     );
   }
 
   menu.addItem((item) =>
     item
-      .setTitle("Open link in default browser")
+      .setTitle("Open in default browser")
       .setIcon("globe")
       .setSection("view")
       .onClick(() => {

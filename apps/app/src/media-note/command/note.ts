@@ -25,7 +25,7 @@ export function registerNoteCommands(plugin: MxPlugin) {
     {
       id: "copy-screenshot",
       name: "Copy screenshot",
-      icon: "copy",
+      icon: "focus",
       playerCheckCallback(checking, view) {
         if (checking) return true;
         const player = validateProvider(view);
