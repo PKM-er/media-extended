@@ -11,6 +11,7 @@ import { getMediaInfoFor } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import type { MediaType } from "@/patch/media-type";
 import { mediaInfoToURL, type MediaURL } from "@/web/url-match";
+import { mediaTitle } from "../timestamp/utils";
 import {
   extractFirstMarkdownLink,
   extractListItemMainText,
@@ -100,16 +101,18 @@ export class PlaylistIndex extends Component {
    * to make reactivity work
    */
   private mediaToPlaylistIndex = new Map<string, PlaylistWithActive[]>();
+  private listVariantMap = new WeakMap<PlaylistWithActive, Playlist>();
   private listFileCache = new Map<string, Playlist>();
 
   private onResolve() {
     this.mediaToPlaylistIndex.clear();
-    for (const { file, playlist } of iteratePlaylist(this.plugin)) {
-      this.requestUpdate(file, playlist);
+    for (const file of iterateFiles(this.app.vault.getRoot())) {
+      if (file.extension !== "md") continue;
+      this.requestUpdate(file);
     }
     this.registerEvent(
       this.app.metadataCache.on("changed", (file) => {
-        this.requestUpdate(file, getPlaylistMeta(file, this.plugin));
+        this.requestUpdate(file);
       }),
     );
     this.registerEvent(
@@ -135,7 +138,11 @@ export class PlaylistIndex extends Component {
     // clear old data
     for (const media of this.mediaToPlaylistIndex.keys()) {
       const prev = this.mediaToPlaylistIndex.get(media)!;
-      const next = prev.filter((playlist) => playlist !== prevPlaylist);
+      const next = prev.filter(
+        (playlist) =>
+          !this.listVariantMap.has(playlist) ||
+          this.listVariantMap.get(playlist)! !== prevPlaylist,
+      );
       if (next.length === 0) {
         this.mediaToPlaylistIndex.delete(media);
       } else {
@@ -145,19 +152,29 @@ export class PlaylistIndex extends Component {
     this.requestNotify();
   }
 
-  updateQueue = new WeakMap<TFile, Playlist>();
-  updater = debounce((listFile: TFile) => {
-    const data = this.updateQueue.get(listFile);
-    if (!data) return;
-    this.update(listFile, data);
-    this.updateQueue.delete(listFile);
+  updateQueue = new Set<TFile>();
+  updater = debounce(async () => {
+    const files = [...this.updateQueue.values()];
+    this.updateQueue.clear();
+    if (files.length === 0) return;
+    await Promise.all(
+      files.map((f) =>
+        getPlaylistMeta(f, this.plugin).then((l) => {
+          if (l) {
+            this.update(f, l);
+          } else {
+            this.remove(f.path);
+          }
+        }),
+      ),
+    );
+    if (this.updateQueue.size > 0) {
+      this.updater();
+    }
   }, 500);
-  requestUpdate(listFile: TFile, data: Promise<Playlist | null>) {
-    data.then((playlist) => {
-      if (!playlist) return;
-      this.updateQueue.set(listFile, playlist);
-      this.updater(listFile);
-    });
+  requestUpdate(file: TFile) {
+    this.updateQueue.add(file);
+    this.updater();
   }
 
   notify() {
@@ -167,6 +184,7 @@ export class PlaylistIndex extends Component {
 
   update(listFile: TFile, data: Playlist) {
     this.remove(listFile.path);
+    this.listFileCache.set(listFile.path, data);
     // make sure only one instance of the playlist is stored
     const uniqCache = new Set<string>();
     data.list.forEach((item) => {
@@ -174,10 +192,13 @@ export class PlaylistIndex extends Component {
       if (!media) return;
       const key = media.jsonState.source;
       if (uniqCache.has(key)) return;
-      this.mediaToPlaylistIndex.set(key, [
-        ...(this.mediaToPlaylistIndex.get(key) ?? []),
-        { ...data, active: data.list.findIndex((i) => media.compare(i.media)) },
-      ]);
+      const others = this.mediaToPlaylistIndex.get(key) ?? [];
+      const curr = {
+        ...data,
+        active: data.list.findIndex((i) => media.compare(i.media)),
+      };
+      this.listVariantMap.set(curr, data);
+      this.mediaToPlaylistIndex.set(key, [...others, curr]);
       uniqCache.add(key);
     });
     this.requestNotify();
@@ -210,16 +231,6 @@ function* iterateFiles(folder: TFolder): IterableIterator<TFile> {
     } else if (child instanceof TFile) {
       yield child;
     }
-  }
-}
-
-function* iteratePlaylist(plugin: MxPlugin) {
-  const { vault } = plugin.app;
-  for (const file of iterateFiles(vault.getRoot())) {
-    if (file.extension !== "md") continue;
-    const playlist = getPlaylistMeta(file, plugin);
-    if (!playlist) continue;
-    yield { playlist, file };
   }
 }
 
@@ -284,8 +295,12 @@ async function parsePlaylist(
     const syntax = parseMarkdown(text);
     const externalLink = extractFirstMarkdownLink(text, syntax);
     if (externalLink) {
-      const { display, url } = externalLink;
+      const { url } = externalLink;
       const media = ctx.plugin.resolveUrl(url);
+      let { display } = externalLink;
+      if (media && (display === url || !display)) {
+        display = mediaTitle(media, { vault });
+      }
       return { media, title: display, type: type || "generic", parent };
     }
     return {

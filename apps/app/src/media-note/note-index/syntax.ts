@@ -17,11 +17,12 @@ export function extractFirstMarkdownLink(text: string, tree: Root) {
   if (!link) return null;
   const displayTextStart = link.children.first()?.position?.start.offset,
     displayTextEnd = link.children.last()?.position?.end.offset;
+  const displayText =
+    displayTextStart && displayTextEnd
+      ? text.slice(displayTextStart, displayTextEnd).trim()
+      : "";
   return {
-    display:
-      displayTextStart && displayTextEnd
-        ? text.slice(displayTextStart, displayTextEnd)
-        : "",
+    display: displayText,
     url: link.url,
     title: link.title,
   };
