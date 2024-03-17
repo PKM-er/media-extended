@@ -66,11 +66,15 @@ export class MediaURL extends URL implements URLResolveResult {
     return !!other && this.jsonState.source === other.jsonState.source;
   }
 
+  /**
+   * Print the url with temporal fragment encoded (if supported)
+   * @returns the url without hash
+   */
   print(frag?: TempFragment): string {
-    if (this.mxUrl) return this.mxUrl.href;
-    if (!frag) return this.source.href;
+    if (this.mxUrl) return noHash(this.mxUrl.href);
+    if (!frag) return this.jsonState.source;
     if (this.#resolved.print) return this.#resolved.print(frag);
-    return this.source.href;
+    return this.jsonState.source;
   }
 
   get tempFrag(): TempFragment | null {
