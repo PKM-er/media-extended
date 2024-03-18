@@ -5,7 +5,7 @@ module.exports = {
   siteUrl,
   generateRobotsTxt: true,
   transform: async (config, path) => {
-    if (!path.endsWith('.en')) {
+    if (!path.endsWith('.en') || locales.some(locale => path.startsWith(`/${locale}/`))) {
       return null;
     }
     path = path.slice(0, -3)
