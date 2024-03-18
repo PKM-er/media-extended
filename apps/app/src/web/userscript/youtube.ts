@@ -80,8 +80,32 @@ import { requireMx } from "./_require";
 const { waitForSelector, MediaPlugin } = requireMx();
 
 export default class YouTubePlugin extends MediaPlugin {
-  findMedia(): Promise<HTMLMediaElement> {
-    return waitForSelector<HTMLMediaElement>("ytd-app #movie_player video");
+  async findMedia(): Promise<HTMLMediaElement> {
+    const media = await waitForSelector<HTMLMediaElement>(
+      "ytd-app #movie_player video",
+    );
+    this.app = media.closest<HTMLElement>("ytd-app")!;
+    this.moviePlayer = media.closest<HTMLElement>("#movie_player")!;
+    if (!this.app || !this.moviePlayer) {
+      throw new Error("Failed to find media");
+    }
+    this.watchIfDetached();
+    return media;
+  }
+
+  watchIfDetached() {
+    const container = this.moviePlayer;
+    const observer = new MutationObserver(async () => {
+      if (this.media.isConnected) return;
+      console.log("Re-attaching media");
+      const lastest = await this.findMedia();
+      if (!lastest) return;
+      console.log("found media");
+      this.rehookMediaEl(lastest);
+      console.log("media hooked");
+    });
+    observer.observe(container, { childList: true, subtree: true });
+    this.register(() => observer.disconnect());
   }
 
   getStyle() {
@@ -99,12 +123,8 @@ export default class YouTubePlugin extends MediaPlugin {
     });
   }
 
-  get app() {
-    return this.media.closest<HTMLElement>("ytd-app")!;
-  }
-  get moviePlayer() {
-    return this.media.closest<HTMLElement>("#movie_player")!;
-  }
+  app!: HTMLElement;
+  moviePlayer!: HTMLElement;
 
   async disableAutoPlay() {
     console.log("Disabling autoplay...");

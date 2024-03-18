@@ -14,7 +14,7 @@ export function handleReadyState(plugin: MediaPlugin) {
   plugin.registerDomEvent(player, "canplay", onCanPlay);
   plugin.registerDomEvent(player, "canplaythrough", onCanPlayThrough);
 
-  if (player.readyState === 0) player.load();
+  // if (player.readyState === 0) player.load();
   if (player.readyState >= 0) onLoadStart();
   if (player.readyState >= 1) onLoadedMetadata();
   if (player.readyState >= 2) onLoadedData();

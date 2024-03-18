@@ -119,6 +119,11 @@ export default class MediaPlugin extends LifeCycle {
     window.clearTimeout(timeoutId);
   }
 
+  rehookMediaEl(media: HTMLMediaElement) {
+    this.#media = media;
+    this.hookMediaEl();
+  }
+
   async hookMediaEl() {
     handleReadyState(this);
     fluentTimeUpdate(this);

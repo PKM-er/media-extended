@@ -7,10 +7,6 @@ import YouTubePlugin from "./youtube";
 const { waitForSelector } = requireMx();
 
 export default class YouTubePluginNoAd extends YouTubePlugin {
-  findMedia(): Promise<HTMLMediaElement> {
-    return waitForSelector<HTMLMediaElement>("ytd-app #movie_player video");
-  }
-
   async onload(): Promise<void> {
     await super.onload();
     waitForSelector<HTMLElement>(".video-ads.ytp-ad-module", this.app).then(
