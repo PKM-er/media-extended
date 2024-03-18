@@ -1,15 +1,12 @@
 import { fileURLToPath } from "url";
 import type { Vault, TFile, App } from "obsidian";
-import { FileSystemAdapter, Platform, normalizePath } from "obsidian";
+import { FileSystemAdapter, normalizePath } from "obsidian";
 import { addTempFrag, removeTempFrag } from "@/lib/hash/format";
 import { parseTempFrag, type TempFragment } from "@/lib/hash/temporal-frag";
 import path from "@/lib/path";
 import { noHash } from "@/lib/url";
-import {
-  getMediaInfoFor,
-  isFileMediaInfo,
-  type MediaInfo,
-} from "@/media-view/media-info";
+import { mediaInfoFromFile } from "@/media-view/media-info";
+import type { MediaInfo } from "@/media-view/media-info";
 import { checkMediaType, type MediaType } from "@/patch/media-type";
 import type { MxSettings } from "@/settings/def";
 import type { URLResolveResult, URLResolver } from "./base";
@@ -209,25 +206,16 @@ export function resolveMxProtocol(
       return media;
     }
     if (checkMediaType(file.extension) === null) return null;
-    return getMediaInfoFor(file, media.hash);
+    return mediaInfoFromFile(file, media.hash);
   }
 }
 
-export function fromFile(file: TFile, hash: string, vault: Vault): MediaURL {
-  if (checkMediaType(file.extension) === null) {
-    throw new Error(`Unknown media type ${file.extension}`);
-  }
-  const resouceUrl = vault.getResourcePath(file);
-  return new MediaURL(
-    "file:///" +
-      resouceUrl.substring(Platform.resourcePathPrefix.length) +
-      "#" +
-      hash,
-  );
-}
-
-export function mediaInfoToURL(mediaInfo: MediaInfo, vault: Vault): MediaURL {
-  return isFileMediaInfo(mediaInfo)
-    ? fromFile(mediaInfo.file, mediaInfo.hash, vault)
-    : mediaInfo;
-}
+// export function fromFile(info: FileMediaInfo, vault: Vault): MediaURL {
+//   const resouceUrl = vault.getResourcePath(info.file);
+//   return new MediaURL(
+//     "file:///" +
+//       resouceUrl.substring(Platform.resourcePathPrefix.length) +
+//       "#" +
+//       info.hash,
+//   );
+// }

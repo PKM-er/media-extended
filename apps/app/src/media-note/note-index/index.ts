@@ -137,6 +137,12 @@ export function toInfoKey(mediaInfo: MediaInfo) {
   }
   return `url:${mediaInfo.jsonState.source}`;
 }
+export function compare(a: MediaInfo | undefined, b: MediaInfo | undefined) {
+  if (!a || !b) return false;
+  const aKey = toInfoKey(a);
+  const bKey = toInfoKey(b);
+  return aKey === bKey;
+}
 
 export interface InternalLinkField {
   type: "internal";

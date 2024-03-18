@@ -1,5 +1,6 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import { isTimestamp } from "@/lib/hash/temporal-frag";
+import { compare } from "@/media-note/note-index";
 import type { MediaViewState, MediaViewStoreApi } from "../context";
 
 const tfNotInitial = new WeakSet<MediaPlayerInstance>();
@@ -25,7 +26,7 @@ export function handleTempFrag(store: MediaViewStoreApi) {
     if (currUrl === prevUrl) return;
     if (
       (!currUrl && prevUrl !== undefined) ||
-      (currUrl !== undefined && !currUrl.compare(prevUrl))
+      (currUrl !== undefined && !compare(prevUrl, currUrl))
     ) {
       // when url is reset
       tfNotInitial.delete(player);

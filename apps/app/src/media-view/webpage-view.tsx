@@ -1,5 +1,6 @@
 import { handlePaneMigration } from "@/lib/window-migration";
 import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
+import { isFileMediaInfo } from "./media-info";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
 import { MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";
@@ -25,6 +26,8 @@ export class MediaWebpageView extends MediaRemoteView {
 
   getHost(): MediaHost {
     const { source } = this.store.getState();
+    if (isFileMediaInfo(source?.url))
+      throw new Error("Cannot get host for file");
     if (!source?.url) return MediaHost.Generic;
     return source.url.type;
   }

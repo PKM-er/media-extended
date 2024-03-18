@@ -9,6 +9,7 @@ import {
 } from "@/components/context";
 import { Player } from "@/components/player";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { compare } from "@/media-note/note-index";
 import type MediaExtended from "@/mx-main";
 import type { MediaURL } from "@/web/url-match";
 import type { PlayerComponent } from "./base";
@@ -96,6 +97,9 @@ export abstract class MediaRemoteView
   getState(): MediaRemoteViewState {
     const state = super.getState() as MediaRemoteViewState;
     const url = this.store.getState().source?.url;
+    if (isFileMediaInfo(url))
+      throw new Error("Remote view don't handle file media");
+
     return {
       ...state,
       source: url ? url.jsonState.source : state.source,
@@ -112,7 +116,7 @@ export abstract class MediaRemoteView
       console.warn("Open in-vault media in remote view", url);
     } else {
       const now = this.store.getState().source?.url;
-      if (!url.compare(now)) {
+      if (!compare(url, now)) {
         await this.setSource(url);
         // workaround for vidstack issue when refresh source
         // including subtitle default not applied

@@ -13,7 +13,7 @@ import { MoreIcon, PlaylistIcon, SubtitlesIcon } from "@/components/icon";
 import { showAtButton } from "@/lib/menu";
 import type { PlaylistItem } from "@/media-note/playlist/def";
 import { isWithMedia } from "@/media-note/playlist/def";
-import { toInfoKey } from "../../media-note/note-index";
+import { compare } from "../../media-note/note-index";
 import {
   useApp,
   useIsEmbed,
@@ -78,7 +78,7 @@ export function Playlist() {
           item.setTitle(li.title).onClick(() => {
             onPlaylistChange(li, playlist);
           });
-          if (toInfoKey(current) === toInfoKey(li.media)) {
+          if (compare(current, li.media)) {
             item.setChecked(true);
             const checkParent = (node: PlaylistItem) => {
               if (node.parent < 0) return;

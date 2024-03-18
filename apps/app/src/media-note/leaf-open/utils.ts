@@ -5,6 +5,7 @@ import { VideoUrlView, AudioUrlView } from "@/media-view/url-view";
 import { MediaWebpageView } from "@/media-view/webpage-view";
 import type { MediaURL } from "@/web/url-match";
 import { type FileMediaInfo } from "../../media-view/media-info";
+import { compare } from "../note-index";
 
 export function filterFileLeaf(
   leaf: WorkspaceLeaf,
@@ -31,7 +32,7 @@ export function filterUrlLeaf(leaf: WorkspaceLeaf, info: MediaURL): boolean {
     return false;
   }
   const { source } = leaf.view.store.getState();
-  return info.compare(source?.url);
+  return compare(source?.url, info);
 }
 
 export function sortByMtime(a: TFile, b: TFile) {

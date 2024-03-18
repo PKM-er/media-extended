@@ -1,4 +1,5 @@
 import { Notice, type Menu } from "obsidian";
+import { isFileMediaInfo } from "../media-info";
 import { fileOperations } from "./file-op";
 import { openAsMenu } from "./open-as";
 import type { PlayerContext } from ".";
@@ -7,6 +8,7 @@ export function urlMenu(
   menu: Menu,
   { source, plugin, viewType, player }: PlayerContext,
 ) {
+  if (isFileMediaInfo(source)) return;
   if (source.isFileUrl) {
     fileOperations(source, menu);
     return;

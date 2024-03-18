@@ -1,14 +1,16 @@
 import "@vidstack/react/player/styles/base.css";
 
-import type { MediaViewType } from "@vidstack/react";
+import type { MediaViewType, PlayerSrc } from "@vidstack/react";
 import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
 
 import { Notice } from "obsidian";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTempFragHandler } from "@/components/hook/use-temporal-frag";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { cn } from "@/lib/utils";
-import { useIsEmbed, useMediaViewStore, useSettings } from "./context";
+import { toInfoKey } from "../media-note/note-index";
+import { isFileMediaInfo } from "../media-view/media-info";
+import { useApp, useIsEmbed, useMediaViewStore, useSettings } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
 import { useControls, useDefaultVolume, useHashProps } from "./hook/use-hash";
 import { AudioLayout } from "./player/layouts/audio-layout";
@@ -35,27 +37,46 @@ function PlayerLayout() {
   return <VideoLayout />;
 }
 
+function useSource() {
+  const mediaInfo = useMediaViewStore((s) => s.source?.url);
+  const { vault } = useApp();
+  const mediaInfoKey = mediaInfo ? toInfoKey(mediaInfo) : null;
+  const src = useMemo(() => {
+    if (!mediaInfo) return;
+    if (isFileMediaInfo(mediaInfo)) {
+      return vault.getResourcePath(mediaInfo.file);
+    }
+    return mediaInfo.source.href;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mediaInfoKey]);
+
+  const type = useMediaViewStore(
+    (s): "video/mp4" | "audio/mp3" | "webpage" | undefined => {
+      const viewType = s.source?.viewType;
+      if (!viewType) return;
+      if (viewType === "mx-webpage") return "webpage";
+      if (viewType?.endsWith("video")) return "video/mp4";
+      if (viewType?.endsWith("audio")) return "audio/mp3";
+    },
+  );
+  if (!src) return;
+
+  if (type === "webpage") {
+    return { src: encodeWebpageUrl(src) } satisfies PlayerSrc;
+  }
+  return { src, type } satisfies PlayerSrc;
+}
+
 export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
 
-  const src = useMediaViewStore(({ source }) => {
-    if (!source) return;
-    const url = source.url.source.href;
-    if (source.viewType === "mx-webpage") {
-      // webview will create a new MediaURL instance
-      return { src: encodeWebpageUrl(url) };
-    }
-    return {
-      type: source.viewType.endsWith("video")
-        ? "video/mp4"
-        : source.viewType.endsWith("audio")
-        ? "audio/mp3"
-        : undefined,
-      src: url,
-    };
-  });
+  const source = useSource();
   const isWebm = useMediaViewStore(({ source }) => {
-    return Boolean(source?.url.source.pathname.endsWith(".webm"));
+    if (!source) return;
+    if (isFileMediaInfo(source.url)) {
+      return source.url.file.extension === "webm";
+    }
+    return source.url.source.pathname.endsWith(".webm");
   });
   const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const load = useSettings((s) => s.loadStrategy);
@@ -65,7 +86,7 @@ export function Player() {
   const title = useMediaViewStore((s) => s.title);
   const { controls, ...hashProps } = useHashProps();
 
-  if (!src) return null;
+  if (!source) return null;
   return (
     <MediaPlayer
       className={cn(
@@ -73,7 +94,7 @@ export function Player() {
         "data-[view-type=video]:aspect-video data-[view-type=audio]:h-20 data-[view-type=audio]:aspect-auto",
       )}
       load={isEmbed ? load : "eager"}
-      src={src}
+      src={source}
       playsInline
       title={title}
       viewType={viewType}
@@ -81,7 +102,7 @@ export function Player() {
       onError={(e) => {
         new Notice(
           createFragment((frag) => {
-            frag.appendText(`Failed to load media for ${src.src}: `);
+            frag.appendText(`Failed to load media for ${source.src}: `);
             frag.createEl("br");
             switch (e.code) {
               // MEDIA_ERR_ABORTED
@@ -110,7 +131,7 @@ export function Player() {
                 frag.appendText(
                   e.message || "Unknown error, check console for more details",
                 );
-                console.error("Failed to load media", src.src, e);
+                console.error("Failed to load media", source.src, e);
                 break;
             }
           }),

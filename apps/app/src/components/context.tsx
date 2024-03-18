@@ -20,8 +20,9 @@ import {
 } from "@/media-view/view-type";
 import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
-import { fromFile, type MediaURL } from "@/web/url-match";
+import { type MediaURL } from "@/web/url-match";
 import type { MediaHost } from "@/web/url-match/supported";
+import { type MediaInfo, mediaInfoFromFile } from "../media-view/media-info";
 import { applyTempFrag, handleTempFrag } from "./state/apply-tf";
 
 export interface TransformConfig {
@@ -46,7 +47,7 @@ export interface MediaViewState {
   playerRef: React.RefCallback<MediaPlayerInstance>;
   source:
     | {
-        url: MediaURL;
+        url: MediaInfo;
         viewType: MediaViewType;
       }
     | undefined;
@@ -119,11 +120,12 @@ export function createMediaViewStore() {
     },
     async loadFile(file, { vault, subpath, defaultLang }) {
       const textTracks = await getTracksInVault(file, vault, defaultLang);
-      const url = fromFile(file, subpath ?? "", vault);
-      if (!url.inferredType) throw new Error("Unsupported media type");
-      const viewType = MEDIA_FILE_VIEW_TYPE[url.inferredType];
+      const url = mediaInfoFromFile(file, subpath ?? "");
+      if (!url) {
+        throw new Error("Invalid media file: " + file.path);
+      }
       set(({ source, hash }) => ({
-        source: { ...source, url, viewType },
+        source: { ...source, url, viewType: MEDIA_FILE_VIEW_TYPE[url.type] },
         textTracks,
         title: file.name,
         hash: subpath ? { ...hash, ...parseHashProps(subpath) } : hash,

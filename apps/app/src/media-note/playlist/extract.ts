@@ -8,7 +8,7 @@ import type {
   TFile,
 } from "obsidian";
 import type { MediaInfo } from "@/media-view/media-info";
-import { getMediaInfoFor } from "@/media-view/media-info";
+import { mediaInfoFromFile } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
 import { mediaTitle } from "../title";
 import { isMediaTaskSymbol, taskSymbolMediaTypeMap } from "./def";
@@ -28,7 +28,13 @@ export async function getPlaylistMeta(
   const ctx = { source: file, plugin };
   const list = await parsePlaylist(meta, ctx);
   if (!list) return null;
-  return { title: getFileTitle(meta, file), list, file };
+  return {
+    // by default autoplay is true
+    autoplay: !(meta.frontmatter?.autoplay === false),
+    title: getFileTitle(meta, file),
+    list,
+    file,
+  };
 }
 
 async function parsePlaylist(
@@ -43,6 +49,7 @@ async function parsePlaylist(
   if (frontmatter?.playlist !== true || !meta.sections || !meta.listItems)
     return null;
 
+  // only consider the first list section
   const listSection = meta.sections.find((s) => s.type === "list");
   if (!listSection) return [];
   const withinListSection = (item: { position: Pos }) =>
@@ -99,7 +106,7 @@ async function parsePlaylist(
   function mediaInfoFromInternalLink({ link }: LinkCache): MediaInfo | null {
     const { path, subpath } = parseLinktext(link);
     const file = metadataCache.getFirstLinkpathDest(path, ctx.source.path);
-    return getMediaInfoFor(file, subpath);
+    return mediaInfoFromFile(file, subpath);
   }
 }
 

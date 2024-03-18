@@ -4,7 +4,7 @@ import { canProviderScreenshot } from "@/components/player/screenshot";
 import { handleExternalLinkMenu } from "@/media-note/link-click";
 import { copyScreenshot } from "@/media-note/timestamp/screenshot";
 import type MxPlugin from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
+import type { MediaInfo } from "../media-info";
 import type { MediaViewType } from "../view-type";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";
@@ -15,7 +15,7 @@ import { webpageMenu } from "./webpage";
 
 export interface PlayerContext {
   player: MediaPlayerInstance;
-  source: MediaURL;
+  source: MediaInfo;
   plugin: MxPlugin;
   reload: () => void;
   viewType: MediaViewType;

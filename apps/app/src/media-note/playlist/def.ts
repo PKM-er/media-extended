@@ -29,6 +29,7 @@ declare module "obsidian" {
 
 export interface Playlist {
   file: TFile;
+  autoplay: boolean;
   title: string;
   list: PlaylistItem[];
 }

@@ -12,10 +12,10 @@ export interface FileMediaInfo {
 }
 
 export function isFileMediaInfo(info: unknown): info is FileMediaInfo {
-  return (info as FileMediaInfo).file instanceof TFile;
+  return (info as FileMediaInfo)?.file instanceof TFile;
 }
 
-export function getMediaInfoFor(
+export function mediaInfoFromFile(
   file: TFile | null,
   hash: string,
 ): FileMediaInfo | null {
@@ -25,12 +25,12 @@ export function getMediaInfoFor(
   return { type, file, hash };
 }
 
-export function parseFileInfo(
+export function mediaInfoFromFilePath(
   filePath: string,
   hash: string,
   vault: Vault,
 ): FileMediaInfo | null {
   const file = vault.getFileByPath(filePath);
   if (!file) return null;
-  return getMediaInfoFor(file, hash);
+  return mediaInfoFromFile(file, hash);
 }

@@ -3,7 +3,6 @@ import { Component, TFolder, TFile, debounce } from "obsidian";
 import { waitUntilResolve } from "@/lib/meta-resolve";
 import type { MediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
-import { type MediaURL } from "@/web/url-match";
 import { toInfoKey } from "../note-index";
 import { emptyLists } from "./def";
 import type { PlaylistWithActive, Playlist } from "./def";
