@@ -1,5 +1,5 @@
 import { DocsThemeConfig } from "nextra-theme-docs";
-import Image from "next/image";
+import { localeInfo } from "./locales.js";
 import Main from "./components/Main";
 import ICP from "./components/ICP";
 
@@ -9,10 +9,10 @@ const config: DocsThemeConfig = {
       titleTemplate: "%s – Media Extended",
     };
   },
-  i18n: [
-    { locale: "en", text: "English" },
-    { locale: "zh-CN", text: "简体中文" },
-  ],
+  i18n: Object.entries(localeInfo).map(([locale, { label }]) => ({
+    locale,
+    text: label,
+  })),
   logo: (
     <div className="flex gap-2 items-center">
       {/* <Image alt="Media Extended logo" src="/img/logo.svg" width={32} height={32} /> */}
@@ -42,7 +42,9 @@ const config: DocsThemeConfig = {
         <p className="flex items-center gap-1 text-current">
           <b>Media Extended</b>
         </p>
-        <p className="mt-6 text-xs">© 2021-{new Date().getFullYear()} AidenLx & PKMer All rights reserved.</p>
+        <p className="mt-6 text-xs">
+          © 2021-{new Date().getFullYear()} AidenLx & PKMer All rights reserved.
+        </p>
         <ICP />
       </div>
       // <div className="flex gap-4 items-center">

@@ -1,3 +1,5 @@
+const { locales } = require("./locales.js");
+
 const withNextra = require("nextra")({
   theme: "nextra-theme-docs",
   themeConfig: "./theme.config.tsx",
@@ -8,9 +10,8 @@ const withNextra = require("nextra")({
  */
 const config = {
   i18n: {
-    locales: ["en", "zh-CN"],
-    defaultLocale: "zh-CN",
-    localeDetection: false,
+    locales,
+    defaultLocale: "en",
   },
   images: {
     formats: ["image/avif", "image/webp"],
