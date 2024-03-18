@@ -8,12 +8,23 @@ module.exports = {
     if (!path.endsWith('.en')) {
       return null;
     }
+    path = path.slice(0, -3)
+    if (path.endsWith("/index")) {
+      path = path.slice(0, -6)
+    }
     return {
-      loc: path.slice(0, -3),
+      loc: path,
       alternateRefs: locales.map(locale => ({
         href: `${siteUrl.replace(/\/+$/, '')}/${locale}`,
         hreflang: locale
       }))
     }
-  }
+  },
+  additionalPaths: () => ([{
+    loc: '/',
+    alternateRefs: locales.map(locale => ({
+      href: `${siteUrl.replace(/\/+$/, '')}/${locale}`,
+      hreflang: locale
+    }))
+  }])
 }
