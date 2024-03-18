@@ -13,6 +13,7 @@ import { isFileMediaInfo } from "../media-view/media-info";
 import { useApp, useIsEmbed, useMediaViewStore, useSettings } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
 import { useControls, useDefaultVolume, useHashProps } from "./hook/use-hash";
+import { useAutoContinuePlay } from "./hook/use-playlist";
 import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
 import { MediaProviderEnhanced } from "./provider";
@@ -69,7 +70,7 @@ function useSource() {
 
 export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
-
+  const { onEnded } = useAutoContinuePlay();
   const source = useSource();
   const isWebm = useMediaViewStore(({ source }) => {
     if (!source) return;
@@ -99,6 +100,7 @@ export function Player() {
       title={title}
       viewType={viewType}
       ref={playerRef}
+      onEnded={onEnded}
       onError={(e) => {
         new Notice(
           createFragment((frag) => {

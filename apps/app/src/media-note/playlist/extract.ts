@@ -19,6 +19,12 @@ import {
   parseMarkdown,
 } from "./syntax";
 
+function parsePlaylistAutoplay(meta: CachedMetadata) {
+  if (!meta.frontmatter || !("autoplay" in meta.frontmatter)) return true;
+  const value = meta.frontmatter.autoplay;
+  return Boolean(value);
+}
+
 export async function getPlaylistMeta(
   file: TFile,
   plugin: MxPlugin,
@@ -30,7 +36,7 @@ export async function getPlaylistMeta(
   if (!list) return null;
   return {
     // by default autoplay is true
-    autoplay: !(meta.frontmatter?.autoplay === false),
+    autoplay: parsePlaylistAutoplay(meta),
     title: getFileTitle(meta, file),
     list,
     file,

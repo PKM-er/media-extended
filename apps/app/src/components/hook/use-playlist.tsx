@@ -1,6 +1,12 @@
-import { useEffect, useState } from "react";
-import type { PlaylistWithActive } from "@/media-note/playlist/def";
-import { useMediaViewStore, usePlugin } from "../context";
+import { useMemoizedFn } from "ahooks";
+import { useEffect, useMemo, useState } from "react";
+import { compare } from "@/media-note/note-index";
+import {
+  findWithMedia,
+  isWithMedia,
+  type PlaylistWithActive,
+} from "@/media-note/playlist/def";
+import { useMediaViewStore, usePlaylistChange, usePlugin } from "../context";
 
 export function usePlaylist(): PlaylistWithActive | undefined {
   const media = useMediaViewStore((s) => s.source?.url);
@@ -18,4 +24,39 @@ export function usePlaylist(): PlaylistWithActive | undefined {
   }, [media, plugin.playlist, plugin.app.metadataCache]);
   // get latest updated playlist
   return playlist.sort((a, b) => a.file.stat.mtime - b.file.stat.mtime).last();
+}
+
+export function useAutoContinuePlay() {
+  const { target, action } = useJumpTo("next");
+  const autoContinuePlay = usePlaylist()?.autoplay;
+  const onEnded = useMemoizedFn(() => {
+    if (!autoContinuePlay || !target) return;
+    action();
+  });
+  return { onEnded };
+}
+
+export function useJumpTo(mode: "next" | "previous") {
+  const onPlaylistChange = usePlaylistChange();
+  const playlist = usePlaylist();
+  const target = useMemo(() => {
+    if (!playlist) return;
+    const curr = playlist.list[playlist.active];
+    if (!(curr && isWithMedia(curr))) return;
+    const target = findWithMedia(
+      playlist.list,
+      (li) => !compare(curr.media, li.media),
+      {
+        fromIndex: mode === "next" ? playlist.active + 1 : playlist.active - 1,
+        reverse: mode === "previous",
+      },
+    );
+    if (!target) return;
+    return target;
+  }, [playlist, mode]);
+  const action = useMemoizedFn(() => {
+    if (!target || !playlist || !onPlaylistChange) return;
+    onPlaylistChange(target, playlist);
+  });
+  return { target, action };
 }

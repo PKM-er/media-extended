@@ -33,16 +33,13 @@ import {
   PreviousIcon,
 } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { isWithMedia, findWithMedia } from "@/media-note/playlist/def";
-import { compare } from "../../media-note/note-index";
 import {
   useIsEmbed,
-  usePlaylistChange,
   useScreenshot,
   useSettings,
   useTimestamp,
 } from "../context";
-import { usePlaylist } from "../hook/use-playlist";
+import { useJumpTo } from "../hook/use-playlist";
 import { canProviderScreenshot, takeScreenshot } from "./screenshot";
 
 export const buttonClass =
@@ -221,48 +218,26 @@ export function Timestamp() {
 }
 
 export function Next() {
-  const onPlaylistChange = usePlaylistChange();
-  const playlist = usePlaylist();
-  if (!playlist || !onPlaylistChange) return null;
-  const curr = playlist.list[playlist.active];
-  if (!(curr && isWithMedia(curr))) return null;
-  const next = findWithMedia(
-    playlist.list,
-    (li) => compare(curr.media, li.media),
-    { fromIndex: playlist.active + 1 },
-  );
-  if (!next) return null;
+  const { target, action } = useJumpTo("next");
+  if (!target) return null;
   return (
     <button
       className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
-      onClick={() => {
-        onPlaylistChange(next, playlist);
-      }}
-      aria-label={`Next: ${next.title}`}
+      onClick={action}
+      aria-label={`Next: ${target.title}`}
     >
       <NextIcon className="w-7 h-7" />
     </button>
   );
 }
 export function Previous() {
-  const onPlaylistChange = usePlaylistChange();
-  const playlist = usePlaylist();
-  if (!playlist || !onPlaylistChange) return null;
-  const curr = playlist.list[playlist.active];
-  if (!(curr && isWithMedia(curr))) return null;
-  const prev = findWithMedia(
-    playlist.list,
-    (li) => compare(curr.media, li.media),
-    { fromIndex: playlist.active - 1, reverse: true },
-  );
-  if (!prev) return null;
+  const { target, action } = useJumpTo("previous");
+  if (!target) return;
   return (
     <button
       className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
-      onClick={() => {
-        onPlaylistChange(prev, playlist);
-      }}
-      aria-label={`Prev: ${prev.title}`}
+      onClick={action}
+      aria-label={`Prev: ${target.title}`}
     >
       <PreviousIcon className="w-7 h-7" />
     </button>
