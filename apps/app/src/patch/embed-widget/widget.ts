@@ -35,6 +35,60 @@ type ElementWithInfo = HTMLElement & {
   };
 };
 
+export class InvalidNoticeWidget extends WidgetType {
+  constructor(
+    public message: string,
+    public start: number,
+    public end: number,
+  ) {
+    super();
+  }
+  toDOM(view: EditorView): HTMLElement {
+    const dom = document.createElement("div");
+    this.hookClickHandler(view, dom);
+    dom.className = "external-embed mx-external-media-embed mx-invalid-notice";
+    dom.createEl("p", { text: this.message });
+    return dom;
+  }
+  eq(widget: WidgetType): boolean {
+    return (
+      widget instanceof InvalidNoticeWidget && widget.message === this.message
+    );
+  }
+  updateDOM(dom: HTMLElement): boolean {
+    if (dom.textContent !== this.message) {
+      dom.empty();
+      dom.createEl("p", { text: this.message });
+      return true;
+    }
+    return false;
+  }
+  hookClickHandler(view: EditorView, el: HTMLElement) {
+    el.addEventListener("click", (evt) => {
+      evt.defaultPrevented ||
+        (this.selectElement(view, el), evt.preventDefault());
+    });
+  }
+  selectElement(view: EditorView, el: HTMLElement) {
+    const info = (el as ElementWithInfo).playerInfo;
+    const { start } = info ?? this;
+    let { end } = info ?? this;
+    try {
+      if (start < 0 || end < 0) {
+        const pos = view.posAtDOM(el);
+        view.dispatch({ selection: { head: pos, anchor: pos } });
+        view.focus();
+      } else {
+        if (Platform.isMobile) end = start;
+        view.dispatch({ selection: { head: start, anchor: end } });
+        view.focus();
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+}
+
 abstract class UrlPlayerWidget extends WidgetType {
   abstract enableWebview?: boolean;
   setPos(dom: HTMLElement) {

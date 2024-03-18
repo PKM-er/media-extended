@@ -8,7 +8,7 @@ import { isFileMediaInfo } from "@/media-view/media-info";
 import type MediaExtended from "@/mx-main";
 
 import { isMdFavorInternalLink } from "./utils";
-import { WidgetCtorMap } from "./widget";
+import { InvalidNoticeWidget, WidgetCtorMap } from "./widget";
 
 const getPlayerDecos = (
   plugin: MediaExtended,
@@ -55,20 +55,32 @@ const getPlayerDecos = (
           return;
         }
         const urlInfo = plugin.resolveUrl(imgUrlText);
-        if (
-          urlInfo &&
-          !isFileMediaInfo(urlInfo) &&
-          shouldOpenMedia(urlInfo, plugin)
-        ) {
-          const viewType = plugin.urlViewType.getPreferred(urlInfo);
-          const widget = new WidgetCtorMap[viewType](
-            plugin,
-            urlInfo,
-            imgAltText,
-            imgMarkLoc,
-            to,
-          );
-          addDeco(widget, imgMarkLoc, to);
+        if (urlInfo) {
+          if (isFileMediaInfo(urlInfo)) {
+            const link = plugin.app.metadataCache.fileToLinktext(
+              urlInfo.file,
+              "",
+            );
+            addDeco(
+              new InvalidNoticeWidget(
+                `Please use internal embed in favor of file url embed: ![[${link}]]`,
+                imgMarkLoc,
+                to,
+              ),
+              imgMarkLoc,
+              to,
+            );
+          } else if (shouldOpenMedia(urlInfo, plugin)) {
+            const viewType = plugin.urlViewType.getPreferred(urlInfo);
+            const widget = new WidgetCtorMap[viewType](
+              plugin,
+              urlInfo,
+              imgAltText,
+              imgMarkLoc,
+              to,
+            );
+            addDeco(widget, imgMarkLoc, to);
+          }
         }
 
         isImgEmbed = false;

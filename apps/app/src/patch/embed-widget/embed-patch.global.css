@@ -10,3 +10,15 @@
   iframe.external-embed[src*="youtube.com/embed/"] {
   display: none;
 }
+
+.mx-invalid-notice {
+  display: flex !important;
+  min-height: 60px;
+  width: 100%;
+  border-radius: var(--radius-s);
+  border: 1px solid var(--background-modifier-error);
+  padding: 0.5rem 0.75rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-warning);
+}
