@@ -3,6 +3,7 @@
     "aliases": "aliases",
     "cssclasses": "multitext",
     "tags": "tags",
-    "playlist": "checkbox"
+    "playlist": "checkbox",
+    "autoplay": "checkbox"
   }
 }
