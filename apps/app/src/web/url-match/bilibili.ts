@@ -13,7 +13,10 @@ function parseVideoId(url: URL): string | false | null {
     // short url don't have vid in url
     return false;
   }
-  if (!url.hostname.endsWith(".bilibili.com")) {
+  if (
+    url.hostname !== "bilibili.com" &&
+    !url.hostname.endsWith(".bilibili.com")
+  ) {
     return null;
   }
   if (
@@ -41,6 +44,9 @@ export const bilibiliResolver: URLResolver = (url) => {
   const time = parseTimeFromBilibiliUrl(url);
 
   const cleaned = noHashUrl(url);
+  if (cleaned.hostname === "bilibili.com") {
+    cleaned.hostname = "www.bilibili.com";
+  }
   cleaned.searchParams.forEach((val, key, params) => {
     if (key === "p" && val !== "1") return;
     params.delete(key);
