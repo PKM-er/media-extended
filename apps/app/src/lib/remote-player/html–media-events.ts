@@ -210,7 +210,7 @@ export class HTMLMediaEvents {
   }
 
   private _onPlay(event: Event) {
-    if (!this._ctx.$state.canPlay) return;
+    if (!this._ctx.$state.canPlay()) return;
     this._notify("play", undefined, new Event(event.type));
   }
 

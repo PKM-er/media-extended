@@ -34,6 +34,7 @@ import {
 } from "@/components/icon";
 import { cn } from "@/lib/utils";
 import { isWithMedia, findWithMedia } from "@/media-note/playlist/def";
+import { toInfoKey } from "../../media-note/note-index";
 import {
   useIsEmbed,
   usePlaylistChange,
@@ -227,7 +228,7 @@ export function Next() {
   if (!(curr && isWithMedia(curr))) return null;
   const next = findWithMedia(
     playlist.list,
-    (li) => !curr.media.compare(li.media),
+    (li) => toInfoKey(curr.media) !== toInfoKey(li.media),
     { fromIndex: playlist.active + 1 },
   );
   if (!next) return null;
@@ -251,7 +252,7 @@ export function Previous() {
   if (!(curr && isWithMedia(curr))) return null;
   const prev = findWithMedia(
     playlist.list,
-    (li) => !curr.media.compare(li.media),
+    (li) => toInfoKey(curr.media) !== toInfoKey(li.media),
     { fromIndex: playlist.active - 1, reverse: true },
   );
   if (!prev) return null;

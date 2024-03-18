@@ -165,6 +165,7 @@ export abstract class MediaRemoteView
           store: this.store,
           reload: () => this.render(),
           onPlaylistChange: (item) => {
+            item.media.hash += "&play";
             this.plugin.leafOpener.openMediaIn(this.leaf, item.media);
           },
           embed: false,

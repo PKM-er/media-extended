@@ -114,7 +114,11 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
       await this.#interaction;
       return;
     }
-    await (this.#interaction = this.webview.executeJavaScript("1", true));
+    await (this.#interaction = this.webview
+      .executeJavaScript("1", true)
+      .finally(() => {
+        this.#interaction = null;
+      }));
   }
 
   async play() {
@@ -260,6 +264,11 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   onDomReady = async (evt: Event) => {
     const webview = this._webview;
     new HTMLMediaEvents(this, this._ctx);
+    Maverick.effect(() => {
+      if (this._ctx.$state.autoPlay()) {
+        this.userGesture();
+      }
+    });
     this._updateTitle(evt);
     // prepare to recieve port, handle plugin load
     await evalInWebview(init, webview);

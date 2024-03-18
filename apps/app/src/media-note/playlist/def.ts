@@ -2,7 +2,6 @@
 import type { TFile } from "obsidian";
 import type { MediaInfo } from "@/media-view/media-info";
 import type { MediaType } from "@/patch/media-type";
-import { type MediaURL } from "@/web/url-match";
 
 export const taskSymbolMediaTypeMap = {
   ">": "video",
@@ -46,7 +45,7 @@ export interface PlaylistItem {
   parent: number;
 }
 export interface PlaylistItemWithMedia extends PlaylistItem {
-  media: MediaURL;
+  media: MediaInfo;
 }
 
 export function isWithMedia(item: PlaylistItem): item is PlaylistItemWithMedia {
