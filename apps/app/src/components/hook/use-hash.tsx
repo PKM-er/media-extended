@@ -1,4 +1,6 @@
+import type { MediaPlayerInstance } from "@vidstack/react";
 import { useMediaPlayer } from "@vidstack/react";
+import { debounce } from "obsidian";
 import { useEffect, useRef } from "react";
 import { useMediaViewStore, useSettings } from "../context";
 
@@ -30,11 +32,32 @@ export function useDefaultVolume() {
   const initVolumeRef = useRef<number>(initVolume);
   initVolumeRef.current = initVolume;
 
-  useEffect(
-    () =>
-      player?.subscribe(({ canPlay }) => {
-        if (canPlay) player.volume = initVolumeRef.current;
+  const locked = useRef(false);
+
+  useEffect(() => {
+    const unlock = debounce(
+      () => {
+        locked.current = false;
+      },
+      1e3,
+      true,
+    );
+    const updateVolume = (e: { target: MediaPlayerInstance }) => {
+      e.target.provider?.setVolume(initVolumeRef.current);
+      locked.current = true;
+      unlock();
+    };
+    if (!player) return;
+    const unloads = [
+      player.listen("can-play-through", updateVolume),
+      player.listen("can-play", updateVolume),
+      player.listen("loaded-data", updateVolume),
+      player.listen("loaded-metadata", updateVolume),
+      player.subscribe(({ volume }) => {
+        if (!locked.current || volume === initVolumeRef.current) return;
+        player.provider?.setVolume(initVolumeRef.current);
       }),
-    [player],
-  );
+    ];
+    return () => unloads.forEach((u) => u());
+  }, [player]);
 }
