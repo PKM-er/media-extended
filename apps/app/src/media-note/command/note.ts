@@ -139,11 +139,17 @@ export function registerNoteCommands(plugin: MxPlugin) {
           return;
         }
         if (checking) return true;
-        action(view, {
-          file: active.view.file,
-          editor: active.view.editor,
-          from: "player",
-        });
+        (async () => {
+          // keep notice in same window with note
+          const prevActiveDoc = window.activeDocument;
+          window.activeDocument = active.containerEl.doc;
+          await action(view, {
+            file: active.view.file,
+            editor: active.view.editor,
+            from: "player",
+          });
+          window.activeDocument = prevActiveDoc;
+        })();
       },
       noteCheckCallback: (checking, view, { isMediaNote, ...ctx }) => {
         let _view: Promise<MediaView>;
@@ -158,7 +164,9 @@ export function registerNoteCommands(plugin: MxPlugin) {
           plugin.app.workspace.revealLeaf(view.leaf);
           _view = Promise.resolve(view);
         }
-        _view.then((v) => action(v, { ...ctx, from: "note" }));
+        _view.then(async (v) => {
+          await action(v, { ...ctx, from: "note" });
+        });
       },
     };
   }

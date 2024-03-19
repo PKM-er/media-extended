@@ -239,7 +239,14 @@ export function registerControlCommands(plugin: MxPlugin) {
             if (!player) return false;
             if (check && !check(player)) return false;
             if (checking) return true;
-            action(player);
+            if (player.el?.doc) {
+              const prevActiveDoc = window.activeDocument;
+              window.activeDocument = player.el.doc;
+              action(player);
+              window.activeDocument = prevActiveDoc;
+            } else {
+              action(player);
+            }
           },
         },
         plugin,
