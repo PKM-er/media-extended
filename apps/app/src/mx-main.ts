@@ -5,6 +5,7 @@ import "./icons";
 
 import type { PaneType, SplitDirection } from "obsidian";
 import { Notice, Plugin } from "obsidian";
+import { RecorderNote } from "./audio-rec";
 import type { MediaInfo } from "./info/media-info";
 import { MediaFileExtensions } from "./info/media-type";
 import { URLViewType } from "./info/view-type";
@@ -100,6 +101,7 @@ export default class MxPlugin extends Plugin {
   playlist = this.addChild(new PlaylistIndex(this));
   biliReq = this.addChild(new BilibiliRequestHacker(this));
   leafOpener = this.addChild(new LeafOpener(this));
+  recorderNote = this.addChild(new RecorderNote(this));
   handleMediaNote = handleMediaNote;
   injectMediaEmbed = injectMediaEmbed;
   injectMediaView = injectMediaView;

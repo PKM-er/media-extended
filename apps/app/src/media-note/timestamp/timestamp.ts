@@ -21,7 +21,7 @@ export async function takeTimestamp<T extends PlayerComponent>(
   const genTimestamp = timestampGenerator(time, mediaInfo, {
     app: playerComponent.plugin.app,
     settings: playerComponent.plugin.settings.getState(),
-    state: player.state,
+    duration: player.state.duration,
   });
 
   if (time <= 0) {

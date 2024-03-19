@@ -1,4 +1,3 @@
-import type { MediaState } from "@vidstack/react";
 import { Notice } from "obsidian";
 import type { App, Editor } from "obsidian";
 import { isFileMediaInfo } from "@/info/media-info";
@@ -70,18 +69,21 @@ export function openOrCreateMediaNote(
   }
 }
 
+/**
+ * @param time in seconds
+ */
 export function timestampGenerator(
   time: number,
   mediaInfo: MediaInfo,
   {
     app: { fileManager },
     settings: { timestampOffset },
-    state: { duration },
-  }: { app: App; settings: MxSettings; state: Readonly<MediaState> },
+    duration = +Infinity,
+  }: { app: App; settings: MxSettings; duration?: number },
 ): (newNotePath: string) => string {
   time += timestampOffset;
   if (time < 0) time = 0;
-  if (duration && time > duration) time = duration;
+  else if (time > duration) time = duration;
 
   const timeInDuration = formatDuration(time);
   const frag =
