@@ -7,6 +7,7 @@ import { iterateFiles } from "../../lib/iterate-files";
 import { toInfoKey } from "../note-index/def";
 import { emptyLists } from "./def";
 import type { PlaylistWithActive, Playlist } from "./def";
+import { generateM3U8File } from "./export";
 import { getPlaylistMeta } from "./extract";
 
 export class PlaylistIndex extends Component {
@@ -135,5 +136,37 @@ export class PlaylistIndex extends Component {
     waitUntilResolve(this.app.metadataCache, this).then(() => {
       this.onResolve();
     });
+    this.plugin.addCommand({
+      id: "playlist-export",
+      name: "Export current playlist to m3u8 file",
+      editorCheckCallback: (checking, editor, ctx) => {
+        if (!ctx.file || !this.listFileCache.has(ctx.file.path)) return false;
+        if (checking) return true;
+        generateM3U8File(
+          this.listFileCache.get(ctx.file.path)!,
+          this.app.vault,
+        );
+      },
+    });
+    this.registerEvent(
+      this.app.workspace.on(
+        "file-menu",
+        (menu, file, source) =>
+          source === "more-options" &&
+          this.listFileCache.has(file.path) &&
+          menu.addItem((item) =>
+            item
+              .setTitle("Export to m3u8...")
+              .setIcon("file-down")
+              .setSection("action")
+              .onClick(() => {
+                generateM3U8File(
+                  this.listFileCache.get(file.path)!,
+                  this.app.vault,
+                );
+              }),
+          ),
+      ),
+    );
   }
 }
