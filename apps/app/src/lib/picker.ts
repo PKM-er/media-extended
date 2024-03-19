@@ -1,6 +1,6 @@
 import mime from "mime";
 import { Platform } from "obsidian";
-import { MediaFileExtensions } from "@/patch/media-type";
+import { MediaFileExtensions } from "@/info/media-type";
 import { getDialog } from "@/web/session/utils";
 
 /**

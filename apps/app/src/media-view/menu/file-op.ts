@@ -1,6 +1,6 @@
 import type { Menu } from "obsidian";
 import { Notice, Platform } from "obsidian";
-import type { MediaURL } from "@/web/url-match";
+import type { MediaURL } from "@/info/media-url";
 import { showItemInFolder, openPath } from "../../media-note/link-click";
 
 export function fileOperations(url: MediaURL, menu: Menu) {

@@ -1,6 +1,6 @@
 import { around } from "monkey-around";
 import { MarkdownView } from "obsidian";
-import { mediaSourceFields } from "@/media-note/note-index";
+import { mediaSourceFields } from "@/media-note/note-index/def";
 import type MxPlugin from "@/mx-main";
 import { isModEvent } from "./mod-evt";
 

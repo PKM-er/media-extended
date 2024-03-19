@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
 import { dataLpPassthrough } from "@/components/player/buttons";
-import { mediaInfoFromFile, type FileMediaInfo } from "@/media-view/media-info";
+import { mediaInfoFromFile, type FileMediaInfo } from "@/info/media-info";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
 

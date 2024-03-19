@@ -1,6 +1,6 @@
 import { useMemoizedFn } from "ahooks";
 import { useEffect, useMemo, useState } from "react";
-import { compare } from "@/media-note/note-index";
+import { compare } from "@/media-note/note-index/def";
 import {
   findWithMedia,
   isWithMedia,

@@ -8,15 +8,15 @@ import {
   DropdownComponent,
 } from "obsidian";
 import "./modal.global.less";
-import { showAtButton } from "@/lib/menu";
-import { getPartition } from "@/lib/remote-player/const";
-import { getSession, getWebContents } from "@/web/session/utils";
 import {
   mediaHostDisplayName,
   mediaHostUrl,
   noGeneric,
-} from "@/web/url-match/supported";
-import type { SupportedMediaHost } from "@/web/url-match/supported";
+} from "@/info/supported";
+import type { SupportedMediaHost } from "@/info/supported";
+import { showAtButton } from "@/lib/menu";
+import { getPartition } from "@/lib/remote-player/const";
+import { getSession, getWebContents } from "@/web/session/utils";
 
 export class LoginModal extends Modal {
   navEl = this.contentEl.insertAdjacentElement(

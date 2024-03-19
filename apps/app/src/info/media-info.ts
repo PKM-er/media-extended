@@ -1,7 +1,7 @@
 import type { Vault } from "obsidian";
 import { TFile } from "obsidian";
-import { checkMediaType, type MediaType } from "@/patch/media-type";
-import type { MediaURL } from "@/web/url-match";
+import type { MediaURL } from "@/info/media-url";
+import { checkMediaType, type MediaType } from "./media-type";
 
 export type MediaInfo = FileMediaInfo | MediaURL;
 

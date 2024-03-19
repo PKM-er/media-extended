@@ -1,14 +1,14 @@
 import type { EmbedCreator, Plugin } from "obsidian";
+import { isFileMediaInfo } from "@/info/media-info";
+import type { MediaURL } from "@/info/media-url";
 import type { Size } from "@/lib/size-syntax";
 import { parseSizeFromLinkTitle, setSize } from "@/lib/size-syntax";
 import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
-import { isFileMediaInfo } from "@/media-view/media-info";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MxPlugin from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
+import { MediaFileExtensions } from "../info/media-type";
 import setupEmbedWidget from "./embed-widget";
-import { MediaFileExtensions } from "./media-type";
 import { reloadMarkdownPreview } from "./utils";
 
 export default function injectMediaEmbed(

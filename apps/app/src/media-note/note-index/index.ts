@@ -1,9 +1,11 @@
-import { Component, TFolder, TFile, parseLinktext } from "obsidian";
-import type { MetadataCache, Vault, CachedMetadata } from "obsidian";
+import { Component } from "obsidian";
+import type { MetadataCache, Vault, TFile } from "obsidian";
+import { iterateFiles } from "@/lib/iterate-files";
 import { waitUntilResolve } from "@/lib/meta-resolve";
 import type MxPlugin from "@/mx-main";
-import { checkMediaType } from "@/patch/media-type";
-import { isFileMediaInfo, type MediaInfo } from "../../media-view/media-info";
+import { type MediaInfo } from "../../info/media-info";
+import { toInfoKey } from "./def";
+import { getMediaNoteMeta } from "./extract";
 
 declare module "obsidian" {
   interface MetadataCache {
@@ -97,16 +99,6 @@ export class MediaNoteIndex extends Component {
   }
 }
 
-function* iterateFiles(folder: TFolder): IterableIterator<TFile> {
-  for (const child of folder.children) {
-    if (child instanceof TFolder) {
-      yield* iterateFiles(child);
-    } else if (child instanceof TFile) {
-      yield child;
-    }
-  }
-}
-
 function* iterateMediaNote(ctx: {
   metadataCache: MetadataCache;
   vault: Vault;
@@ -118,89 +110,4 @@ function* iterateMediaNote(ctx: {
     if (!mediaInfo) continue;
     yield { mediaInfo, file };
   }
-}
-
-export const mediaSourceFieldMap = {
-  generic: "media",
-  video: "video",
-  audio: "audio",
-} as const;
-export type MediaSourceFieldType =
-  (typeof mediaSourceFieldMap)[keyof typeof mediaSourceFieldMap];
-export const mediaSourceFields = Object.values(
-  mediaSourceFieldMap,
-) as MediaSourceFieldType[];
-
-export function toInfoKey(mediaInfo: MediaInfo) {
-  if (isFileMediaInfo(mediaInfo)) {
-    return `file:${mediaInfo.file.path}`;
-  }
-  return `url:${mediaInfo.jsonState.source}`;
-}
-export function compare(a: MediaInfo | undefined, b: MediaInfo | undefined) {
-  if (!a || !b) return false;
-  const aKey = toInfoKey(a);
-  const bKey = toInfoKey(b);
-  return aKey === bKey;
-}
-
-export interface InternalLinkField {
-  type: "internal";
-  media: "video" | "audio";
-  source: TFile;
-  subpath: string;
-  original: string;
-}
-export interface ExternalLinkField {
-  type: "external";
-  media: MediaSourceFieldType;
-  source: URL;
-  subpath: string;
-  original: string;
-  isSameSource: (src: string) => boolean;
-}
-
-function getMediaNoteMeta(
-  file: TFile,
-  { metadataCache, plugin }: { metadataCache: MetadataCache; plugin: MxPlugin },
-): MediaInfo | null {
-  const meta = metadataCache.getFileCache(file);
-  if (!meta) return null;
-  const ctx = { metadataCache, sourcePath: file.path, plugin };
-
-  // prefer explicit typed media
-  return (
-    getField(mediaSourceFieldMap.video, meta, ctx) ??
-    getField(mediaSourceFieldMap.audio, meta, ctx) ??
-    getField(mediaSourceFieldMap.generic, meta, ctx)
-  );
-}
-
-function getField(
-  key: MediaSourceFieldType,
-  meta: CachedMetadata,
-  ctx: { metadataCache: MetadataCache; sourcePath: string; plugin: MxPlugin },
-): MediaInfo | null {
-  const { frontmatter, frontmatterLinks } = meta;
-  if (!frontmatter || !(key in frontmatter)) return null;
-  const linkCache = frontmatterLinks?.find((link) => link.key === key);
-  if (linkCache) {
-    const { path: linkpath, subpath } = parseLinktext(linkCache.link);
-    const mediaFile = ctx.metadataCache.getFirstLinkpathDest(
-      linkpath,
-      ctx.sourcePath,
-    );
-    if (!mediaFile) return null;
-    // if local file, prefer detect media type
-    const mediaType = checkMediaType(mediaFile.extension);
-    if (!mediaType) return null;
-    return {
-      type: mediaType,
-      file: mediaFile,
-      hash: subpath,
-    };
-  }
-  const content = frontmatter[key];
-  if (typeof content !== "string") return null;
-  return ctx.plugin.resolveUrl(content);
 }

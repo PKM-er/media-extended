@@ -1,6 +1,6 @@
 import type { Menu } from "obsidian";
+import { MediaHost } from "@/info/supported";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { MediaHost } from "@/web/url-match/supported";
 import type { PlayerContext } from ".";
 
 export function webpageMenu(

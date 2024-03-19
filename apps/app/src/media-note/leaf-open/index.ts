@@ -9,10 +9,10 @@ import type {
   WorkspaceLeaf,
 } from "obsidian";
 import { Component, MarkdownView, debounce } from "obsidian";
+import type { MediaInfo } from "@/info/media-info";
+import { isFileMediaInfo } from "@/info/media-info";
 import { normalizeFilename } from "@/lib/norm";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
-import type { MediaInfo } from "@/media-view/media-info";
-import { isFileMediaInfo } from "@/media-view/media-info";
 import type { MediaUrlViewState } from "@/media-view/url-view";
 import type {
   MediaView,

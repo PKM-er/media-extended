@@ -3,6 +3,8 @@ import type { App, TFile, Vault } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
 import { createStore, useStore } from "zustand";
+import { type MediaURL } from "@/info/media-url";
+import type { MediaHost } from "@/info/supported";
 import { parseHashProps, type HashProps } from "@/lib/hash/hash-prop";
 import { TimeoutError } from "@/lib/message";
 import noop from "@/lib/no-op";
@@ -20,9 +22,7 @@ import {
 } from "@/media-view/view-type";
 import type MediaExtended from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
-import { type MediaURL } from "@/web/url-match";
-import type { MediaHost } from "@/web/url-match/supported";
-import { type MediaInfo, mediaInfoFromFile } from "../media-view/media-info";
+import { type MediaInfo, mediaInfoFromFile } from "../info/media-info";
 import { applyTempFrag, handleTempFrag } from "./state/apply-tf";
 
 export interface TransformConfig {

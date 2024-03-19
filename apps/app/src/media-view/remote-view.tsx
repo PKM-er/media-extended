@@ -8,13 +8,13 @@ import {
   onPlayerMounted,
 } from "@/components/context";
 import { Player } from "@/components/player";
+import type { MediaURL } from "@/info/media-url";
 import { handleWindowMigration } from "@/lib/window-migration";
-import { compare } from "@/media-note/note-index";
+import { compare } from "@/media-note/note-index/def";
 import type MediaExtended from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
+import { isFileMediaInfo } from "../info/media-info";
 import type { PlayerComponent } from "./base";
 import { addAction, onPaneMenu } from "./base";
-import { isFileMediaInfo } from "./media-info";
 import type { RemoteMediaViewType } from "./view-type";
 
 export interface MediaRemoteViewState {

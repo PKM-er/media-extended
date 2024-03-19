@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Notice, Platform, parseLinktext } from "obsidian";
-import { isFileMediaInfo } from "@/media-view/media-info";
+import { isFileMediaInfo } from "@/info/media-info";
+import { checkMediaType } from "@/info/media-type";
+import type { MediaURL } from "@/info/media-url";
+import { MediaHost } from "@/info/supported";
 import { MEDIA_FILE_VIEW_TYPE } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import type { LinkEvent } from "@/patch/event";
-import { checkMediaType } from "@/patch/media-type";
-import type { MediaURL } from "@/web/url-match";
-import { MediaHost } from "@/web/url-match/supported";
 import { fileOperations } from "../media-view/menu/file-op";
 import { openAsMenu } from "../media-view/menu/open-as";
 

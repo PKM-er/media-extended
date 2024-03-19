@@ -1,7 +1,7 @@
 import type { MediaState } from "@vidstack/react";
-import { isFileMediaInfo, type MediaInfo } from "@/media-view/media-info";
-import { type MediaURL } from "@/web/url-match";
-import { MediaHost } from "@/web/url-match/supported";
+import { isFileMediaInfo, type MediaInfo } from "@/info/media-info";
+import { type MediaURL } from "@/info/media-url";
+import { MediaHost } from "@/info/supported";
 
 export function urlTitle(url: MediaURL, playerState?: MediaState) {
   if (playerState?.title) return playerState.title;

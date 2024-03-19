@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { Component, TFolder, TFile, debounce } from "obsidian";
+import { Component, TFile, debounce } from "obsidian";
+import type { MediaInfo } from "@/info/media-info";
 import { waitUntilResolve } from "@/lib/meta-resolve";
-import type { MediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
-import { toInfoKey } from "../note-index";
+import { iterateFiles } from "../../lib/iterate-files";
+import { toInfoKey } from "../note-index/def";
 import { emptyLists } from "./def";
 import type { PlaylistWithActive, Playlist } from "./def";
 import { getPlaylistMeta } from "./extract";
@@ -134,15 +135,5 @@ export class PlaylistIndex extends Component {
     waitUntilResolve(this.app.metadataCache, this).then(() => {
       this.onResolve();
     });
-  }
-}
-
-function* iterateFiles(folder: TFolder): IterableIterator<TFile> {
-  for (const child of folder.children) {
-    if (child instanceof TFolder) {
-      yield* iterateFiles(child);
-    } else if (child instanceof TFile) {
-      yield child;
-    }
   }
 }

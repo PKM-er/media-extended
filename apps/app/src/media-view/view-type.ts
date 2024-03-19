@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 
-import type { MediaType } from "@/patch/media-type";
+import type { MediaType } from "@/info/media-type";
 import type { AudioFileView, VideoFileView } from "./file-view";
 import type { MediaEmbedView } from "./iframe-view";
 import type { VideoUrlView, AudioUrlView } from "./url-view";

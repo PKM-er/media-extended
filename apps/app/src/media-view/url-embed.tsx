@@ -2,9 +2,9 @@ import { MarkdownRenderChild } from "obsidian";
 import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
+import type { MediaURL } from "@/info/media-url";
 import { getTracksLocal } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
 import { type PlayerComponent } from "./base";
 import { MEDIA_URL_VIEW_TYPE } from "./view-type";
 

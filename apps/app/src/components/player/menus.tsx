@@ -11,9 +11,9 @@ import { Menu } from "obsidian";
 import { useRef } from "react";
 import { MoreIcon, PlaylistIcon, SubtitlesIcon } from "@/components/icon";
 import { showAtButton } from "@/lib/menu";
+import { compare } from "@/media-note/note-index/def";
 import type { PlaylistItem } from "@/media-note/playlist/def";
 import { isWithMedia } from "@/media-note/playlist/def";
-import { compare } from "../../media-note/note-index";
 import {
   useApp,
   useIsEmbed,

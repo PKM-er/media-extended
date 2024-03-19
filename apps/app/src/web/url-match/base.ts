@@ -1,7 +1,7 @@
 import { removeTempFrag } from "@/lib/hash/format";
 import type { TempFragment } from "@/lib/hash/temporal-frag";
-import type { MediaHost } from "./supported";
-import type { MediaURL } from ".";
+import type { MediaURL } from "../../info/media-url";
+import type { MediaHost } from "../../info/supported";
 
 export type URLResolver = (src: MediaURL) => URLResolveResult;
 export type URLDetecter = (src: MediaURL) => MediaHost | null;

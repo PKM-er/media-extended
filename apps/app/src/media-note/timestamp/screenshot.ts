@@ -6,11 +6,11 @@ import {
   canProviderScreenshot,
   takeScreenshot,
 } from "@/components/player/screenshot";
+import type { MediaInfo } from "@/info/media-info";
 import { formatDuration, toDurationISOString } from "@/lib/hash/format";
 import { normalizeFilename } from "@/lib/norm";
 import type { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { PlayerComponent } from "@/media-view/base";
-import type { MediaInfo } from "@/media-view/media-info";
 import type { MxSettings } from "@/settings/def";
 import { mediaTitle } from "../title";
 import { timestampGenerator, insertTimestamp } from "./utils";

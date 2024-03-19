@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { TFile } from "obsidian";
-import type { MediaInfo } from "@/media-view/media-info";
-import type { MediaType } from "@/patch/media-type";
+import type { MediaInfo } from "@/info/media-info";
+import type { MediaType } from "@/info/media-type";
 
 export const taskSymbolMediaTypeMap = {
   ">": "video",

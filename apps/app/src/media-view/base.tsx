@@ -6,7 +6,7 @@ import { saveScreenshot } from "@/media-note/timestamp/screenshot";
 import { takeTimestamp } from "@/media-note/timestamp/timestamp";
 import { openOrCreateMediaNote } from "@/media-note/timestamp/utils";
 import type MediaExtended from "@/mx-main";
-import type { MediaInfo } from "./media-info";
+import type { MediaInfo } from "../info/media-info";
 import { noticeNotetaking } from "./notice-notetaking";
 import { screenshotAllowed, type MediaViewType } from "./view-type";
 

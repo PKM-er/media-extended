@@ -1,6 +1,6 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import { isTimestamp } from "@/lib/hash/temporal-frag";
-import { compare } from "@/media-note/note-index";
+import { compare } from "@/media-note/note-index/def";
 import type { MediaViewState, MediaViewStoreApi } from "../context";
 
 const tfNotInitial = new WeakSet<MediaPlayerInstance>();

@@ -3,8 +3,8 @@ import type { EditorState } from "@codemirror/state";
 import type { WidgetType } from "@codemirror/view";
 import { Decoration } from "@codemirror/view";
 // import { editorInfoField } from "obsidian";
+import { isFileMediaInfo } from "@/info/media-info";
 import { shouldOpenMedia } from "@/media-note/link-click";
-import { isFileMediaInfo } from "@/media-view/media-info";
 import type MediaExtended from "@/mx-main";
 
 import { isMdFavorInternalLink } from "./utils";

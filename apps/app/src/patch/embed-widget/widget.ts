@@ -3,10 +3,10 @@ import type { EditorView } from "@codemirror/view";
 import { WidgetType } from "@codemirror/view";
 import { Platform } from "obsidian";
 import { dataLpPassthrough } from "@/components/player/buttons";
+import type { MediaURL } from "@/info/media-url";
 import { parseSizeFromLinkTitle, setSize } from "@/lib/size-syntax";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MediaExtended from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
 
 class UrlMediaRenderChild extends MediaRenderChild {
   constructor(public containerEl: HTMLElement, public plugin: MediaExtended) {

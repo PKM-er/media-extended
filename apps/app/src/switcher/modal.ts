@@ -1,14 +1,14 @@
 import { pathToFileURL } from "url";
 import { assertNever } from "assert-never";
 import { Keymap, Notice, Platform, SuggestModal } from "obsidian";
+import { isFileMediaInfo, type MediaInfo } from "@/info/media-info";
+import { checkMediaType } from "@/info/media-type";
+import { MediaURL } from "@/info/media-url";
 import path from "@/lib/path";
 import { pickMediaFile } from "@/lib/picker";
 import { toURL } from "@/lib/url";
-import { isFileMediaInfo, type MediaInfo } from "@/media-view/media-info";
 import type MxPlugin from "@/mx-main";
-import { checkMediaType } from "@/patch/media-type";
 import { getFsPromise } from "@/web/session/utils";
-import { MediaURL } from "@/web/url-match";
 import { FileProtocolModal } from "./protocol-select";
 
 const avId = /^av(?<id>\d+)$/i;

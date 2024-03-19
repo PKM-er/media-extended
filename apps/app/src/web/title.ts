@@ -1,4 +1,4 @@
-import type { MediaHost } from "./url-match/supported";
+import type { MediaHost } from "../info/supported";
 
 export const titleParser: Record<MediaHost, (title: string) => string> = {
   generic: (title) => title,

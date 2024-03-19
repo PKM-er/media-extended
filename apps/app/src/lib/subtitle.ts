@@ -2,7 +2,7 @@ import { readdir, readFile } from "fs/promises";
 import type { TextTrackInit } from "@vidstack/react";
 import type { Vault } from "obsidian";
 import { Notice, TFile } from "obsidian";
-import type { MediaURL } from "@/web/url-match";
+import type { MediaURL } from "@/info/media-url";
 import { groupBy } from "./group-by";
 import { format, langCodeToLabel } from "./lang/lang";
 import path from "./path";

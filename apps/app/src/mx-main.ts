@@ -5,6 +5,9 @@ import "./icons";
 
 import type { PaneType, SplitDirection } from "obsidian";
 import { Notice, Plugin } from "obsidian";
+import type { MediaInfo } from "./info/media-info";
+import { MediaFileExtensions } from "./info/media-type";
+import { URLViewType } from "./info/view-type";
 import { toURL } from "./lib/url";
 import { initLogin } from "./login";
 import { handleMediaNote } from "./media-note";
@@ -18,7 +21,6 @@ import { PlaylistIndex } from "./media-note/playlist";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
 import { MediaEmbedView } from "./media-view/iframe-view";
-import type { MediaInfo } from "./media-view/media-info";
 import registerMediaMenu from "./media-view/menu";
 import { AudioUrlView, VideoUrlView } from "./media-view/url-view";
 import {
@@ -34,7 +36,6 @@ import patchInlineUrl from "./patch/link.inline-field";
 import patchLinktextOpen from "./patch/link.internal";
 import fixLinkLabel from "./patch/link.label-fix";
 import patchPreviewClick from "./patch/link.preview";
-import { MediaFileExtensions } from "./patch/media-type";
 import injectMediaView from "./patch/view";
 import { patchWin32FileUrl } from "./patch/win-file-url";
 import { createSettingsStore } from "./settings/def";
@@ -42,9 +43,8 @@ import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
-import "./login/modal";
 import { resolveMxProtocol } from "./web/url-match";
-import { URLViewType } from "./web/url-match/view-type";
+import "./login/modal";
 
 interface MxAPI {
   openUrl: (

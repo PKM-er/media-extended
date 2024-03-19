@@ -9,7 +9,7 @@ import type {
   Modifier,
 } from "obsidian";
 import { Keymap, MarkdownView } from "obsidian";
-import type { MediaInfo } from "@/media-view/media-info";
+import type { MediaInfo } from "@/info/media-info";
 import type { MediaView } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { isMediaLeaf } from "../leaf-open";

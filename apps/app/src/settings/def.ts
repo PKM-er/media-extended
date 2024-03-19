@@ -3,13 +3,13 @@ import { assertNever } from "assert-never";
 import type { PaneType } from "obsidian";
 import { Notice, Platform, debounce, moment, normalizePath } from "obsidian";
 import { createStore } from "zustand";
+import type { URLMatchPattern } from "@/info/view-type";
 import { vaildate } from "@/lib/lang/lang";
 import { enumerate } from "@/lib/must-include";
 import { pick, omit } from "@/lib/pick";
 import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
 import { BilibiliQuality } from "@/web/session/bilibili";
-import type { URLMatchPattern } from "@/web/url-match/view-type";
 
 export type OpenLinkBehavior = false | PaneType | "split-horizontal" | null;
 

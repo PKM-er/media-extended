@@ -1,5 +1,5 @@
+import type { MediaURL } from "@/info/media-url";
 import { getTracksLocal } from "@/lib/subtitle";
-import type { MediaURL } from "@/web/url-match";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";

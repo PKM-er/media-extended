@@ -1,6 +1,6 @@
+import { MediaHost, mediaHostDisplayName } from "@/info/supported";
 import { handlePaneMigration } from "@/lib/window-migration";
-import { MediaHost, mediaHostDisplayName } from "@/web/url-match/supported";
-import { isFileMediaInfo } from "./media-info";
+import { isFileMediaInfo } from "../info/media-info";
 import type { MediaRemoteViewState } from "./remote-view";
 import { MediaRemoteView } from "./remote-view";
 import { MEDIA_WEBPAGE_VIEW_TYPE } from "./view-type";

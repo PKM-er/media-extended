@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { MenuItem, Menu } from "obsidian";
+import type { MediaURL } from "@/info/media-url";
 import type { RemoteMediaViewType } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
-import type { MediaURL } from "@/web/url-match";
 
 const mediaTypeDisplay: Record<
   RemoteMediaViewType,

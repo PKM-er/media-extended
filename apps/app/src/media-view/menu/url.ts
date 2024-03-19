@@ -1,5 +1,5 @@
 import { Notice, type Menu } from "obsidian";
-import { isFileMediaInfo } from "../media-info";
+import { isFileMediaInfo } from "../../info/media-info";
 import { fileOperations } from "./file-op";
 import { openAsMenu } from "./open-as";
 import type { PlayerContext } from ".";

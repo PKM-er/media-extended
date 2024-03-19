@@ -7,8 +7,8 @@ import type {
   ListItemCache,
   TFile,
 } from "obsidian";
-import type { MediaInfo } from "@/media-view/media-info";
-import { mediaInfoFromFile } from "@/media-view/media-info";
+import type { MediaInfo } from "@/info/media-info";
+import { mediaInfoFromFile } from "@/info/media-info";
 import type MxPlugin from "@/mx-main";
 import { mediaTitle } from "../title";
 import { isMediaTaskSymbol, taskSymbolMediaTypeMap } from "./def";

@@ -2,7 +2,7 @@
 import { assertNever } from "assert-never";
 import { Component, debounce } from "obsidian";
 import { URLPattern } from "urlpattern-polyfill";
-import type { FileMediaInfo, MediaInfo } from "@/media-view/media-info";
+import type { FileMediaInfo, MediaInfo } from "@/info/media-info";
 import type {
   MediaFileViewType,
   MediaViewType,
@@ -15,8 +15,8 @@ import {
   MEDIA_FILE_VIEW_TYPE,
 } from "@/media-view/view-type";
 import type MxPlugin from "@/mx-main";
+import { MediaURL } from "./media-url";
 import { MediaHost } from "./supported";
-import { MediaURL } from ".";
 
 export type URLMatchPattern =
   | {

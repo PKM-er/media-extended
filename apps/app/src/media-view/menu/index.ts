@@ -4,7 +4,7 @@ import { canProviderScreenshot } from "@/components/player/screenshot";
 import { handleExternalLinkMenu } from "@/media-note/link-click";
 import { copyScreenshot } from "@/media-note/timestamp/screenshot";
 import type MxPlugin from "@/mx-main";
-import type { MediaInfo } from "../media-info";
+import type { MediaInfo } from "../../info/media-info";
 import type { MediaViewType } from "../view-type";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";
