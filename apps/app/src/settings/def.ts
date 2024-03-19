@@ -21,6 +21,7 @@ type MxSettingValues = {
     click: OpenLinkBehavior;
     alt: OpenLinkBehavior;
   };
+  speedStep: number;
   defaultLanguage?: string;
   loadStrategy: "play" | "eager";
   linkHandler: Record<RemoteMediaViewType, URLMatchPattern[]>;
@@ -41,6 +42,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "devices",
   "defaultMxLinkClick",
   "linkHandler",
+  "speedStep",
   "loadStrategy",
   "timestampTemplate",
   "screenshotTemplate",
@@ -76,6 +78,7 @@ const mxSettingsDefault = {
   timestampOffset: 0,
   biliDefaultQuality: BilibiliQuality.FHD,
   screenshotFormat: "image/webp",
+  speedStep: 0.1,
 } satisfies MxSettingValues;
 
 function getDefaultDeviceName() {
@@ -113,6 +116,7 @@ export type MxSettings = {
   getDeviceName: (id?: string) => string | undefined;
   getDeviceNameWithDefault: (id?: string) => string;
   setDeviceName: (label: string, id?: string) => void;
+  setSpeedStep: (step: number) => void;
   urlMapping: Map<string, string>;
   setTemplate: (
     key: "timestamp" | "screenshot" | "screenshotEmbed",
@@ -159,6 +163,12 @@ export function createSettingsStore(plugin: MxPlugin) {
   }, 1e3);
   return createStore<MxSettings>((set, get) => ({
     ...omit(mxSettingsDefault, ["urlMappingData"]),
+    setSpeedStep(step) {
+      step = Math.abs(step);
+      if (step === 0) return;
+      set({ speedStep: step });
+      save(get());
+    },
     setScreenshotFormat(format) {
       set({ screenshotFormat: format });
       save(get());

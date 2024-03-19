@@ -1,12 +1,11 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
-import type { Plugin } from "obsidian";
 import { Notice, debounce } from "obsidian";
 import { PlaybackSpeedPrompt } from "@/media-view/menu/prompt";
 import { speedOptions } from "@/media-view/menu/speed";
 import type MxPlugin from "@/mx-main";
 import { addMediaViewCommand, handleRepeatHotkey } from "./utils";
 
-const createMediaCommands = (plugin: Plugin): Controls[] => [
+const createMediaCommands = (plugin: MxPlugin): Controls[] => [
   {
     id: "toggle-play",
     label: "Play/pause",
@@ -58,7 +57,7 @@ const createMediaCommands = (plugin: Plugin): Controls[] => [
   },
   ...speed(plugin),
 ];
-function speed(plugin: Plugin): Controls[] {
+function speed(plugin: MxPlugin): Controls[] {
   // reuse notice if user is spamming speed change
   let notice: Notice | null = null;
   const hide = debounce(() => notice?.hide(), 2000, true);
@@ -177,7 +176,7 @@ function speed(plugin: Plugin): Controls[] {
     },
     {
       id: "increase-speed-granular",
-      label: "Increase playback speed by 0.1x",
+      label: "Increase playback speed slightly",
       icon: "arrow-up",
       action: (media) => {
         const curr = media.playbackRate;
@@ -185,7 +184,8 @@ function speed(plugin: Plugin): Controls[] {
           notifyAllowDup("Cannot increase speed further");
           return;
         }
-        const next = Math.round((curr + 0.1) * 10) / 10;
+        const step = plugin.settings.getState().speedStep;
+        const next = Math.round((curr + step) * 100) / 100;
         media.playbackRate = next;
         notify(`Speed increased to ${next}x`);
       },
@@ -200,7 +200,8 @@ function speed(plugin: Plugin): Controls[] {
           notifyAllowDup("Cannot decrease speed further");
           return;
         }
-        const prev = Math.round((curr - 0.1) * 10) / 10;
+        const step = plugin.settings.getState().speedStep;
+        const prev = Math.round((curr - step) * 100) / 100;
         media.playbackRate = prev;
         notify(`Speed decreased to ${prev}x`);
       },
