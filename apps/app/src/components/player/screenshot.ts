@@ -26,9 +26,12 @@ export async function takeScreenshot(
       throw new Error("Unsupported provider for screenshot");
     }
   } catch (e) {
-    if (e instanceof DOMException && e.name === "SecurityError") {
+    if (
+      (e as DOMException)?.name === "SecurityError" ||
+      (e as DOMException)?.message?.match(/Tainted canvas/i)
+    ) {
       new Notice(
-        "Cannot take screenshot due to CORS restriction, you can try open media as webpage to bypass this",
+        "Cannot take screenshot due to CORS restriction, you may try open media as webpage to bypass this",
       );
     } else {
       new Notice(
