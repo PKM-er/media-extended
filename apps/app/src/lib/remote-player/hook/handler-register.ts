@@ -25,6 +25,8 @@ export function registerHandlers(this: MediaPlugin) {
       value: serializeMediaStatePropValue(player[prop]),
     }));
   });
+  port.handle("getTracks", async () => ({ value: await this.getTracks() }));
+  port.handle("getTrack", async (id) => ({ value: await this.getTrack(id) }));
   port.handle("pictureInPictureEnabled", () => {
     return { value: document.pictureInPictureElement === player };
   });

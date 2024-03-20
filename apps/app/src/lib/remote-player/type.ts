@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { MediaErrorCode } from "@vidstack/react";
+import type {
+  MediaErrorCode,
+  TextTrackInit,
+  VTTContent,
+} from "@vidstack/react";
 import type { BilibiliPlayerManifest } from "@/web/bili-api/base";
 import type { MessageController, Nil } from "../message";
 // import { enumerate } from "../must-include";
@@ -199,6 +203,8 @@ export type MsgCtrlRemote = MessageController<
     bili_getManifest(): {
       value: BilibiliPlayerManifest;
     };
+    getTracks(): { value: (TextTrackInit & { id: string })[] };
+    getTrack(id: string): { value: VTTContent | null };
   },
   Nil,
   {
@@ -237,6 +243,8 @@ export type MsgCtrlLocal = MessageController<
     requestPictureInPicture(): void;
     exitPictureInPicture(): void;
     bili_getManifest(): Promise<BilibiliPlayerManifest>;
+    getTracks(): Promise<(TextTrackInit & { id: string })[]>;
+    getTrack(id: string): Promise<VTTContent | null>;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap & CustomEventWithPayload,
   {

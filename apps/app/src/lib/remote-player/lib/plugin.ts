@@ -1,3 +1,4 @@
+import type { TextTrackInit, VTTContent } from "@vidstack/react";
 import { LifeCycle } from "@/lib/lifecycle";
 import { TimeoutError } from "@/lib/message";
 import { registerEvents } from "../hook/event-register";
@@ -19,6 +20,13 @@ export default class MediaPlugin extends LifeCycle {
   constructor(public controller: MsgCtrlRemote) {
     super();
     this.register(() => controller.unload());
+  }
+
+  async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
+    return [];
+  }
+  async getTrack(_id: string): Promise<VTTContent | null> {
+    return null;
   }
 
   getStyle(): string | null {
