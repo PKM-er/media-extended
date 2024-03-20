@@ -144,6 +144,8 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
   }
 
   setCurrentTime(time: number) {
+    // prevent "_resetPlaybackIfNeeded" from being called in "onPlay" handler
+    this._ctx.$state.ended.set(false);
     this._port.methods.setCurrentTime(time);
   }
 
