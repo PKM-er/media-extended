@@ -1,15 +1,11 @@
 import "./menu.css";
 
-import {
-  useCaptionOptions,
-  useMediaPlayer,
-  useMediaState,
-} from "@vidstack/react";
+import { useMediaPlayer } from "@vidstack/react";
 import { around } from "monkey-around";
 import type { MenuItem } from "obsidian";
 import { Menu } from "obsidian";
 import { useRef } from "react";
-import { MoreIcon, PlaylistIcon, SubtitlesIcon } from "@/components/icon";
+import { MoreIcon, PlaylistIcon } from "@/components/icon";
 import { showAtButton } from "@/lib/menu";
 import { compare } from "@/media-note/note-index/def";
 import type { PlaylistItem } from "@/media-note/playlist/def";
@@ -27,7 +23,7 @@ import { usePlaylist } from "../hook/use-playlist";
 import { dataLpPassthrough } from "./buttons";
 import { addItemsToMenu } from "./playlist-menu";
 
-function useMenu(onMenu: (menu: Menu) => boolean) {
+export function useMenu(onMenu: (menu: Menu) => boolean) {
   const menuRef = useRef<Menu | null>(null);
   return (evt: React.MouseEvent) => {
     menuRef.current?.close();
@@ -123,34 +119,7 @@ export function Playlist() {
   );
 }
 
-export function Captions() {
-  const options = useCaptionOptions();
-  const tracks = useMediaState("textTracks");
-  const onClick = useMenu((menu) => {
-    options.forEach(({ label, select, selected }, idx, options) => {
-      menu.addItem((item) => {
-        if (options.length === 2 && label === "Unknown") {
-          label = "On";
-        }
-        item.setTitle(label).setChecked(selected).onClick(select);
-      });
-    });
-    return true;
-  });
-
-  if (tracks.length === 0) return null;
-
-  return (
-    <button
-      className="group ring-mod-border-focus relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-md outline-none ring-inset hover:bg-white/20 focus-visible:ring-2 aria-disabled:hidden"
-      {...{ [dataLpPassthrough]: true }}
-      onClick={onClick}
-      aria-label="Select Caption"
-    >
-      <SubtitlesIcon className="w-7 h-7" />
-    </button>
-  );
-}
+export { Captions } from "./caption-menu";
 
 export function MoreOptions() {
   const player = useMediaPlayer();

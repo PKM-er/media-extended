@@ -5,6 +5,7 @@ import {
   type MediaProviderInstance,
   type MediaProviderLoader,
   type MediaProviderProps,
+  Track,
 } from "@vidstack/react";
 import { useCallback } from "react";
 import { getPartition } from "@/lib/remote-player/const";
@@ -12,6 +13,7 @@ import { WebviewProviderLoader } from "@/lib/remote-player/loader";
 import { cn } from "@/lib/utils";
 import { useApp, useMediaViewStore } from "./context";
 import { useControls } from "./hook/use-hash";
+import { useTracks } from "./use-tracks";
 import { WebView } from "./webview";
 
 export function MediaProviderEnhanced({
@@ -38,6 +40,7 @@ export function MediaProviderEnhanced({
       }
     });
   const controls = useControls();
+  const tracks = useTracks();
   return (
     <MediaProvider
       className={cn(
@@ -71,6 +74,10 @@ export function MediaProviderEnhanced({
         [appId, controls],
       )}
       {...props}
-    />
+    >
+      {tracks.map((props) => (
+        <Track {...props} key={props.id} />
+      ))}
+    </MediaProvider>
   );
 }

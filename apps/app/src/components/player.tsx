@@ -1,22 +1,22 @@
 import "@vidstack/react/player/styles/base.css";
 
-import type { MediaViewType, PlayerSrc } from "@vidstack/react";
-import { MediaPlayer, Track, useMediaState } from "@vidstack/react";
+import type { MediaErrorDetail, MediaViewType } from "@vidstack/react";
+import { MediaPlayer, useMediaState } from "@vidstack/react";
 
 import { Notice } from "obsidian";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTempFragHandler } from "@/components/hook/use-temporal-frag";
-import { encodeWebpageUrl } from "@/lib/remote-player/encode";
 import { cn } from "@/lib/utils";
-import { toInfoKey } from "@/media-note/note-index/def";
 import { isFileMediaInfo } from "../info/media-info";
-import { useApp, useIsEmbed, useMediaViewStore, useSettings } from "./context";
+import { useIsEmbed, useMediaViewStore, useSettings } from "./context";
 import { useViewTypeDetect } from "./hook/fix-webm-audio";
 import { useControls, useDefaultVolume, useHashProps } from "./hook/use-hash";
 import { useAutoContinuePlay } from "./hook/use-playlist";
 import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
 import { MediaProviderEnhanced } from "./provider";
+import { useSource } from "./use-source";
+import { useRemoteTracks } from "./use-tracks";
 
 function HookLoader({
   onViewTypeChange,
@@ -24,6 +24,7 @@ function HookLoader({
   onViewTypeChange: (viewType: "audio" | "unknown") => any;
 }) {
   useViewTypeDetect(onViewTypeChange);
+  useRemoteTracks();
   useTempFragHandler();
   useDefaultVolume();
   return <></>;
@@ -38,36 +39,6 @@ function PlayerLayout() {
   return <VideoLayout />;
 }
 
-function useSource() {
-  const mediaInfo = useMediaViewStore((s) => s.source?.url);
-  const { vault } = useApp();
-  const mediaInfoKey = mediaInfo ? toInfoKey(mediaInfo) : null;
-  const src = useMemo(() => {
-    if (!mediaInfo) return;
-    if (isFileMediaInfo(mediaInfo)) {
-      return vault.getResourcePath(mediaInfo.file);
-    }
-    return mediaInfo.source.href;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mediaInfoKey]);
-
-  const type = useMediaViewStore(
-    (s): "video/mp4" | "audio/mp3" | "webpage" | undefined => {
-      const viewType = s.source?.viewType;
-      if (!viewType) return;
-      if (viewType === "mx-webpage") return "webpage";
-      if (viewType?.endsWith("video")) return "video/mp4";
-      if (viewType?.endsWith("audio")) return "audio/mp3";
-    },
-  );
-  if (!src) return;
-
-  if (type === "webpage") {
-    return { src: encodeWebpageUrl(src) } satisfies PlayerSrc;
-  }
-  return { src, type } satisfies PlayerSrc;
-}
-
 export function Player() {
   const playerRef = useMediaViewStore((s) => s.playerRef);
   const { onEnded } = useAutoContinuePlay();
@@ -79,7 +50,6 @@ export function Player() {
     }
     return source.url.source.pathname.endsWith(".webm");
   });
-  const textTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const load = useSettings((s) => s.loadStrategy);
   const isEmbed = useIsEmbed();
 
@@ -101,51 +71,10 @@ export function Player() {
       viewType={viewType}
       ref={playerRef}
       onEnded={onEnded}
-      onError={(e) => {
-        new Notice(
-          createFragment((frag) => {
-            frag.appendText(`Failed to load media for ${source.src}: `);
-            frag.createEl("br");
-            switch (e.code) {
-              // MEDIA_ERR_ABORTED
-              case 1:
-                frag.appendText("The media playback was aborted");
-                break;
-              // MEDIA_ERR_NETWORK
-              case 2:
-                frag.appendText(
-                  "A network error caused the media playback to fail",
-                );
-                break;
-              // MEDIA_ERR_DECODE
-              case 3:
-                frag.appendText(
-                  "The media playback was aborted due to a corruption problem or because the media encoding is not supported",
-                );
-                break;
-              // MEDIA_ERR_SRC_NOT_SUPPORTED
-              case 4:
-                frag.appendText(
-                  "The media is not supported to open as regular video or audio, try open as webpage",
-                );
-                break;
-              default:
-                frag.appendText(
-                  e.message || "Unknown error, check console for more details",
-                );
-                console.error("Failed to load media", source.src, e);
-                break;
-            }
-          }),
-        );
-      }}
+      onError={(e) => handleError(e, source.src)}
       {...hashProps}
     >
-      <MediaProviderEnhanced>
-        {textTracks.map((props) => (
-          <Track {...props} key={props.id} />
-        ))}
-      </MediaProviderEnhanced>
+      <MediaProviderEnhanced></MediaProviderEnhanced>
       <HookLoader
         onViewTypeChange={(viewType) => {
           setViewType(viewType);
@@ -158,5 +87,42 @@ export function Player() {
       />
       <PlayerLayout />
     </MediaPlayer>
+  );
+}
+
+function handleError(e: MediaErrorDetail, source: URL | string) {
+  new Notice(
+    createFragment((frag) => {
+      frag.appendText(`Failed to load media for ${source}: `);
+      frag.createEl("br");
+      switch (e.code) {
+        // MEDIA_ERR_ABORTED
+        case 1:
+          frag.appendText("The media playback was aborted");
+          break;
+        // MEDIA_ERR_NETWORK
+        case 2:
+          frag.appendText("A network error caused the media playback to fail");
+          break;
+        // MEDIA_ERR_DECODE
+        case 3:
+          frag.appendText(
+            "The media playback was aborted due to a corruption problem or because the media encoding is not supported",
+          );
+          break;
+        // MEDIA_ERR_SRC_NOT_SUPPORTED
+        case 4:
+          frag.appendText(
+            "The media is not supported to open as regular video or audio, try open as webpage",
+          );
+          break;
+        default:
+          frag.appendText(
+            e.message || "Unknown error, check console for more details",
+          );
+          console.error("Failed to load media", source, e);
+          break;
+      }
+    }),
   );
 }
