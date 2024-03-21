@@ -28,13 +28,18 @@ For common question, please refer to the [FAQ](https://mx.pkmer.net/faq), and be
 - **Support for Multiple Video Platforms** 🌐: Enjoy support for popular platforms like YouTube, Vimeo, Coursera, Bilibili, and more. If it can be played in a web browser, it can be embedded in your notes.
 - **Local Subtitle Support** 📑: Enhance your media with local subtitle files in SRT, VTT, and ASS formats, making it easier to follow along or understand content in another language.
 - **Media Fragments** 🎞️: Create media fragments that play only within a specified range, perfect for focusing on specific parts of a lecture or presentation.
+- **Playlist Support** 📋: Organize your media files into playlists for continuous playback.
 
 ## Coming Next 🔮
 
 - [ ] **Mobile support**📱
 - [ ] **Metadata and Subtitle Extraction** 📊: Pull metadata and subtitles directly from YouTube and Bilibili.
-- [ ] **Playlist Support** 📋: Organize your media files into playlists for continuous playback.
+
 - [ ] **Canvas Support** 🎨: Get creative with how you integrate and display media within your notes.
 - [ ] (Paid Features) **AI Summary for Transcript** 🤖: Get concise summaries of your media's content.
 - [ ] (Paid Features) **Table/Text OCR for Screenshots** 📷: Extract text from images for easy reference and integration.
 - [ ] (Paid Features) **Transcript Generation from Video** 📝: Automatically generate text transcripts from your video content.
+
+## Special Thanks
+
+A special thanks to [bfcs](https://github.com/bfcs) for their valuable contributions. They have helped fix issues during a long period of inactivity and made attempts to implement YouTube transcript functionality!

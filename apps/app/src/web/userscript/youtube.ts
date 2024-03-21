@@ -1,4 +1,9 @@
+/* eslint-disable no-var */
 // hugely inspired by https://greasyfork.org/zh-CN/scripts/4870-maximize-video
+
+declare global {
+  var ytInitialPlayerResponse: any;
+}
 
 const css = `
 body:not(.mx-player-ready) #movie_player, 
@@ -74,6 +79,7 @@ ytm-companion-ad-renderer {
 }
 `.trim();
 
+import type { TextTrackInit, VTTContent } from "@vidstack/react";
 /* eslint-disable @typescript-eslint/naming-convention */
 import { requireMx } from "./_require";
 
@@ -91,6 +97,52 @@ export default class YouTubePlugin extends MediaPlugin {
     }
     this.watchIfDetached();
     return media;
+  }
+
+  captionSrc = new Map<string, string>();
+
+  async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
+    const tracks =
+      window.ytInitialPlayerResponse?.captions?.playerCaptionsTracklistRenderer
+        ?.captionTracks;
+    if (!Array.isArray(tracks)) return [];
+
+    return tracks.map((t, i) => {
+      const track = t as {
+        baseUrl: string;
+        isTranslatable?: boolean;
+        languageCode?: string;
+        name?: { simpleText?: string };
+        trackName?: string;
+        vssId?: string;
+      };
+      const id = track.vssId || `tract${i}`;
+      this.captionSrc.set(id, track.baseUrl);
+      return {
+        id,
+        kind: "captions",
+        language: track.languageCode || "en",
+        label: track.name?.simpleText || track.trackName || "Unknown",
+      } satisfies TextTrackInit;
+    });
+  }
+  parser = new DOMParser();
+  async getTrack(_id: string): Promise<VTTContent | null> {
+    const src = this.captionSrc.get(_id);
+    if (!src) return null;
+    const resp = await fetch(src);
+    if (!resp.ok) return null;
+    const xml = await resp.text();
+    const xmlDoc = this.parser.parseFromString(xml, "text/xml");
+    const textElements = xmlDoc.getElementsByTagName("text");
+    const vtt: VTTContent = { cues: [] };
+    for (const text of textElements) {
+      const startTime = parseFloat(text.getAttribute("start")!);
+      const dur = parseFloat(text.getAttribute("dur")!);
+      const endTime = startTime + dur;
+      vtt.cues!.push({ startTime, endTime, text: text.textContent! });
+    }
+    return vtt;
   }
 
   watchIfDetached() {
