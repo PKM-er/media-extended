@@ -55,21 +55,21 @@ function detectChs(subtag: string) {
   return "zh";
 }
 
-export function vaildate(code: string | undefined) {
+export function vaildate(code: string | undefined): code is string {
   if (!code) return false;
   const lang = code.split("-")[0].toLowerCase();
   return iso.validate(lang);
 }
 
-export function format(code: string) {
+export function format(code: string | undefined): string | null {
   if (!vaildate(code)) return null;
   const tags = code.split("-");
   const lang = tags[0].toLowerCase();
   if (tags.length === 1) return lang;
   const subtag = tags[1];
   if (lang === "zh") return detectChs(subtag);
-  return (
-    langExtra[`${lang}-${subtag.toUpperCase()}`] ??
-    `${lang}-${tags.slice(1).join("-")}`
-  );
+  return `${lang}-${tags
+    .slice(1)
+    .map((t, i) => (i === 0 ? t.toUpperCase() : t))
+    .join("-")}`;
 }

@@ -10,8 +10,9 @@ import type {
 } from "@vidstack/react";
 import { Notice } from "obsidian";
 import { useEffect, useMemo, useState } from "react";
+import { setDefaultLang } from "@/lib/lang/default-lang";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { useMediaViewStore } from "./context";
+import { useMediaViewStore, useSettings } from "./context";
 
 export function useRemoteTracks() {
   // const externalTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
@@ -68,6 +69,7 @@ export function useTracks() {
     })[]
   >([]);
   const loaded = useMediaState("canPlay");
+  const defaultLang = useSettings((s) => s.defaultLanguage);
 
   const provider = useMediaProvider();
   useEffect(() => {
@@ -80,8 +82,9 @@ export function useTracks() {
     });
   }, [provider, loaded]);
   return useMemo(
-    () => [...localTextTracks, ...remoteTextTracks],
-    [localTextTracks, remoteTextTracks],
+    () =>
+      setDefaultLang([...localTextTracks, ...remoteTextTracks], defaultLang),
+    [localTextTracks, remoteTextTracks, defaultLang],
   );
 }
 

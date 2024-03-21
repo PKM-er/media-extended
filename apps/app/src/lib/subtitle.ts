@@ -18,12 +18,10 @@ function isCaptionsFile<T extends FileInfo>(
 export function getTracks<F extends FileInfo>(
   media: Omit<F, "extension">,
   siblings: F[],
-  defaultLangCode?: string,
 ): LocalTrack<F>[] {
   console.debug("Search subtitles for media", {
     basename: media.basename,
     path: media.path,
-    defaultLangCode,
   });
   console.debug(`${siblings.length} siblings`, siblings);
   const subtitles = siblings.filter(isCaptionsFile).flatMap((file) => {
@@ -40,55 +38,32 @@ export function getTracks<F extends FileInfo>(
     subtitles.map((f) => f.src.path),
   );
   console.debug(`Subtitles details: `, subtitles);
-  const subtitlesByLang = groupBy(subtitles, (v) => v.language);
-  const allLanguages = [...subtitlesByLang.keys()];
-  const subtitleDefaultLang = !defaultLangCode
-    ? allLanguages.filter((l) => !!l)[0]
-    : allLanguages.find((code) => {
-        // exact match
-        if (!code) return;
-        return code === defaultLangCode;
-      }) ??
-      allLanguages.find((code) => {
-        // only language match
-        if (!code) return;
-        const lang = code.split("-")[0],
-          defaultLang = defaultLangCode.split("-")[0];
-        return lang === defaultLang;
-      });
-
-  const uniqueTracks: LocalTrack<F>[] = [];
-  subtitlesByLang.forEach((tracks, lang) => {
-    for (const fmt of supportedFormat) {
-      const track = tracks.find((track) => track.type === fmt);
-      if (track) {
-        uniqueTracks.push({
-          ...track,
-          default: !!subtitleDefaultLang && lang === subtitleDefaultLang,
-        });
-        return;
-      }
+  // const subtitlesByLang = ;
+  const filteredTracks = [
+    ...groupBy(subtitles, (v) => v.language).values(),
+  ].reduce<LocalTrack<F>[]>((final, tracks) => {
+    // find the first supported format
+    const preferred = supportedFormat.reduce<LocalTrack<F> | undefined>(
+      (out, format) => {
+        if (out) return out;
+        return tracks.find((t) => t.type === format);
+      },
+      void 0,
+    );
+    if (preferred) {
+      final.push(preferred);
     }
-  });
+    return final;
+  }, []);
   console.debug(
-    `Final tracks: ${uniqueTracks.length}`,
-    uniqueTracks.map((f) => f.src.path),
+    `Final tracks: ${filteredTracks.length}`,
+    filteredTracks.map((f) => f.src.path),
   );
-  console.debug(`Final tracks details`, uniqueTracks);
-
-  if (uniqueTracks.length === 0) {
-    return uniqueTracks;
-  }
-  console.debug(
-    `Final default lang: ${subtitleDefaultLang ?? uniqueTracks[0].id}`,
-  );
-  if (!subtitleDefaultLang) {
-    uniqueTracks[0].default = true;
-  }
-  return uniqueTracks;
+  console.debug(`Final tracks details`, filteredTracks);
+  return filteredTracks;
 }
 
-export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
+export async function getTracksLocal(media: MediaURL) {
   const filePath = media.filePath;
   if (!filePath || !media.inferredType) return [];
   const mediaName = path.basename(filePath);
@@ -126,7 +101,7 @@ export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
   const uniqueTracks = getTracks(
     { basename: mediaBaseame, path: filePath },
     siblings,
-    defaultLang,
+    // defaultLang,
   );
 
   return (
@@ -151,14 +126,14 @@ export async function getTracksLocal(media: MediaURL, defaultLang?: string) {
 export async function getTracksInVault(
   media: TFile,
   vault: Vault,
-  defaultLang?: string,
+  // defaultLang?: string,
 ) {
   if (!media.parent) return [];
 
   const uniqueTracks = getTracks(
     media,
     media.parent.children.filter((f): f is TFile => f instanceof TFile),
-    defaultLang,
+    // defaultLang,
   );
 
   return await Promise.all(
