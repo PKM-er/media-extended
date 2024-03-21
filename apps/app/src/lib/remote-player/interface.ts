@@ -203,7 +203,6 @@ export type MsgCtrlRemote = MessageController<
     bili_getManifest(): {
       value: BilibiliPlayerManifest;
     };
-    getTracks(): { value: (TextTrackInit & { id: string })[] };
     getTrack(id: string): { value: VTTContent | null };
   },
   Nil,
@@ -211,12 +210,14 @@ export type MsgCtrlRemote = MessageController<
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;
     "mx-toggle-webfs": boolean;
+    "mx-bili-player-v2-url": string;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap & CustomEventWithPayload
 >;
 
 type CustomEventWithPayload = {
   "mx-open-browser": { url: string; message?: string };
+  "mx-text-tracks": { tracks: (TextTrackInit & { id: string })[] };
 };
 
 export type MsgCtrlLocal = MessageController<
@@ -243,7 +244,6 @@ export type MsgCtrlLocal = MessageController<
     requestPictureInPicture(): void;
     exitPictureInPicture(): void;
     bili_getManifest(): Promise<BilibiliPlayerManifest>;
-    getTracks(): Promise<(TextTrackInit & { id: string })[]>;
     getTrack(id: string): Promise<VTTContent | null>;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap & CustomEventWithPayload,
@@ -251,6 +251,7 @@ export type MsgCtrlLocal = MessageController<
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;
     "mx-toggle-webfs": boolean;
+    "mx-bili-player-v2-url": string;
   }
 >;
 

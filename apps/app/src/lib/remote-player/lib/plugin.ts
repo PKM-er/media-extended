@@ -1,4 +1,4 @@
-import type { TextTrackInit, VTTContent } from "@vidstack/react";
+import type { VTTContent } from "@vidstack/react";
 import { LifeCycle } from "@/lib/lifecycle";
 import { TimeoutError } from "@/lib/message";
 import { registerEvents } from "../hook/event-register";
@@ -6,7 +6,7 @@ import type { MediaStateRef } from "../hook/handler-register";
 import { registerHandlers } from "../hook/handler-register";
 import { handleReadyState } from "../hook/ready-state";
 import { fluentTimeUpdate } from "../hook/time-update";
-import { mountedEvent, type MsgCtrlRemote } from "../type";
+import { mountedEvent, type MsgCtrlRemote } from "../interface";
 import { waitForSelector } from "./wait-el";
 
 const generalPlayerRules = [
@@ -22,9 +22,6 @@ export default class MediaPlugin extends LifeCycle {
     this.register(() => controller.unload());
   }
 
-  async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
-    return [];
-  }
   async getTrack(_id: string): Promise<VTTContent | null> {
     return null;
   }

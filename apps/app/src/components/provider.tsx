@@ -13,7 +13,7 @@ import { WebviewProviderLoader } from "@/lib/remote-player/loader";
 import { cn } from "@/lib/utils";
 import { useApp, useMediaViewStore } from "./context";
 import { useControls } from "./hook/use-hash";
-import { useTracks } from "./use-tracks";
+import { useTextTracks } from "./use-tracks";
 import { WebView } from "./webview";
 
 export function MediaProviderEnhanced({
@@ -40,7 +40,7 @@ export function MediaProviderEnhanced({
       }
     });
   const controls = useControls();
-  const tracks = useTracks();
+  const tracks = useTextTracks();
   return (
     <MediaProvider
       className={cn(

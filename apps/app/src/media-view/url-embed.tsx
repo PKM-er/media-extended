@@ -30,20 +30,14 @@ export class MediaRenderChild
     other: Partial<{ title: string; hash: string }> = {},
   ) {
     const viewType = this.plugin.urlViewType.getPreferred(media);
-    const defaultLang = this.plugin.settings.getState().getDefaultLang();
     this.store.getState().setSource(media, {
       title: other.title ?? true,
       hash: other.hash,
       viewType,
       textTracks:
         viewType === MEDIA_URL_VIEW_TYPE.video
-          ? await getTracksLocal(media, defaultLang).catch((e) => {
-              console.error(
-                "Failed to get text tracks",
-                e,
-                media.href,
-                defaultLang,
-              );
+          ? await getTracksLocal(media).catch((e) => {
+              console.error("Failed to get text tracks", e, media.href);
               return [];
             })
           : [],

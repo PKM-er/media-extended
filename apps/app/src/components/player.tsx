@@ -16,7 +16,7 @@ import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
 import { MediaProviderEnhanced } from "./provider";
 import { useSource } from "./use-source";
-import { useRemoteTracks } from "./use-tracks";
+import { useBilibiliTextTracks, useRemoteTextTracks } from "./use-tracks";
 
 function HookLoader({
   onViewTypeChange,
@@ -24,8 +24,9 @@ function HookLoader({
   onViewTypeChange: (viewType: "audio" | "unknown") => any;
 }) {
   useViewTypeDetect(onViewTypeChange);
-  useRemoteTracks();
+  useRemoteTextTracks();
   useTempFragHandler();
+  useBilibiliTextTracks();
   useDefaultVolume();
   return <></>;
 }

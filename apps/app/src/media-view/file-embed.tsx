@@ -69,7 +69,6 @@ export class MediaFileEmbed
     await this.store.getState().loadFile(this.file, {
       vault: this.plugin.app.vault,
       subpath: this.subpath,
-      defaultLang: this.plugin.settings.getState().getDefaultLang(),
     });
   }
 

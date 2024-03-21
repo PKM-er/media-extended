@@ -1,4 +1,4 @@
-import type { MsgCtrlRemote } from "@/lib/remote-player/type";
+import type { MsgCtrlRemote } from "@/lib/remote-player/interface";
 import { MessageController } from "../../message";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "../const";
 

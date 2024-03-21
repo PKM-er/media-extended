@@ -21,11 +21,11 @@ import { MessageController, TimeoutError } from "../message";
 import { noHash } from "../url";
 import { decodeWebpageUrl } from "./encode";
 import { HTMLMediaEvents } from "./html–media-events";
+import type { MsgCtrlLocal } from "./interface";
 import { evalInWebview } from "./lib/inline-eval";
 import { WebviewLoadError, webviewErrorMessage } from "./net-err";
 import type { MediaPictureInPictureAdapter } from "./pip";
 import { WebpagePictureInPicture } from "./pip";
-import type { MsgCtrlLocal } from "./type";
 
 const { createScope, onDispose, scoped } = Maverick;
 

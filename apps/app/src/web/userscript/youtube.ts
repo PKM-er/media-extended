@@ -101,7 +101,7 @@ export default class YouTubePlugin extends MediaPlugin {
 
   captionSrc = new Map<string, string>();
 
-  async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
+  getTracks(): (TextTrackInit & { id: string })[] {
     const tracks =
       window.ytInitialPlayerResponse?.captions?.playerCaptionsTracklistRenderer
         ?.captionTracks;
@@ -120,7 +120,7 @@ export default class YouTubePlugin extends MediaPlugin {
       this.captionSrc.set(id, track.baseUrl);
       return {
         id,
-        kind: "captions",
+        kind: "subtitles",
         language: track.languageCode || "en",
         label: track.name?.simpleText || track.trackName || "Unknown",
       } satisfies TextTrackInit;
@@ -165,6 +165,8 @@ export default class YouTubePlugin extends MediaPlugin {
   }
   async onload(): Promise<void> {
     await super.onload();
+    const tracks = this.getTracks();
+    if (tracks.length > 0) this.controller.send("mx-text-tracks", { tracks });
     this.disableAutoPlay();
     waitForSelector("ytd-consent-bump-v2-lightbox", this.app).then(() => {
       this.controller.send("mx-open-browser", {

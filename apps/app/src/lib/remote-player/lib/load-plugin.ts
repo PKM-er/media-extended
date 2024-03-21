@@ -1,4 +1,4 @@
-import type { MsgCtrlRemote } from "../type";
+import type { MsgCtrlRemote } from "../interface";
 import Plugin from "./plugin";
 import { require } from "./require";
 

@@ -43,7 +43,6 @@ abstract class MediaFileView
   async onLoadFile(file: TFile): Promise<void> {
     await this.store.getState().loadFile(file, {
       vault: this.app.vault,
-      defaultLang: this.plugin.settings.getState().getDefaultLang(),
     });
   }
   onPaneMenu(

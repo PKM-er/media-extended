@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import type { TextTrackInit, VTTContent } from "@vidstack/react";
+import { BiliApiError } from "../bili-api/base";
+import type { PlayerV2Response } from "../bili-api/player-v2";
+import type { SubtitlesConfig } from "../bili-api/subtitle";
 import { requireMx } from "./_require";
 
 const { waitForSelector, MediaPlugin } = requireMx();
@@ -18,16 +22,80 @@ declare global {
 }
 
 export default class BilibiliPlugin extends MediaPlugin {
+  #playerV2API: string | null = null;
+  #subtitleUrl = new Map<string, string>();
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
   getStyle() {
     return css;
   }
+  async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
+    if (!this.#playerV2API) {
+      console.error("Player V2 API not loaded");
+      return [];
+    }
+    try {
+      const resp = await fetch(this.#playerV2API, { credentials: "include" });
+      if (!resp.ok) {
+        throw new Error("Failed to fetch player V2 API, " + resp.statusText);
+      }
+      const json = (await resp.json()) as PlayerV2Response;
+      console.debug("Fetching player V2 API", this.#playerV2API, json);
+      if (json.code !== 0) {
+        throw new BiliApiError(json.message, json.code);
+      }
+      return json.data.subtitle.subtitles.map((sub) => {
+        const track = {
+          id: sub.id.toString(),
+          kind: "subtitles",
+          label: sub.lan_doc,
+          language: sub.lan.startsWith("ai-") ? sub.lan.substring(3) : sub.lan,
+        } satisfies TextTrackInit;
+        this.#subtitleUrl.set(track.id, sub.subtitle_url);
+        return track;
+      });
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  }
+  async getTrack(id: string): Promise<VTTContent | null> {
+    const url = this.#subtitleUrl.get(id);
+    if (!url) return null;
+    const resp = await fetch(url);
+    if (!resp.ok)
+      throw new Error("Failed to fetch subtitle, " + resp.statusText);
+    const json = (await resp.json()) as SubtitlesConfig;
+    return {
+      cues: json.body.map((sub) => ({
+        startTime: sub.from,
+        endTime: sub.to,
+        text: sub.content,
+      })),
+    };
+  }
   async onload(): Promise<void> {
-    this.controller.handle("bili_getManifest", () => {
-      return { value: window.player.getManifest() };
-    });
+    this.register(
+      this.controller.handle("bili_getManifest", () => {
+        return { value: window.player.getManifest() };
+      }),
+    );
+    this.register(
+      this.controller.on("mx-bili-player-v2-url", ({ payload }) => {
+        this.#playerV2API = payload;
+        console.debug("Player V2 API received");
+        this.getTracks()
+          .then((tracks) => {
+            console.debug("Sending tracks to remote", tracks);
+            if (tracks.length === 0) return;
+            this.controller.send("mx-text-tracks", { tracks });
+          })
+          .catch((e) => {
+            console.error("Failed to get tracks", e);
+          });
+      }),
+    );
     localStorage.setItem("recommend_auto_play", "close");
     // disable autoplay
     localStorage.setItem(

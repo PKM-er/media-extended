@@ -10,11 +10,13 @@ import type {
 } from "@vidstack/react";
 import { Notice } from "obsidian";
 import { useEffect, useMemo, useState } from "react";
+import { MediaURL } from "@/info/media-url";
+import { MediaHost } from "@/info/supported";
 import { setDefaultLang } from "@/lib/lang/default-lang";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { useMediaViewStore, useSettings } from "./context";
+import { useMediaViewStore, usePlugin, useSettings } from "./context";
 
-export function useRemoteTracks() {
+export function useRemoteTextTracks() {
   // const externalTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const player = useMediaPlayer();
   const loaded = useMediaState("canPlay");
@@ -61,29 +63,55 @@ export function useRemoteTracks() {
   }, [player, loaded]);
 }
 
-export function useTracks() {
+export function useBilibiliTextTracks() {
+  const isBilibili = useMediaViewStore(
+    ({ source }) =>
+      source?.url instanceof MediaURL && source.url.type === MediaHost.Bilibili,
+  );
+  const plugin = usePlugin();
+  const provider = useMediaProvider();
+  const canPlay = useMediaState("canPlay");
+  useEffect(() => {
+    if (!isBilibili || !(provider instanceof WebiviewMediaProvider) || !canPlay)
+      return;
+    provider.media.methods.bili_getManifest().then(async (manifest) => {
+      try {
+        const reqUrl = await plugin.biliReq.getPlayerV2Request(manifest);
+        provider.media.send("mx-bili-player-v2-url", reqUrl);
+      } catch (e) {
+        console.error("Failed to get player V2 API for bilibili", e);
+      }
+    });
+  }, [plugin.biliReq, provider, isBilibili, canPlay]);
+}
+
+export function useTextTracks() {
   const localTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const [remoteTextTracks, setRemoteTracks] = useState<
     (TextTrackInit & {
       id: string;
     })[]
   >([]);
-  const loaded = useMediaState("canPlay");
   const defaultLang = useSettings((s) => s.defaultLanguage);
+  const getDefaultLang = useSettings((s) => s.getDefaultLang);
 
   const provider = useMediaProvider();
   useEffect(() => {
-    if (!(provider instanceof WebiviewMediaProvider) || !loaded) return;
-    provider.media.methods.getTracks().then((tracks): void => {
+    if (!(provider instanceof WebiviewMediaProvider)) return;
+    return provider.media.on("mx-text-tracks", ({ payload: { tracks } }) => {
       setRemoteTracks(
         tracks.map(({ src, ...t }) => ({ ...t, content: dummyVTTContent })),
       );
       if (tracks.length !== 0) console.debug("Remote tracks loaded", tracks);
     });
-  }, [provider, loaded]);
+  }, [provider]);
   return useMemo(
     () =>
-      setDefaultLang([...localTextTracks, ...remoteTextTracks], defaultLang),
+      setDefaultLang(
+        [...localTextTracks, ...remoteTextTracks],
+        getDefaultLang(),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [localTextTracks, remoteTextTracks, defaultLang],
   );
 }

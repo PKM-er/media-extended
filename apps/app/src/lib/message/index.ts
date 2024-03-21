@@ -137,9 +137,14 @@ export class MessageController<
     ) =>
       | Promise<Awaited<ReturnType<InvokeHandlers[A]>>>
       | Awaited<ReturnType<InvokeHandlers[A]>>,
-  ): void;
-  handle(action: string, callback: (...args: any[]) => any): void {
+  ): () => void;
+  handle(action: string, callback: (...args: any[]) => any): () => void {
     this.actions[action] = callback;
+    return () => {
+      if (this.actions[action] === callback) {
+        delete this.actions[action];
+      }
+    };
   }
 
   send<A extends keyof Sends>(

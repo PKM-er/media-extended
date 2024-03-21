@@ -1,6 +1,6 @@
 import type { MediaContext } from "@vidstack/react";
 import { Maverick } from "@vidstack/react";
-import type { MsgCtrlLocal } from "./type";
+import type { MsgCtrlLocal } from "./interface";
 
 const { onDispose } = Maverick;
 
