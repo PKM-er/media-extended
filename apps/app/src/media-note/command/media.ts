@@ -192,7 +192,7 @@ function speed(plugin: MxPlugin): Controls[] {
     },
     {
       id: "decrease-speed-granular",
-      label: "Decrease playback speed by 0.1x",
+      label: "Decrease playback speed slightly",
       icon: "arrow-down",
       action: (media) => {
         const curr = media.playbackRate;
