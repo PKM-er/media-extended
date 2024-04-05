@@ -115,7 +115,6 @@ export class BilibiliRequestHacker extends Component {
           );
       }
       const { ipcRenderer } = require("electron");
-      console.log(channel.enable);
       await ipcRenderer.invoke(channel.enable, preloadScriptPath);
       this.register(() => {
         ipcRenderer.invoke(channel.disable);

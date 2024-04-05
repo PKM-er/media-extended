@@ -43,6 +43,7 @@ import { createSettingsStore } from "./settings/def";
 import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
 import { registerTranscriptView } from "./transcript";
+import { CacheStore } from "./transcript/store";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import { resolveMxProtocol } from "./web/url-match";
@@ -102,6 +103,7 @@ export default class MxPlugin extends Plugin {
   mediaNote = this.addChild(new MediaNoteIndex(this));
   playlist = this.addChild(new PlaylistIndex(this));
   biliReq = this.addChild(new BilibiliRequestHacker(this));
+  cacheStore = this.addChild(new CacheStore(this));
   leafOpener = this.addChild(new LeafOpener(this));
   recorderNote = this.addChild(new RecorderNote(this));
   handleMediaNote = handleMediaNote;

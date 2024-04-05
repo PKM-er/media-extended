@@ -1,4 +1,4 @@
-import { json } from "../base";
+import { json } from "../../../lib/json";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 declare const __USERSCRIPT__: string;
