@@ -10,6 +10,11 @@ declare module "obsidian" {
   }
 }
 
+export type PaneMenuSource =
+  | "sidebar-context-menu"
+  | "tab-header"
+  | "more-options";
+
 export function showAtButton(evt: Event | HTMLElement, menu: Menu) {
   const target = ("target" in evt ? evt.target : evt) as HTMLElement;
   if (!target.instanceOf?.(HTMLElement)) return;

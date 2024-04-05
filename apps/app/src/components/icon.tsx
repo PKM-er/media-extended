@@ -55,4 +55,5 @@ export const PlayIcon = makeIcon("play"),
   TrashIcon = makeIcon("trash"),
   PlaylistIcon = makeIcon("list-video"),
   NextIcon = makeIcon("skip-forward"),
-  PreviousIcon = makeIcon("skip-back");
+  PreviousIcon = makeIcon("skip-back"),
+  CopyIcon = makeIcon("copy");

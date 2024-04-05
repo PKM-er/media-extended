@@ -1,6 +1,7 @@
 import { type Component, type Menu, type View, type ItemView } from "obsidian";
 import type ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
+import type { PaneMenuSource } from "@/lib/menu";
 import { toURL } from "@/lib/url";
 import { saveScreenshot } from "@/media-note/timestamp/screenshot";
 import { takeTimestamp } from "@/media-note/timestamp/timestamp";
@@ -68,11 +69,7 @@ export function onPaneMenu<
     getViewType(): MediaViewType;
     render(): void;
   } & View,
->(
-  view: T,
-  menu: Menu,
-  menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
-) {
+>(view: T, menu: Menu, menuSource: PaneMenuSource) {
   const {
     player,
     source,

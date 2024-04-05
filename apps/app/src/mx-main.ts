@@ -42,6 +42,7 @@ import { patchWin32FileUrl } from "./patch/win-file-url";
 import { createSettingsStore } from "./settings/def";
 import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
+import { registerTranscriptView } from "./transcript";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import { resolveMxProtocol } from "./web/url-match";
@@ -89,6 +90,7 @@ export default class MxPlugin extends Plugin {
     this.loadPatches();
     this.registerMediaMenu();
     this.handleMediaNote();
+    registerTranscriptView(this);
     await this.modifySession();
     initSwitcher(this);
   }

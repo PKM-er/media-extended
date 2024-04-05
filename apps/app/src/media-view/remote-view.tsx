@@ -9,6 +9,7 @@ import {
 } from "@/components/context";
 import { Player } from "@/components/player";
 import type { MediaURL } from "@/info/media-url";
+import type { PaneMenuSource } from "@/lib/menu";
 import { handleWindowMigration } from "@/lib/window-migration";
 import { compare } from "@/media-note/note-index/def";
 import type MediaExtended from "@/mx-main";
@@ -86,10 +87,7 @@ export abstract class MediaRemoteView
   abstract getIcon(): string;
   abstract getDisplayText(): string;
 
-  onPaneMenu(
-    menu: Menu,
-    menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
-  ): void {
+  onPaneMenu(menu: Menu, menuSource: PaneMenuSource): void {
     super.onPaneMenu(menu, menuSource);
     onPaneMenu(this, menu, menuSource);
   }

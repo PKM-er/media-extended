@@ -5,6 +5,7 @@ import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import type { FileMediaInfo } from "@/info/media-info";
 import { MediaFileExtensions } from "@/info/media-type";
+import type { PaneMenuSource } from "@/lib/menu";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
 import { type PlayerComponent, addAction, onPaneMenu } from "./base";
@@ -45,10 +46,7 @@ abstract class MediaFileView
       vault: this.app.vault,
     });
   }
-  onPaneMenu(
-    menu: Menu,
-    menuSource: "sidebar-context-menu" | "tab-header" | "more-options",
-  ): void {
+  onPaneMenu(menu: Menu, menuSource: PaneMenuSource): void {
     super.onPaneMenu(menu, menuSource);
     onPaneMenu(this, menu, menuSource);
   }

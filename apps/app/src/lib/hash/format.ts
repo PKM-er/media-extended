@@ -2,10 +2,11 @@ import { moment } from "obsidian";
 import { isTimestamp, type TempFragment } from "./temporal-frag";
 
 export function formatDuration(seconds: number) {
-  if (seconds === 0) return "00:00:00";
+  if (seconds === 0) return "00:00";
   return moment
     .utc(moment.duration({ seconds }).as("milliseconds"))
-    .format("HH:mm:ss");
+    .format("HH:mm:ss")
+    .replace(/^00:/, "");
 }
 
 export function toDurationISOString(duration: number) {

@@ -1,5 +1,5 @@
-import * as Tooltip from "@radix-ui/react-tooltip";
 import { Controls, Gesture } from "@vidstack/react";
+import * as Tooltip from "@/components/tooltip";
 
 import * as Buttons from "../buttons";
 import * as Menus from "../menus";
