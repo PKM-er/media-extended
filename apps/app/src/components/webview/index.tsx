@@ -11,6 +11,7 @@ import {
 import { useMergeRefs } from "use-callback-ref";
 import { getUserAgent } from "@/lib/remote-player/ua";
 import { cn } from "@/lib/utils";
+import { usePlugin } from "../context";
 import { useEvents, type WebviewEventProps } from "./events";
 
 export type WebviewElement = WebviewTag & {
@@ -25,6 +26,18 @@ interface WebviewProps {
   muted?: boolean;
 }
 
+function usePreload() {
+  const plugin = usePlugin();
+  const [preloadReady, setPreloadReady] = useState<boolean | null>(false);
+  useEffect(() => {
+    plugin.biliReq
+      .untilReady()
+      .then(() => setPreloadReady(true))
+      .catch(() => setPreloadReady(null));
+  }, [plugin.biliReq]);
+  return preloadReady;
+}
+
 export const WebView = forwardRef<
   WebviewElement,
   WebviewProps &
@@ -36,6 +49,8 @@ export const WebView = forwardRef<
   ref,
 ) {
   const webviewRef = useRef<WebviewElement>(null);
+
+  const preloadReady = usePreload();
 
   const [domReady, setIsDomReady] = useState(false);
   const restProps = useEvents(props, webviewRef);
@@ -64,9 +79,19 @@ export const WebView = forwardRef<
     }
   }, []);
 
+  const internalRef = useMergeRefs([webviewRef, ref]);
+
+  if (restProps.preload) {
+    if (preloadReady === false) {
+      return null;
+    } else if (preloadReady === null) {
+      restProps.preload = undefined;
+    }
+  }
+
   return (
     <webview
-      ref={useMergeRefs([webviewRef, ref])}
+      ref={internalRef}
       className={cn("h-full w-full", className)}
       // eslint-disable-next-line react/no-unknown-property
       useragent={ua}

@@ -76,6 +76,7 @@
     "minisearch": "^6.3.0",
     "monkey-around": "^2.3.0",
     "nanoevents": "^9.0.0",
+    "nanoid": "^5.0.6",
     "p-limit": "^5.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

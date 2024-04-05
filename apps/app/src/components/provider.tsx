@@ -7,14 +7,18 @@ import {
   type MediaProviderProps,
   Track,
 } from "@vidstack/react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getPartition } from "@/lib/remote-player/const";
 import { WebviewProviderLoader } from "@/lib/remote-player/loader";
 import { cn } from "@/lib/utils";
+import { channelId } from "@/web/bili-req/channel";
+import { BILI_REQ_STORE } from "@/web/bili-req/const";
 import { useApp, useMediaViewStore } from "./context";
 import { useControls } from "./hook/use-hash";
 import { useTextTracks } from "./use-tracks";
 import { WebView } from "./webview";
+
+const { preload } = channelId(BILI_REQ_STORE);
 
 export function MediaProviderEnhanced({
   loaders,
@@ -65,6 +69,7 @@ export function MediaProviderEnhanced({
               webpreferences="autoplayPolicy=user-gesture-required"
               // devtools
               partition={getPartition(appId)}
+              preload={preload}
               ref={(inst) => {
                 provider.load(inst);
               }}

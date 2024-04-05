@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type { TextTrackInit, VTTContent } from "@vidstack/react";
+import type { XHRIntercepter } from "@/lib/remote-player/lib/xhr-hijack";
 import { BiliApiError } from "../bili-api/base";
 import type { PlayerV2Response } from "../bili-api/player-v2";
 import type { SubtitlesConfig } from "../bili-api/subtitle";
+import { storeId } from "../bili-req/scripts/store-id";
 import { requireMx } from "./_require";
 
 const { waitForSelector, MediaPlugin } = requireMx();
@@ -22,7 +24,6 @@ declare global {
 }
 
 export default class BilibiliPlugin extends MediaPlugin {
-  #playerV2API: string | null = null;
   #subtitleUrl = new Map<string, string>();
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
@@ -31,17 +32,10 @@ export default class BilibiliPlugin extends MediaPlugin {
     return css;
   }
   async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
-    if (!this.#playerV2API) {
-      console.error("Player V2 API not loaded");
-      return [];
-    }
+    const intercepter = (window as any)[storeId] as XHRIntercepter;
     try {
-      const resp = await fetch(this.#playerV2API, { credentials: "include" });
-      if (!resp.ok) {
-        throw new Error("Failed to fetch player V2 API, " + resp.statusText);
-      }
-      const json = (await resp.json()) as PlayerV2Response;
-      console.debug("Fetching player V2 API", this.#playerV2API, json);
+      const resp = await intercepter.getRequest();
+      const json = JSON.parse(resp) as PlayerV2Response;
       if (json.code !== 0) {
         throw new BiliApiError(json.message, json.code);
       }
@@ -81,21 +75,7 @@ export default class BilibiliPlugin extends MediaPlugin {
         return { value: window.player.getManifest() };
       }),
     );
-    this.register(
-      this.controller.on("mx-bili-player-v2-url", ({ payload }) => {
-        this.#playerV2API = payload;
-        console.debug("Player V2 API received");
-        this.getTracks()
-          .then((tracks) => {
-            console.debug("Sending tracks to remote", tracks);
-            if (tracks.length === 0) return;
-            this.controller.send("mx-text-tracks", { tracks });
-          })
-          .catch((e) => {
-            console.error("Failed to get tracks", e);
-          });
-      }),
-    );
+
     localStorage.setItem("recommend_auto_play", "close");
     // disable autoplay
     localStorage.setItem(
@@ -106,6 +86,9 @@ export default class BilibiliPlugin extends MediaPlugin {
     this.revertAutoSeek();
     Promise.all([this.toggleDanmaku(false)]);
     await this.untilWebFullscreen();
+    await this.getTracks().then((tracks) => {
+      if (tracks.length > 0) this.controller.send("mx-text-tracks", { tracks });
+    });
   }
 
   get player() {

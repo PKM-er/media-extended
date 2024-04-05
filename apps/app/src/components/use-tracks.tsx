@@ -10,11 +10,9 @@ import type {
 } from "@vidstack/react";
 import { Notice } from "obsidian";
 import { useEffect, useMemo, useState } from "react";
-import { MediaURL } from "@/info/media-url";
-import { MediaHost } from "@/info/supported";
 import { setDefaultLang } from "@/lib/lang/default-lang";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { useMediaViewStore, usePlugin, useSettings } from "./context";
+import { useMediaViewStore, useSettings } from "./context";
 
 export function useRemoteTextTracks() {
   // const externalTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
@@ -61,28 +59,6 @@ export function useRemoteTextTracks() {
       player.textTracks.removeEventListener("mode-change", updateCaption);
     };
   }, [player, loaded]);
-}
-
-export function useBilibiliTextTracks() {
-  const isBilibili = useMediaViewStore(
-    ({ source }) =>
-      source?.url instanceof MediaURL && source.url.type === MediaHost.Bilibili,
-  );
-  const plugin = usePlugin();
-  const provider = useMediaProvider();
-  const canPlay = useMediaState("canPlay");
-  useEffect(() => {
-    if (!isBilibili || !(provider instanceof WebiviewMediaProvider) || !canPlay)
-      return;
-    provider.media.methods.bili_getManifest().then(async (manifest) => {
-      try {
-        const reqUrl = await plugin.biliReq.getPlayerV2Request(manifest);
-        provider.media.send("mx-bili-player-v2-url", reqUrl);
-      } catch (e) {
-        console.error("Failed to get player V2 API for bilibili", e);
-      }
-    });
-  }, [plugin.biliReq, provider, isBilibili, canPlay]);
 }
 
 export function useTextTracks() {

@@ -15,6 +15,7 @@ import { MediaURL } from "@/info/media-url";
 import { MediaHost } from "@/info/supported";
 import { GET_PORT_TIMEOUT, PORT_MESSAGE } from "@/lib/remote-player/const";
 import { LoginModal } from "@/login/modal";
+import { replaceEnv } from "@/web/bili-req/const";
 import { plugins } from "@/web/plugin";
 import { titleParser } from "@/web/title";
 import { MessageController, TimeoutError } from "../message";
@@ -169,7 +170,7 @@ export class WebiviewMediaProvider implements MediaProviderAdapter {
       const unsub = this.media.onReady(
         async () => {
           window.clearTimeout(timeoutId);
-          await this.media.methods.loadPlugin(plugins[host]);
+          await this.media.methods.loadPlugin(replaceEnv(plugins[host]));
           resolve();
         },
         { once: true },

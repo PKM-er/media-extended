@@ -210,7 +210,6 @@ export type MsgCtrlRemote = MessageController<
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;
     "mx-toggle-webfs": boolean;
-    "mx-bili-player-v2-url": string;
   },
   Record<CustomEvent, void> & MediaEventPayloadMap & CustomEventWithPayload
 >;
@@ -251,7 +250,6 @@ export type MsgCtrlLocal = MessageController<
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "mx-toggle-controls": boolean;
     "mx-toggle-webfs": boolean;
-    "mx-bili-player-v2-url": string;
   }
 >;
 

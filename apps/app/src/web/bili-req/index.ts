@@ -1,197 +1,127 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { IpcRendererEvent } from "electron/renderer";
-// import { openDB, DBSchema } from "idb";
+import preloadScript from "inline:./scripts/preload";
+import preloadLoader from "inline:./scripts/preload-patch";
+import userScript from "inline:./scripts/userscript";
 import { Component, Platform } from "obsidian";
-import type { FileSystemAdapter } from "obsidian";
-import { createEventEmitter } from "@/lib/emitter";
 import type MxPlugin from "@/mx-main";
-import { Aid, Bvid, Cid } from "../bili-api/base";
-import { channelId, buildMainProcessScript, RequestInfo } from "./base";
+import { evalInMainPs, getUserDataPath } from "../session/utils";
+import { channelId } from "./channel";
+import { BILI_REQ_STORE, replaceEnv } from "./const";
 
-// type SubtitleCache = {
-//   ab: ArrayBuffer;
-//   gzip: boolean;
-//   id: number;
-//   lan: string;
-//   lan_doc: string;
-//   md5: string;
-// } & Aid &
-//   Bvid &
-//   Cid;
+const preloadLoaderCode = replaceEnv(preloadLoader);
+const userScriptCode = replaceEnv(userScript);
+const preloadScriptCode = replaceEnv(preloadScript).replace(
+  "__USERSCRIPT__",
+  JSON.stringify(userScriptCode),
+);
+const channel = channelId(BILI_REQ_STORE);
 
-// interface MxCache extends DBSchema {
-//   "bili-subtitle": {
-//     key: string;
-//     value: SubtitleCache;
-//   };
-// }
-
-type WebviewRequestEvents = {
-  player_v2: (resp: Partial<Aid & Bvid> & Cid & { url: string }) => void;
-};
-
-// function toVideoId(id: Aid & Bvid & Cid): string {
-//   return `${id.aid}-${id.bvid}-${id.cid}`;
-// }
+declare module "obsidian" {
+  interface MetadataCache {
+    on(name: "mx-preload-ready", callback: () => any, ctx?: any): EventRef;
+    on(
+      name: "mx-preload-err",
+      callback: (err: unknown) => any,
+      ctx?: any,
+    ): EventRef;
+    trigger(name: "mx-preload-ready"): void;
+    trigger(name: "mx-preload-err", err: unknown): void;
+  }
+}
 
 export class BilibiliRequestHacker extends Component {
-  #reqEvents = createEventEmitter<WebviewRequestEvents>();
-  // #playerV2ApiRespCache = new Map<string, PlayerV2Data>();
-  private _playerV2ApiUrlCache = new Map<string, string>();
-
-  app;
-  // db;
+  get app() {
+    return this.plugin.app;
+  }
   constructor(public plugin: MxPlugin) {
     super();
-    this.app = plugin.app;
-    // this.db = openDB<MxCache>(`mx-cache-${this.app.appId}`, 1, {
-    //   upgrade(db) {
-    //     db.createObjectStore("bili-subtitle");
-    //   },
-    // });
-    this.app = plugin.app;
   }
 
-  // async getPlayerApiResp(
-  //   port: MsgCtrlLocal,
-  //   timeout = 10e3,
-  // ): Promise<PlayerV2Data> {
-  //   const { aid, bvid, cid } = await port.methods.bili_getManifest();
-  //   const internalId = toVideoId({ aid, bvid, cid });
-  //   const cached = this.#playerV2ApiRespCache.get(internalId);
-  //   if (cached) return cached;
-  //   let cachedUrl =
-  //     this.#playerV2ApiUrlCache.get(`${bvid}-${cid}`) ??
-  //     this.#playerV2ApiUrlCache.get(`${aid}-${cid}`);
+  /**
+   * null if load failed
+   */
+  ready: boolean | null = false;
 
-  //   if (!cachedUrl)
-  //     cachedUrl = await new Promise<string>((resolve, reject) => {
-  //       const unload = this.#reqEvents.on(`player_v2`, (resp) => {
-  //         if (!(cid === resp.cid && (aid === resp.aid || bvid === resp.bvid))) {
-  //           return;
-  //         }
-  //         resolve(resp.url);
-  //         window.clearTimeout(timeoutId);
-  //       });
-  //       const timeoutId = window.setTimeout(() => {
-  //         unload();
-  //         reject(new Error("player_v2 timeout: " + internalId));
-  //       }, timeout);
-  //     });
+  private onReady(): void {
+    this.ready = true;
+    this.app.metadataCache.trigger("mx-preload-ready");
+  }
+  private onError(err: unknown): void {
+    console.error("Failed to load preload", err);
+    this.ready = null;
+    this.app.metadataCache.trigger("mx-preload-err", err);
+  }
 
-  //   const apiResp = await port.methods.fetch(cachedUrl, {
-  //     gzip: false,
-  //     credentials: "include",
-  //   });
-  //   if (apiResp.type !== "application/json") {
-  //     throw new Error(
-  //       `Unexpected response type ${apiResp.type} for player_v2 api`,
-  //     );
-  //   }
-  //   const resp = JSON.parse(
-  //     new TextDecoder().decode(apiResp.ab),
-  //   ) as PlayerV2Response;
-  //   if (resp.code !== 0) {
-  //     throw new Error(`player_v2 api error: (${resp.code}) ${resp.message}`);
-  //   }
-  //   this.#playerV2ApiRespCache.set(internalId, resp.data);
-  //   return resp.data;
-  // }
+  untilReady(timeout = 5e3): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.ready) return resolve();
+      if (this.ready === null) return reject(new Error("Cannot load"));
+      const onReady = () => {
+        this.app.metadataCache.off("mx-preload-ready", onReady);
+        this.app.metadataCache.off("mx-preload-err", onError);
+        resolve();
+      };
+      const onError = (err: unknown) => {
+        this.app.metadataCache.off("mx-preload-ready", onReady);
+        this.app.metadataCache.off("mx-preload-err", onError);
+        reject(err);
+      };
+      this.app.metadataCache.on("mx-preload-ready", onReady);
+      this.app.metadataCache.on("mx-preload-err", onError);
+      setTimeout(() => {
+        onError(new Error("Timeout"));
+      }, timeout);
+    });
+  }
 
-  // async cacheSubtitle(id: number, subtitle: SubtitleCache) {
-  //   const db = await this.db;
-  //   db.put("bili-subtitle", subtitle, id.toString());
-  // }
-  // async getCachedSubtitle(id: number) {
-  //   const db = await this.db;
-  //   const cache = await db.get("bili-subtitle", id.toString());
-  //   if (!cache) return null;
-  //   const { ab, gzip } = cache;
-  //   const mimeType = "application/json";
-  //   const blob = gzip
-  //     ? await gzippedStreamToBlob(abToStream(ab), mimeType)
-  //     : new Blob([ab], { type: mimeType });
-  //   const jsonText = await blob.text();
-  //   return JSON.parse(jsonText);
-  // }
-  // async hasSubtitle(id: number): Promise<boolean> {
-  //   const db = await this.db;
-  //   return (await db.count("bili-subtitle", id.toString())) > 0;
-  // }
-
-  async onload(): Promise<void> {
-    if (!Platform.isDesktopApp)
-      throw new Error("Cannot register ipc events, not in desktop app");
-
+  onload(): void {
+    if (!Platform.isDesktopApp) {
+      this.onReady();
+      return;
+    }
     const path = require("path") as typeof import("node:path");
     const fs = require("fs/promises") as typeof import("node:fs/promises");
-    const { ipcRenderer } = require("electron");
-    const remote =
-      require("@electron/remote") as typeof import("@electron/remote");
 
-    const onWebviewRequest = (_: IpcRendererEvent, data: RequestInfo) => {
-      if (data.type !== "player_v2") return;
-      const url = new URL(data.url);
-      const aid = url.searchParams.get("aid"),
-        bvid = url.searchParams.get("bvid"),
-        cid = url.searchParams.get("cid");
-      if ((!aid && !bvid) || !cid) return;
-      this.#reqEvents.emit("player_v2", {
-        url: data.url,
-        aid: +aid!,
-        bvid: bvid!,
-        cid: +cid,
-      });
-      const cacheKey = bvid ? `${bvid}-${cid}` : `${aid}-${cid}`;
-      this._playerV2ApiUrlCache.set(cacheKey, data.url);
-    };
-    ipcRenderer.on(channelId, onWebviewRequest);
+    const userDataDir = getUserDataPath();
+    const preloadLoaderPath = path.join(
+      userDataDir,
+      `mx-player-hack.${Date.now()}.js`,
+    );
+    const preloadScriptPath = path.join(
+      userDataDir,
+      `mx-preload.${Date.now()}.js`,
+    );
 
-    try {
-      const webContentsId = remote.getCurrentWebContents().id;
-
-      // need hack method, since dom-ready event is fired after initial request is sent
-      // so XHR/fetch monkey patching will not work for initial request interception
-      const hackScript = buildMainProcessScript(webContentsId, this.app);
-      const hackScriptPath = path.join(
-        (this.app.vault.adapter as FileSystemAdapter).getBasePath(),
-        ...this.app.vault.configDir.split("/"),
-        `mx-player-hack.${Date.now()}.js`,
-      );
-      await fs.writeFile(hackScriptPath, hackScript, "utf-8");
-      try {
-        await remote.require(hackScriptPath);
-        console.log("mx-player-hack loaded");
-      } finally {
-        await fs.rm(hackScriptPath, { force: true, maxRetries: 5 });
-      }
+    (async () => {
+      await Promise.all([
+        fs.writeFile(preloadLoaderPath, preloadLoaderCode, "utf-8"),
+        fs.writeFile(preloadScriptPath, preloadScriptCode, "utf-8"),
+      ]);
+      // console.log(preloadLoaderPath, preloadScriptPath);
       this.register(() => {
-        ipcRenderer.off(channelId, onWebviewRequest);
+        fs.rm(preloadScriptPath, { force: true, maxRetries: 5 }).catch((e) =>
+          console.warn("Failed to remove preload script", preloadScriptPath, e),
+        );
       });
-    } catch (e) {
-      ipcRenderer.off(channelId, onWebviewRequest);
-      throw e;
-    }
-  }
-  async getPlayerV2Request(id: Aid & Bvid & Cid) {
-    if (this._playerV2ApiUrlCache.has(`${id.bvid}-${id.cid}`))
-      return this._playerV2ApiUrlCache.get(`${id.bvid}-${id.cid}`)!;
-    if (this._playerV2ApiUrlCache.has(`${id.aid}-${id.cid}`))
-      return this._playerV2ApiUrlCache.get(`${id.aid}-${id.cid}`)!;
-    return new Promise<string>((resolve, reject) => {
-      const unload = this.#reqEvents.on("player_v2", (resp): void => {
-        if (resp.cid !== id.cid) return;
-        if (id.bvid && resp.bvid !== id.bvid) return;
-        if (id.aid && resp.aid !== id.aid) return;
-        resolve(resp.url);
-        unload();
+      try {
+        await evalInMainPs(preloadLoaderPath);
+        console.debug("preload patch loaded");
+      } finally {
+        await fs
+          .rm(preloadLoaderPath, { force: true, maxRetries: 5 })
+          .catch((e) =>
+            console.warn("Failed to remove hack script", preloadLoaderPath, e),
+          );
+      }
+      const { ipcRenderer } = require("electron");
+      console.log(channel.enable);
+      await ipcRenderer.invoke(channel.enable, preloadScriptPath);
+      this.register(() => {
+        ipcRenderer.invoke(channel.disable);
       });
-      setTimeout(() => {
-        reject(new Error("player_v2 timeout"));
-        unload();
-      }, 5e3);
-    });
+      console.log("mx-player-hack loaded");
+      this.onReady();
+    })().catch((e) => this.onError(e));
   }
 }
