@@ -76,12 +76,6 @@ export default class BilibiliPlugin extends MediaPlugin {
       }),
     );
 
-    localStorage.setItem("recommend_auto_play", "close");
-    // disable autoplay
-    localStorage.setItem(
-      "bpx_player_profile",
-      JSON.stringify({ media: { autoplay: false } }),
-    );
     await super.onload();
     this.revertAutoSeek();
     Promise.all([this.toggleDanmaku(false)]);

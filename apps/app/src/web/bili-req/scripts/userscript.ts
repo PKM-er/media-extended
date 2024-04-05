@@ -12,4 +12,23 @@ const intercepter = new XHRIntercepter((url) =>
 intercepter.load();
 (window as any)[storeId] = intercepter;
 
+const enum Codec {
+  default = 0,
+  hevc = 1,
+  avc = 2,
+  av1 = 3,
+}
+
+localStorage.setItem("recommend_auto_play", "close");
+// disable autoplay
+localStorage.setItem(
+  "bpx_player_profile",
+  JSON.stringify({ media: { autoplay: false } }),
+);
+// default to hevc
+localStorage.setItem(
+  "bilibili_player_codec_prefer_type",
+  JSON.stringify(Codec.hevc),
+);
+
 console.log("intercepter loaded");
