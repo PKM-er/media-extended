@@ -13,17 +13,19 @@ declare module "obsidian" {
 
 export function registerTranscriptView(plugin: MxPlugin) {
   LocalTranscriptView.register(plugin);
-  plugin.register(
-    around(plugin.app.commands.commands["editor:open-search"] as Command, {
-      checkCallback: (next) =>
-        function (checking) {
-          if (next?.(checking)) return true;
-          const view =
-            plugin.app.workspace.getActiveViewOfType(LocalTranscriptView);
-          if (!view) return false;
-          if (checking) return true;
-          view.store.getState().toggleSearchBox();
-        },
-    }),
+  plugin.app.workspace.onLayoutReady(() =>
+    plugin.register(
+      around(plugin.app.commands.commands["editor:open-search"] as Command, {
+        checkCallback: (next) =>
+          function (checking) {
+            if (next?.(checking)) return true;
+            const view =
+              plugin.app.workspace.getActiveViewOfType(LocalTranscriptView);
+            if (!view) return false;
+            if (checking) return true;
+            view.store.getState().toggleSearchBox();
+          },
+      }),
+    ),
   );
 }
