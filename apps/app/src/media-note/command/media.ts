@@ -14,6 +14,22 @@ const createMediaCommands = (plugin: MxPlugin): Controls[] => [
       media.paused = !media.paused;
     },
   },
+  {
+    id: "play",
+    label: "Play",
+    icon: "play",
+    action: (media) => {
+      media.play();
+    },
+  },
+  {
+    id: "pause",
+    label: "Pause",
+    icon: "pause",
+    action: (media) => {
+      media.pause();
+    },
+  },
   ...[0.5, 1, 2, 5, 10, 30, 60].flatMap((sec): Controls[] => [
     {
       id: `forward-${sec}s`,
@@ -83,17 +99,17 @@ function speed(plugin: MxPlugin): Controls[] {
     ...speedOptions
       .filter((s) => s > 1)
       .map((speed): Controls => {
-        let repeated = false;
+        let repeating = false;
         const { callback } = handleRepeatHotkey<[MediaPlayerInstance]>(plugin, {
           onKeyDown(evt, media) {
-            if (evt.repeat) {
-              repeated = true;
+            if (evt.repeat && !repeating) {
+              repeating = true;
               media.playbackRate = speed;
               notifyManualHide(`Fast forwarding at ${speed}x`);
             }
           },
           onKeyUp(_evt, media) {
-            if (repeated) {
+            if (repeating) {
               media.playbackRate = 1;
               notice?.hide();
             }
