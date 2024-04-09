@@ -23,70 +23,63 @@ const getPlayerDecos = (
   // if (!sourcePath) console.warn("missing sourcePath", mdView);
 
   const doc = state.doc;
-  let isImgEmbed = !1,
-    imgAltText = "",
-    imgUrlText = "",
-    imgMarkLoc = -1;
+  let imgInfo: { alt?: string; url?: string; imgMarkLoc: number } | null = null;
 
   syntaxTree(state).iterate({
     from,
     to,
     enter: ({ type, from, to }) => {
+      console.log(type, from, to, doc.sliceString(from, to));
       const nodeTypes = new Set(
         (type.prop(tokenClassNodeProp) as string | undefined)?.split(" "),
       );
-      if (!nodeTypes) return;
+      if (nodeTypes.size === 0) return;
       if (nodeTypes.has("image-marker")) {
-        isImgEmbed = true;
-        imgMarkLoc = from;
-      } else if (
-        nodeTypes.has("image-alt-text") &&
-        !nodeTypes.has("formatting")
-      ) {
-        imgAltText = doc.sliceString(from, to);
-      } else if (
-        isImgEmbed &&
-        nodeTypes.has("url") &&
-        !nodeTypes.has("formatting")
-      ) {
-        imgUrlText = doc.sliceString(from, to);
-      } else if (isImgEmbed && imgUrlText && nodeTypes.has("formatting")) {
-        if (isMdFavorInternalLink(imgUrlText)) {
-          return;
-        }
-        const urlInfo = plugin.resolveUrl(imgUrlText);
-        if (urlInfo) {
-          if (isFileMediaInfo(urlInfo)) {
-            const link = plugin.app.metadataCache.fileToLinktext(
-              urlInfo.file,
-              "",
-            );
-            addDeco(
-              new InvalidNoticeWidget(
-                `Please use internal embed in favor of file url embed: ![[${link}]]`,
-                imgMarkLoc,
-                to,
-              ),
-              imgMarkLoc,
-              to,
-            );
-          } else if (shouldOpenMedia(urlInfo, plugin)) {
-            const viewType = plugin.urlViewType.getPreferred(urlInfo);
-            const widget = new WidgetCtorMap[viewType](
-              plugin,
-              urlInfo,
-              imgAltText,
-              imgMarkLoc,
-              to,
-            );
-            addDeco(widget, imgMarkLoc, to);
-          }
-        }
+        imgInfo = { imgMarkLoc: from };
+        return;
+      }
 
-        isImgEmbed = false;
-        imgUrlText = "";
-        imgAltText = "";
-        imgMarkLoc = -1;
+      if (!imgInfo) return;
+
+      if (nodeTypes.has("image-alt-text") && !nodeTypes.has("formatting")) {
+        imgInfo.alt = doc.sliceString(from, to);
+        return;
+      }
+
+      if (nodeTypes.has("url") && !nodeTypes.has("formatting")) {
+        imgInfo.url = doc.sliceString(from, to);
+        return;
+      }
+
+      if (!(nodeTypes.has("formatting") && imgInfo.url)) return;
+
+      const { imgMarkLoc, alt, url } = imgInfo;
+      imgInfo = null;
+      if (isMdFavorInternalLink(url)) return;
+      const urlInfo = plugin.resolveUrl(url);
+
+      if (!urlInfo) return;
+      if (isFileMediaInfo(urlInfo)) {
+        const link = plugin.app.metadataCache.fileToLinktext(urlInfo.file, "");
+        addDeco(
+          new InvalidNoticeWidget(
+            `Please use internal embed in favor of file url embed: ![[${link}]]`,
+            imgMarkLoc,
+            to,
+          ),
+          imgMarkLoc,
+          to,
+        );
+      } else if (shouldOpenMedia(urlInfo, plugin)) {
+        const viewType = plugin.urlViewType.getPreferred(urlInfo);
+        const widget = new WidgetCtorMap[viewType](
+          plugin,
+          urlInfo,
+          alt ?? "",
+          imgMarkLoc,
+          to,
+        );
+        addDeco(widget, imgMarkLoc, to);
       }
     },
   });
