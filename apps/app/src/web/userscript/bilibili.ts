@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { TextTrackInit, VTTContent } from "@vidstack/react";
+import type { TextTrackInit } from "@vidstack/react";
 import type { XHRIntercepter } from "@/lib/remote-player/lib/xhr-hijack";
+import type { VTTContent } from "@/transcript/store";
 import { BiliApiError } from "../bili-api/base";
 import type { PlayerV2Response } from "../bili-api/player-v2";
 import type { SubtitlesConfig } from "../bili-api/subtitle";
@@ -63,6 +64,7 @@ export default class BilibiliPlugin extends MediaPlugin {
     const json = (await resp.json()) as SubtitlesConfig;
     return {
       cues: json.body.map((sub) => ({
+        id: sub.sid.toString(),
         startTime: sub.from,
         endTime: sub.to,
         text: sub.content,

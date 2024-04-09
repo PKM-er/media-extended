@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type {
-  MediaErrorCode,
-  TextTrackInit,
-  VTTContent,
-} from "@vidstack/react";
+import type { MediaErrorCode, TextTrackInit } from "@vidstack/react";
+import type { VTTContent } from "@/transcript/store";
 import type { BilibiliPlayerManifest } from "@/web/bili-api/base";
 import type { MessageController, Nil } from "../message";
 // import { enumerate } from "../must-include";

@@ -1,9 +1,10 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import type { VTTCue } from "media-captions";
+import type { VTTCueInit } from "@vidstack/react";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { CueSearchResult } from "@/transcript/context";
+import type { VTTCueWithId } from "@/transcript/store";
 import { CueActions, CueLine } from "./cue-line";
 
 export interface CueLineListRef {
@@ -12,7 +13,7 @@ export interface CueLineListRef {
 export interface CueLineListProps {
   className?: string;
   searchResult?: CueSearchResult[];
-  children: VTTCue[];
+  children: VTTCueWithId[];
 }
 export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
   function CueLineList({ children: cues, className, searchResult }, ref) {

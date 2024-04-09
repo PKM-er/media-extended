@@ -1,26 +1,45 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { TextTrackInit, VTTContent } from "@vidstack/react";
+import type { TextTrackInit, VTTCueInit, VTTRegionInit } from "@vidstack/react";
 import type { DBSchema, IDBPDatabase } from "idb";
 import { openDB } from "idb";
+import { isEqual } from "lodash-es";
+import type { VTTHeaderMetadata } from "media-captions";
 import { Component } from "obsidian";
 import { createEventEmitter } from "@/lib/emitter";
 import { gzipBlobToJson, jsonToGzipBlob } from "@/lib/store";
 import type MxPlugin from "@/mx-main";
 
+interface CaptionData extends TextTrackInit {
+  /** caption internal id */
+  id: string;
+  /** media source id */
+  sid: string;
+  data: {
+    blob: Blob;
+    cueCount: number;
+  } | null;
+}
+
+export type VTTCueWithId = VTTCueInit & { id: string };
+
+export interface VTTContent {
+  cues: VTTCueWithId[];
+  regions?: VTTRegionInit[];
+  metadata?: VTTHeaderMetadata;
+}
+
 interface MxCache extends DBSchema {
   "caption-data": {
     key: [string, string];
-    value: TextTrackInit & {
-      /** caption internal id */
-      id: string;
-      /** media source id */
-      sid: string;
-      data: {
-        blob: Blob;
-        cueCount: number;
-      } | null;
-    };
+    value: CaptionData;
     indexes: { "idx-sid": "sid" };
+  };
+  "source-cache": {
+    key: string;
+    value: {
+      id: string;
+      title: string;
+    };
   };
 }
 
@@ -53,20 +72,43 @@ export class CacheStore extends Component {
 
   event = createEventEmitter<{
     "db-ready": (db: IDBPDatabase<MxCache>) => void;
+    "title-update": (sid: string, title: string) => void;
+    "caption-update": (sid: string, id: string) => void;
   }>();
 
   onload(): void {
     openDB<MxCache>("mx-cache", 1, {
       upgrade(db) {
-        const store = db.createObjectStore("caption-data", {
+        const captionStore = db.createObjectStore("caption-data", {
           keyPath: ["sid", "id"],
         });
-        store.createIndex("idx-sid", "sid", { unique: false });
+        captionStore.createIndex("idx-sid", "sid", { unique: false });
+        db.createObjectStore("source-cache", {
+          keyPath: "id",
+        });
       },
     }).then((db) => {
       this.#db = db;
       this.event.emit("db-ready", db);
     });
+  }
+
+  async getTitle(sid: string) {
+    const tx = (await this.db).transaction("source-cache", "readonly");
+    const store = tx.store;
+    const data = await store.get(sid);
+    if (!data) return null;
+    return data.title;
+  }
+  async updateSourceCache(sid: string, data: { title: string }) {
+    const tx = (await this.db).transaction("source-cache", "readwrite");
+    const store = tx.store;
+    const prev = await store.get(sid);
+    await store.put({ id: sid, ...data });
+    await tx.done;
+    if (data.title !== prev?.title) {
+      this.event.emit("title-update", sid, data.title);
+    }
   }
 
   async saveCaptionList(
@@ -75,13 +117,21 @@ export class CacheStore extends Component {
   ): Promise<void> {
     const tx = (await this.db).transaction("caption-data", "readwrite");
     const store = tx.store;
+    const updated: { id: string; sid: string }[] = [];
     await Promise.all(
       data.map(async (item) => {
         const prev = await store.get([sid, item.id]);
-        await store.put({ sid, ...item, data: prev?.data ?? null });
+        const next = { sid, ...item, data: prev?.data ?? null };
+        if (!diffCaption(next, prev)) {
+          updated.push({ id: item.id, sid });
+        }
+        await store.put(next);
       }),
     );
     await tx.done;
+    updated.forEach(({ id, sid }) =>
+      this.event.emit("caption-update", sid, id),
+    );
   }
   updateCaption = (sid: string, id: string, data: VTTContent | null) =>
     this.withDb(async (db): Promise<boolean> => {
@@ -100,6 +150,7 @@ export class CacheStore extends Component {
       }
       await store.put(item);
       await tx.done;
+      this.event.emit("caption-update", sid, id);
       return true;
     });
 
@@ -126,4 +177,12 @@ export class CacheStore extends Component {
   static decompress(blob: Blob) {
     return gzipBlobToJson<VTTContent>(blob);
   }
+}
+
+function diffCaption(a: CaptionData, b: CaptionData | undefined) {
+  if (!b) return false;
+  const { data: aData, ...aInfo } = a;
+  const { data: bData, ...bInfo } = b;
+  if (isEqual(aInfo, bInfo) && aData?.cueCount === bData?.cueCount) return true;
+  return false;
 }

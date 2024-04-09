@@ -1,8 +1,8 @@
-import type { VTTCue } from "media-captions";
 import { Notice, htmlToMarkdown } from "obsidian";
 import { forwardRef, useMemo } from "react";
 import { formatDuration } from "@/lib/hash/format";
 import { cn } from "@/lib/utils";
+import type { VTTCueWithId } from "@/transcript/store";
 import { CopyIcon, PlayIcon } from "../icon";
 
 export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
@@ -13,7 +13,7 @@ export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 export interface CueActionsProps {
-  children: VTTCue;
+  children: VTTCueWithId;
   onPlay?: () => void;
 }
 

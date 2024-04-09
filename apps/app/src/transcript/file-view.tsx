@@ -7,21 +7,21 @@ import type MxPlugin from "@/mx-main";
 import {
   isCaptionFile,
   isSupportedCaptionExt,
-  localTranscriptViewType,
   supportedCaptionExts,
   toTrack,
+  transcriptViewType,
 } from "./const";
 import { createTranscriptViewStore, TranscriptViewContext } from "./context";
 
 export class LocalTranscriptView extends EditableFileView {
   static register(plugin: MxPlugin) {
     plugin.registerView(
-      localTranscriptViewType,
+      transcriptViewType.local,
       (leaf) => new LocalTranscriptView(leaf, plugin),
     );
     plugin.registerExtensions(
       supportedCaptionExts as unknown as string[],
-      localTranscriptViewType,
+      transcriptViewType.local,
     );
   }
 
@@ -38,7 +38,7 @@ export class LocalTranscriptView extends EditableFileView {
     return isSupportedCaptionExt(extension);
   }
   getViewType(): string {
-    return localTranscriptViewType;
+    return transcriptViewType.local;
   }
   async onLoadFile(file: TFile): Promise<void> {
     await super.onLoadFile(file);

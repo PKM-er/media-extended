@@ -2,6 +2,7 @@ import { around } from "monkey-around";
 import type { Command } from "obsidian";
 import type MxPlugin from "@/mx-main";
 import { LocalTranscriptView } from "./file-view";
+import { WebpageTranscriptView } from "./webpage-view";
 
 declare module "obsidian" {
   interface App {
@@ -13,6 +14,7 @@ declare module "obsidian" {
 
 export function registerTranscriptView(plugin: MxPlugin) {
   LocalTranscriptView.register(plugin);
+  WebpageTranscriptView.register(plugin);
   plugin.app.workspace.onLayoutReady(() =>
     plugin.register(
       around(plugin.app.commands.commands["editor:open-search"] as Command, {

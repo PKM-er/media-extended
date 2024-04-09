@@ -1,6 +1,6 @@
-import type { VTTContent } from "@vidstack/react";
 import { LifeCycle } from "@/lib/lifecycle";
 import { TimeoutError } from "@/lib/message";
+import type { VTTContent } from "@/transcript/store";
 import { registerEvents } from "../hook/event-register";
 import type { MediaStateRef } from "../hook/handler-register";
 import { registerHandlers } from "../hook/handler-register";

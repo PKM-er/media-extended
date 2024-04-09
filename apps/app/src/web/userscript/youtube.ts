@@ -79,8 +79,9 @@ ytm-companion-ad-renderer {
 }
 `.trim();
 
-import type { TextTrackInit, VTTContent } from "@vidstack/react";
+import type { TextTrackInit } from "@vidstack/react";
 /* eslint-disable @typescript-eslint/naming-convention */
+import type { VTTContent } from "@/transcript/store";
 import { requireMx } from "./_require";
 
 const { waitForSelector, MediaPlugin } = requireMx();
@@ -126,22 +127,31 @@ export default class YouTubePlugin extends MediaPlugin {
       } satisfies TextTrackInit;
     });
   }
-  parser = new DOMParser();
+  #parser = new DOMParser();
+  #decodeHTML(text: string) {
+    return (
+      this.#parser.parseFromString(text, "text/html").documentElement
+        .textContent ?? text
+    );
+  }
+
   async getTrack(_id: string): Promise<VTTContent | null> {
     const src = this.captionSrc.get(_id);
     if (!src) return null;
     const resp = await fetch(src);
     if (!resp.ok) return null;
     const xml = await resp.text();
-    const xmlDoc = this.parser.parseFromString(xml, "text/xml");
-    const textElements = xmlDoc.getElementsByTagName("text");
-    const vtt: VTTContent = { cues: [] };
-    for (const text of textElements) {
-      const startTime = parseFloat(text.getAttribute("start")!);
-      const dur = parseFloat(text.getAttribute("dur")!);
-      const endTime = startTime + dur;
-      vtt.cues!.push({ startTime, endTime, text: text.textContent! });
-    }
+    const xmlDoc = this.#parser.parseFromString(xml, "text/xml");
+    const textElements = [...xmlDoc.getElementsByTagName("text")];
+    const vtt: VTTContent = {
+      cues: textElements.map((cue, i) => {
+        const startTime = parseFloat(cue.getAttribute("start")!);
+        const dur = parseFloat(cue.getAttribute("dur")!);
+        const endTime = startTime + dur;
+        const text = this.#decodeHTML(cue.textContent!);
+        return { id: i.toString(), startTime, endTime, text };
+      }),
+    };
     return vtt;
   }
 

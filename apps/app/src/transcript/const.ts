@@ -1,6 +1,9 @@
 import { format, langCodeToLabel } from "@/lib/lang/lang";
 
-export const localTranscriptViewType = "mx-transcript-local";
+export const transcriptViewType = {
+  local: "mx-transcript-local",
+  webpage: "mx-transcript-webpage",
+};
 
 export const supportedCaptionExts = ["vtt", "srt", "ass", "ssa"] as const;
 export type SupportedCaptionExt = (typeof supportedCaptionExts)[number];

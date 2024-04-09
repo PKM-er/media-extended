@@ -10,8 +10,9 @@ import {
 import { Player } from "@/components/player";
 import type { MediaURL } from "@/info/media-url";
 import type { PaneMenuSource } from "@/lib/menu";
+import { updateTitle } from "@/lib/view-title";
 import { handleWindowMigration } from "@/lib/window-migration";
-import { compare } from "@/media-note/note-index/def";
+import { compare, toInfoKey } from "@/media-note/note-index/def";
 import type MediaExtended from "@/mx-main";
 import { isFileMediaInfo } from "../info/media-info";
 import type { PlayerComponent } from "./base";
@@ -78,6 +79,10 @@ export abstract class MediaRemoteView
         player.subscribe(({ title }) => {
           title;
           this.updateTitle();
+          const source = this.getMediaInfo()!;
+          if (!source) return;
+          const id = toInfoKey(source);
+          this.plugin.cacheStore.updateSourceCache(id, { title });
         }),
       ),
     );
@@ -137,19 +142,7 @@ export abstract class MediaRemoteView
     this.render();
   }
 
-  updateTitle() {
-    const newTitle = this.getDisplayText();
-    this.titleEl.setText(newTitle);
-
-    if (
-      // eslint-disable-next-line deprecation/deprecation
-      this.app.workspace.activeLeaf === this.leaf &&
-      this.app.workspace.requestActiveLeafEvents()
-    ) {
-      this.leaf.updateHeader();
-    }
-  }
-
+  updateTitle = updateTitle;
   render() {
     if (this.root) {
       // this.contentEl

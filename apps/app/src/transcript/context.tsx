@@ -1,27 +1,37 @@
-import type {
-  CaptionsFileFormat,
-  ParsedCaptionsResult,
-  VTTCue,
-} from "media-captions";
+import type { CaptionsFileFormat, VTTCue } from "media-captions";
 import { parseText } from "media-captions";
 import MiniSearch from "minisearch";
 import { createContext, useContext } from "react";
 import { createStore, useStore } from "zustand";
+import type { MediaURL } from "@/info/media-url";
+import { toInfoKey } from "@/media-note/note-index/def";
 import type MxPlugin from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
 import "./style.less";
+import type { VTTContent, VTTCueWithId } from "./store";
 
 interface TranscriptViewState {
   showSearchBox: boolean;
+  source: {
+    url: MediaURL;
+    id: string;
+    /** track label for lang, etc */
+    label?: string;
+  } | null;
+  title?: string;
+  setSource(
+    source: { id: string; url: MediaURL },
+    plugin: MxPlugin,
+  ): Promise<void>;
   toggleSearchBox(val?: boolean): void;
   captions: {
     _minisearch: MiniSearch<VTTCue> | null;
-    result: ParsedCaptionsResult;
+    result: VTTContent;
     locales: string[];
   } | null;
   setCaptions(
     result: {
-      result: ParsedCaptionsResult;
+      result: VTTContent;
       locales: string[];
     } | null,
   ): void;
@@ -45,6 +55,22 @@ export interface CueSearchResult {
 
 export function createTranscriptViewStore() {
   const store = createStore<TranscriptViewState>((set, get, _store) => ({
+    source: null,
+    async setSource(src, plugin) {
+      const sid = toInfoKey(src.url);
+      const [title, caption] = await Promise.all([
+        plugin.cacheStore.getTitle(sid),
+        plugin.cacheStore.getCaption(sid, src.id),
+      ]);
+      if (title) set({ title });
+      if (!caption) {
+        set({ source: src });
+      } else {
+        set({ source: { ...src, label: caption.label || caption.language } });
+        const locales = caption.language ? [caption.language] : [];
+        this.setCaptions({ result: caption.content, locales });
+      }
+    },
     showSearchBox: false,
     toggleSearchBox(val) {
       if (typeof val === "boolean") {
@@ -66,7 +92,7 @@ export function createTranscriptViewStore() {
       const { locales, result } = info;
       get().captions?._minisearch?.removeAll();
       const segmenter = getSegmenter(...info.locales);
-      const minisearch = new MiniSearch<VTTCue>({
+      const minisearch = new MiniSearch<VTTCueWithId>({
         idField: "id",
         fields: ["text"],
         tokenize: segmenter

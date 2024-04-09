@@ -113,6 +113,9 @@ importers:
       iso-639-1:
         specifier: ^3.1.0
         version: 3.1.0
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
       maverick.js:
         specifier: 0.41.2
         version: 0.41.2
@@ -192,6 +195,9 @@ importers:
       '@types/eslint':
         specifier: ~8.4.6
         version: 8.4.10
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
       '@types/mdast':
         specifier: ^4.0.3
         version: 4.0.3
@@ -2782,6 +2788,16 @@ packages:
 
   /@types/less@3.0.6:
     resolution: {integrity: sha512-PecSzorDGdabF57OBeQO/xFbAkYWo88g4Xvnsx7LRwqLC17I7OoKtA3bQB9uXkY6UkMWCOsA8HSVpaoitscdXw==}
+    dev: true
+
+  /@types/lodash-es@4.17.12:
+    resolution: {integrity: sha512-0NgftHUcV4v34VhXm8QBSftKVXtbkBG3ViCjs6+eJ5a6y6Mi/jiFGPc1sC7QK+9BFhWrURE3EOggmWaSxL9OzQ==}
+    dependencies:
+      '@types/lodash': 4.17.0
+    dev: true
+
+  /@types/lodash@4.17.0:
+    resolution: {integrity: sha512-t7dhREVv6dbNj0q17X12j7yDG4bD/DHYX7o5/DbDxobP0HnGPgpRz2Ej77aL7TZT3DSw13fqUTj8J4mMnqa7WA==}
     dev: true
 
   /@types/mdast@3.0.15:
