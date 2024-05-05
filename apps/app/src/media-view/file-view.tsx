@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import { createMediaViewStore, MediaViewContext } from "@/components/context";
 import { Player } from "@/components/player";
 import type { FileMediaInfo } from "@/info/media-info";
-import { MediaFileExtensions } from "@/info/media-type";
+import { checkMediaType } from "@/info/media-type";
 import type { PaneMenuSource } from "@/lib/menu";
 import { handleWindowMigration } from "@/lib/window-migration";
 import type MediaExtended from "@/mx-main";
@@ -25,9 +25,12 @@ abstract class MediaFileView
   store;
   scope: Scope;
   root: ReactDOM.Root | null = null;
+  get player() {
+    return this.store.getState().player;
+  }
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
-    this.store = createMediaViewStore();
+    this.store = createMediaViewStore(plugin);
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
     addAction(this);
@@ -107,7 +110,7 @@ export class VideoFileView extends MediaFileView {
     return MEDIA_FILE_VIEW_TYPE.video;
   }
   canAcceptExtension(extension: string): boolean {
-    return MediaFileExtensions.video.includes(extension);
+    return checkMediaType(extension) === "video";
   }
 }
 
@@ -127,7 +130,7 @@ export class AudioFileView extends MediaFileView {
     };
   }
   canAcceptExtension(extension: string): boolean {
-    return MediaFileExtensions.audio.includes(extension);
+    return checkMediaType(extension) === "audio";
   }
 }
 

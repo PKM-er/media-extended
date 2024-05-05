@@ -15,7 +15,6 @@ import {
   validateProvider,
 } from "../timestamp/screenshot";
 import { takeTimestamp } from "../timestamp/timestamp";
-import { openOrCreateMediaNote } from "../timestamp/utils";
 import type { MediaViewCallback } from "./utils";
 import { addMediaViewCommand } from "./utils";
 
@@ -93,9 +92,10 @@ export function registerNoteCommands(plugin: MxPlugin) {
         const mediaInfo = view.getMediaInfo();
         if (!mediaInfo) return false;
         if (checking) return true;
-        openOrCreateMediaNote(mediaInfo, view).then((ctx) =>
-          takeTimestamp(view, ctx),
-        );
+        plugin.mediaNote
+          .getNote(mediaInfo, view.player)
+          .then((note) => plugin.leafOpener.openNote(note))
+          .then((ctx) => takeTimestamp(view, ctx));
       },
     },
     plugin,
@@ -111,9 +111,10 @@ export function registerNoteCommands(plugin: MxPlugin) {
         const mediaInfo = view.getMediaInfo();
         if (!mediaInfo) return false;
         if (checking) return true;
-        openOrCreateMediaNote(mediaInfo, view).then((ctx) =>
-          saveScreenshot(view, ctx),
-        );
+        plugin.mediaNote
+          .getNote(mediaInfo, view.player)
+          .then((note) => plugin.leafOpener.openNote(note))
+          .then((ctx) => saveScreenshot(view, ctx));
       },
     },
     plugin,

@@ -31,14 +31,21 @@ export const countryMap = {
 } as Record<string, string[]>;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-export function langCodeToLabel(code: string): string {
+export function langCodeToLabel(
+  code: string | undefined,
+  format: (label: string) => string = (s) => s,
+): string {
+  if (!code?.trim()) return "";
+  code = code.trim();
   const tags = code.split("-");
   const lang = tags[0].toLowerCase();
   if (tags.length === 1) {
-    return iso.getNativeName(lang);
+    return format(iso.getNativeName(lang));
   }
   const langCountry = tags.slice(0, 2).join("-");
-  return langExtra[langCountry] || `${iso.getNativeName(tags[0])} (${code})`;
+  return format(
+    langExtra[langCountry] || `${iso.getNativeName(tags[0])} - ${code}`,
+  );
 }
 
 function detectChs(subtag: string) {

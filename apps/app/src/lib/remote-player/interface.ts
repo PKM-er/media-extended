@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { MediaErrorCode, TextTrackInit } from "@vidstack/react";
-import type { VTTContent } from "@/transcript/store";
+import type { MediaErrorCode } from "@vidstack/react";
+import type { WebsiteTextTrack } from "@/info/track-info";
+import type { VTTContent } from "@/transcript/handle/type";
 import type { BilibiliPlayerManifest } from "@/web/bili-api/base";
 import type { MessageController, Nil } from "../message";
 // import { enumerate } from "../must-include";
@@ -213,7 +214,7 @@ export type MsgCtrlRemote = MessageController<
 
 type CustomEventWithPayload = {
   "mx-open-browser": { url: string; message?: string };
-  "mx-text-tracks": { tracks: (TextTrackInit & { id: string })[] };
+  "mx-text-tracks": { tracks: WebsiteTextTrack[] };
 };
 
 export type MsgCtrlLocal = MessageController<

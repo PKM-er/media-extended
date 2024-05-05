@@ -1,14 +1,15 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
 import type { MediaViewState } from "@/components/context";
 import { canProviderScreenshot } from "@/components/player/screenshot";
+import type { MediaInfo } from "@/info/media-info";
 import { handleExternalLinkMenu } from "@/media-note/link-click";
 import { copyScreenshot } from "@/media-note/timestamp/screenshot";
 import type MxPlugin from "@/mx-main";
-import type { MediaInfo } from "../../info/media-info";
 import type { MediaViewType } from "../view-type";
 import { muteMenu } from "./mute";
 import { pipMenu } from "./pip";
 import { speedMenu } from "./speed";
+import { transcriptMenu } from "./transcript";
 import { transformMenu } from "./transform";
 import { urlMenu } from "./url";
 import { webpageMenu } from "./webpage";
@@ -21,6 +22,7 @@ export interface PlayerContext {
   viewType: MediaViewType;
   setTransform: MediaViewState["setTransform"];
   transform: MediaViewState["transform"];
+  tracks: MediaViewState["textTracks"];
   controls: boolean | undefined;
   disableWebFullscreen: boolean | undefined;
   toggleWebFullscreen: (enableWebFs: boolean) => void;
@@ -31,7 +33,7 @@ declare module "obsidian" {
   interface Workspace {
     on(name: "url-menu", callback: (menu: Menu, link: string) => any): EventRef;
     on(
-      name: "mx-media-menu",
+      name: "mx:media-menu",
       callback: (
         menu: Menu,
         player: PlayerContext,
@@ -46,7 +48,7 @@ declare module "obsidian" {
       ctx?: any,
     ): EventRef;
     trigger(
-      name: "mx-media-menu",
+      name: "mx:media-menu",
       menu: Menu,
       player: PlayerContext,
       source:
@@ -63,7 +65,7 @@ declare module "obsidian" {
 export default function registerMediaMenu(this: MxPlugin) {
   handleExternalLinkMenu(this);
   this.registerEvent(
-    this.app.workspace.on("mx-media-menu", (menu, ctx, source) => {
+    this.app.workspace.on("mx:media-menu", (menu, ctx, source) => {
       if (
         source === "more-options" ||
         source === "sidebar-context-menu" ||
@@ -122,6 +124,19 @@ export default function registerMediaMenu(this: MxPlugin) {
       }
       webpageMenu(menu, ctx, source);
       if (source === "player-menu-embed" || source === "more-options") {
+        transcriptMenu(menu, ctx);
+        menu.addItem((item) =>
+          item
+            .setTitle("Open media note")
+            .setIcon("book")
+            .setSection("view")
+            .onClick(async () => {
+              await ctx.plugin.leafOpener.openNote(
+                await ctx.plugin.mediaNote.getNote(ctx.source, ctx.player),
+                "split",
+              );
+            }),
+        );
         urlMenu(menu, ctx);
       }
 

@@ -79,9 +79,9 @@ ytm-companion-ad-renderer {
 }
 `.trim();
 
-import type { TextTrackInit } from "@vidstack/react";
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { VTTContent } from "@/transcript/store";
+import type { WebsiteTextTrack } from "@/info/track-info";
+import type { VTTContent } from "@/transcript/handle/type";
 import { requireMx } from "./_require";
 
 const { waitForSelector, MediaPlugin } = requireMx();
@@ -100,9 +100,9 @@ export default class YouTubePlugin extends MediaPlugin {
     return media;
   }
 
-  captionSrc = new Map<string, string>();
+  captionSrc = new Map<string, { url: string }>();
 
-  getTracks(): (TextTrackInit & { id: string })[] {
+  getTracks(): WebsiteTextTrack[] {
     const tracks =
       window.ytInitialPlayerResponse?.captions?.playerCaptionsTracklistRenderer
         ?.captionTracks;
@@ -118,13 +118,15 @@ export default class YouTubePlugin extends MediaPlugin {
         vssId?: string;
       };
       const id = track.vssId || `tract${i}`;
-      this.captionSrc.set(id, track.baseUrl);
+      this.captionSrc.set(id, {
+        url: track.baseUrl,
+      });
       return {
-        id,
+        wid: id,
         kind: "subtitles",
-        language: track.languageCode || "en",
-        label: track.name?.simpleText || track.trackName || "Unknown",
-      } satisfies TextTrackInit;
+        language: track.languageCode,
+        label: track.name?.simpleText || track.trackName,
+      };
     });
   }
   #parser = new DOMParser();
@@ -138,11 +140,15 @@ export default class YouTubePlugin extends MediaPlugin {
   async getTrack(_id: string): Promise<VTTContent | null> {
     const src = this.captionSrc.get(_id);
     if (!src) return null;
-    const resp = await fetch(src);
+    const resp = await fetch(src.url);
     if (!resp.ok) return null;
     const xml = await resp.text();
     const xmlDoc = this.#parser.parseFromString(xml, "text/xml");
     const textElements = [...xmlDoc.getElementsByTagName("text")];
+    const metadata: Record<string, string> = {
+      Kind: "subtitles",
+      ID: _id,
+    };
     const vtt: VTTContent = {
       cues: textElements.map((cue, i) => {
         const startTime = parseFloat(cue.getAttribute("start")!);
@@ -151,6 +157,7 @@ export default class YouTubePlugin extends MediaPlugin {
         const text = this.#decodeHTML(cue.textContent!);
         return { id: i.toString(), startTime, endTime, text };
       }),
+      metadata,
     };
     return vtt;
   }

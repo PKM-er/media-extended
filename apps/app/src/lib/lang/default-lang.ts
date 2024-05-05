@@ -13,7 +13,7 @@ export function setDefaultLang(
       return langs;
     }, []),
   );
-  const subtitleDefaultLang = !defaultLangCode
+  const defaultLang = !defaultLangCode
     ? allLanguages.filter((l) => !!l)[0]
     : allLanguages.find((code) => {
         // exact match
@@ -29,6 +29,6 @@ export function setDefaultLang(
       });
   return list.map((t) => ({
     ...t,
-    default: format(t.language) === subtitleDefaultLang,
+    default: format(t.language) === defaultLang,
   }));
 }

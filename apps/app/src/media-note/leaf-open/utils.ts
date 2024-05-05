@@ -1,10 +1,10 @@
 import type { TFile, WorkspaceLeaf } from "obsidian";
+import { type FileMediaInfo } from "@/info/media-info";
 import type { MediaURL } from "@/info/media-url";
 import { AudioFileView, VideoFileView } from "@/media-view/file-view";
 import { MediaEmbedView } from "@/media-view/iframe-view";
 import { VideoUrlView, AudioUrlView } from "@/media-view/url-view";
 import { MediaWebpageView } from "@/media-view/webpage-view";
-import { type FileMediaInfo } from "../../info/media-info";
 import { compare } from "../note-index/def";
 
 export function filterFileLeaf(

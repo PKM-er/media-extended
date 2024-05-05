@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { TextTrackInit } from "@vidstack/react";
+import type { WebsiteTextTrack } from "@/info/track-info";
 import type { XHRIntercepter } from "@/lib/remote-player/lib/xhr-hijack";
-import type { VTTContent } from "@/transcript/store";
+import type { VTTContent } from "@/transcript/handle/type";
 import { BiliApiError } from "../bili-api/base";
 import type { PlayerV2Response } from "../bili-api/player-v2";
 import type { SubtitlesConfig } from "../bili-api/subtitle";
@@ -25,14 +25,14 @@ declare global {
 }
 
 export default class BilibiliPlugin extends MediaPlugin {
-  #subtitleUrl = new Map<string, string>();
+  #subtitleUrl = new Map<string, { url: string }>();
   findMedia(): Promise<HTMLMediaElement> {
     return waitForSelector<HTMLMediaElement>("#bilibili-player video");
   }
   getStyle() {
     return css;
   }
-  async getTracks(): Promise<(TextTrackInit & { id: string })[]> {
+  async getTracks(): Promise<WebsiteTextTrack[]> {
     const intercepter = (window as any)[storeId] as XHRIntercepter;
     try {
       const resp = await intercepter.getRequest();
@@ -41,13 +41,16 @@ export default class BilibiliPlugin extends MediaPlugin {
         throw new BiliApiError(json.message, json.code);
       }
       return json.data.subtitle.subtitles.map((sub) => {
-        const track = {
-          id: sub.id.toString(),
+        const language = sub.lan.startsWith("ai-")
+          ? sub.lan.substring(3)
+          : sub.lan;
+        const track: WebsiteTextTrack = {
+          wid: sub.id.toString(),
           kind: "subtitles",
           label: sub.lan_doc,
-          language: sub.lan.startsWith("ai-") ? sub.lan.substring(3) : sub.lan,
-        } satisfies TextTrackInit;
-        this.#subtitleUrl.set(track.id, sub.subtitle_url);
+          language,
+        };
+        this.#subtitleUrl.set(track.wid, { url: sub.subtitle_url });
         return track;
       });
     } catch (e) {
@@ -56,12 +59,16 @@ export default class BilibiliPlugin extends MediaPlugin {
     }
   }
   async getTrack(id: string): Promise<VTTContent | null> {
-    const url = this.#subtitleUrl.get(id);
-    if (!url) return null;
-    const resp = await fetch(url);
+    const src = this.#subtitleUrl.get(id);
+    if (!src) return null;
+    const resp = await fetch(src.url);
     if (!resp.ok)
       throw new Error("Failed to fetch subtitle, " + resp.statusText);
     const json = (await resp.json()) as SubtitlesConfig;
+    const metadata: Record<string, string> = {
+      Kind: "subtitles",
+      ID: id,
+    };
     return {
       cues: json.body.map((sub) => ({
         id: sub.sid.toString(),
@@ -69,6 +76,7 @@ export default class BilibiliPlugin extends MediaPlugin {
         endTime: sub.to,
         text: sub.content,
       })),
+      metadata,
     };
   }
   async onload(): Promise<void> {

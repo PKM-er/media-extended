@@ -4,8 +4,9 @@ import preloadScript from "inline:./scripts/preload";
 import preloadLoader from "inline:./scripts/preload-patch";
 import userScript from "inline:./scripts/userscript";
 import { Component, Platform } from "obsidian";
+import path from "@/lib/path";
 import type MxPlugin from "@/mx-main";
-import { evalInMainPs, getUserDataPath } from "../session/utils";
+import { evalInMainPs, getFsPromise, getUserDataPath } from "../session/utils";
 import { channelId } from "./channel";
 import { BILI_REQ_STORE, replaceEnv } from "./const";
 
@@ -19,14 +20,14 @@ const channel = channelId(BILI_REQ_STORE);
 
 declare module "obsidian" {
   interface MetadataCache {
-    on(name: "mx-preload-ready", callback: () => any, ctx?: any): EventRef;
+    on(name: "mx:preload-ready", callback: () => any, ctx?: any): EventRef;
     on(
-      name: "mx-preload-err",
+      name: "mx:preload-error",
       callback: (err: unknown) => any,
       ctx?: any,
     ): EventRef;
-    trigger(name: "mx-preload-ready"): void;
-    trigger(name: "mx-preload-err", err: unknown): void;
+    trigger(name: "mx:preload-ready"): void;
+    trigger(name: "mx:preload-error", err: unknown): void;
   }
 }
 
@@ -45,12 +46,12 @@ export class BilibiliRequestHacker extends Component {
 
   private onReady(): void {
     this.ready = true;
-    this.app.metadataCache.trigger("mx-preload-ready");
+    this.app.metadataCache.trigger("mx:preload-ready");
   }
   private onError(err: unknown): void {
     console.error("Failed to load preload", err);
     this.ready = null;
-    this.app.metadataCache.trigger("mx-preload-err", err);
+    this.app.metadataCache.trigger("mx:preload-error", err);
   }
 
   untilReady(timeout = 5e3): Promise<void> {
@@ -58,17 +59,17 @@ export class BilibiliRequestHacker extends Component {
       if (this.ready) return resolve();
       if (this.ready === null) return reject(new Error("Cannot load"));
       const onReady = () => {
-        this.app.metadataCache.off("mx-preload-ready", onReady);
-        this.app.metadataCache.off("mx-preload-err", onError);
+        this.app.metadataCache.off("mx:preload-ready", onReady);
+        this.app.metadataCache.off("mx:preload-error", onError);
         resolve();
       };
       const onError = (err: unknown) => {
-        this.app.metadataCache.off("mx-preload-ready", onReady);
-        this.app.metadataCache.off("mx-preload-err", onError);
+        this.app.metadataCache.off("mx:preload-ready", onReady);
+        this.app.metadataCache.off("mx:preload-error", onError);
         reject(err);
       };
-      this.app.metadataCache.on("mx-preload-ready", onReady);
-      this.app.metadataCache.on("mx-preload-err", onError);
+      this.app.metadataCache.on("mx:preload-ready", onReady);
+      this.app.metadataCache.on("mx:preload-error", onError);
       setTimeout(() => {
         onError(new Error("Timeout"));
       }, timeout);
@@ -80,8 +81,7 @@ export class BilibiliRequestHacker extends Component {
       this.onReady();
       return;
     }
-    const path = require("path") as typeof import("node:path");
-    const fs = require("fs/promises") as typeof import("node:fs/promises");
+    const fs = getFsPromise()!;
 
     const userDataDir = getUserDataPath();
     const preloadLoaderPath = path.join(

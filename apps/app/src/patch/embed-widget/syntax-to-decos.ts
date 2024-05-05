@@ -29,7 +29,6 @@ const getPlayerDecos = (
     from,
     to,
     enter: ({ type, from, to }) => {
-      console.log(type, from, to, doc.sliceString(from, to));
       const nodeTypes = new Set(
         (type.prop(tokenClassNodeProp) as string | undefined)?.split(" "),
       );

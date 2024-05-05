@@ -7,7 +7,7 @@ import {
   type MediaProviderProps,
   Track,
 } from "@vidstack/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { getPartition } from "@/lib/remote-player/const";
 import { WebviewProviderLoader } from "@/lib/remote-player/loader";
 import { cn } from "@/lib/utils";

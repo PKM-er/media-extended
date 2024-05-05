@@ -13,9 +13,16 @@ export function getSession(appId: string) {
   return (remote.session as typeof Electron.Session).fromPartition(partition);
 }
 
+let fs: any;
 export function getFsPromise() {
   if (!Platform.isDesktopApp) return null;
-  return require("fs/promises") as typeof import("node:fs/promises");
+  return (fs ??= require("fs/promises")) as typeof import("node:fs/promises");
+}
+
+export async function readFile(filePath: string) {
+  const fs = getFsPromise();
+  if (!fs) throw new Error("fs not available");
+  return await fs.readFile(filePath, "utf-8");
 }
 
 export function getWebContents(id: number) {

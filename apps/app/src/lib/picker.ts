@@ -1,6 +1,6 @@
 import mime from "mime";
 import { Platform } from "obsidian";
-import { MediaFileExtensions } from "@/info/media-type";
+import { getMediaExts } from "@/info/media-type";
 import { getDialog } from "@/web/session/utils";
 
 /**
@@ -18,8 +18,8 @@ export async function pickMediaFile(
     buttonLabel: "Pick",
     properties: ["openFile"],
     filters: [
-      { extensions: MediaFileExtensions.video, name: "Video" },
-      { extensions: MediaFileExtensions.audio, name: "Audio" },
+      { extensions: getMediaExts("video"), name: "Video" },
+      { extensions: getMediaExts("audio"), name: "Audio" },
     ],
     defaultPath,
   });

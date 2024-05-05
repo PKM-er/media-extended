@@ -1,11 +1,24 @@
+import type { MediaPlayerInstance } from "@vidstack/react";
 import { Component } from "obsidian";
 import type { MetadataCache, Vault, TFile } from "obsidian";
+import { getMediaInfoID, isFileMediaInfo } from "@/info/media-info";
+import { type MediaInfo } from "@/info/media-info";
+import { checkMediaType } from "@/info/media-type";
+import { getTrackInfoID, type TextTrackInfo } from "@/info/track-info";
 import { iterateFiles } from "@/lib/iterate-files";
 import { waitUntilResolve } from "@/lib/meta-resolve";
+import { normalizeFilename } from "@/lib/norm";
 import type MxPlugin from "@/mx-main";
-import { type MediaInfo } from "../../info/media-info";
-import { toInfoKey } from "./def";
+import { mediaTitle } from "../title";
+import type { MediaSourceFieldType } from "./def";
+import type { ParsedMediaNoteMetadata } from "./extract";
 import { getMediaNoteMeta } from "./extract";
+
+export interface NewNoteInfo {
+  title: string;
+  fm: (newNotePath: string) => Record<string, any>;
+  sourcePath?: string;
+}
 
 declare module "obsidian" {
   interface MetadataCache {
@@ -23,12 +36,20 @@ export class MediaNoteIndex extends Component {
   }
 
   private noteToMediaIndex = new Map<string, MediaInfo>();
-  private mediaToNoteIndex = new Map<string, Set<TFile>>();
+  private mediaToNoteIndex = new Map<string, TFile>();
 
-  findNotes(media: MediaInfo): TFile[] {
-    const notes = this.mediaToNoteIndex.get(toInfoKey(media));
-    if (!notes) return [];
-    return [...notes];
+  private mediaToTrackIndex = new Map<string, TextTrackInfo[]>();
+  private trackToMediaIndex = new Map<string, MediaInfo[]>();
+
+  getLinkedTextTracks(media: MediaInfo) {
+    return this.mediaToTrackIndex.get(getMediaInfoID(media)) ?? [];
+  }
+  getLinkedMedia(track: TextTrackInfo) {
+    return this.trackToMediaIndex.get(getTrackInfoID(track).id) ?? [];
+  }
+
+  findNote(media: MediaInfo): TFile | null {
+    return this.mediaToNoteIndex.get(getMediaInfoID(media)) ?? null;
   }
   findMedia(note: TFile) {
     return this.noteToMediaIndex.get(note.path);
@@ -42,14 +63,14 @@ export class MediaNoteIndex extends Component {
       vault: this.app.vault,
       plugin: this.plugin,
     };
-    for (const { file, mediaInfo } of iterateMediaNote(ctx)) {
-      this.addMediaNote(mediaInfo, file);
+    for (const { file, meta } of iterateMediaNote(ctx)) {
+      this.addMediaNote(meta, file);
     }
     this.registerEvent(
       this.app.metadataCache.on("changed", (file) => {
-        const mediaInfo = getMediaNoteMeta(file, ctx);
-        if (!mediaInfo) return;
-        this.addMediaNote(mediaInfo, file);
+        const meta = getMediaNoteMeta(file, ctx);
+        if (!meta) return;
+        this.addMediaNote(meta, file);
       }),
     );
     this.registerEvent(
@@ -69,26 +90,123 @@ export class MediaNoteIndex extends Component {
     );
   }
 
+  /**
+   * create if not exists
+   */
+  async #getNote(
+    mediaInfo: MediaInfo,
+    newNoteInfo: NewNoteInfo,
+  ): Promise<TFile> {
+    const note = this.plugin.mediaNote.findNote(mediaInfo);
+    if (note) return note;
+    const title = normalizeFilename(newNoteInfo.title);
+    const filename = `Media Note - ${title}`;
+    return await this.#createNewNote(
+      filename,
+      newNoteInfo.fm,
+      newNoteInfo.sourcePath ?? "",
+    );
+  }
+  /**
+   * open media note, create if not exist
+   */
+  getNote(
+    mediaInfo: MediaInfo,
+    player: MediaPlayerInstance | null,
+  ): Promise<TFile> {
+    const { metadataCache } = this.app;
+    if (!player) {
+      throw new Error("Player not initialized");
+    }
+    const title = mediaTitle(mediaInfo, { state: player.state });
+    if (isFileMediaInfo(mediaInfo)) {
+      const mediaType = checkMediaType(mediaInfo.file.extension)!;
+      const file = mediaInfo.file;
+      return this.#getNote(mediaInfo, {
+        title,
+        fm: (newNotePath) => ({
+          [mediaType]: `[[${metadataCache.fileToLinktext(file, newNotePath)}]]`,
+        }),
+        sourcePath: file.path,
+      });
+    } else {
+      const type: MediaSourceFieldType = mediaInfo.inferredType ?? "media";
+      return this.#getNote(mediaInfo, {
+        title,
+        fm: () => ({ [type]: mediaInfo.jsonState.source }),
+      });
+    }
+  }
+  async #createNewNote(
+    filename: string,
+    fm: (sourcePath: string) => Record<string, any>,
+    sourcePath = "",
+  ) {
+    const { fileManager } = this.app;
+    const folder = fileManager.getNewFileParent(sourcePath, filename);
+    const newNote = await fileManager.createNewFile(
+      folder,
+      filename,
+      "md",
+      "---\n---\n",
+    );
+    await fileManager.processFrontMatter(newNote, (fn) => {
+      Object.assign(fn, fm(newNote.path));
+    });
+    return newNote;
+  }
+
+  private resetTracks(mediaID: string) {
+    const tracks = this.mediaToTrackIndex.get(mediaID);
+    if (!tracks) return;
+    this.mediaToTrackIndex.delete(mediaID);
+    tracks.forEach((track) => {
+      const trackID = getTrackInfoID(track).id;
+      const linkedMedia = this.trackToMediaIndex.get(trackID);
+      if (!linkedMedia) return;
+      const filteredMedia = linkedMedia.filter(
+        (media) => getMediaInfoID(media) !== mediaID,
+      );
+      if (filteredMedia.length > 0) {
+        this.trackToMediaIndex.set(trackID, filteredMedia);
+      } else {
+        this.trackToMediaIndex.delete(trackID);
+      }
+    });
+  }
+
   removeMediaNote(toRemove: TFile) {
     const mediaInfo = this.noteToMediaIndex.get(toRemove.path)!;
     if (!mediaInfo) return;
     this.noteToMediaIndex.delete(toRemove.path);
-    const mediaInfoKey = toInfoKey(mediaInfo);
-    const mediaNotes = this.mediaToNoteIndex.get(mediaInfoKey);
-    if (!mediaNotes) return;
-    mediaNotes.delete(toRemove);
-    if (mediaNotes.size === 0) {
-      this.mediaToNoteIndex.delete(mediaInfoKey);
-    }
+    const mediaID = getMediaInfoID(mediaInfo);
+    this.mediaToNoteIndex.delete(mediaID);
+    this.resetTracks(mediaID);
   }
-  addMediaNote(mediaInfo: MediaInfo, newNote: TFile) {
-    this.noteToMediaIndex.set(newNote.path, mediaInfo);
-    const key = toInfoKey(mediaInfo);
-    const mediaNotes = this.mediaToNoteIndex.get(key);
-    if (!mediaNotes) {
-      this.mediaToNoteIndex.set(key, new Set([newNote]));
-    } else {
-      mediaNotes.add(newNote);
+  addMediaNote(meta: ParsedMediaNoteMetadata, newNote: TFile) {
+    const mediaID = getMediaInfoID(meta.src);
+    const prevNote = this.mediaToNoteIndex.get(mediaID);
+    // skip if note to add is created after existing note
+    if (
+      prevNote &&
+      prevNote !== newNote &&
+      prevNote.stat.ctime <= newNote.stat.ctime
+    )
+      return;
+    this.noteToMediaIndex.set(newNote.path, meta.src);
+    this.mediaToNoteIndex.set(mediaID, newNote);
+    this.resetTracks(mediaID);
+    const { textTracks } = meta.data;
+    if (textTracks.length > 0) {
+      this.mediaToTrackIndex.set(mediaID, textTracks);
+      textTracks.forEach((track) => {
+        const trackID = getTrackInfoID(track).id;
+        const linkedMedia = [
+          meta.src,
+          ...(this.trackToMediaIndex.get(trackID) ?? []),
+        ];
+        this.trackToMediaIndex.set(trackID, linkedMedia);
+      });
     }
   }
 
@@ -106,8 +224,8 @@ function* iterateMediaNote(ctx: {
 }) {
   for (const file of iterateFiles(ctx.vault.getRoot())) {
     if (file.extension !== "md") continue;
-    const mediaInfo = getMediaNoteMeta(file, ctx);
-    if (!mediaInfo) continue;
-    yield { mediaInfo, file };
+    const meta = getMediaNoteMeta(file, ctx);
+    if (!meta) continue;
+    yield { meta, file };
   }
 }

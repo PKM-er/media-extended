@@ -1,6 +1,6 @@
 import { LifeCycle } from "@/lib/lifecycle";
 import { TimeoutError } from "@/lib/message";
-import type { VTTContent } from "@/transcript/store";
+import type { VTTContent } from "@/transcript/handle/type";
 import { registerEvents } from "../hook/event-register";
 import type { MediaStateRef } from "../hook/handler-register";
 import { registerHandlers } from "../hook/handler-register";

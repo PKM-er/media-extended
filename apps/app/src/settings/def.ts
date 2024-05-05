@@ -35,6 +35,7 @@ type MxSettingValues = {
   screenshotFormat: "image/png" | "image/jpeg" | "image/webp";
   screenshotQuality?: number;
   screenshotFolderPath?: string;
+  subtitleFolderPath?: string;
 };
 const settingKeys = enumerate<keyof MxSettingValues>()(
   "defaultVolume",
@@ -54,6 +55,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "screenshotQuality",
   "defaultLanguage",
   "screenshotFolderPath",
+  "subtitleFolderPath",
 );
 
 const mxSettingsDefault = {
@@ -137,6 +139,7 @@ export type MxSettings = {
   setLoadStrategy: (strategy: "play" | "eager") => void;
   setBiliDefaultQuality: (quality: BilibiliQuality) => void;
   setScreenshotFolder: (path: string | null) => void;
+  setSubtitleFolder: (path: string | null) => void;
   load: () => Promise<void>;
   save: () => void;
 } & Omit<MxSettingValues, "urlMappingData">;
@@ -327,6 +330,19 @@ export function createSettingsStore(plugin: MxPlugin) {
         set({ screenshotFolderPath: path });
       } else {
         set({ screenshotFolderPath: undefined });
+      }
+    },
+    setSubtitleFolder(path: string | null) {
+      if (path !== null) {
+        path = normalizePath(path);
+        if (path === ".") {
+          path = "/";
+        } else if (path.startsWith("./")) {
+          path = path.slice(2);
+        }
+        set({ subtitleFolderPath: path });
+      } else {
+        set({ subtitleFolderPath: undefined });
       }
     },
     load: async () => {

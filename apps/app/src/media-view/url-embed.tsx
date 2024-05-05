@@ -3,10 +3,8 @@ import ReactDOM from "react-dom/client";
 import { MediaViewContext, createMediaViewStore } from "@/components/context";
 import { Player } from "@/components/player";
 import type { MediaURL } from "@/info/media-url";
-import { getTracksLocal } from "@/lib/subtitle";
 import type MxPlugin from "@/mx-main";
 import { type PlayerComponent } from "./base";
-import { MEDIA_URL_VIEW_TYPE } from "./view-type";
 
 export class MediaRenderChild
   extends MarkdownRenderChild
@@ -14,10 +12,12 @@ export class MediaRenderChild
 {
   store;
   root: ReactDOM.Root | null = null;
-
+  get player() {
+    return this.store.getState().player;
+  }
   constructor(public containerEl: HTMLElement, public plugin: MxPlugin) {
     super(containerEl);
-    this.store = createMediaViewStore();
+    this.store = createMediaViewStore(plugin);
     containerEl.addClasses(["mx", "custom", "mx-media-embed"]);
   }
 
@@ -34,13 +34,10 @@ export class MediaRenderChild
       title: other.title ?? true,
       hash: other.hash,
       viewType,
-      textTracks:
-        viewType === MEDIA_URL_VIEW_TYPE.video
-          ? await getTracksLocal(media).catch((e) => {
-              console.error("Failed to get text tracks", e, media.href);
-              return [];
-            })
-          : [],
+      textTracks: await this.plugin.transcript.getTracks(media).catch((e) => {
+        console.error("Failed to get text tracks", e, media.href);
+        return [];
+      }),
     });
   }
 

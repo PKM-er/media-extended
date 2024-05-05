@@ -2,19 +2,20 @@ import { around } from "monkey-around";
 import type { WorkspaceLeaf, Menu, ViewStateResult } from "obsidian";
 import { ItemView, Scope } from "obsidian";
 import ReactDOM from "react-dom/client";
+import type { SourceFacet } from "@/components/context";
 import {
   createMediaViewStore,
   MediaViewContext,
   onPlayerMounted,
 } from "@/components/context";
 import { Player } from "@/components/player";
+import { isFileMediaInfo } from "@/info/media-info";
 import type { MediaURL } from "@/info/media-url";
 import type { PaneMenuSource } from "@/lib/menu";
 import { updateTitle } from "@/lib/view-title";
 import { handleWindowMigration } from "@/lib/window-migration";
-import { compare, toInfoKey } from "@/media-note/note-index/def";
+import { compare } from "@/media-note/note-index/def";
 import type MediaExtended from "@/mx-main";
-import { isFileMediaInfo } from "../info/media-info";
 import type { PlayerComponent } from "./base";
 import { addAction, onPaneMenu } from "./base";
 import type { RemoteMediaViewType } from "./view-type";
@@ -33,9 +34,12 @@ export abstract class MediaRemoteView
   scope: Scope;
   root: ReactDOM.Root | null = null;
   navigation = true;
-
-  setSource(url: MediaURL): any {
-    this.store.getState().setSource(url, { viewType: this.getViewType() });
+  get player() {
+    return this.store.getState().player;
+  }
+  async setSource(url: MediaURL): Promise<SourceFacet> {
+    const textTracks = await this.plugin.transcript.getTracks(url);
+    return { viewType: this.getViewType(), textTracks };
   }
   getMediaInfo() {
     return this.store.getState().source?.url ?? null;
@@ -49,7 +53,7 @@ export abstract class MediaRemoteView
 
   constructor(leaf: WorkspaceLeaf, public plugin: MediaExtended) {
     super(leaf);
-    this.store = createMediaViewStore();
+    this.store = createMediaViewStore(plugin);
     this.scope = new Scope(this.app.scope);
     this.contentEl.addClasses(["mx", "custom"]);
     addAction(this);
@@ -79,10 +83,6 @@ export abstract class MediaRemoteView
         player.subscribe(({ title }) => {
           title;
           this.updateTitle();
-          const source = this.getMediaInfo()!;
-          if (!source) return;
-          const id = toInfoKey(source);
-          this.plugin.cacheStore.updateSourceCache(id, { title });
         }),
       ),
     );
@@ -120,7 +120,7 @@ export abstract class MediaRemoteView
     } else {
       const now = this.store.getState().source?.url;
       if (!compare(url, now)) {
-        await this.setSource(url);
+        this.store.getState().setSource(url, await this.setSource(url));
         // workaround for vidstack issue when refresh source
         // including subtitle default not applied
         // provider not loaded properly when switched

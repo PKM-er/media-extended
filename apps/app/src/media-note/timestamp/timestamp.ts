@@ -7,7 +7,7 @@ export async function takeTimestamp<T extends PlayerComponent>(
   playerComponent: T,
   { file: mediaNote, editor }: { file: TFile; editor: Editor },
 ): Promise<boolean> {
-  const player = playerComponent.store.getState().player;
+  const player = playerComponent.player;
   if (!player) {
     new Notice("Player not initialized");
     return false;

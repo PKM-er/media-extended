@@ -2,9 +2,8 @@ import { pathToFileURL } from "url";
 import type { Vault } from "obsidian";
 import { FileSystemAdapter, Notice } from "obsidian";
 
-import { isFileMediaInfo } from "@/info/media-info";
+import { isFileMediaInfo, getMediaInfoID } from "@/info/media-info";
 import { MediaURL } from "@/info/media-url";
-import { toInfoKey } from "../note-index/def";
 import type { Playlist } from "./def";
 
 export function generateM3U8File(playlist: Playlist, vault: Vault) {
@@ -26,11 +25,11 @@ export function generateM3U8File(playlist: Playlist, vault: Vault) {
           m3u8Content += `#EXTINF:-1,${item.title}\n${fileUrl}\n`;
         } catch (e) {
           new Notice(`Failed to convert file path to URL: ${e}`);
-          skippedItems.push(item.title || toInfoKey(item.media));
+          skippedItems.push(item.title || getMediaInfoID(item.media));
         }
       } else {
         fileNotSupported = true;
-        skippedItems.push(item.title || toInfoKey(item.media));
+        skippedItems.push(item.title || getMediaInfoID(item.media));
       }
     }
   }

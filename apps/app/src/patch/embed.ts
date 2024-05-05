@@ -7,7 +7,7 @@ import { shouldOpenMedia } from "@/media-note/link-click";
 import { titleFromUrl } from "@/media-view/base";
 import { MediaRenderChild } from "@/media-view/url-embed";
 import type MxPlugin from "@/mx-main";
-import { MediaFileExtensions } from "../info/media-type";
+import { getMediaExts } from "../info/media-type";
 import setupEmbedWidget from "./embed-widget";
 import { reloadMarkdownPreview } from "./utils";
 
@@ -23,7 +23,7 @@ export default function injectMediaEmbed(
 function injectFileMediaEmbed(this: Plugin, embedCreator: EmbedCreator) {
   const { app } = this;
   (["video", "audio"] as const).forEach((type) => {
-    const exts = MediaFileExtensions[type];
+    const exts = getMediaExts(type);
     const revertBackup = unregisterExistingEmbed(exts),
       unregister = registerEmbed(exts, embedCreator);
     this.register(() => {

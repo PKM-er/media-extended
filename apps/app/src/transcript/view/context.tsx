@@ -1,45 +1,32 @@
-import type { CaptionsFileFormat, VTTCue } from "media-captions";
-import { parseText } from "media-captions";
+import type { VTTCue } from "media-captions";
 import MiniSearch from "minisearch";
 import { createContext, useContext } from "react";
+// eslint-disable-next-line import/no-deprecated
 import { createStore, useStore } from "zustand";
-import type { MediaURL } from "@/info/media-url";
-import { toInfoKey } from "@/media-note/note-index/def";
+import type { ParsedTextTrack } from "@/info/track-info";
+import type { TranscriptSource } from "@/info/transcript-info";
+import { langCodeToLabel, vaildate } from "@/lib/lang/lang";
 import type MxPlugin from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
 import "./style.less";
-import type { VTTContent, VTTCueWithId } from "./store";
+import type { VTTContent, VTTCueWithId } from "../handle/type";
 
 interface TranscriptViewState {
   showSearchBox: boolean;
-  source: {
-    url: MediaURL;
-    id: string;
-    /** track label for lang, etc */
-    label?: string;
-  } | null;
-  title?: string;
-  setSource(
-    source: { id: string; url: MediaURL },
-    plugin: MxPlugin,
-  ): Promise<void>;
+  source: TranscriptSource | null;
+  title: string | null;
   toggleSearchBox(val?: boolean): void;
   captions: {
     _minisearch: MiniSearch<VTTCue> | null;
-    result: VTTContent;
+    content: VTTContent;
     locales: string[];
   } | null;
   setCaptions(
     result: {
-      result: VTTContent;
+      track: ParsedTextTrack;
       locales: string[];
     } | null,
   ): void;
-  // parseLocalCaptions(file: TFile, vault: Vault): Promise<void>;
-  parseCaptions(
-    content: string,
-    opts: { type: CaptionsFileFormat; locales: string[] },
-  ): Promise<void>;
   search(
     query: string,
     options?: Partial<{ fuzzy: boolean; prefix: boolean }>,
@@ -56,21 +43,7 @@ export interface CueSearchResult {
 export function createTranscriptViewStore() {
   const store = createStore<TranscriptViewState>((set, get, _store) => ({
     source: null,
-    async setSource(src, plugin) {
-      const sid = toInfoKey(src.url);
-      const [title, caption] = await Promise.all([
-        plugin.cacheStore.getTitle(sid),
-        plugin.cacheStore.getCaption(sid, src.id),
-      ]);
-      if (title) set({ title });
-      if (!caption) {
-        set({ source: src });
-      } else {
-        set({ source: { ...src, label: caption.label || caption.language } });
-        const locales = caption.language ? [caption.language] : [];
-        this.setCaptions({ result: caption.content, locales });
-      }
-    },
+    title: null,
     showSearchBox: false,
     toggleSearchBox(val) {
       if (typeof val === "boolean") {
@@ -80,16 +53,20 @@ export function createTranscriptViewStore() {
       }
     },
     captions: null,
-    async parseCaptions(content, { type, locales }) {
-      const result = await parseText(content, { type });
-      this.setCaptions({ locales, result });
-    },
     setCaptions(info) {
       if (!info) {
-        set({ captions: null });
+        set({ captions: null, title: null });
         return;
       }
-      const { locales, result } = info;
+      const { track, locales } = info;
+      const { metadata: meta, cues } = track.content;
+      const label = meta.Label || track.label;
+      const lang = meta.Language || track.language;
+      let title = label || (vaildate(lang) ? langCodeToLabel(lang) : "");
+      if (title && meta.Title) {
+        title = meta.Title + " - " + title;
+      }
+      set({ title: title ?? null });
       get().captions?._minisearch?.removeAll();
       const segmenter = getSegmenter(...info.locales);
       const minisearch = new MiniSearch<VTTCueWithId>({
@@ -102,8 +79,10 @@ export function createTranscriptViewStore() {
                 .map((seg) => seg.segment)
           : undefined,
       });
-      minisearch.addAll(result.cues);
-      set({ captions: { _minisearch: minisearch, locales, result } });
+      minisearch.addAll(cues);
+      set({
+        captions: { _minisearch: minisearch, locales, content: track.content },
+      });
     },
     search(query, options) {
       const minisearch = get().captions?._minisearch;

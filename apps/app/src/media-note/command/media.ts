@@ -244,7 +244,7 @@ export function registerControlCommands(plugin: MxPlugin) {
           repeatable: repeat,
           playerCheckCallback: (checking, view) => {
             if (!view) return false;
-            const player = view.store.getState().player;
+            const player = view.player;
             if (!player) return false;
             if (check && !check(player)) return false;
             if (checking) return true;
@@ -252,7 +252,7 @@ export function registerControlCommands(plugin: MxPlugin) {
           },
           noteCheckCallback(checking, view) {
             if (!view) return false;
-            const player = view.store.getState().player;
+            const player = view.player;
             if (!player) return false;
             if (check && !check(player)) return false;
             if (checking) return true;

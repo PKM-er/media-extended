@@ -2,7 +2,7 @@ import { Notice, htmlToMarkdown } from "obsidian";
 import { forwardRef, useMemo } from "react";
 import { formatDuration } from "@/lib/hash/format";
 import { cn } from "@/lib/utils";
-import type { VTTCueWithId } from "@/transcript/store";
+import type { VTTCueWithId } from "@/transcript/handle/type";
 import { CopyIcon, PlayIcon } from "../icon";
 
 export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
@@ -61,7 +61,11 @@ export const CueLine = forwardRef<HTMLDivElement, CueLineProps>(
   ) {
     const highlightedText = matches
       ? splitByKeywords(content, matches)
-      : [content];
+      : ((content: string) => {
+          const segments: React.ReactNode[] = [];
+          insertLineBreaks(content, segments, 0);
+          return segments;
+        })(content);
     return (
       <div
         {...props}
@@ -106,7 +110,8 @@ function splitByKeywords(content: string, keywords: string[]) {
       const idx = match.index!,
         matchedWord = match[0];
       const after = content.slice(idx + matchedWord.length);
-      segments.push(after, <mark key={idx}>{matchedWord}</mark>);
+      insertLineBreaks(after, segments, idx);
+      segments.push(<mark key={idx}>{matchedWord}</mark>);
       content = content.slice(0, idx);
       return segments;
     },
@@ -120,4 +125,19 @@ function splitByKeywords(content: string, keywords: string[]) {
 function Timestamp({ children: time }: { children: number }) {
   const formattedTime = useMemo(() => formatDuration(time), [time]);
   return <span>{formattedTime}</span>;
+}
+
+function insertLineBreaks(
+  content: string,
+  segments: React.ReactNode[],
+  idx: number,
+): void {
+  if (content.includes("\n")) {
+    content.split("\n").forEach((line, i) => {
+      if (i === 0) segments.push(line);
+      else segments.push(<br key={`${idx}seg-${i}`} />, line);
+    });
+  } else {
+    segments.push(content);
+  }
 }

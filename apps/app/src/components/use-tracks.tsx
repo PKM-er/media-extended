@@ -8,26 +8,23 @@ import type {
   TextTrackListModeChangeEvent,
   VTTContent,
 } from "@vidstack/react";
-import { useEffect, useMemo, useState } from "react";
+import { upperFirst } from "lodash-es";
+import { useEffect, useMemo } from "react";
+import type { TextTrackInfo, WebsiteTextTrack } from "@/info/track-info";
+import { getTrackInfoID } from "@/info/track-info";
 import { setDefaultLang } from "@/lib/lang/default-lang";
+import { langCodeToLabel } from "@/lib/lang/lang";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
-import { toInfoKey } from "@/media-note/note-index/def";
-import { useMediaViewStore, usePlugin, useSettings } from "./context";
-
-function useSid() {
-  return useMediaViewStore((s) => (s.source ? toInfoKey(s.source.url) : null));
-}
+import { useMediaViewStore, useSettings } from "./context";
 
 export function useRemoteTextTracks() {
   // const externalTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
   const player = useMediaPlayer();
   const loaded = useMediaState("canPlay");
-  const sid = useSid();
-  const plugin = usePlugin();
 
   useEffect(() => {
     if (!player) return;
-    const updateCaption = async (evt: TextTrackListModeChangeEvent) => {
+    const updateTrack = async (evt: TextTrackListModeChangeEvent) => {
       const track = evt.detail;
       const provider = player.provider;
 
@@ -35,32 +32,17 @@ export function useRemoteTextTracks() {
         !(
           track.mode === "showing" &&
           track.content === dummyVTTContent &&
-          track.id &&
-          provider instanceof WebiviewMediaProvider &&
-          sid
+          track.id.startsWith(webpageTrackPrefix) &&
+          provider instanceof WebiviewMediaProvider
         )
       )
         return;
-      const id = track.id as string;
-      const cached = await plugin.cacheStore.getCaption(sid, id);
-      let vtt;
-      if (cached) {
-        vtt = cached.content;
-        console.debug("Caption data loaded from cache", sid, id);
-      } else {
-        if (!loaded) {
-          console.warn("Cannot load remote captions before media is loaded");
-          return;
-        }
-        vtt = await provider.media.methods.getTrack(id);
-        plugin.cacheStore.updateCaption(sid, id, vtt).then((v) => {
-          if (v) {
-            console.debug("Caption cached", sid, id);
-          } else {
-            console.error("Cannot cache caption", sid, id);
-          }
-        });
+      const id = (track.id as string).slice(webpageTrackPrefix.length);
+      if (!loaded) {
+        console.warn("Cannot load remote captions before media is loaded");
+        return;
       }
+      const vtt = await provider.media.methods.getTrack(id);
       if (!vtt) return;
       player.textTracks.remove(track);
       player.textTracks.add({
@@ -75,71 +57,112 @@ export function useRemoteTextTracks() {
       });
       player.textTracks.getById(id)?.setMode("showing");
     };
-    player.textTracks.addEventListener("mode-change", updateCaption);
+    player.textTracks.addEventListener("mode-change", updateTrack);
     return () => {
-      player.textTracks.removeEventListener("mode-change", updateCaption);
+      player.textTracks.removeEventListener("mode-change", updateTrack);
     };
-  }, [player, loaded, sid, plugin.cacheStore]);
+  }, [player, loaded]);
 }
 
 export function useTextTracks() {
-  const localTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
-  const [remoteTextTracks, setRemoteTracks] = useState<
-    (TextTrackInit & {
-      id: string;
-    })[]
-  >([]);
+  const localTextTracks = useMediaViewStore((s) => s.textTracks.local);
+  const remoteTextTracks = useMediaViewStore((s) => s.textTracks.remote);
+  const setRemoteTracks = useMediaViewStore((s) => s.updateWebsiteTracks);
   const defaultLang = useSettings((s) => s.defaultLanguage);
   const getDefaultLang = useSettings((s) => s.getDefaultLang);
-  const sid = useSid();
-  const plugin = usePlugin();
 
   const provider = useMediaProvider();
-  useEffect(() => {
-    if (!sid) return;
-    plugin.cacheStore.getCaptions(sid).then((data) => {
-      if (data.length === 0) return;
-      setRemoteTracks(
-        data.map(({ sid, data, ...info }) => ({
-          ...info,
-          content: dummyVTTContent,
-        })),
-      );
-      console.debug("Remote tracks loaded from cache", data.length);
-    });
-  }, [plugin.cacheStore, sid]);
+
   useEffect(() => {
     if (!(provider instanceof WebiviewMediaProvider)) return;
     return provider.media.on("mx-text-tracks", ({ payload: { tracks } }) => {
-      setRemoteTracks(
-        tracks.map(({ src, ...t }) => ({ ...t, content: dummyVTTContent })),
-      );
+      setRemoteTracks(tracks);
       if (tracks.length !== 0) console.debug("Remote tracks loaded", tracks);
     });
-  }, [provider]);
-  useEffect(() => {
-    if (!(provider instanceof WebiviewMediaProvider) || !sid) return;
-    return provider.media.on(
-      "mx-text-tracks",
-      async ({ payload: { tracks } }) => {
-        await plugin.cacheStore.saveCaptionList(sid, tracks);
-        if (tracks.length !== 0)
-          console.debug("Remote tracks cached", tracks.length);
-      },
-    );
-  }, [plugin.cacheStore, provider, sid]);
+  }, [provider, setRemoteTracks]);
+
   return useMemo(
-    () =>
-      setDefaultLang(
-        [...localTextTracks, ...remoteTextTracks],
-        getDefaultLang(),
-      ),
+    () => {
+      const local = localTextTracks.map(
+        (track) =>
+          ({
+            id: getTrackInfoID(track).id,
+            kind: track.kind,
+            label: track.label,
+            type: track.type,
+            content: track.content,
+          } satisfies TextTrackInit),
+      );
+      const remote = dedupeWebsiteTrack(remoteTextTracks, localTextTracks).map(
+        ({ wid, ...track }) =>
+          ({
+            id: webpageTrackPrefix + wid,
+            ...track,
+            content: dummyVTTContent,
+          } satisfies TextTrackInit),
+      );
+      const tracks = [...local, ...remote].sort(sortTrack).map((t, idx) => ({
+        ...t,
+        label: toTrackLabel(t, idx),
+      }));
+      return setDefaultLang(tracks, getDefaultLang());
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [localTextTracks, remoteTextTracks, defaultLang],
   );
 }
 
+const webpageTrackPrefix = "webpage:";
 export const dummyVTTContent = {
   cues: [],
   regions: [],
 } satisfies VTTContent;
+
+export function dedupeWebsiteTrack(
+  website: WebsiteTextTrack[],
+  local: TextTrackInfo[],
+) {
+  return website.filter((t) => !local.some(({ wid }) => wid === t.wid));
+}
+
+export function toTrackLabel(t: LabelProps, idx: number) {
+  return (
+    t.label ||
+    langCodeToLabel(t.language) ||
+    `${upperFirst(t.kind)} ${t.wid || idx + 1}`
+  );
+}
+
+type LabelProps = Pick<TextTrackInfo, "label" | "language" | "kind" | "wid">;
+
+export function sortTrack(a: LabelProps | null, b: LabelProps | null) {
+  if (a && b) {
+    // if with item.track.language, sort by item.track.language
+    if (a.language && b.language) {
+      return (a as { language: string }).language.localeCompare(
+        (b as { language: string }).language,
+      );
+    }
+
+    // if not with item.track.language, sort by item.label
+    if (!a.language && !b.language) {
+      return toTrackLabel(a, -1).localeCompare(toTrackLabel(b, -1));
+    }
+
+    // if one has language and the other doesn't, the one with language comes first
+    if (a.language && !b.language) {
+      return -1;
+    }
+    if (!a.language && b.language) {
+      return 1;
+    }
+  }
+  // if item.track is null, put it at the end
+  if (a === null && b !== null) {
+    return 1;
+  }
+  if (a !== null && b === null) {
+    return -1;
+  }
+  return 0;
+}

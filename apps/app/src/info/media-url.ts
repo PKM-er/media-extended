@@ -14,9 +14,6 @@ const allowedProtocols = new Set(["https:", "http:", "file:"]);
 
 export class MediaURL extends URL implements URLResolveResult {
   static create(url: string | URL, mx?: URL | string): MediaURL | null {
-    if (url instanceof MediaURL) {
-      return url.clone();
-    }
     try {
       return new MediaURL(url, mx);
     } catch {

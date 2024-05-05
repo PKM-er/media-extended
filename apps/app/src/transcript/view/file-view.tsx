@@ -1,16 +1,15 @@
 import type { Menu, TFile, WorkspaceLeaf } from "obsidian";
-import { EditableFileView } from "obsidian";
+import { EditableFileView, Notice } from "obsidian";
 import ReactDOM from "react-dom/client";
 import LineView from "@/components/transcript/line";
+import {
+  getCaptionExts,
+  isSupportedCaptionExt,
+  toTrack,
+} from "@/info/track-info";
 import type { PaneMenuSource } from "@/lib/menu";
 import type MxPlugin from "@/mx-main";
-import {
-  isCaptionFile,
-  isSupportedCaptionExt,
-  supportedCaptionExts,
-  toTrack,
-  transcriptViewType,
-} from "./const";
+import { transcriptViewType } from "../const";
 import { createTranscriptViewStore, TranscriptViewContext } from "./context";
 
 export class LocalTranscriptView extends EditableFileView {
@@ -19,14 +18,24 @@ export class LocalTranscriptView extends EditableFileView {
       transcriptViewType.local,
       (leaf) => new LocalTranscriptView(leaf, plugin),
     );
-    plugin.registerExtensions(
-      supportedCaptionExts as unknown as string[],
-      transcriptViewType.local,
-    );
+    plugin.registerExtensions(getCaptionExts(), transcriptViewType.local);
   }
 
   store = createTranscriptViewStore();
   root: ReactDOM.Root | null = null;
+  // updateTitle = updateTitle;
+  // registerTitleChange() {
+  //   this.register(
+  //     this.store.subscribe((now, prev) => {
+  //       if (now.title !== prev.title) {
+  //         this.updateTitle();
+  //       }
+  //     }),
+  //   );
+  // }
+  // getDisplayText(): string {
+  //   return this.store.getState().title ?? super.getDisplayText();
+  // }
 
   constructor(leaf: WorkspaceLeaf, public plugin: MxPlugin) {
     super(leaf);
@@ -42,15 +51,22 @@ export class LocalTranscriptView extends EditableFileView {
   }
   async onLoadFile(file: TFile): Promise<void> {
     await super.onLoadFile(file);
-    if (!isCaptionFile(file))
-      throw new Error(`Caption file not supported: ${file.path}`);
     const track = toTrack(file);
-    const content = await this.app.vault.cachedRead(file);
-    await this.store.getState().parseCaptions(content, {
-      type: file.extension,
-      locales: track.language ? [track.language] : [],
-    });
-    this.render();
+    if (!track) throw new Error(`Caption file not supported: ${file.path}`);
+    try {
+      this.store.getState().setCaptions({
+        track: await this.plugin.transcript.loadAndParseTrack(track),
+        locales: track.language ? [track.language] : [],
+      });
+      this.render();
+    } catch (e) {
+      new Notice(
+        `Failed to load subtitle ${file.path}: ${
+          e instanceof Error ? e.message : "See console for details"
+        }`,
+      );
+      console.error("Failed to load subtitle", file, e);
+    }
   }
   protected async onOpen(): Promise<void> {
     await super.onOpen();

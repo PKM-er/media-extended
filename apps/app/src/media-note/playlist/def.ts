@@ -22,8 +22,8 @@ export function isMediaTaskSymbol(
 
 declare module "obsidian" {
   interface MetadataCache {
-    on(name: "mx-playlist-change", callback: () => void): EventRef;
-    trigger(name: "mx-playlist-change"): void;
+    on(name: "mx:playlist-change", callback: () => void): EventRef;
+    trigger(name: "mx:playlist-change"): void;
   }
 }
 

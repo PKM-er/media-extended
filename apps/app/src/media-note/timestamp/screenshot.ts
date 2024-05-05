@@ -1,12 +1,13 @@
 import type { MediaPlayerState, VideoProvider } from "@vidstack/react";
 import mime from "mime";
 import type { App, Editor } from "obsidian";
-import { Notice, TFolder, normalizePath, TFile } from "obsidian";
+import { Notice, normalizePath, TFile } from "obsidian";
 import {
   canProviderScreenshot,
   takeScreenshot,
 } from "@/components/player/screenshot";
 import type { MediaInfo } from "@/info/media-info";
+import { getSaveFolder } from "@/lib/folder";
 import { formatDuration, toDurationISOString } from "@/lib/hash/format";
 import { normalizeFilename } from "@/lib/norm";
 import type { WebiviewMediaProvider } from "@/lib/remote-player/provider";
@@ -26,7 +27,7 @@ interface Player {
 export function validateProvider<T extends PlayerComponent>(
   playerComponent: T,
 ) {
-  const player = playerComponent.store.getState().player;
+  const player = playerComponent.player;
   if (!player) {
     new Notice("Player not initialized");
     return false;
@@ -87,37 +88,13 @@ export async function saveScreenshot<T extends PlayerComponent>(
   const title = mediaTitle(media, { state });
   const screenshotName = normalizeFilename(title) + toDurationISOString(time);
   const humanizedDuration = time > 0 ? ` - ${formatDuration(time)}` : "";
-  let screenshotPath: string;
+
+  const folder = await getSaveFolder(screenshotFolderPath, {
+    plugin: playerComponent.plugin,
+    sourcePath: newNote.path,
+  });
   const screenshotFilename = `${screenshotName}.${ext}`;
-  if (screenshotFolderPath === undefined) {
-    const random = `${Date.now()}.${Math.random()
-      .toString(36)
-      .substring(2)}.${ext}`;
-    const attachementFolder = (
-      await fileManager.getAvailablePathForAttachment(random, newNote.path)
-    ).replace(random, "");
-    screenshotPath = normalizePath(
-      `${attachementFolder}/${screenshotFilename}`,
-    );
-  } else {
-    let folder = vault.getAbstractFileByPath(screenshotFolderPath);
-    if (folder === null) {
-      folder = await vault.createFolder(screenshotFolderPath).catch((e) => {
-        new Notice(
-          `Failed to create screenshot folder ${screenshotFolderPath}: ${
-            e instanceof Error ? e.message : e
-          }`,
-        );
-        throw e;
-      });
-    } else if (!(folder instanceof TFolder)) {
-      new Notice(
-        `Screenshot folder occupied, check your preferences: ${folder.path}`,
-      );
-      return false;
-    }
-    screenshotPath = `${folder.path}/${screenshotFilename}`;
-  }
+  const screenshotPath = normalizePath(`${folder.path}/${screenshotFilename}`);
 
   let isNew = false;
   let screenshotFile = vault.getAbstractFileByPath(screenshotPath);

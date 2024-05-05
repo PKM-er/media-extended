@@ -7,7 +7,7 @@ import type { PaneType, SplitDirection } from "obsidian";
 import { Notice, Plugin } from "obsidian";
 import { RecorderNote } from "./audio-rec";
 import type { MediaInfo } from "./info/media-info";
-import { MediaFileExtensions } from "./info/media-type";
+import { getMediaExts } from "./info/media-type";
 import { URLViewType } from "./info/view-type";
 import { toURL } from "./lib/url";
 import { initLogin } from "./login";
@@ -43,7 +43,7 @@ import { createSettingsStore } from "./settings/def";
 import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
 import { registerTranscriptView } from "./transcript";
-import { CacheStore } from "./transcript/store";
+import { TranscriptLoader } from "./transcript/handle";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import { resolveMxProtocol } from "./web/url-match";
@@ -59,6 +59,8 @@ interface MxAPI {
 
 export default class MxPlugin extends Plugin {
   settings = createSettingsStore(this);
+
+  transcript = this.addChild(new TranscriptLoader(this));
 
   resolveUrl(url: string | URL | null | undefined): MediaInfo | null {
     const patched = patchWin32FileUrl(url);
@@ -103,7 +105,6 @@ export default class MxPlugin extends Plugin {
   mediaNote = this.addChild(new MediaNoteIndex(this));
   playlist = this.addChild(new PlaylistIndex(this));
   biliReq = this.addChild(new BilibiliRequestHacker(this));
-  cacheStore = this.addChild(new CacheStore(this));
   leafOpener = this.addChild(new LeafOpener(this));
   recorderNote = this.addChild(new RecorderNote(this));
   handleMediaNote = handleMediaNote;
@@ -122,12 +123,12 @@ export default class MxPlugin extends Plugin {
     this.injectMediaView(
       MEDIA_FILE_VIEW_TYPE.audio,
       (leaf) => new AudioFileView(leaf, this),
-      MediaFileExtensions.audio,
+      getMediaExts("audio"),
     );
     this.injectMediaView(
       MEDIA_FILE_VIEW_TYPE.video,
       (leaf) => new VideoFileView(leaf, this),
-      MediaFileExtensions.video,
+      getMediaExts("video"),
     );
     this.injectMediaEmbed(
       (info, file, subpath) => new MediaFileEmbed(info, file, subpath, this),

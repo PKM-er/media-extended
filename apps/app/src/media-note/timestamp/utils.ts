@@ -2,14 +2,10 @@ import { Notice } from "obsidian";
 import type { App, Editor } from "obsidian";
 import { isFileMediaInfo } from "@/info/media-info";
 import type { MediaInfo } from "@/info/media-info";
-import { checkMediaType } from "@/info/media-type";
 import { insertBeforeCursor, insertToCursor } from "@/lib/cursor";
 import { formatDuration, toTempFragString } from "@/lib/hash/format";
 import type { TempFragment } from "@/lib/hash/temporal-frag";
-import type { PlayerComponent } from "@/media-view/base";
 import type { MxSettings } from "@/settings/def";
-import type { MediaSourceFieldType } from "../note-index/def";
-import { mediaTitle } from "../title";
 
 export function insertTimestamp(
   { timestamp, screenshot }: { timestamp: string; screenshot?: string },
@@ -38,34 +34,6 @@ export function insertTimestamp(
   } catch (error) {
     new Notice("Failed to insert timestamp, see console for details");
     console.error("Failed to insert timestamp", error);
-  }
-}
-export function openOrCreateMediaNote(
-  mediaInfo: MediaInfo,
-  playerComponent: PlayerComponent,
-) {
-  const { metadataCache } = playerComponent.plugin.app;
-  const player = playerComponent.store.getState().player;
-  if (!player) {
-    throw new Error("Player not initialized");
-  }
-  const title = mediaTitle(mediaInfo, { state: player.state });
-  if (isFileMediaInfo(mediaInfo)) {
-    const mediaType = checkMediaType(mediaInfo.file.extension)!;
-    const file = mediaInfo.file;
-    return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
-      title,
-      fm: (newNotePath) => ({
-        [mediaType]: `[[${metadataCache.fileToLinktext(file, newNotePath)}]]`,
-      }),
-      sourcePath: file.path,
-    });
-  } else {
-    const type: MediaSourceFieldType = mediaInfo.inferredType ?? "media";
-    return playerComponent.plugin.leafOpener.openNote(mediaInfo, {
-      title,
-      fm: () => ({ [type]: mediaInfo.jsonState.source }),
-    });
   }
 }
 

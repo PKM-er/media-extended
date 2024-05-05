@@ -1,5 +1,6 @@
 import type { TFile } from "obsidian";
-import { isFileMediaInfo, type MediaInfo } from "@/info/media-info";
+import { type MediaInfo } from "@/info/media-info";
+import { getMediaInfoID } from "@/info/media-info";
 
 export const mediaSourceFieldMap = {
   generic: "media",
@@ -12,16 +13,10 @@ export const mediaSourceFields = Object.values(
   mediaSourceFieldMap,
 ) as MediaSourceFieldType[];
 
-export function toInfoKey(mediaInfo: MediaInfo) {
-  if (isFileMediaInfo(mediaInfo)) {
-    return `file:${mediaInfo.file.path}`;
-  }
-  return `url:${mediaInfo.jsonState.source}`;
-}
 export function compare(a: MediaInfo | undefined, b: MediaInfo | undefined) {
   if (!a || !b) return false;
-  const aKey = toInfoKey(a);
-  const bKey = toInfoKey(b);
+  const aKey = getMediaInfoID(a);
+  const bKey = getMediaInfoID(b);
   return aKey === bKey;
 }
 

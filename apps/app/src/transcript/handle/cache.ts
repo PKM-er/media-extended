@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import type { TextTrackInit, VTTCueInit, VTTRegionInit } from "@vidstack/react";
+import type { TextTrackInit } from "@vidstack/react";
 import type { DBSchema, IDBPDatabase } from "idb";
 import { openDB } from "idb";
 import { isEqual } from "lodash-es";
-import type { VTTHeaderMetadata } from "media-captions";
 import { Component } from "obsidian";
 import { createEventEmitter } from "@/lib/emitter";
 import { gzipBlobToJson, jsonToGzipBlob } from "@/lib/store";
 import type MxPlugin from "@/mx-main";
+import type { VTTContent } from "./type";
 
 interface CaptionData extends TextTrackInit {
   /** caption internal id */
@@ -18,14 +18,6 @@ interface CaptionData extends TextTrackInit {
     blob: Blob;
     cueCount: number;
   } | null;
-}
-
-export type VTTCueWithId = VTTCueInit & { id: string };
-
-export interface VTTContent {
-  cues: VTTCueWithId[];
-  regions?: VTTRegionInit[];
-  metadata?: VTTHeaderMetadata;
 }
 
 interface MxCache extends DBSchema {

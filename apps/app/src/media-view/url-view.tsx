@@ -1,5 +1,4 @@
 import type { MediaURL } from "@/info/media-url";
-import { getTracksLocal } from "@/lib/subtitle";
 import { MediaRemoteView } from "./remote-view";
 import type { MediaRemoteViewState } from "./remote-view";
 import type { MediaUrlViewType } from "./view-type";
@@ -23,16 +22,9 @@ export class VideoUrlView extends MediaUrlView {
   }
 
   async setSource(url: MediaURL) {
-    const defaultLang = this.plugin.settings.getState().getDefaultLang();
-    const textTracks = await getTracksLocal(url).catch((e) => {
-      console.error("Failed to get text tracks", e, url.href, defaultLang);
-      return [];
-    });
-    this.store.getState().setSource(url, {
-      title: true,
-      textTracks,
-      viewType: this.getViewType(),
-    });
+    const state = await super.setSource(url);
+    state.title = true;
+    return state;
   }
 }
 
@@ -47,10 +39,9 @@ export class AudioUrlView extends MediaUrlView {
     return MEDIA_URL_VIEW_TYPE.audio;
   }
   async setSource(url: MediaURL) {
-    this.store.getState().setSource(url, {
-      title: true,
-      viewType: this.getViewType(),
-    });
+    const state = await super.setSource(url);
+    state.title = true;
+    return state;
   }
 }
 

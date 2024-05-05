@@ -34,3 +34,10 @@ export function mediaInfoFromFilePath(
   if (!file) return null;
   return mediaInfoFromFile(file, hash);
 }
+
+export function getMediaInfoID(mediaInfo: MediaInfo) {
+  if (isFileMediaInfo(mediaInfo)) {
+    return `file:${mediaInfo.file.path}`;
+  }
+  return `url:${mediaInfo.jsonState.source}`;
+}

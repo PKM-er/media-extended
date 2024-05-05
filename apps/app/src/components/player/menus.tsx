@@ -20,6 +20,7 @@ import {
   useReload,
 } from "../context";
 import { usePlaylist } from "../hook/use-playlist";
+import { dedupeWebsiteTrack } from "../use-tracks";
 import { dataLpPassthrough } from "./buttons";
 import { addItemsToMenu } from "./playlist-menu";
 
@@ -138,9 +139,10 @@ export function MoreOptions() {
       transform,
       disableWebFullscreen,
       toggleWebFullscreen,
+      textTracks: tracks,
     } = store.getState();
     workspace.trigger(
-      "mx-media-menu",
+      "mx:media-menu",
       menu,
       {
         player,
@@ -150,6 +152,10 @@ export function MoreOptions() {
         toggleControls,
         controls,
         setTransform,
+        tracks: {
+          local: tracks.local,
+          remote: dedupeWebsiteTrack(tracks.remote, tracks.local),
+        },
         transform,
         plugin,
         disableWebFullscreen,

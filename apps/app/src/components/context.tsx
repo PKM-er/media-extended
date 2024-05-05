@@ -1,16 +1,16 @@
-import type { MediaPlayerInstance, TextTrackInit } from "@vidstack/react";
+import type { MediaPlayerInstance } from "@vidstack/react";
 import type { App, TFile, Vault } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
 import { createStore, useStore } from "zustand";
 import { type MediaURL } from "@/info/media-url";
 import type { MediaHost } from "@/info/supported";
+import type { LoadedTextTrack, WebsiteTextTrack } from "@/info/track-info";
 import { parseHashProps, type HashProps } from "@/lib/hash/hash-prop";
 import { TimeoutError } from "@/lib/message";
 import noop from "@/lib/no-op";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import type { ScreenshotInfo } from "@/lib/screenshot";
-import { getTracksInVault } from "@/lib/subtitle";
 import type {
   Playlist,
   PlaylistItemWithMedia,
@@ -20,7 +20,7 @@ import {
   MEDIA_FILE_VIEW_TYPE,
   type MediaViewType,
 } from "@/media-view/view-type";
-import type MediaExtended from "@/mx-main";
+import type MxPlugin from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
 import { type MediaInfo, mediaInfoFromFile } from "../info/media-info";
 import { applyTempFrag, handleTempFrag } from "./state/apply-tf";
@@ -39,7 +39,7 @@ export interface SourceFacet {
    */
   title?: string | true;
   viewType: MediaViewType;
-  textTracks?: TextTrackInit[];
+  textTracks?: LoadedTextTrack[];
 }
 
 export interface MediaViewState {
@@ -63,12 +63,13 @@ export interface MediaViewState {
   disableWebFullscreen?: boolean;
   toggleControls: (showCustom: boolean) => void;
   toggleWebFullscreen: (enableWebFs: boolean) => void;
-  textTracks: TextTrackInit[];
+  textTracks: { local: LoadedTextTrack[]; remote: WebsiteTextTrack[] };
   webHost?: Exclude<MediaHost, MediaHost.Generic>;
   updateWebHost: (webHost: MediaHost) => void;
+  updateWebsiteTracks: (tracks: WebsiteTextTrack[]) => void;
 }
 
-export function createMediaViewStore() {
+export function createMediaViewStore(plugin: MxPlugin) {
   const store = createStore<MediaViewState>((set, get, store) => ({
     player: null,
     playerRef: (inst) => set({ player: inst }),
@@ -104,7 +105,10 @@ export function createMediaViewStore() {
           viewType,
           url,
         },
-        textTracks: textTracks ?? og.textTracks,
+        textTracks: {
+          local: textTracks ?? og.textTracks.local,
+          remote: og.textTracks.remote,
+        },
         hash: { ...og.hash, ...parseHashProps(hash || url.hash) },
         title:
           (title === true ? titleFromUrl(url.source.href) : title) ?? og.title,
@@ -115,15 +119,15 @@ export function createMediaViewStore() {
       set((og) => ({ hash: { ...og.hash, ...parseHashProps(hash) } }));
       applyTempFrag(get());
     },
-    async loadFile(file, { vault, subpath }) {
-      const textTracks = await getTracksInVault(file, vault);
+    async loadFile(file, { subpath }) {
       const url = mediaInfoFromFile(file, subpath ?? "");
       if (!url) {
         throw new Error("Invalid media file: " + file.path);
       }
-      set(({ source, hash }) => ({
+      const textTracks = await plugin.transcript.getTracks(url);
+      set(({ source, hash, textTracks: { remote } }) => ({
         source: { ...source, url, viewType: MEDIA_FILE_VIEW_TYPE[url.type] },
-        textTracks,
+        textTracks: { local: textTracks, remote },
         title: file.name,
         hash: subpath ? { ...hash, ...parseHashProps(subpath) } : hash,
       }));
@@ -168,7 +172,11 @@ export function createMediaViewStore() {
         player.provider.media.send("mx-toggle-webfs", enableWebFs);
       }
     },
-    textTracks: [],
+    textTracks: { local: [], remote: [] },
+    updateWebsiteTracks: (tracks) =>
+      set(({ textTracks }) => ({
+        textTracks: { ...textTracks, remote: tracks },
+      })),
     updateWebHost: (webHost) =>
       set({ webHost: webHost === "generic" ? undefined : webHost }),
   }));
@@ -181,7 +189,7 @@ export type MediaViewStoreApi = ReturnType<typeof createMediaViewStore>;
 
 export const MediaViewContext = createContext<{
   store: MediaViewStoreApi;
-  plugin: MediaExtended;
+  plugin: MxPlugin;
   embed: boolean;
   reload: () => void;
   onScreenshot?: (info: ScreenshotInfo) => any;

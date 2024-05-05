@@ -17,9 +17,9 @@ export function usePlaylist(): PlaylistWithActive | undefined {
       setPlaylist(plugin.playlist.get(media));
     }
     onPlaylistChange();
-    plugin.app.metadataCache.on("mx-playlist-change", onPlaylistChange);
+    plugin.app.metadataCache.on("mx:playlist-change", onPlaylistChange);
     return () => {
-      plugin.app.metadataCache.off("mx-playlist-change", onPlaylistChange);
+      plugin.app.metadataCache.off("mx:playlist-change", onPlaylistChange);
     };
   }, [media, plugin.playlist, plugin.app.metadataCache]);
   // get latest updated playlist

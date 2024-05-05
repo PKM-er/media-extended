@@ -1,10 +1,9 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import type { VTTCueInit } from "@vidstack/react";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import type { CueSearchResult } from "@/transcript/context";
-import type { VTTCueWithId } from "@/transcript/store";
+import type { VTTCueWithId } from "@/transcript/handle/type";
+import type { CueSearchResult } from "@/transcript/view/context";
 import { CueActions, CueLine } from "./cue-line";
 
 export interface CueLineListRef {

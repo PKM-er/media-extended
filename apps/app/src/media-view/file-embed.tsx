@@ -15,6 +15,9 @@ export class MediaFileEmbed
   store;
   root: ReactDOM.Root | null = null;
   public containerEl: HTMLElement;
+  get player() {
+    return this.store.getState().player;
+  }
   constructor(
     public info: EmbedInfo,
     public file: TFile,
@@ -23,7 +26,7 @@ export class MediaFileEmbed
   ) {
     super();
     this.containerEl = info.containerEl;
-    this.store = createMediaViewStore();
+    this.store = createMediaViewStore(plugin);
     const { containerEl } = info;
     containerEl.addClasses(["mx", "mx-media-embed", "custom"]);
     function isEditButton(target: EventTarget | null): boolean {

@@ -15,7 +15,7 @@ export function shouldOpenMedia(url: MediaURL, plugin: MxPlugin): boolean {
     url.type !== MediaHost.Generic ||
     url.inferredType ||
     url.tempFrag ||
-    plugin.mediaNote.findNotes(url).length > 0 ||
+    plugin.mediaNote.findNote(url) ||
     plugin.urlViewType.getPreferred(url, true)
   );
 }

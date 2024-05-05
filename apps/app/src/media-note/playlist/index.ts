@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Component, TFile, debounce } from "obsidian";
 import type { MediaInfo } from "@/info/media-info";
+import { getMediaInfoID } from "@/info/media-info";
 import { waitUntilResolve } from "@/lib/meta-resolve";
 import type MxPlugin from "@/mx-main";
 import { iterateFiles } from "../../lib/iterate-files";
-import { toInfoKey } from "../note-index/def";
 import { emptyLists } from "./def";
 import type { PlaylistWithActive, Playlist } from "./def";
 import { generateM3U8File } from "./export";
@@ -19,7 +19,7 @@ export class PlaylistIndex extends Component {
 
   get(media: MediaInfo | undefined) {
     if (!media) return emptyLists;
-    return this.mediaToPlaylistIndex.get(toInfoKey(media)) ?? emptyLists;
+    return this.mediaToPlaylistIndex.get(getMediaInfoID(media)) ?? emptyLists;
   }
 
   /**
@@ -104,7 +104,7 @@ export class PlaylistIndex extends Component {
   }
 
   notify() {
-    this.app.metadataCache.trigger("mx-playlist-change");
+    this.app.metadataCache.trigger("mx:playlist-change");
   }
   requestNotify = debounce(() => this.notify(), 500);
 
@@ -116,13 +116,13 @@ export class PlaylistIndex extends Component {
     data.list.forEach((item) => {
       const { media } = item;
       if (!media) return;
-      const key = toInfoKey(media);
+      const key = getMediaInfoID(media);
       if (uniqCache.has(key)) return;
       const others = this.mediaToPlaylistIndex.get(key) ?? [];
       const curr = {
         ...data,
         active: data.list.findIndex(
-          (i) => i.media && key === toInfoKey(i.media),
+          (i) => i.media && key === getMediaInfoID(i.media),
         ),
       };
       this.listVariantMap.set(curr, data);

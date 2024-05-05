@@ -330,7 +330,10 @@ export class MxSettingTabs extends PluginSettingTab {
             this.state.setLoadStrategy(val as "play" | "eager"),
           ),
       );
+  }
 
+  subtitle() {
+    const { containerEl: container } = this;
     const fallback = "_follow_";
     const extra = getGroupedLangExtra();
     const locales = Object.fromEntries(
@@ -383,6 +386,40 @@ export class MxSettingTabs extends PluginSettingTab {
           }),
       )
       .then((s) => s.controlEl.appendText("x"));
+
+    new Setting(container)
+      .setName("Default location for downloaded subtitle")
+      .setDesc("Where subtitles from website are placed.")
+      .addDropdown((d) =>
+        d
+          .addOptions({
+            default: "In attachment folder",
+            specific: "In the folder specified below",
+          })
+          .onChange((d) => {
+            this.state.setSubtitleFolder(d === "specific" ? "" : null);
+          }),
+      );
+
+    new Setting(container)
+      .setName("Subtitle folder path")
+      .setDesc("Place newly created subtitle files in this folder.")
+      .addText((t) =>
+        t
+          .setPlaceholder("Example: folder 1/folder")
+          .setValue(this.state.subtitleFolderPath ?? "")
+          .onChange(this.state.setSubtitleFolder),
+      )
+      .then((setting) => {
+        setting.settingEl.style.display =
+          this.state.subtitleFolderPath !== undefined ? "" : "none";
+        this.sub((s, prev) => {
+          if (typeof s.subtitleFolderPath === typeof prev.subtitleFolderPath)
+            return;
+          setting.settingEl.style.display =
+            s.subtitleFolderPath !== undefined ? "" : "none";
+        });
+      });
   }
 
   timestamp() {
@@ -670,6 +707,7 @@ export class MxSettingTabs extends PluginSettingTab {
 
     this.webpage();
     this.playback();
+    this.subtitle();
     this.noteTaking();
     this.linkOpen();
     this.protocol();

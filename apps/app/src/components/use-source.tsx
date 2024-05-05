@@ -1,14 +1,13 @@
 import type { PlayerSrc } from "@vidstack/react";
 import { useMemo } from "react";
+import { getMediaInfoID, isFileMediaInfo } from "@/info/media-info";
 import { encodeWebpageUrl } from "@/lib/remote-player/encode";
-import { toInfoKey } from "@/media-note/note-index/def";
-import { isFileMediaInfo } from "../info/media-info";
 import { useApp, useMediaViewStore } from "./context";
 
 export function useSource() {
   const mediaInfo = useMediaViewStore((s) => s.source?.url);
   const { vault } = useApp();
-  const mediaInfoKey = mediaInfo ? toInfoKey(mediaInfo) : null;
+  const mediaInfoKey = mediaInfo ? getMediaInfoID(mediaInfo) : null;
   const src = useMemo(() => {
     if (!mediaInfo) return;
     if (isFileMediaInfo(mediaInfo)) {

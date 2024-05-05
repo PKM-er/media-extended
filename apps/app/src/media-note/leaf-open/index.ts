@@ -11,7 +11,6 @@ import type {
 import { Component, MarkdownView, debounce } from "obsidian";
 import type { MediaInfo } from "@/info/media-info";
 import { isFileMediaInfo } from "@/info/media-info";
-import { normalizeFilename } from "@/lib/norm";
 import type { MediaEmbedViewState } from "@/media-view/iframe-view";
 import type { MediaUrlViewState } from "@/media-view/url-view";
 import type {
@@ -48,12 +47,6 @@ declare module "obsidian" {
       content?: string,
     ): Promise<TFile>;
   }
-}
-
-export interface NewNoteInfo {
-  title: string;
-  fm: (newNotePath: string) => Record<string, any>;
-  sourcePath?: string;
 }
 
 const mediaLeafActiveClass = "mx-media-active";
@@ -268,24 +261,20 @@ export class LeafOpener extends Component {
   }
 
   async openNote(
-    mediaInfo: MediaInfo,
-    newNoteInfo: NewNoteInfo,
+    file: TFile,
     newLeaf?: "split",
     direction?: SplitDirection,
   ): Promise<{ file: TFile; editor: Editor }>;
   async openNote(
-    mediaInfo: MediaInfo,
-    newNoteInfo: NewNoteInfo,
+    file: TFile,
     newLeaf?: PaneType | boolean,
   ): Promise<{ file: TFile; editor: Editor }>;
   async openNote(
-    mediaInfo: MediaInfo,
-    newNoteInfo: NewNoteInfo,
+    note: TFile,
     newLeaf: PaneType | boolean = "split",
     direction: SplitDirection = "vertical",
   ): Promise<{ file: TFile; editor: Editor }> {
-    const notes = this.plugin.mediaNote.findNotes(mediaInfo);
-    const opened = this.#getOpenedNote(notes);
+    const opened = this.#getOpenedNote([note]);
     if (opened) {
       if (opened.getMode() !== "source") {
         await opened.setState({ mode: "source" }, { history: false });
@@ -293,23 +282,10 @@ export class LeafOpener extends Component {
       return opened;
     }
 
-    let targetNote: TFile;
-    if (notes.length === 0) {
-      const title = normalizeFilename(newNoteInfo.title);
-      const filename = `Media Note - ${title}`;
-      targetNote = await this.#createNewNote(
-        filename,
-        newNoteInfo.fm,
-        newNoteInfo.sourcePath ?? "",
-      );
-    } else {
-      targetNote = notes.sort(sortByMtime).at(0)!;
-    }
-
     const leaf = this.app.workspace.getLeaf(newLeaf as any, direction);
-    await leaf.openFile(targetNote, { state: { mode: "source" } });
+    await leaf.openFile(note, { state: { mode: "source" } });
     return {
-      file: targetNote,
+      file: note,
       editor: (leaf.view as MarkdownView).editor,
     };
   }
@@ -326,24 +302,6 @@ export class LeafOpener extends Component {
       opened.sort((a, b) => sortByMtime(a.view.file, b.view.file)).at(0)!
     ).view;
     return view;
-  }
-  async #createNewNote(
-    filename: string,
-    fm: (sourcePath: string) => Record<string, any>,
-    sourcePath = "",
-  ) {
-    const { fileManager } = this.app;
-    const folder = fileManager.getNewFileParent(sourcePath, filename);
-    const newNote = await fileManager.createNewFile(
-      folder,
-      filename,
-      "md",
-      "---\n---\n",
-    );
-    await fileManager.processFrontMatter(newNote, (fn) => {
-      Object.assign(fn, fm(newNote.path));
-    });
-    return newNote;
   }
 }
 
