@@ -12,7 +12,8 @@ import { CueLineList } from "./cue-line-list";
 import { SearchInput } from "./search-input";
 
 export default function Lines() {
-  const cues = useTranscriptViewStore((s) => s.captions?.content.cues || []);
+  const cues = useTranscriptViewStore((s) => s.textTrack?.content.cues || []);
+  const activeCueIDs = useTranscriptViewStore((s) => s.activeCueIDs);
   const play = usePlay();
   const cueHash = useMemo(
     () => new Map(cues.map((cue, index) => [cue.id, { cue, index }])),
@@ -101,6 +102,7 @@ export default function Lines() {
         className="p-[var(--file-margins)] pt-0"
         ref={cueListRef}
         onPlay={play}
+        activeCueIDs={activeCueIDs}
         searchResult={searchResult}
       >
         {cues}

@@ -1,5 +1,11 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { VTTCueWithId } from "@/transcript/handle/type";
@@ -13,11 +19,12 @@ export interface CueLineListProps {
   className?: string;
   searchResult?: CueSearchResult[];
   children: VTTCueWithId[];
+  activeCueIDs?: Set<string>;
   onPlay?: (evt: React.MouseEvent | React.KeyboardEvent, time: number) => void;
 }
 export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
   function CueLineList(
-    { children: cues, className, searchResult, onPlay },
+    { children: cues, className, searchResult, onPlay, activeCueIDs },
     ref,
   ) {
     const parentRef = useRef<HTMLDivElement>(null);
@@ -33,6 +40,18 @@ export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
       estimateSize: () => 45,
       overscan: 20,
     });
+
+    useEffect(() => {
+      if (!activeCueIDs) return;
+      const [firstCue] = activeCueIDs;
+      if (!firstCue) return;
+      const index = cues.findIndex((cue) => cue.id === firstCue);
+      if (index - 1 < 0) return;
+      rowVirtualizer.scrollToIndex(index - 1, {
+        behavior: "smooth",
+        align: "start",
+      });
+    }, [activeCueIDs, cues, rowVirtualizer]);
 
     useImperativeHandle(
       ref,
@@ -66,6 +85,7 @@ export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
               return (
                 <CueLine
                   key={cue.id}
+                  active={activeCueIDs?.has(cue.id)}
                   ref={rowVirtualizer.measureElement}
                   data-index={virtualItem.index}
                   time={cue.startTime}

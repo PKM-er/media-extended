@@ -24,6 +24,7 @@ import type MxPlugin from "@/mx-main";
 import type { MxSettings } from "@/settings/def";
 import { type MediaInfo, mediaInfoFromFile } from "../info/media-info";
 import { applyTempFrag, handleTempFrag } from "./state/apply-tf";
+import { handleCueUpdate } from "./state/handle-cue-update";
 
 export interface TransformConfig {
   rotate: "90" | "180" | "270";
@@ -182,6 +183,7 @@ export function createMediaViewStore(plugin: MxPlugin) {
   }));
 
   handleTempFrag(store);
+  handleCueUpdate(store, plugin.app.workspace);
   return store;
 }
 

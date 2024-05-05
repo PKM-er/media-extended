@@ -47,6 +47,7 @@ declare module "obsidian" {
       ) => any,
       ctx?: any,
     ): EventRef;
+
     trigger(
       name: "mx:media-menu",
       menu: Menu,

@@ -1,14 +1,13 @@
 import type { VTTCue } from "media-captions";
 import MiniSearch from "minisearch";
-import { Notice } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated
 import { createStore, useStore } from "zustand";
 import type { MediaInfo } from "@/info/media-info";
 import { MediaURL } from "@/info/media-url";
 import type { ParsedTextTrack } from "@/info/track-info";
-import type { TranscriptSource } from "@/info/transcript-info";
 import { langCodeToLabel, vaildate } from "@/lib/lang/lang";
+import { compare } from "@/media-note/note-index/def";
 import type MxPlugin from "@/mx-main";
 import { isModEvent } from "@/patch/mod-evt";
 import type { MxSettings } from "@/settings/def";
@@ -18,17 +17,20 @@ import type { VTTContent, VTTCueWithId } from "../handle/type";
 interface TranscriptViewState {
   media: MediaInfo | null;
   showSearchBox: boolean;
-  source: TranscriptSource | null;
   title: string | null;
   toggleSearchBox(val?: boolean): void;
-  captions: {
+  activeCueIDs: Set<string>;
+  updateActiveCues: (cueIds: string[]) => void;
+  textTrack: {
     _minisearch: MiniSearch<VTTCue> | null;
     content: VTTContent;
+    id: string;
     locales: string[];
   } | null;
-  setLinkedMedia(media: MediaInfo | null): void;
+  setLinkedMedia(media: MediaInfo | null): boolean;
   setCaptions(
     result: {
+      id: string;
       track: ParsedTextTrack;
       locales: string[];
     } | null,
@@ -52,8 +54,20 @@ export function createTranscriptViewStore() {
     title: null,
     showSearchBox: false,
     media: null,
+    activeCueIDs: new Set(),
+    updateActiveCues(cueIds) {
+      const prev = get().activeCueIDs;
+      const now = new Set(cueIds);
+      if (prev.size === now.size && [...prev].every((id) => now.has(id)))
+        return;
+      console.log("updateActiveCues", cueIds);
+      set({ activeCueIDs: now });
+    },
     setLinkedMedia(media) {
+      const prev = get().media;
+      if (compare(prev, media)) return false;
       set({ media });
+      return true;
     },
     toggleSearchBox(val) {
       if (typeof val === "boolean") {
@@ -62,10 +76,10 @@ export function createTranscriptViewStore() {
         set(({ showSearchBox: prev }) => ({ showSearchBox: !prev }));
       }
     },
-    captions: null,
+    textTrack: null,
     setCaptions(info) {
       if (!info) {
-        set({ captions: null, title: null });
+        set({ textTrack: null, title: null });
         return;
       }
       const { track, locales } = info;
@@ -77,7 +91,7 @@ export function createTranscriptViewStore() {
         title = meta.Title + " - " + title;
       }
       set({ title: title ?? null });
-      get().captions?._minisearch?.removeAll();
+      get().textTrack?._minisearch?.removeAll();
       const segmenter = getSegmenter(...info.locales);
       const minisearch = new MiniSearch<VTTCueWithId>({
         idField: "id",
@@ -91,11 +105,16 @@ export function createTranscriptViewStore() {
       });
       minisearch.addAll(cues);
       set({
-        captions: { _minisearch: minisearch, locales, content: track.content },
+        textTrack: {
+          _minisearch: minisearch,
+          locales,
+          content: track.content,
+          id: info.id,
+        },
       });
     },
     search(query, options) {
-      const minisearch = get().captions?._minisearch;
+      const minisearch = get().textTrack?._minisearch;
       if (!minisearch) return [];
       const result = minisearch.search(query, options);
       return result.map((r) => ({
@@ -153,7 +172,7 @@ export function usePlugin() {
 
 export function useSearch() {
   const minisearchReady = useTranscriptViewStore(
-    (s) => !!s.captions?._minisearch,
+    (s) => !!s.textTrack?._minisearch,
   );
   const search = useTranscriptViewStore((s) => s.search);
   return minisearchReady ? search : null;
@@ -172,15 +191,8 @@ export function usePlay() {
   return async (evt: React.MouseEvent | React.KeyboardEvent, time: number) => {
     const forLink = media instanceof MediaURL ? media.clone() : { ...media };
     forLink.hash = `#t=${time}`;
-    const leaf = await plugin.leafOpener.openMedia(
-      forLink,
-      isModEvent(evt.nativeEvent),
-      { fromUser: true },
-    );
-    if (!leaf.view.player?.provider) {
-      new Notice(`Player not initialized`);
-      return;
-    }
-    leaf.view.player.provider.setCurrentTime(time);
+    await plugin.leafOpener.openMedia(forLink, isModEvent(evt.nativeEvent), {
+      fromUser: true,
+    });
   };
 }

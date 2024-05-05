@@ -4,10 +4,12 @@ import ReactDOM from "react-dom/client";
 import LineView from "@/components/transcript/line";
 import {
   getCaptionExts,
+  getTrackInfoID,
   isSupportedCaptionExt,
   toTrack,
 } from "@/info/track-info";
 import type { PaneMenuSource } from "@/lib/menu";
+import { compare } from "@/media-note/note-index/def";
 import type MxPlugin from "@/mx-main";
 import { transcriptViewType } from "../const";
 import { createTranscriptViewStore, TranscriptViewContext } from "./context";
@@ -53,15 +55,45 @@ export class LocalTranscriptView extends EditableFileView {
     await super.onLoadFile(file);
     const track = toTrack(file);
     if (!track) throw new Error(`Caption file not supported: ${file.path}`);
-    await Promise.allSettled([
-      this.plugin.transcript.getLinkedMedia(track).then((media) => {
-        this.store.getState().setLinkedMedia(media[0] || null);
+    this.registerEvent(
+      this.app.workspace.on("mx:cue-change", (source, trackID, cueIDs) => {
+        const { media, textTrack, updateActiveCues } = this.store.getState();
+        if (
+          !media ||
+          !textTrack ||
+          textTrack.id !== trackID ||
+          !compare(source, media)
+        )
+          return;
+        updateActiveCues(cueIDs);
       }),
+    );
+
+    const updateLinkedMedia = async () => {
+      const { setLinkedMedia, updateActiveCues } = this.store.getState();
+      const [media] = await this.plugin.transcript.getLinkedMedia(track);
+      if (!setLinkedMedia(media || null) || !media) return;
+      const leaf = this.plugin.leafOpener.findPlayerWithSameMedia(media);
+      if (!leaf) return;
+      const textTrack = leaf.view.player?.textTracks.selected;
+      if (!textTrack) return;
+      updateActiveCues(textTrack.activeCues.map((c) => c.id));
+    };
+    this.registerEvent(
+      this.app.metadataCache.on("mx:transcript-changed", (trackIDs) => {
+        const { textTrack } = this.store.getState();
+        if (!textTrack || !trackIDs.has(textTrack.id)) return;
+        updateLinkedMedia();
+      }),
+    );
+    await Promise.allSettled([
+      updateLinkedMedia(),
       this.plugin.transcript
         .loadAndParseTrack(track)
         .then((track) => {
           this.store.getState().setCaptions({
             track,
+            id: getTrackInfoID(track).id,
             locales: track.language ? [track.language] : [],
           });
           this.render();

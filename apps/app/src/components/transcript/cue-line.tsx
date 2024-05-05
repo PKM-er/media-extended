@@ -9,6 +9,7 @@ export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
   children: string;
   matches?: string[];
   time: number;
+  active?: boolean;
   actions: React.ReactNode;
 }
 
@@ -56,7 +57,15 @@ export function CueActions({ children: cue, onPlay }: CueActionsProps) {
 
 export const CueLine = forwardRef<HTMLDivElement, CueLineProps>(
   function CueLine(
-    { children: content, matches, time, className, actions, ...props },
+    {
+      children: content,
+      matches,
+      time,
+      className,
+      actions,
+      active = false,
+      ...props
+    },
     ref,
   ) {
     const highlightedText = matches
@@ -74,6 +83,7 @@ export const CueLine = forwardRef<HTMLDivElement, CueLineProps>(
           "grid items-center group hover:bg-accent pr-2 py-1 mr-1 transition-all rounded-md hover:delay-100",
           className,
           matches?.length && "bg-text-highlight bg-opacity-10",
+          active && "text-md font-semibold",
         )}
       >
         <div className="text-xs font-medium select-none text-gray-400 group-hover:text-black group-hover:pl-1 transition-all flex items-center group-hover:delay-100">

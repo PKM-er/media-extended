@@ -13,7 +13,10 @@ export const mediaSourceFields = Object.values(
   mediaSourceFieldMap,
 ) as MediaSourceFieldType[];
 
-export function compare(a: MediaInfo | undefined, b: MediaInfo | undefined) {
+export function compare(
+  a: MediaInfo | undefined | null,
+  b: MediaInfo | undefined | null,
+) {
   if (!a || !b) return false;
   const aKey = getMediaInfoID(a);
   const bKey = getMediaInfoID(b);
