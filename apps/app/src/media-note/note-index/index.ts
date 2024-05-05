@@ -24,6 +24,12 @@ declare module "obsidian" {
   interface MetadataCache {
     on(name: "finished", callback: () => any, ctx?: any): EventRef;
     on(name: "initialized", callback: () => any, ctx?: any): EventRef;
+    on(
+      name: "mx:transcript-changed",
+      callback: (trackIDs: Set<string>) => any,
+      ctx?: any,
+    ): EventRef;
+    trigger(name: "mx:transcript-changed", trackIDs: Set<string>): void;
     initialized: boolean;
   }
 }
@@ -156,9 +162,10 @@ export class MediaNoteIndex extends Component {
     return newNote;
   }
 
-  private resetTracks(mediaID: string) {
+  private resetTracks(mediaID: string): string[] {
     const tracks = this.mediaToTrackIndex.get(mediaID);
-    if (!tracks) return;
+    if (!tracks) return [];
+    const affected = tracks.map((track) => getTrackInfoID(track).id);
     this.mediaToTrackIndex.delete(mediaID);
     tracks.forEach((track) => {
       const trackID = getTrackInfoID(track).id;
@@ -173,6 +180,7 @@ export class MediaNoteIndex extends Component {
         this.trackToMediaIndex.delete(trackID);
       }
     });
+    return affected;
   }
 
   removeMediaNote(toRemove: TFile) {
@@ -181,7 +189,13 @@ export class MediaNoteIndex extends Component {
     this.noteToMediaIndex.delete(toRemove.path);
     const mediaID = getMediaInfoID(mediaInfo);
     this.mediaToNoteIndex.delete(mediaID);
-    this.resetTracks(mediaID);
+    const affected = this.resetTracks(mediaID);
+    if (affected.length > 0) {
+      this.app.metadataCache.trigger(
+        "mx:transcript-changed",
+        new Set(affected),
+      );
+    }
   }
   addMediaNote(meta: ParsedMediaNoteMetadata, newNote: TFile) {
     const mediaID = getMediaInfoID(meta.src);
@@ -195,18 +209,22 @@ export class MediaNoteIndex extends Component {
       return;
     this.noteToMediaIndex.set(newNote.path, meta.src);
     this.mediaToNoteIndex.set(mediaID, newNote);
-    this.resetTracks(mediaID);
+    const affected = new Set(this.resetTracks(mediaID));
     const { textTracks } = meta.data;
     if (textTracks.length > 0) {
       this.mediaToTrackIndex.set(mediaID, textTracks);
       textTracks.forEach((track) => {
         const trackID = getTrackInfoID(track).id;
+        affected.add(trackID);
         const linkedMedia = [
           meta.src,
           ...(this.trackToMediaIndex.get(trackID) ?? []),
         ];
         this.trackToMediaIndex.set(trackID, linkedMedia);
       });
+    }
+    if (affected.size > 0) {
+      this.app.metadataCache.trigger("mx:transcript-changed", affected);
     }
   }
 

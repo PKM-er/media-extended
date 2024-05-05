@@ -1,6 +1,7 @@
+import type { UserEvent } from "obsidian";
 import { Keymap } from "obsidian";
 
-export function isModEvent(evt: MouseEvent) {
+export function isModEvent(evt: UserEvent) {
   const mod = Keymap.isModEvent(evt);
   return toPaneAction(mod);
 }

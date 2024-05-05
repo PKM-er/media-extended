@@ -14,7 +14,7 @@ export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
 
 export interface CueActionsProps {
   children: VTTCueWithId;
-  onPlay?: () => void;
+  onPlay?: (evt: React.MouseEvent | React.KeyboardEvent) => void;
 }
 
 export function CueActions({ children: cue, onPlay }: CueActionsProps) {
@@ -44,7 +44,7 @@ export function CueActions({ children: cue, onPlay }: CueActionsProps) {
           tabIndex={0}
           onClick={onPlay}
           onKeyDown={(evt) => {
-            if (evt.key === "Enter") onPlay();
+            if (evt.key === "Enter") onPlay(evt);
           }}
         >
           <PlayIcon className="w-3 h-3" />

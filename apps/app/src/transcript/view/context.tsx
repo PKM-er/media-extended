@@ -1,17 +1,22 @@
 import type { VTTCue } from "media-captions";
 import MiniSearch from "minisearch";
+import { Notice } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated
 import { createStore, useStore } from "zustand";
+import type { MediaInfo } from "@/info/media-info";
+import { MediaURL } from "@/info/media-url";
 import type { ParsedTextTrack } from "@/info/track-info";
 import type { TranscriptSource } from "@/info/transcript-info";
 import { langCodeToLabel, vaildate } from "@/lib/lang/lang";
 import type MxPlugin from "@/mx-main";
+import { isModEvent } from "@/patch/mod-evt";
 import type { MxSettings } from "@/settings/def";
 import "./style.less";
 import type { VTTContent, VTTCueWithId } from "../handle/type";
 
 interface TranscriptViewState {
+  media: MediaInfo | null;
   showSearchBox: boolean;
   source: TranscriptSource | null;
   title: string | null;
@@ -21,6 +26,7 @@ interface TranscriptViewState {
     content: VTTContent;
     locales: string[];
   } | null;
+  setLinkedMedia(media: MediaInfo | null): void;
   setCaptions(
     result: {
       track: ParsedTextTrack;
@@ -45,6 +51,10 @@ export function createTranscriptViewStore() {
     source: null,
     title: null,
     showSearchBox: false,
+    media: null,
+    setLinkedMedia(media) {
+      set({ media });
+    },
     toggleSearchBox(val) {
       if (typeof val === "boolean") {
         set({ showSearchBox: val });
@@ -135,6 +145,11 @@ export function useSettings<U>(selector: (state: MxSettings) => U): U {
   // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
   return useStore(settings, selector);
 }
+export function usePlugin() {
+  const { plugin } = useContext(TranscriptViewContext);
+  // eslint-disable-next-line import/no-deprecated -- don't use equalityFn here
+  return plugin;
+}
 
 export function useSearch() {
   const minisearchReady = useTranscriptViewStore(
@@ -148,4 +163,24 @@ export function useSearchBox() {
   const showSearchBox = useTranscriptViewStore((s) => s.showSearchBox);
   const toggleSearchBox = useTranscriptViewStore((s) => s.toggleSearchBox);
   return [showSearchBox, toggleSearchBox] as const;
+}
+
+export function usePlay() {
+  const plugin = usePlugin();
+  const media = useTranscriptViewStore((s) => s.media);
+  if (!media) return;
+  return async (evt: React.MouseEvent | React.KeyboardEvent, time: number) => {
+    const forLink = media instanceof MediaURL ? media.clone() : { ...media };
+    forLink.hash = `#t=${time}`;
+    const leaf = await plugin.leafOpener.openMedia(
+      forLink,
+      isModEvent(evt.nativeEvent),
+      { fromUser: true },
+    );
+    if (!leaf.view.player?.provider) {
+      new Notice(`Player not initialized`);
+      return;
+    }
+    leaf.view.player.provider.setCurrentTime(time);
+  };
 }

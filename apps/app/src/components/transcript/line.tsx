@@ -2,6 +2,7 @@ import { assertNever } from "assert-never";
 import { useMemo, useRef, useState } from "react";
 import type { CueSearchResult } from "@/transcript/view/context";
 import {
+  usePlay,
   useSearch,
   useSearchBox,
   useTranscriptViewStore,
@@ -12,6 +13,7 @@ import { SearchInput } from "./search-input";
 
 export default function Lines() {
   const cues = useTranscriptViewStore((s) => s.captions?.content.cues || []);
+  const play = usePlay();
   const cueHash = useMemo(
     () => new Map(cues.map((cue, index) => [cue.id, { cue, index }])),
     [cues],
@@ -98,6 +100,7 @@ export default function Lines() {
       <CueLineList
         className="p-[var(--file-margins)] pt-0"
         ref={cueListRef}
+        onPlay={play}
         searchResult={searchResult}
       >
         {cues}

@@ -53,20 +53,28 @@ export class LocalTranscriptView extends EditableFileView {
     await super.onLoadFile(file);
     const track = toTrack(file);
     if (!track) throw new Error(`Caption file not supported: ${file.path}`);
-    try {
-      this.store.getState().setCaptions({
-        track: await this.plugin.transcript.loadAndParseTrack(track),
-        locales: track.language ? [track.language] : [],
-      });
-      this.render();
-    } catch (e) {
-      new Notice(
-        `Failed to load subtitle ${file.path}: ${
-          e instanceof Error ? e.message : "See console for details"
-        }`,
-      );
-      console.error("Failed to load subtitle", file, e);
-    }
+    await Promise.allSettled([
+      this.plugin.transcript.getLinkedMedia(track).then((media) => {
+        this.store.getState().setLinkedMedia(media[0] || null);
+      }),
+      this.plugin.transcript
+        .loadAndParseTrack(track)
+        .then((track) => {
+          this.store.getState().setCaptions({
+            track,
+            locales: track.language ? [track.language] : [],
+          });
+          this.render();
+        })
+        .catch((e) => {
+          new Notice(
+            `Failed to load subtitle ${file.path}: ${
+              e instanceof Error ? e.message : "See console for details"
+            }`,
+          );
+          console.error("Failed to load subtitle", file, e);
+        }),
+    ]);
   }
   protected async onOpen(): Promise<void> {
     await super.onOpen();

@@ -13,9 +13,13 @@ export interface CueLineListProps {
   className?: string;
   searchResult?: CueSearchResult[];
   children: VTTCueWithId[];
+  onPlay?: (evt: React.MouseEvent | React.KeyboardEvent, time: number) => void;
 }
 export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
-  function CueLineList({ children: cues, className, searchResult }, ref) {
+  function CueLineList(
+    { children: cues, className, searchResult, onPlay },
+    ref,
+  ) {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const searchMatchesHash = useMemo(
@@ -66,7 +70,13 @@ export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
                   data-index={virtualItem.index}
                   time={cue.startTime}
                   matches={searchMatchesHash?.get(cue.id)}
-                  actions={<CueActions>{cue}</CueActions>}
+                  actions={
+                    <CueActions
+                      onPlay={onPlay && ((evt) => onPlay(evt, cue.startTime))}
+                    >
+                      {cue}
+                    </CueActions>
+                  }
                 >
                   {cue.text}
                 </CueLine>

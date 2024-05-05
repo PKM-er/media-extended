@@ -9,6 +9,7 @@ import type {
   LoadedTextTrack,
   LocalTrack,
   ParsedTextTrack,
+  RemoteTrack,
   TextTrackInfo,
 } from "@/info/track-info";
 import { isSupportedCaptionExt } from "@/info/track-info";
@@ -86,11 +87,16 @@ export class TranscriptLoader extends Component {
       return [];
     }
   }
-  async getMedia(track: LocalTrack<FileInfo>) {
-    const media = await (isTrackInVault(track)
-      ? resolveInvaultMediaForTrack(track)
-      : resolveLocalMediaForTrack(track));
-    return media;
+
+  async getLinkedMedia(track: TextTrackInfo): Promise<MediaInfo[]> {
+    const linkedMedia = this.plugin.mediaNote.getLinkedMedia(track);
+    if (!isRemoteTrack(track)) {
+      const byFilePath = isTrackInVault(track)
+        ? await resolveInvaultMediaForTrack(track)
+        : await resolveLocalMediaForTrack(track);
+      if (byFilePath) linkedMedia.push(byFilePath);
+    }
+    return linkedMedia;
   }
 }
 
@@ -98,4 +104,8 @@ function isTrackInVault(
   track: LocalTrack<FileInfo>,
 ): track is LocalTrack<TFile> {
   return track.src instanceof TFile;
+}
+
+function isRemoteTrack(track: TextTrackInfo): track is RemoteTrack {
+  return track.src instanceof URL;
 }

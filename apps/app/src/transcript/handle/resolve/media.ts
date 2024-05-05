@@ -1,6 +1,13 @@
+import { pathToFileURL } from "url";
 import { TFile } from "obsidian";
+import type { MediaInfo } from "@/info/media-info";
 import type { SupportedMediaExt } from "@/info/media-type";
-import { isMediaFile, mediaExtensions } from "@/info/media-type";
+import {
+  checkMediaType,
+  isMediaFile,
+  mediaExtensions,
+} from "@/info/media-type";
+import { MediaURL } from "@/info/media-url";
 import type { LocalTrack } from "@/info/track-info";
 import type { FileInfo } from "@/lib/iter-sibling";
 import { iterSiblings } from "@/lib/iter-sibling";
@@ -8,10 +15,20 @@ import path from "@/lib/path";
 
 function resolveMedia<F extends FileInfo>(
   mediaFiles: (F & { extension: SupportedMediaExt })[],
-) {
+): MediaInfo | null {
   for (const ext of mediaExtensions) {
     const media = mediaFiles.find((f) => f.extension === ext);
-    if (media) return media;
+    if (media) {
+      if (media instanceof TFile) {
+        return {
+          type: checkMediaType(ext)!,
+          file: media,
+          hash: "",
+        };
+      } else {
+        return MediaURL.create(pathToFileURL(media.path) as URL);
+      }
+    }
   }
   return null;
 }
