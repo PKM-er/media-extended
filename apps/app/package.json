@@ -63,7 +63,7 @@
     "@radix-ui/react-visually-hidden": "^1.0.3",
     "@radix-ui/rect": "1.0.1",
     "@tanstack/react-virtual": "^3.2.0",
-    "@vidstack/react": "npm:@aidenlx/vidstack-react@1.10.9-mod.1",
+    "@vidstack/react": "npm:@aidenlx/vidstack-react@1.10.9-mod.4",
     "ahooks": "^3.7.8",
     "arktype": "1.0.29-alpha",
     "assert-never": "^1.2.1",

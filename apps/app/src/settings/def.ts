@@ -22,6 +22,7 @@ type MxSettingValues = {
     alt: OpenLinkBehavior;
   };
   speedStep: number;
+  enableSubtitle: boolean;
   defaultLanguage?: string;
   loadStrategy: "play" | "eager";
   linkHandler: Record<RemoteMediaViewType, URLMatchPattern[]>;
@@ -53,6 +54,7 @@ const settingKeys = enumerate<keyof MxSettingValues>()(
   "biliDefaultQuality",
   "screenshotFormat",
   "screenshotQuality",
+  "enableSubtitle",
   "defaultLanguage",
   "screenshotFolderPath",
   "subtitleFolderPath",
@@ -72,6 +74,7 @@ const mxSettingsDefault = {
     "mx-url-video": [],
     "mx-webpage": [],
   },
+  enableSubtitle: false,
   loadStrategy: "eager",
   timestampTemplate: "\n- {{TIMESTAMP}} ",
   screenshotEmbedTemplate: "{{TITLE}}{{DURATION}}|50",
@@ -119,6 +122,7 @@ export type MxSettings = {
   getDeviceNameWithDefault: (id?: string) => string;
   setDeviceName: (label: string, id?: string) => void;
   setSpeedStep: (step: number) => void;
+  setEnableSubtitle: (enable: boolean) => void;
   urlMapping: Map<string, string>;
   setTemplate: (
     key: "timestamp" | "screenshot" | "screenshotEmbed",
@@ -166,6 +170,10 @@ export function createSettingsStore(plugin: MxPlugin) {
   }, 1e3);
   return createStore<MxSettings>((set, get) => ({
     ...omit(mxSettingsDefault, ["urlMappingData"]),
+    setEnableSubtitle(enable) {
+      set({ enableSubtitle: enable });
+      save(get());
+    },
     setSpeedStep(step) {
       step = Math.abs(step);
       if (step === 0) return;

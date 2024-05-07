@@ -16,7 +16,7 @@ import { AudioLayout } from "./player/layouts/audio-layout";
 import { VideoLayout } from "./player/layouts/video-layout";
 import { MediaProviderEnhanced } from "./provider";
 import { useSource } from "./use-source";
-import { useRemoteTextTracks } from "./use-tracks";
+import { useTextTracks } from "./use-tracks";
 
 function HookLoader({
   onViewTypeChange,
@@ -24,9 +24,9 @@ function HookLoader({
   onViewTypeChange: (viewType: "audio" | "unknown") => any;
 }) {
   useViewTypeDetect(onViewTypeChange);
-  useRemoteTextTracks();
   useTempFragHandler();
   useDefaultVolume();
+  useTextTracks();
   return <></>;
 }
 
@@ -40,7 +40,7 @@ function PlayerLayout() {
 }
 
 export function Player() {
-  const playerRef = useMediaViewStore((s) => s.playerRef);
+  const setPlayer = useMediaViewStore((s) => s.setPlayer);
   const { onEnded } = useAutoContinuePlay();
   const source = useSource();
   const isWebm = useMediaViewStore(({ source }) => {
@@ -69,7 +69,7 @@ export function Player() {
       playsInline
       title={title}
       viewType={viewType}
-      ref={playerRef}
+      ref={setPlayer}
       onEnded={onEnded}
       onError={(e) => handleError(e, source.src)}
       {...hashProps}

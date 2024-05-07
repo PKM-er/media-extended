@@ -1,122 +1,167 @@
-import {
-  useMediaPlayer,
-  useMediaProvider,
-  useMediaState,
-} from "@vidstack/react";
-import type {
-  TextTrackInit,
-  TextTrackListModeChangeEvent,
-  VTTContent,
-} from "@vidstack/react";
+import { useMediaPlayer, useMediaProvider, TextTrack } from "@vidstack/react";
 import { upperFirst } from "lodash-es";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getMediaInfoID } from "@/info/media-info";
 import type { TextTrackInfo, WebsiteTextTrack } from "@/info/track-info";
 import { getTrackInfoID } from "@/info/track-info";
-import { setDefaultLang } from "@/lib/lang/default-lang";
+import { getDefaultLang } from "@/lib/lang/default-lang";
 import { langCodeToLabel } from "@/lib/lang/lang";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { useMediaViewStore, useSettings } from "./context";
 
-export function useRemoteTextTracks() {
-  // const externalTextTracks = useMediaViewStore(({ textTracks }) => textTracks);
-  const player = useMediaPlayer();
-  const loaded = useMediaState("canPlay");
-
+export function useLastSelectedTrack() {
+  const key = useMediaViewStore((s) =>
+    s.source?.url ? `mx-last-track:${getMediaInfoID(s.source.url)}` : null,
+  );
+  const [lastSelectedTrack, setTrack] = useState<string | null>(() =>
+    key && window ? window.localStorage.getItem(key) : null,
+  );
   useEffect(() => {
-    if (!player) return;
-    const updateTrack = async (evt: TextTrackListModeChangeEvent) => {
-      const track = evt.detail;
-      const provider = player.provider;
+    () => {
+      if (!key || !window) return;
+      setTrack(window?.localStorage.getItem(key));
+    };
+  }, [key]);
+  return [
+    lastSelectedTrack === "" ? false : lastSelectedTrack,
+    useCallback(
+      (trackID: string | null) => {
+        if (!key) return;
+        if (!trackID) window?.localStorage.setItem(key, "");
+        else window?.localStorage.setItem(key, trackID);
+      },
+      [key],
+    ),
+  ] as const;
+}
 
-      if (
-        !(
-          track.mode === "showing" &&
-          track.content === dummyVTTContent &&
-          track.id.startsWith(webpageTrackPrefix) &&
-          provider instanceof WebiviewMediaProvider
-        )
-      )
-        return;
-      const id = (track.id as string).slice(webpageTrackPrefix.length);
-      if (!loaded) {
-        console.warn("Cannot load remote captions before media is loaded");
-        return;
+function useDefaultLang() {
+  const defaultLang = useSettings((s) => s.defaultLanguage);
+  const getDefaultLang = useSettings((s) => s.getDefaultLang);
+  return useMemo(
+    () => getDefaultLang(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [defaultLang],
+  );
+}
+function useDefaultTrack() {
+  // useDefaultShowingTrack();
+  const [lastSelectedTrack] = useLastSelectedTrack();
+  const defaultLang = useDefaultLang();
+  const enableDefaultSubtitle = useSettings((s) => s.enableSubtitle);
+  return useCallback(
+    (
+      ...tracks: { language?: string }[]
+    ): ((
+      track: { language?: string; id: string },
+      index: number,
+    ) => boolean) => {
+      // if user has selected subtitle for this media
+      if (lastSelectedTrack === false) return () => false;
+      if (lastSelectedTrack) return ({ id }) => id === lastSelectedTrack;
+      // if user have enabled subtitle by default
+      if (enableDefaultSubtitle) {
+        const lang = getDefaultLang(tracks, defaultLang);
+        if (!lang) return (_, index) => index === 0;
+        return ({ language }) => language === lang;
       }
-      const vtt = await provider.media.methods.getTrack(id);
-      if (!vtt) return;
-      player.textTracks.remove(track);
-      player.textTracks.add({
-        content: vtt,
-        kind: track.kind,
-        default: track.default,
-        encoding: track.encoding,
-        id: track.id,
-        label: track.label,
-        language: track.language,
-        type: track.type,
-      });
-      player.textTracks.getById(id)?.setMode("showing");
-    };
-    player.textTracks.addEventListener("mode-change", updateTrack);
-    return () => {
-      player.textTracks.removeEventListener("mode-change", updateTrack);
-    };
-  }, [player, loaded]);
+      return () => false;
+    },
+    [defaultLang, enableDefaultSubtitle, lastSelectedTrack],
+  );
 }
 
 export function useTextTracks() {
-  const localTextTracks = useMediaViewStore((s) => s.textTracks.local);
-  const remoteTextTracks = useMediaViewStore((s) => s.textTracks.remote);
+  const localTracks = useMediaViewStore((s) => s.textTracks.local);
+  const remoteTracks = useMediaViewStore((s) => s.textTracks.remote);
   const setRemoteTracks = useMediaViewStore((s) => s.updateWebsiteTracks);
-  const defaultLang = useSettings((s) => s.defaultLanguage);
-  const getDefaultLang = useSettings((s) => s.getDefaultLang);
-
   const provider = useMediaProvider();
+  const genDefaultTrackPredicate = useDefaultTrack();
 
   useEffect(() => {
     if (!(provider instanceof WebiviewMediaProvider)) return;
+    const providerCache = providerRef.current!;
     return provider.media.on("mx-text-tracks", ({ payload: { tracks } }) => {
+      providerCache.set(tracks, provider);
       setRemoteTracks(tracks);
       if (tracks.length !== 0) console.debug("Remote tracks loaded", tracks);
     });
   }, [provider, setRemoteTracks]);
 
-  return useMemo(
-    () => {
-      const local = localTextTracks.map(
-        (track) =>
-          ({
-            id: getTrackInfoID(track).id,
-            kind: track.kind,
-            label: track.label,
-            type: track.type,
-            content: track.content,
-          } satisfies TextTrackInit),
+  const providerRef =
+    useRef<WeakMap<WebsiteTextTrack[], WebiviewMediaProvider>>();
+  providerRef.current ??= new WeakMap();
+
+  const player = useMediaPlayer();
+
+  useEffect(() => {
+    if (!player) return;
+    const provider = providerRef.current!.get(remoteTracks);
+    const customFetch: typeof window.fetch = async (url, init) => {
+      if (!(typeof url === "string" && url.startsWith("webview://")))
+        return fetch(url, init);
+      if (!provider) return new Response(null, { status: 500 });
+      const id = url.slice(`webview://${webpageTrackPrefix}`.length);
+      const vtt = await provider.media.methods.getTrack(id);
+      if (!vtt) return new Response(null, { status: 404 });
+      return Response.json({ cues: vtt.cues, regions: vtt.regions });
+    };
+
+    const defaultTrackPredicate = genDefaultTrackPredicate(
+      ...localTracks,
+      ...remoteTracks,
+    );
+
+    const local = localTracks.map((track, i) => {
+      const { wid, src, ...props } = track;
+      const id = getTrackInfoID(track).id;
+      const isDefault = defaultTrackPredicate(
+        { id, language: props.language },
+        i,
       );
-      const remote = dedupeWebsiteTrack(remoteTextTracks, localTextTracks).map(
-        ({ wid, ...track }) =>
-          ({
-            id: webpageTrackPrefix + wid,
-            ...track,
-            content: dummyVTTContent,
-          } satisfies TextTrackInit),
-      );
-      const tracks = [...local, ...remote].sort(sortTrack).map((t, idx) => ({
-        ...t,
-        label: toTrackLabel(t, idx),
-      }));
-      return setDefaultLang(tracks, getDefaultLang());
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [localTextTracks, remoteTextTracks, defaultLang],
-  );
+      const out = new TextTrack({
+        ...props,
+        id,
+        default: isDefault,
+      });
+      // out.setMode(isDefault ? "showing" : "disabled");
+      return out;
+    });
+    const remote = dedupeWebsiteTrack(remoteTracks, localTracks).map(
+      ({ wid, ...props }, i) => {
+        const id = webpageTrackPrefix + wid;
+        const isDefault = defaultTrackPredicate(
+          { id, language: props.language },
+          i + localTracks.length,
+        );
+        const track = new TextTrack({
+          ...props,
+          id,
+          type: "json",
+          src: `webview://${id}`,
+          default: isDefault,
+        });
+        // track.setMode(isDefault ? "showing" : "disabled");
+        track.customFetch = customFetch;
+        return track;
+      },
+    );
+
+    player.textTracks.clear();
+    // @ts-expect-error may report to vidstack/react as a bug?
+    player.textTracks._defaults = {};
+    [...local, ...remote].sort(sortTrack).forEach((track, i) => {
+      // @ts-expect-error I know it's readonly
+      track.label = toTrackLabel(track, i);
+      player.textTracks.add(track);
+    });
+  }, [genDefaultTrackPredicate, player, localTracks, remoteTracks]);
+  // const defaultLang = useSettings((s) => s.defaultLanguage);
+  // const getDefaultLang = useSettings((s) => s.getDefaultLang);
+  // useDefaultShowingTrack();
 }
 
 const webpageTrackPrefix = "webpage:";
-export const dummyVTTContent = {
-  cues: [],
-  regions: [],
-} satisfies VTTContent;
 
 export function dedupeWebsiteTrack(
   website: WebsiteTextTrack[],
@@ -125,23 +170,17 @@ export function dedupeWebsiteTrack(
   return website.filter((t) => !local.some(({ wid }) => wid === t.wid));
 }
 
-export function toTrackLabel(t: LabelProps, idx: number) {
+export function toTrackLabel(t: TextTrack, idx: number) {
   return (
-    t.label ||
-    langCodeToLabel(t.language) ||
-    `${upperFirst(t.kind)} ${t.wid || idx + 1}`
+    t.label || langCodeToLabel(t.language) || `${upperFirst(t.kind)} ${idx + 1}`
   );
 }
 
-type LabelProps = Pick<TextTrackInfo, "label" | "language" | "kind" | "wid">;
-
-export function sortTrack(a: LabelProps | null, b: LabelProps | null) {
+export function sortTrack(a: TextTrack | null, b: TextTrack | null) {
   if (a && b) {
     // if with item.track.language, sort by item.track.language
     if (a.language && b.language) {
-      return (a as { language: string }).language.localeCompare(
-        (b as { language: string }).language,
-      );
+      return (a.language as string).localeCompare(b.language as string);
     }
 
     // if not with item.track.language, sort by item.label

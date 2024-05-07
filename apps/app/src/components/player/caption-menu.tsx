@@ -1,15 +1,24 @@
 import { useCaptionOptions, useMediaState } from "@vidstack/react";
 import { SubtitlesIcon } from "@/components/icon";
+import { toTrackLabel, useLastSelectedTrack } from "../use-tracks";
 import { dataLpPassthrough } from "./buttons";
 import { useMenu } from "./menus";
 
 export function Captions() {
   const options = useCaptionOptions();
   const tracks = useMediaState("textTracks");
+  const [, cacheSelectedTrack] = useLastSelectedTrack();
   const onClick = useMenu((menu) => {
-    options.forEach(({ label, select, selected }) => {
+    options.forEach(({ label, select, selected, track }, i) => {
       menu.addItem((item) => {
-        item.setTitle(label).setChecked(selected).onClick(select);
+        item
+          .setTitle(track ? toTrackLabel(track, i) : label)
+          .setChecked(selected)
+          .onClick(() => {
+            select();
+            console.log("cacheSelectedTrack", track?.id ?? null, track?.mode);
+            cacheSelectedTrack(track?.id ?? null);
+          });
       });
     });
     return true;

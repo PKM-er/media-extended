@@ -334,6 +334,14 @@ export class MxSettingTabs extends PluginSettingTab {
 
   subtitle() {
     const { containerEl: container } = this;
+    new Setting(container)
+      .setName("Enable subtitle by default")
+      .setDesc("Toggle subtitle on by default when available")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.state.enableSubtitle)
+          .onChange(this.state.setEnableSubtitle),
+      );
     const fallback = "_follow_";
     const extra = getGroupedLangExtra();
     const locales = Object.fromEntries(

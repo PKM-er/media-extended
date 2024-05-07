@@ -1,9 +1,8 @@
-import type { TextTrackInit } from "@vidstack/react";
 import { uniq } from "../uniq";
 import { format } from "./lang";
 
-export function setDefaultLang(
-  list: TextTrackInit[],
+export function getDefaultLang(
+  list: { language?: string }[],
   defaultLangCode?: string,
 ) {
   const allLanguages = uniq(
@@ -27,8 +26,5 @@ export function setDefaultLang(
           defaultLang = defaultLangCode.split("-")[0];
         return lang === defaultLang;
       });
-  return list.map((t) => ({
-    ...t,
-    default: format(t.language) === defaultLang,
-  }));
+  return defaultLang;
 }

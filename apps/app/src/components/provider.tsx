@@ -5,7 +5,6 @@ import {
   type MediaProviderInstance,
   type MediaProviderLoader,
   type MediaProviderProps,
-  Track,
 } from "@vidstack/react";
 import { useCallback } from "react";
 import { getPartition } from "@/lib/remote-player/const";
@@ -15,7 +14,6 @@ import { channelId } from "@/web/bili-req/channel";
 import { BILI_REQ_STORE } from "@/web/bili-req/const";
 import { useApp, useMediaViewStore } from "./context";
 import { useControls } from "./hook/use-hash";
-import { useTextTracks } from "./use-tracks";
 import { WebView } from "./webview";
 
 const { preload } = channelId(BILI_REQ_STORE);
@@ -44,7 +42,6 @@ export function MediaProviderEnhanced({
       }
     });
   const controls = useControls();
-  const tracks = useTextTracks();
   return (
     <MediaProvider
       className={cn(
@@ -79,10 +76,6 @@ export function MediaProviderEnhanced({
         [appId, controls],
       )}
       {...props}
-    >
-      {tracks.map((props) => (
-        <Track {...props} key={props.id} />
-      ))}
-    </MediaProvider>
+    ></MediaProvider>
   );
 }

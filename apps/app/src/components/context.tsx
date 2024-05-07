@@ -45,7 +45,7 @@ export interface SourceFacet {
 
 export interface MediaViewState {
   player: MediaPlayerInstance | null;
-  playerRef: React.RefCallback<MediaPlayerInstance>;
+  setPlayer: React.RefCallback<MediaPlayerInstance>;
   source:
     | {
         url: MediaInfo;
@@ -73,7 +73,9 @@ export interface MediaViewState {
 export function createMediaViewStore(plugin: MxPlugin) {
   const store = createStore<MediaViewState>((set, get, store) => ({
     player: null,
-    playerRef: (inst) => set({ player: inst }),
+    setPlayer: (inst) => {
+      set({ player: inst });
+    },
     source: undefined,
     hash: {
       autoplay: undefined,
