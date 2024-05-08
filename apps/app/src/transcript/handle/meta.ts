@@ -1,28 +1,41 @@
 import { parseLinktext } from "obsidian";
-import type { TFile, CachedMetadata } from "obsidian";
-import { parseTrackUrl, toTrack, type TextTrackInfo } from "@/info/track-info";
-
-export const textTrackFmField = {
-  subtitles: {
-    singular: "subtitle",
-    plural: "subtitles",
-  },
-  captions: {
-    singular: "caption",
-    plural: "captions",
-  },
-} as const;
-const textTrackKinds = Object.keys(
+import type { App, CachedMetadata, TFile } from "obsidian";
+import {
+  parseTrackUrl,
   textTrackFmField,
-) as (keyof typeof textTrackFmField)[];
+  textTrackKinds,
+  toTrack,
+} from "@/info/track-info";
+import type {
+  LocalTrack,
+  TextTrackInfo,
+  TextTrackKind,
+} from "@/info/track-info";
 
-export function parseTextTrackFields(
-  meta: CachedMetadata,
-  resolveFile: (linkpath: string) => TFile | null,
-) {
+export type UnresolvedTrackLink = {
+  type: "link";
+  path: string;
+  subpath: string;
+  alias?: string;
+  kind: TextTrackKind;
+};
+
+export function isUnresolvedTrackLink(
+  info: MetaTextTrackInfo,
+): info is UnresolvedTrackLink {
+  return (info as UnresolvedTrackLink).type === "link";
+}
+
+export type MetaTextTrackInfo = TextTrackInfo | UnresolvedTrackLink;
+
+/**
+ * @returns TextTrackInfo with FileInfo being source.
+ * FileInfo contains unresolved link path.
+ */
+export function parseTextTrackFields(meta: CachedMetadata) {
   const { frontmatter, frontmatterLinks } = meta;
   if (!frontmatter) return [];
-  return textTrackKinds.reduce<TextTrackInfo[]>((info, kind) => {
+  return textTrackKinds.reduce<MetaTextTrackInfo[]>((info, kind) => {
     const field = textTrackFmField[kind];
     let value: unknown = frontmatter[field.plural];
     if (
@@ -49,14 +62,13 @@ export function parseTextTrackFields(
       const fmLink = frontmatterLinks?.find((l) => l.key === key);
       if (fmLink) {
         const { path, subpath } = parseLinktext(fmLink.link);
-        const file = resolveFile(path);
-        if (!file) return null;
-        const track = toTrack(file, {
-          kind,
+        return {
+          type: "link",
+          path,
           subpath,
+          kind,
           alias: fmLink.displayText,
-        });
-        if (track) return track;
+        } satisfies UnresolvedTrackLink;
       } else {
         const url = parseTrackUrl(value, { kind });
         if (url) return url;
@@ -65,4 +77,14 @@ export function parseTextTrackFields(
     }
     return info;
   }, []);
+}
+
+export function resolveTrackLink(
+  { alias, kind, path, subpath }: UnresolvedTrackLink,
+  sourcePath: string,
+  { metadataCache }: App,
+): LocalTrack<TFile> | null {
+  const file = metadataCache.getFirstLinkpathDest(path, sourcePath);
+  if (!file) return null;
+  return toTrack(file, { kind, subpath, alias });
 }

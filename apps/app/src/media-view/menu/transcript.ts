@@ -1,15 +1,15 @@
 import { upperFirst } from "lodash-es";
 import type { Menu } from "obsidian";
 import { Notice, normalizePath, TFile } from "obsidian";
+import { sortTrack } from "@/components/use-tracks";
 import { MediaURL } from "@/info/media-url";
-import type { WebsiteTextTrack } from "@/info/track-info";
+import { textTrackFmField, type WebsiteTextTrack } from "@/info/track-info";
 import { getSaveFolder } from "@/lib/folder";
 import { langCodeToLabel } from "@/lib/lang/lang";
 import { normalizeFilename } from "@/lib/norm";
 import { WebiviewMediaProvider } from "@/lib/remote-player/provider";
 import { uniq } from "@/lib/uniq";
 import { mediaTitle } from "@/media-note/title";
-import { textTrackFmField } from "@/transcript/handle/meta";
 import { stringifyTrack } from "@/transcript/stringify";
 import type { PlayerContext } from ".";
 
@@ -27,7 +27,7 @@ export function transcriptMenu(menu: Menu, ctx: PlayerContext) {
       .setIcon("subtitles")
       .setSubmenu();
 
-    tracks.forEach((t, idx) => {
+    tracks.sort(sortTrack).forEach((t, idx) => {
       const label =
         t.label ||
         langCodeToLabel(t.language) ||

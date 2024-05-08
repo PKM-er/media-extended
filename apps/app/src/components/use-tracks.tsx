@@ -169,7 +169,7 @@ function toWebpageID(wid: string) {
   return webpageTrackPrefix + wid;
 }
 function toWebpageUrl(wid: string) {
-  return `webview://${toWebpageID(wid)}}`;
+  return `webview://${toWebpageID(wid)}`;
 }
 function getWebpageIDFromTrackID(id: string) {
   if (!id.startsWith(webpageTrackPrefix)) return null;
@@ -187,13 +187,19 @@ export function dedupeWebsiteTrack(
   return website.filter((t) => !local.some(({ wid }) => wid === t.wid));
 }
 
-export function toTrackLabel(t: TextTrack, idx: number) {
+interface SortableTrack {
+  language?: string;
+  label?: string;
+  kind: string;
+}
+
+export function toTrackLabel(t: SortableTrack, idx: number) {
   return (
     t.label || langCodeToLabel(t.language) || `${upperFirst(t.kind)} ${idx + 1}`
   );
 }
 
-export function sortTrack(a: TextTrack | null, b: TextTrack | null) {
+export function sortTrack(a: SortableTrack | null, b: SortableTrack | null) {
   if (a && b) {
     // if with item.track.language, sort by item.track.language
     if (a.language && b.language) {

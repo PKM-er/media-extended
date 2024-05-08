@@ -1,15 +1,16 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
-import { Component, debounce } from "obsidian";
 import type { MetadataCache, Vault, TFile } from "obsidian";
+import { Component, debounce } from "obsidian";
 import { getMediaInfoID, isFileMediaInfo } from "@/info/media-info";
 import { type MediaInfo } from "@/info/media-info";
 import { checkMediaType } from "@/info/media-type";
-import { getTrackInfoID, type TextTrackInfo } from "@/info/track-info";
+import type { TextTrackInfo } from "@/info/track-info";
 import { iterateFiles } from "@/lib/iterate-files";
-import { waitUntilResolve } from "@/lib/meta-resolve";
+import { waitUntilResolve as waitUntilMetaInited } from "@/lib/meta-resolve";
 import { normalizeFilename } from "@/lib/norm";
 import type { PlayerComponent } from "@/media-view/base";
 import type MxPlugin from "@/mx-main";
+import { TranscriptIndex } from "../../transcript/handle/indexer";
 import { mediaTitle } from "../title";
 import type { MediaSourceFieldType } from "./def";
 import type { ParsedMediaNoteMetadata } from "./extract";
@@ -25,38 +26,31 @@ declare module "obsidian" {
   interface MetadataCache {
     on(name: "finished", callback: () => any, ctx?: any): EventRef;
     on(name: "initialized", callback: () => any, ctx?: any): EventRef;
-    on(
-      name: "mx:transcript-changed",
-      callback: (trackIDs: Set<string>, mediaID: string) => any,
-      ctx?: any,
-    ): EventRef;
-    trigger(
-      name: "mx:transcript-changed",
-      trackIDs: Set<string>,
-      mediaID: string,
-    ): void;
     initialized: boolean;
   }
 }
-
 export class MediaNoteIndex extends Component {
   app;
   constructor(public plugin: MxPlugin) {
     super();
     this.app = plugin.app;
+    this.transcript = this.addChild(new TranscriptIndex(this.plugin));
   }
 
+  // media - note map is one-to-one
   private noteToMediaIndex = new Map<string, MediaInfo>();
   private mediaToNoteIndex = new Map<string, TFile>();
 
-  private mediaToTrackIndex = new Map<string, TextTrackInfo[]>();
-  private trackToMediaIndex = new Map<string, MediaInfo[]>();
+  private transcript;
 
   getLinkedTextTracks(media: MediaInfo) {
-    return this.mediaToTrackIndex.get(getMediaInfoID(media)) ?? [];
+    const note = this.findNote(media);
+    if (!note) return [];
+    return this.transcript.getLinkedTextTracks(note);
   }
-  getLinkedMedia(track: TextTrackInfo) {
-    return this.trackToMediaIndex.get(getTrackInfoID(track).id) ?? [];
+  getLinkedMedia(track: TextTrackInfo): MediaInfo[] {
+    const notes = this.transcript.getLinkedMediaNotes(track);
+    return notes.map((note) => this.findMedia(note)!);
   }
 
   findNote(media: MediaInfo): TFile | null {
@@ -66,9 +60,10 @@ export class MediaNoteIndex extends Component {
     return this.noteToMediaIndex.get(note.path);
   }
 
-  private onResolve() {
+  private onResolved() {
     this.noteToMediaIndex.clear();
     this.mediaToNoteIndex.clear();
+    this.transcript.clear();
     const ctx = {
       metadataCache: this.app.metadataCache,
       vault: this.app.vault,
@@ -95,8 +90,25 @@ export class MediaNoteIndex extends Component {
         const mediaInfo = this.noteToMediaIndex.get(oldPath)!;
         this.noteToMediaIndex.delete(oldPath);
         this.noteToMediaIndex.set(file.path, mediaInfo);
-        // mediaToNoteIndex don't need to update
+        // media(track)ToNoteIndex don't need to update
         // since TFile pointer is not changed
+      }),
+    );
+    this.register(
+      this.transcript.on("changed", (updated, note) => {
+        const mediaInfo = this.findMedia(note);
+        if (!mediaInfo) {
+          console.warn(
+            "Media not found for note while responding to transcript change",
+            note.path,
+          );
+          return;
+        }
+        this.plugin.app.metadataCache.trigger(
+          "mx:transcript-changed",
+          updated,
+          getMediaInfoID(mediaInfo),
+        );
       }),
     );
   }
@@ -167,41 +179,13 @@ export class MediaNoteIndex extends Component {
     return newNote;
   }
 
-  private resetTracks(mediaID: string): string[] {
-    const tracks = this.mediaToTrackIndex.get(mediaID);
-    if (!tracks) return [];
-    const affected = tracks.map((track) => getTrackInfoID(track).id);
-    this.mediaToTrackIndex.delete(mediaID);
-    tracks.forEach((track) => {
-      const trackID = getTrackInfoID(track).id;
-      const linkedMedia = this.trackToMediaIndex.get(trackID);
-      if (!linkedMedia) return;
-      const filteredMedia = linkedMedia.filter(
-        (media) => getMediaInfoID(media) !== mediaID,
-      );
-      if (filteredMedia.length > 0) {
-        this.trackToMediaIndex.set(trackID, filteredMedia);
-      } else {
-        this.trackToMediaIndex.delete(trackID);
-      }
-    });
-    return affected;
-  }
-
-  removeMediaNote(toRemove: TFile) {
-    const mediaInfo = this.noteToMediaIndex.get(toRemove.path)!;
+  removeMediaNote(note: TFile) {
+    const mediaInfo = this.noteToMediaIndex.get(note.path)!;
     if (!mediaInfo) return;
-    this.noteToMediaIndex.delete(toRemove.path);
+    this.noteToMediaIndex.delete(note.path);
     const mediaID = getMediaInfoID(mediaInfo);
     this.mediaToNoteIndex.delete(mediaID);
-    const affected = this.resetTracks(mediaID);
-    if (affected.length > 0) {
-      this.app.metadataCache.trigger(
-        "mx:transcript-changed",
-        new Set(affected),
-        mediaID,
-      );
-    }
+    this.transcript.remove(note);
   }
   addMediaNote(meta: ParsedMediaNoteMetadata, newNote: TFile) {
     const mediaID = getMediaInfoID(meta.src);
@@ -215,32 +199,12 @@ export class MediaNoteIndex extends Component {
       return;
     this.noteToMediaIndex.set(newNote.path, meta.src);
     this.mediaToNoteIndex.set(mediaID, newNote);
-    const affected = new Set(this.resetTracks(mediaID));
-    const { textTracks } = meta.data;
-    if (textTracks.length > 0) {
-      this.mediaToTrackIndex.set(mediaID, textTracks);
-      textTracks.forEach((track) => {
-        const trackID = getTrackInfoID(track).id;
-        affected.add(trackID);
-        const linkedMedia = [
-          meta.src,
-          ...(this.trackToMediaIndex.get(trackID) ?? []),
-        ];
-        this.trackToMediaIndex.set(trackID, linkedMedia);
-      });
-    }
-    if (affected.size > 0) {
-      this.app.metadataCache.trigger(
-        "mx:transcript-changed",
-        affected,
-        mediaID,
-      );
-    }
+    this.transcript.add(newNote, meta.data.textTracks);
   }
 
   onload(): void {
-    waitUntilResolve(this.app.metadataCache, this).then(() => {
-      this.onResolve();
+    waitUntilMetaInited(this.app.metadataCache, this).then(() => {
+      this.onResolved();
     });
   }
 }

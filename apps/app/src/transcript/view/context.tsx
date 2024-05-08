@@ -60,7 +60,6 @@ export function createTranscriptViewStore() {
       const now = new Set(cueIds);
       if (prev.size === now.size && [...prev].every((id) => now.has(id)))
         return;
-      console.log("updateActiveCues", cueIds);
       set({ activeCueIDs: now });
     },
     setLinkedMedia(media) {

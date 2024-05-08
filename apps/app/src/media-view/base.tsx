@@ -3,6 +3,7 @@ import { type Component, type Menu, type View, type ItemView } from "obsidian";
 import type ReactDOM from "react-dom/client";
 import type { MediaViewStoreApi } from "@/components/context";
 import { dedupeWebsiteTrack } from "@/components/use-tracks";
+import { toFileInfo } from "@/lib/file-info";
 import type { PaneMenuSource } from "@/lib/menu";
 import { toURL } from "@/lib/url";
 import { saveScreenshot } from "@/media-note/timestamp/screenshot";
@@ -37,12 +38,9 @@ declare module "obsidian" {
 export function titleFromUrl(src: string): string {
   const url = toURL(src);
   if (!url) return "";
-  const { pathname } = url;
-  if (!pathname) return "";
-  const finalPath = pathname.split("/").pop();
-  if (!finalPath) return "";
-  // remove extension
-  return decodeURI(finalPath.split(".").slice(0, -1).join("."));
+  const { basename, extension } = toFileInfo(url.pathname);
+  if (!extension) return "";
+  return decodeURI(basename);
 }
 
 export function addAction(player: PlayerComponent & ItemView) {

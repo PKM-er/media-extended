@@ -1,13 +1,26 @@
 import { fileURLToPath } from "url";
 import type { ParsedCaptionsResult } from "media-captions";
 import { TFile } from "obsidian";
-import { toFileInfo, type FileInfo } from "@/lib/iter-sibling";
+import { toFileInfo, type FileInfo } from "@/lib/file-info";
 import { format } from "@/lib/lang/lang";
 import { noHash, toURL } from "@/lib/url";
 
 const allowedProtocols = new Set(["https:", "http:", "file:"]);
 
-type TextTrackKind = "captions" | "subtitles";
+export type TextTrackKind = "captions" | "subtitles";
+export const textTrackFmField = {
+  subtitles: {
+    singular: "subtitle",
+    plural: "subtitles",
+  },
+  captions: {
+    singular: "caption",
+    plural: "captions",
+  },
+} as const;
+export const textTrackKinds = Object.keys(
+  textTrackFmField,
+) as (keyof typeof textTrackFmField)[];
 
 /**
  * for those extracted from web, provide a unique id from web provider
@@ -102,13 +115,9 @@ function parseURL(
   let { language, type } = fromHash;
 
   // parse as a file
-  const name = src.pathname.split("/").pop() ?? "";
-  const extension = name.split(".").pop() ?? "";
-  if (name && extension && isSupportedCaptionExt(extension)) {
-    const { language: lang } = parseTrackFromBasename(
-      // remove extension from filename
-      name.slice(0, -extension.length - 1),
-    );
+  const { basename, extension } = toFileInfo(src.pathname, "/");
+  if (isSupportedCaptionExt(extension)) {
+    const { language: lang } = parseTrackFromBasename(basename);
     if (lang) language ??= lang;
     type ??= extension;
     return { wid, language, label, type, kind, src };
@@ -160,7 +169,7 @@ export function toTrack<F extends FileInfo>(
     subpath = "",
     alias,
   }: Partial<{
-    kind: "captions" | "subtitles";
+    kind: TextTrackKind;
     subpath: string;
     alias: string;
   }> = {},
@@ -184,4 +193,8 @@ export function getTrackInfoID({ wid, src }: TextTrackInfo) {
     src instanceof URL ? "url" : src instanceof TFile ? "file" : "file-url";
   const srcURL = src instanceof URL ? noHash(src) : src.path;
   return { id: `${type}:${srcURL}`, wid };
+}
+
+export function isVaultTrack(trackID: string) {
+  return trackID.startsWith("file:");
 }

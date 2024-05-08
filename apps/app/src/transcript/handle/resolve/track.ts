@@ -1,8 +1,8 @@
 import { TFile } from "obsidian";
 import type { MediaURL } from "@/info/media-url";
 import { getCaptionExts, toTrack, type LocalTrack } from "@/info/track-info";
+import { toFileInfo, type FileInfo } from "@/lib/file-info";
 import { groupBy } from "@/lib/group-by";
-import type { FileInfo } from "@/lib/iter-sibling";
 import { iterSiblings } from "@/lib/iter-sibling";
 import path from "@/lib/path";
 
@@ -28,9 +28,11 @@ function dedupeTracks<F extends FileInfo>(tracks: LocalTrack<F>[]) {
 export async function resolveLocalTracks(media: MediaURL) {
   const filePath = media.filePath;
   if (!filePath || !media.inferredType) return [];
-  const mediaName = path.basename(filePath);
-  const mediaBaseame = mediaName.split(".").slice(0, -1).join(".");
-  const parentDir = path.dirname(filePath);
+  const {
+    name: mediaName,
+    basename: mediaBaseame,
+    parent: parentDir,
+  } = toFileInfo(filePath, path.sep);
 
   try {
     const tracks: LocalTrack<FileInfo>[] = [];

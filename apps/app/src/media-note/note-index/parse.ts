@@ -1,21 +1,13 @@
-import type { CachedMetadata, MetadataCache } from "obsidian";
-import type { TextTrackInfo } from "@/info/track-info";
+import type { CachedMetadata } from "obsidian";
+import type { MetaTextTrackInfo } from "@/transcript/handle/meta";
 import { parseTextTrackFields } from "@/transcript/handle/meta";
 
 export interface MediaNoteMeta {
-  textTracks: TextTrackInfo[];
+  textTracks: MetaTextTrackInfo[];
 }
 
-export function parseMediaNoteMeta(
-  meta: CachedMetadata,
-  {
-    metadataCache,
-    sourcePath,
-  }: { metadataCache: MetadataCache; sourcePath: string },
-): MediaNoteMeta {
+export function parseMediaNoteMeta(meta: CachedMetadata): MediaNoteMeta {
   return {
-    textTracks: parseTextTrackFields(meta, (linkpath) =>
-      metadataCache.getFirstLinkpathDest(linkpath, sourcePath),
-    ),
+    textTracks: parseTextTrackFields(meta),
   };
 }

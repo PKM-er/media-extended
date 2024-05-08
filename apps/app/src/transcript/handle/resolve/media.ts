@@ -9,7 +9,7 @@ import {
 } from "@/info/media-type";
 import { MediaURL } from "@/info/media-url";
 import type { LocalTrack } from "@/info/track-info";
-import type { FileInfo } from "@/lib/iter-sibling";
+import type { FileInfo } from "@/lib/file-info";
 import { iterSiblings } from "@/lib/iter-sibling";
 import path from "@/lib/path";
 

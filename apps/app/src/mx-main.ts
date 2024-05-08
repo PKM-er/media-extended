@@ -17,7 +17,7 @@ import {
   onExternalLinkClick,
   onInternalLinkClick,
 } from "./media-note/link-click";
-import { MediaNoteIndex } from "./media-note/note-index";
+import { MediaNoteIndex } from "./media-note/note-index/indexer";
 import { PlaylistIndex } from "./media-note/playlist";
 import { MediaFileEmbed } from "./media-view/file-embed";
 import { AudioFileView, VideoFileView } from "./media-view/file-view";
@@ -43,7 +43,7 @@ import { createSettingsStore } from "./settings/def";
 import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
 import { registerTranscriptView } from "./transcript";
-import { TranscriptLoader } from "./transcript/handle";
+import { TranscriptLoader } from "./transcript/handle/loader";
 import { BilibiliRequestHacker } from "./web/bili-req";
 import { modifySession } from "./web/session";
 import { resolveMxProtocol } from "./web/url-match";

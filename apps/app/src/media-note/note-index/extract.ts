@@ -29,7 +29,7 @@ export function getMediaNoteMeta(
   return {
     src,
     get data() {
-      return parseMediaNoteMeta(meta, ctx);
+      return parseMediaNoteMeta(meta);
     },
   };
 }
