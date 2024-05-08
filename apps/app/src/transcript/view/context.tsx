@@ -1,13 +1,16 @@
 import type { VTTCue } from "media-captions";
 import MiniSearch from "minisearch";
+import { Notice, htmlToMarkdown } from "obsidian";
 import { createContext, useContext } from "react";
 // eslint-disable-next-line import/no-deprecated
 import { createStore, useStore } from "zustand";
 import type { MediaInfo } from "@/info/media-info";
 import { MediaURL } from "@/info/media-url";
 import type { ParsedTextTrack } from "@/info/track-info";
+import { formatDuration } from "@/lib/hash/format";
 import { langCodeToLabel, vaildate } from "@/lib/lang/lang";
 import { compare } from "@/media-note/note-index/def";
+import { timestampGenerator } from "@/media-note/timestamp/utils";
 import type MxPlugin from "@/mx-main";
 import { isModEvent } from "@/patch/mod-evt";
 import type { MxSettings } from "@/settings/def";
@@ -193,5 +196,38 @@ export function usePlay() {
     await plugin.leafOpener.openMedia(forLink, isModEvent(evt.nativeEvent), {
       fromUser: true,
     });
+  };
+}
+
+export function useTimestampLink() {
+  const plugin = usePlugin();
+  const media = useTranscriptViewStore((s) => s.media);
+  if (!media)
+    return function (time: number, text: string) {
+      const mainText = htmlToMarkdown(`<pre>${text}</pre>`);
+      const timestamp = formatDuration(time);
+      return { text: `${timestamp} ${mainText}`, timestamp };
+    };
+  return function (time: number, text: string) {
+    const genTimestamp = timestampGenerator(time, media, {
+      app: plugin.app,
+      settings: plugin.settings.getState(),
+    });
+    const timestamp = genTimestamp("");
+    const mainText = htmlToMarkdown(`<pre>${text}</pre>`);
+    return { text: `${timestamp} ${mainText}`, timestamp };
+  };
+}
+
+export function useCopy() {
+  const buildTimestampLink = useTimestampLink();
+  return async (
+    _: React.MouseEvent | React.KeyboardEvent,
+    time: number,
+    text: string,
+  ) => {
+    const { text: content, timestamp } = await buildTimestampLink(time, text);
+    await navigator.clipboard.writeText(content);
+    new Notice(`Copied at ${timestamp} to clipboard`);
   };
 }

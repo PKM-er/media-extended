@@ -106,7 +106,9 @@ export function useTextTracks() {
       if (!provider) return new Response(null, { status: 500 });
       const vtt = await provider.media.methods.getTrack(id);
       if (!vtt) return new Response(null, { status: 404 });
-      return Response.json({ cues: vtt.cues, regions: vtt.regions });
+      return new Response(JSON.stringify(vtt), {
+        headers: { "Content-Type": "application/json" },
+      });
     };
 
     const defaultTrackPredicate = genDefaultTrackPredicate(

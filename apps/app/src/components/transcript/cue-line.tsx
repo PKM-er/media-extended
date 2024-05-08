@@ -1,8 +1,8 @@
-import { Notice, htmlToMarkdown } from "obsidian";
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useMemo, useRef } from "react";
+import { useMergeRefs } from "use-callback-ref";
 import { formatDuration } from "@/lib/hash/format";
 import { cn } from "@/lib/utils";
-import type { VTTCueWithId } from "@/transcript/handle/type";
+import { useTimestampLink } from "@/transcript/view/context";
 import { CopyIcon, PlayIcon } from "../icon";
 
 export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
@@ -14,31 +14,27 @@ export interface CueLineProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 export interface CueActionsProps {
-  children: VTTCueWithId;
+  // children: VTTCueWithId;
   onPlay?: (evt: React.MouseEvent | React.KeyboardEvent) => void;
+  onCopy?: (evt: React.MouseEvent | React.KeyboardEvent) => void;
 }
 
-export function CueActions({ children: cue, onPlay }: CueActionsProps) {
-  async function handleCopy() {
-    const { text, startTime } = cue;
-    const mainText = htmlToMarkdown(`<pre>${text}</pre>`);
-    const timestamp = `\\[${formatDuration(startTime)}\\]`;
-    await navigator.clipboard.writeText(`${timestamp} ${mainText}`);
-    new Notice("Copied to clipboard");
-  }
+export function CueActions({ onPlay, onCopy }: CueActionsProps) {
   return (
     <>
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={handleCopy}
-        aria-label="Copy markdown"
-        onKeyDown={(evt) => {
-          if (evt.key === "Enter") handleCopy();
-        }}
-      >
-        <CopyIcon className="w-3 h-3" />
-      </div>
+      {onCopy && (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onCopy}
+          aria-label="Copy markdown"
+          onKeyDown={(evt) => {
+            if (evt.key === "Enter") onCopy(evt);
+          }}
+        >
+          <CopyIcon className="w-3 h-3" />
+        </div>
+      )}
       {onPlay && (
         <div
           role="button"
@@ -75,10 +71,16 @@ export const CueLine = forwardRef<HTMLDivElement, CueLineProps>(
           insertLineBreaks(content, segments, 0);
           return segments;
         })(content);
+
+    const getTimestamp = useTimestampLink();
+
+    const containerRef = useRef<HTMLDivElement>(null);
+    const domRef = useMergeRefs([ref, containerRef]);
+
     return (
       <div
         {...props}
-        ref={ref}
+        ref={domRef}
         className={cn(
           "grid items-center group hover:bg-accent pr-2 py-1 mr-1 transition-all rounded-md hover:delay-100",
           className,
@@ -87,7 +89,18 @@ export const CueLine = forwardRef<HTMLDivElement, CueLineProps>(
         )}
       >
         <div className="text-xs font-medium select-none text-gray-400 group-hover:text-black group-hover:pl-1 transition-all flex items-center group-hover:delay-100">
-          <div className="flex cursor-pointer items-center">
+          <div
+            className="flex cursor-pointer items-center"
+            draggable
+            onDragStart={(evt) => {
+              evt.dataTransfer.setData(
+                "text/plain",
+                getTimestamp(time, content).text,
+              );
+              evt.dataTransfer.dropEffect = "copy";
+              evt.dataTransfer.setDragImage(containerRef.current!, 0, 0);
+            }}
+          >
             <Timestamp>{time}</Timestamp>
             <div className="ml-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity group-hover:duration-300 group-hover:delay-100">
               {actions}

@@ -21,10 +21,15 @@ export interface CueLineListProps {
   children: VTTCueWithId[];
   activeCueIDs?: Set<string>;
   onPlay?: (evt: React.MouseEvent | React.KeyboardEvent, time: number) => void;
+  onCopy?: (
+    evt: React.MouseEvent | React.KeyboardEvent,
+    time: number,
+    text: string,
+  ) => void;
 }
 export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
   function CueLineList(
-    { children: cues, className, searchResult, onPlay, activeCueIDs },
+    { children: cues, className, searchResult, onPlay, onCopy, activeCueIDs },
     ref,
   ) {
     const parentRef = useRef<HTMLDivElement>(null);
@@ -93,9 +98,11 @@ export const CueLineList = forwardRef<CueLineListRef, CueLineListProps>(
                   actions={
                     <CueActions
                       onPlay={onPlay && ((evt) => onPlay(evt, cue.startTime))}
-                    >
-                      {cue}
-                    </CueActions>
+                      onCopy={
+                        onCopy &&
+                        ((evt) => onCopy(evt, cue.startTime, cue.text))
+                      }
+                    />
                   }
                 >
                   {cue.text}
