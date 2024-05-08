@@ -16,7 +16,6 @@ export function Captions() {
           .setChecked(selected)
           .onClick(() => {
             select();
-            console.log("cacheSelectedTrack", track?.id ?? null, track?.mode);
             cacheSelectedTrack(track?.id ?? null);
           });
       });

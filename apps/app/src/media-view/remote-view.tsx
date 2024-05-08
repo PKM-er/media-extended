@@ -10,10 +10,11 @@ import {
 } from "@/components/context";
 import { Player } from "@/components/player";
 import { isFileMediaInfo } from "@/info/media-info";
-import type { MediaURL } from "@/info/media-url";
+import { MediaURL } from "@/info/media-url";
 import type { PaneMenuSource } from "@/lib/menu";
 import { updateTitle } from "@/lib/view-title";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { handleTrackUpdate } from "@/media-note/note-index";
 import { compare } from "@/media-note/note-index/def";
 import type MediaExtended from "@/mx-main";
 import type { PlayerComponent } from "./base";
@@ -42,7 +43,9 @@ export abstract class MediaRemoteView
     return { viewType: this.getViewType(), textTracks };
   }
   getMediaInfo() {
-    return this.store.getState().source?.url ?? null;
+    const url = this.store.getState().source?.url;
+    if (!(url instanceof MediaURL)) return null;
+    return url ?? null;
   }
   get sourceType(): string {
     return this.store.getState().player?.state.source.type ?? "";
@@ -63,6 +66,7 @@ export abstract class MediaRemoteView
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     super.onload();
+    handleTrackUpdate.call(this);
     // make sure to unmount the player before the leaf detach it from DOM
     this.register(
       around(this.leaf, {
@@ -74,6 +78,7 @@ export abstract class MediaRemoteView
           },
       }),
     );
+
     handleWindowMigration(this, () => this.render());
   }
 

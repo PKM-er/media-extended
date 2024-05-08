@@ -7,6 +7,7 @@ import type { FileMediaInfo } from "@/info/media-info";
 import { checkMediaType } from "@/info/media-type";
 import type { PaneMenuSource } from "@/lib/menu";
 import { handleWindowMigration } from "@/lib/window-migration";
+import { handleTrackUpdate } from "@/media-note/note-index";
 import type MediaExtended from "@/mx-main";
 import { type PlayerComponent, addAction, onPaneMenu } from "./base";
 import type { MediaFileViewType } from "./view-type";
@@ -37,6 +38,7 @@ abstract class MediaFileView
   }
 
   onload(): void {
+    handleTrackUpdate.call(this);
     handleWindowMigration(this, () => this.render());
   }
 

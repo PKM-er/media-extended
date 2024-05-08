@@ -58,6 +58,7 @@ export interface MediaViewState {
   getPlayer(): Promise<MediaPlayerInstance>;
   loadFile(file: TFile, ctx: { vault: Vault; subpath?: string }): Promise<void>;
   setSource(url: MediaURL, other: SourceFacet): void;
+  setTextTracks(tracks: LoadedTextTrack[]): void;
   transform: Partial<TransformConfig> | null;
   setTransform: (transform: Partial<TransformConfig> | null) => void;
   controls?: boolean;
@@ -84,6 +85,11 @@ export function createMediaViewStore(plugin: MxPlugin) {
       muted: undefined,
       tempFragment: null,
       volume: undefined,
+    },
+    setTextTracks(tracks) {
+      set(({ textTracks }) => ({
+        textTracks: { ...textTracks, local: tracks },
+      }));
     },
     async getPlayer(timeout = 10e3) {
       const { player } = get();

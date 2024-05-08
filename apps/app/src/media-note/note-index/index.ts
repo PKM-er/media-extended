@@ -1,5 +1,5 @@
 import type { MediaPlayerInstance } from "@vidstack/react";
-import { Component } from "obsidian";
+import { Component, debounce } from "obsidian";
 import type { MetadataCache, Vault, TFile } from "obsidian";
 import { getMediaInfoID, isFileMediaInfo } from "@/info/media-info";
 import { type MediaInfo } from "@/info/media-info";
@@ -8,6 +8,7 @@ import { getTrackInfoID, type TextTrackInfo } from "@/info/track-info";
 import { iterateFiles } from "@/lib/iterate-files";
 import { waitUntilResolve } from "@/lib/meta-resolve";
 import { normalizeFilename } from "@/lib/norm";
+import type { PlayerComponent } from "@/media-view/base";
 import type MxPlugin from "@/mx-main";
 import { mediaTitle } from "../title";
 import type { MediaSourceFieldType } from "./def";
@@ -26,10 +27,14 @@ declare module "obsidian" {
     on(name: "initialized", callback: () => any, ctx?: any): EventRef;
     on(
       name: "mx:transcript-changed",
-      callback: (trackIDs: Set<string>) => any,
+      callback: (trackIDs: Set<string>, mediaID: string) => any,
       ctx?: any,
     ): EventRef;
-    trigger(name: "mx:transcript-changed", trackIDs: Set<string>): void;
+    trigger(
+      name: "mx:transcript-changed",
+      trackIDs: Set<string>,
+      mediaID: string,
+    ): void;
     initialized: boolean;
   }
 }
@@ -194,6 +199,7 @@ export class MediaNoteIndex extends Component {
       this.app.metadataCache.trigger(
         "mx:transcript-changed",
         new Set(affected),
+        mediaID,
       );
     }
   }
@@ -224,7 +230,11 @@ export class MediaNoteIndex extends Component {
       });
     }
     if (affected.size > 0) {
-      this.app.metadataCache.trigger("mx:transcript-changed", affected);
+      this.app.metadataCache.trigger(
+        "mx:transcript-changed",
+        affected,
+        mediaID,
+      );
     }
   }
 
@@ -246,4 +256,50 @@ function* iterateMediaNote(ctx: {
     if (!meta) continue;
     yield { meta, file };
   }
+}
+
+export function handleTrackUpdate(this: PlayerComponent) {
+  const updateTracks = asyncDebounce(async (url: MediaInfo) => {
+    const textTracks = await this.plugin.transcript.getTracks(url);
+    this.store.getState().setTextTracks(textTracks);
+  });
+  this.registerEvent(
+    this.plugin.app.metadataCache.on(
+      "mx:transcript-changed",
+      async (_, mediaID) => {
+        const currMedia = this.getMediaInfo();
+        if (!currMedia) return;
+        const currMediaID = getMediaInfoID(currMedia);
+        if (currMediaID !== mediaID) return;
+        await updateTracks(currMedia);
+      },
+    ),
+  );
+}
+
+function asyncDebounce<F extends (...args: any[]) => Promise<any>>(
+  func: F,
+  wait?: number,
+) {
+  const resolveSet = new Set<(p: any) => void>();
+  const rejectSet = new Set<(p: any) => void>();
+
+  const debounced = debounce((args: Parameters<F>) => {
+    func(...args)
+      .then((...res) => {
+        resolveSet.forEach((resolve) => resolve(...res));
+        resolveSet.clear();
+      })
+      .catch((...res) => {
+        rejectSet.forEach((reject) => reject(...res));
+        rejectSet.clear();
+      });
+  }, wait);
+
+  return (...args: Parameters<F>): ReturnType<F> =>
+    new Promise((resolve, reject) => {
+      resolveSet.add(resolve);
+      rejectSet.add(reject);
+      debounced(args);
+    }) as ReturnType<F>;
 }

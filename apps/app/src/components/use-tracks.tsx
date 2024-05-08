@@ -53,12 +53,15 @@ function useDefaultTrack() {
     (
       ...tracks: { language?: string }[]
     ): ((
-      track: { language?: string; id: string },
+      track: { language?: string; id: string; wid?: string },
       index: number,
     ) => boolean) => {
       // if user has selected subtitle for this media
       if (lastSelectedTrack === false) return () => false;
-      if (lastSelectedTrack) return ({ id }) => id === lastSelectedTrack;
+      if (lastSelectedTrack) {
+        const lastWid = getWebpageIDFromTrackID(lastSelectedTrack);
+        return ({ id, wid }) => id === lastSelectedTrack || wid === lastWid;
+      }
       // if user have enabled subtitle by default
       if (enableDefaultSubtitle) {
         const lang = getDefaultLang(tracks, defaultLang);
@@ -98,10 +101,9 @@ export function useTextTracks() {
     if (!player) return;
     const provider = providerRef.current!.get(remoteTracks);
     const customFetch: typeof window.fetch = async (url, init) => {
-      if (!(typeof url === "string" && url.startsWith("webview://")))
-        return fetch(url, init);
+      const id = getWebpageIDFromURL(url);
+      if (!id) return fetch(url, init);
       if (!provider) return new Response(null, { status: 500 });
-      const id = url.slice(`webview://${webpageTrackPrefix}`.length);
       const vtt = await provider.media.methods.getTrack(id);
       if (!vtt) return new Response(null, { status: 404 });
       return Response.json({ cues: vtt.cues, regions: vtt.regions });
@@ -116,7 +118,7 @@ export function useTextTracks() {
       const { wid, src, ...props } = track;
       const id = getTrackInfoID(track).id;
       const isDefault = defaultTrackPredicate(
-        { id, language: props.language },
+        { id, language: props.language, wid },
         i,
       );
       const out = new TextTrack({
@@ -129,16 +131,16 @@ export function useTextTracks() {
     });
     const remote = dedupeWebsiteTrack(remoteTracks, localTracks).map(
       ({ wid, ...props }, i) => {
-        const id = webpageTrackPrefix + wid;
+        const id = toWebpageID(wid);
         const isDefault = defaultTrackPredicate(
-          { id, language: props.language },
+          { id, language: props.language, wid },
           i + localTracks.length,
         );
         const track = new TextTrack({
           ...props,
           id,
           type: "json",
-          src: `webview://${id}`,
+          src: toWebpageUrl(wid),
           default: isDefault,
         });
         // track.setMode(isDefault ? "showing" : "disabled");
@@ -162,6 +164,21 @@ export function useTextTracks() {
 }
 
 const webpageTrackPrefix = "webpage:";
+
+function toWebpageID(wid: string) {
+  return webpageTrackPrefix + wid;
+}
+function toWebpageUrl(wid: string) {
+  return `webview://${toWebpageID(wid)}}`;
+}
+function getWebpageIDFromTrackID(id: string) {
+  if (!id.startsWith(webpageTrackPrefix)) return null;
+  return id.slice(webpageTrackPrefix.length);
+}
+function getWebpageIDFromURL(url: unknown) {
+  if (typeof url !== "string" || !url.startsWith("webview://")) return null;
+  return url.slice(`webview://${webpageTrackPrefix}`.length);
+}
 
 export function dedupeWebsiteTrack(
   website: WebsiteTextTrack[],
