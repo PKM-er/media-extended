@@ -3,11 +3,11 @@
 import preloadScript from "inline:./scripts/preload";
 import preloadLoader from "inline:./scripts/preload-patch";
 import userScript from "inline:./scripts/userscript";
-import { Component, Platform } from "obsidian";
+import { Component, Platform, WorkspaceWindow } from "obsidian";
 import path from "@/lib/path";
 import type MxPlugin from "@/mx-main";
 import { evalInMainPs, getFsPromise, getUserDataPath } from "../session/utils";
-import { channelId } from "./channel";
+import { buildPreloadLoader, channelId } from "./channel";
 import { BILI_REQ_STORE, replaceEnv } from "./const";
 
 const preloadLoaderCode = replaceEnv(preloadLoader);
@@ -28,6 +28,11 @@ declare module "obsidian" {
     ): EventRef;
     trigger(name: "mx:preload-ready"): void;
     trigger(name: "mx:preload-error", err: unknown): void;
+  }
+  interface Workspace {
+    floatingSplit: {
+      children: WorkspaceWindow[];
+    };
   }
 }
 
@@ -114,13 +119,34 @@ export class BilibiliRequestHacker extends Component {
             console.warn("Failed to remove hack script", preloadLoaderPath, e),
           );
       }
-      const { ipcRenderer } = require("electron");
-      await ipcRenderer.invoke(channel.enable, preloadScriptPath);
-      this.register(() => {
-        ipcRenderer.invoke(channel.disable);
+      const { enable, disable } = buildPreloadLoader({
+        ipcRenderer: require("electron").ipcRenderer,
+        channel,
       });
+
+      await enable(preloadScriptPath);
+      this.app.workspace.onLayoutReady(() => {
+        this.app.workspace.floatingSplit.children.forEach((workspaceWin) => {
+          if (workspaceWin instanceof WorkspaceWindow) {
+            this.enablePreload(preloadScriptPath, workspaceWin.win);
+          }
+        });
+        this.registerEvent(
+          this.app.workspace.on("window-open", async (_, win) => {
+            await this.enablePreload(preloadScriptPath, win);
+          }),
+        );
+      });
+
+      this.register(disable);
       console.log("mx-player-hack loaded");
       this.onReady();
     })().catch((e) => this.onError(e));
+  }
+
+  async enablePreload(scriptPath: string, win: Window) {
+    const { ipcRenderer } = (win as any).require("electron");
+    const { enable } = buildPreloadLoader({ ipcRenderer, channel });
+    await enable(scriptPath);
   }
 }

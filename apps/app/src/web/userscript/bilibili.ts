@@ -70,8 +70,8 @@ export default class BilibiliPlugin extends MediaPlugin {
       ID: id,
     };
     return {
-      cues: json.body.map((sub) => ({
-        id: sub.sid.toString(),
+      cues: json.body.map((sub, idx) => ({
+        id: `${sub.sid ?? idx}`,
         startTime: sub.from,
         endTime: sub.to,
         text: sub.content,

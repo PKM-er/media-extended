@@ -42,7 +42,9 @@ export function transcriptMenu(menu: Menu, ctx: PlayerContext) {
             }
           } else if (t._type === "local") {
             if (t.src instanceof TFile) {
-              ctx.plugin.app.workspace.openLinkText(t.src.path, "", "split");
+              if (ctx.plugin.app.vault.getFileByPath(t.src.path)) {
+                ctx.plugin.app.workspace.openLinkText(t.src.path, "", "split");
+              }
             } else {
               new Notice("Remote track not yet supported");
             }
