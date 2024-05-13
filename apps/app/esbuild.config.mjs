@@ -91,6 +91,14 @@ const opts = {
         ...(isProd ? { drop: ["console"], } : {})
       }
     ),
+    {
+      name: "fix-media-captions", setup(build) {
+        build.onLoad({ filter: new RegExp("media-captions/") }, async ({ path }) => {
+          const code = await readFile(path, "utf-8");
+          return { contents: code.replaceAll(/\b instanceof HTMLElement\b/g, ".instanceOf(HTMLElement)"), loader: "js" };
+        })
+      }
+    }
   ],
 };
 
