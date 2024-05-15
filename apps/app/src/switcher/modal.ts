@@ -6,9 +6,9 @@ import { checkMediaType } from "@/info/media-type";
 import { MediaURL } from "@/info/media-url";
 import path from "@/lib/path";
 import { pickMediaFile } from "@/lib/picker";
+import { getFsPromise } from "@/lib/require";
 import { toURL } from "@/lib/url";
 import type MxPlugin from "@/mx-main";
-import { getFsPromise } from "@/web/session/utils";
 import { FileProtocolModal } from "./protocol-select";
 
 const avId = /^av(?<id>\d+)$/i;

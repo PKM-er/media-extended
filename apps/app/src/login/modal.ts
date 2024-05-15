@@ -16,7 +16,7 @@ import {
 import type { SupportedMediaHost } from "@/info/supported";
 import { showAtButton } from "@/lib/menu";
 import { getPartition } from "@/lib/remote-player/const";
-import { getSession, getWebContents } from "@/web/session/utils";
+import { getSession, getWebContents } from "@/lib/require";
 
 export class LoginModal extends Modal {
   navEl = this.contentEl.insertAdjacentElement(

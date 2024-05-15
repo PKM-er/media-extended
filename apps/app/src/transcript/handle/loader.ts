@@ -14,8 +14,8 @@ import type {
 } from "@/info/track-info";
 import { isSupportedCaptionExt } from "@/info/track-info";
 import type { FileInfo } from "@/lib/file-info";
+import { readFile } from "@/lib/require";
 import type MxPlugin from "@/mx-main";
-import { readFile } from "@/web/session/utils";
 import { parseTrack } from "../stringify";
 import {
   resolveInvaultMediaForTrack,

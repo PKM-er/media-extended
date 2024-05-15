@@ -1,7 +1,7 @@
 import mime from "mime";
 import { Platform } from "obsidian";
 import { getMediaExts } from "@/info/media-type";
-import { getDialog } from "@/web/session/utils";
+import { getDialog } from "@/lib/require";
 
 /**
  * @returns absolute path of the picked file, or null if canceled

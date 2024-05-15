@@ -1,5 +1,5 @@
 import path from "@/lib/path";
-import { getFsPromise } from "@/web/session/utils";
+import { getFsPromise } from "@/lib/require";
 import type { FileInfo } from "./file-info";
 import { toFileInfo } from "./file-info";
 

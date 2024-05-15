@@ -11,12 +11,12 @@ import {
 } from "obsidian";
 import { getGroupedLangExtra } from "@/lib/lang/lang";
 import { showAtButton } from "@/lib/menu";
+import { getDialog } from "@/lib/require";
 import { LoginModal } from "@/login/modal";
 import type MxPlugin from "@/mx-main";
 import "./style.global.less";
 import type { BilibiliQuality } from "@/web/session/bilibili";
 import { bilibiliQualityLabels } from "@/web/session/bilibili";
-import { getDialog } from "@/web/session/utils";
 import type { MxSettings, OpenLinkBehavior } from "./def";
 
 export class MxSettingTabs extends PluginSettingTab {

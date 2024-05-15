@@ -2,7 +2,7 @@
 import type { RequestUrlParam, RequestUrlResponse } from "obsidian";
 import { Platform, requestUrl } from "obsidian";
 import { getUserAgent } from "@/lib/remote-player/ua";
-import { getSession } from "./utils";
+import { getSession } from "@/lib/require";
 
 export const enum BilibiliQuality {
   /** 240P 极速

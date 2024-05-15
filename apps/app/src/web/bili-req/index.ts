@@ -5,8 +5,8 @@ import preloadLoader from "inline:./scripts/preload-patch";
 import userScript from "inline:./scripts/userscript";
 import { Component, Platform, WorkspaceWindow } from "obsidian";
 import path from "@/lib/path";
+import { evalInMainPs, getFsPromise, getUserDataPath } from "@/lib/require";
 import type MxPlugin from "@/mx-main";
-import { evalInMainPs, getFsPromise, getUserDataPath } from "../session/utils";
 import { buildPreloadLoader, channelId } from "./channel";
 import { BILI_REQ_STORE, replaceEnv } from "./const";
 

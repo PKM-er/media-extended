@@ -19,6 +19,11 @@ export function getFsPromise() {
   return (fs ??= require("fs/promises")) as typeof import("node:fs/promises");
 }
 
+export function getSpawn() {
+  if (!Platform.isDesktopApp) return null;
+  return require("child_process").spawn as typeof import("child_process").spawn;
+}
+
 export async function readFile(filePath: string) {
   const fs = getFsPromise();
   if (!fs) throw new Error("fs not available");

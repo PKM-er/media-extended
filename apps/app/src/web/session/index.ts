@@ -1,7 +1,7 @@
 import { Platform } from "obsidian";
+import { getSession } from "@/lib/require";
 import type MxPlugin from "@/mx-main";
 import { modifyBilibiliSession } from "./bilibili";
-import { getSession } from "./utils";
 
 export async function modifySession(this: MxPlugin) {
   if (!Platform.isDesktopApp) return;
