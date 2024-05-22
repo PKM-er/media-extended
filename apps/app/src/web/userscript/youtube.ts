@@ -241,18 +241,22 @@ export default class YouTubePlugin extends MediaPlugin {
       const fsButton = await waitForSelector<HTMLButtonElement>(
         "#movie_player .ytp-size-button",
       );
-      const isCinematicsMode = () =>
-        !!this.app.querySelector("ytd-watch-flexy[theater]");
-      if (!isCinematicsMode()) {
+      let retries = 0;
+      while (!this.isCinematicsMode() && retries++ < 5) {
         console.log("Entering cinema mode");
-        do {
-          fsButton.click();
-          await sleep(200);
-        } while (!isCinematicsMode());
-        console.log("Entered cinema mode");
+        fsButton.click();
+        await sleep(500);
+      }
+      if (retries >= 5) {
+        console.error("Failed to enter cinema mode, need to manually click");
       }
       window.dispatchEvent(new Event("resize"));
     })();
+  }
+
+  isCinematicsMode() {
+    // if width of this.media is the same as window.innerWidth, then it's in cinema mode
+    return this.media.offsetWidth === window.innerWidth;
   }
 }
 
