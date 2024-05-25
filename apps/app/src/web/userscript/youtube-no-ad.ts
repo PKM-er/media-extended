@@ -19,34 +19,31 @@ export default class YouTubePluginNoAd extends YouTubePlugin {
   set runningAd(value) {
     this._runningAd = value;
     if (value === false) {
-      this.#adContinueInterval &&
-        window.clearInterval(this.#adContinueInterval.id);
+      window.clearInterval(this.#adContinueInterval?.id ?? -1);
       this.#adContinueInterval = null;
-    } else {
+    } else if (value === true && !this.#adContinueInterval) {
       const interval = {
-        id: -1,
+        id: window.setTimeout(() => {
+          // retry for 1s
+          if (interval.retry++ >= 2) {
+            this._runningAd = false;
+            window.clearInterval(interval.id);
+            this.#adContinueInterval = null;
+          } else {
+            this.adContinue();
+          }
+        }, 500),
         retry: 0,
       };
-      // retry for 1s
-      const id = window.setTimeout(() => {
-        if (interval.retry++ >= 4) {
-          this.runningAd = false;
-        } else {
-          this.adContinue();
-        }
-      }, 250);
-      interval.id = id;
       this.#adContinueInterval = interval;
     }
   }
   adContinue() {
-    const playButton =
-      this.moviePlayer.querySelector<HTMLElement>(".ytp-play-button");
-    if (playButton) {
-      playButton.click(); // PC
-      nativeTouch.call(playButton); // Phone
-    }
-    return !!playButton;
+    const clickTarget =
+      this.moviePlayer.querySelector<HTMLElement>(".ytp-play-button") ??
+      this.moviePlayer;
+    clickTarget.click(); // PC
+    nativeTouch.call(clickTarget); // Phone
   }
 
   async onload(): Promise<void> {
