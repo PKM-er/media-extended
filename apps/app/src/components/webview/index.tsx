@@ -30,11 +30,11 @@ function usePreload() {
   const plugin = usePlugin();
   const [preloadReady, setPreloadReady] = useState<boolean | null>(false);
   useEffect(() => {
-    plugin.biliReq
+    plugin.preload
       .untilReady()
       .then(() => setPreloadReady(true))
       .catch(() => setPreloadReady(null));
-  }, [plugin.biliReq]);
+  }, [plugin.preload]);
   return preloadReady;
 }
 

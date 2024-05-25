@@ -41,7 +41,7 @@ export function getDialog() {
   return remote.dialog as typeof Electron.dialog;
 }
 
-export function evalInMainPs(scriptPath: string) {
+export function evalInMainProcess(scriptPath: string) {
   const remote = require("@electron/remote");
   return remote.require(scriptPath);
 }

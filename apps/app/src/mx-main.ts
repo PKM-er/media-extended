@@ -44,7 +44,7 @@ import { MxSettingTabs } from "./settings/tab";
 import { initSwitcher } from "./switcher";
 import { registerTranscriptView } from "./transcript";
 import { TranscriptLoader } from "./transcript/handle/loader";
-import { BilibiliRequestHacker } from "./web/bili-req";
+import { WebviewPreload } from "./web/preload";
 import { modifySession } from "./web/session";
 import { resolveMxProtocol } from "./web/url-match";
 import "./login/modal";
@@ -104,7 +104,7 @@ export default class MxPlugin extends Plugin {
 
   mediaNote = this.addChild(new MediaNoteIndex(this));
   playlist = this.addChild(new PlaylistIndex(this));
-  biliReq = this.addChild(new BilibiliRequestHacker(this));
+  preload = this.addChild(new WebviewPreload(this));
   leafOpener = this.addChild(new LeafOpener(this));
   recorderNote = this.addChild(new RecorderNote(this));
   handleMediaNote = handleMediaNote;

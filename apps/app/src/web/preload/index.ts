@@ -5,7 +5,11 @@ import preloadLoader from "inline:./scripts/preload-patch";
 import userScript from "inline:./scripts/userscript";
 import { Component, Platform, WorkspaceWindow } from "obsidian";
 import path from "@/lib/path";
-import { evalInMainPs, getFsPromise, getUserDataPath } from "@/lib/require";
+import {
+  evalInMainProcess,
+  getFsPromise,
+  getUserDataPath,
+} from "@/lib/require";
 import type MxPlugin from "@/mx-main";
 import { buildPreloadLoader, channelId } from "./channel";
 import { BILI_REQ_STORE, replaceEnv } from "./const";
@@ -36,7 +40,7 @@ declare module "obsidian" {
   }
 }
 
-export class BilibiliRequestHacker extends Component {
+export class WebviewPreload extends Component {
   get app() {
     return this.plugin.app;
   }
@@ -110,7 +114,7 @@ export class BilibiliRequestHacker extends Component {
         );
       });
       try {
-        await evalInMainPs(preloadLoaderPath);
+        await evalInMainProcess(preloadLoaderPath);
         console.debug("preload patch loaded");
       } finally {
         await fs

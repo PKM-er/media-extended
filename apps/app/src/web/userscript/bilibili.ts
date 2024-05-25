@@ -5,7 +5,7 @@ import type { VTTContent } from "@/transcript/handle/type";
 import { BiliApiError } from "../bili-api/base";
 import type { PlayerV2Response } from "../bili-api/player-v2";
 import type { SubtitlesConfig } from "../bili-api/subtitle";
-import { storeId } from "../bili-req/scripts/store-id";
+import { storeId } from "../preload/scripts/store-id";
 import { requireMx } from "./_require";
 
 const { waitForSelector, MediaPlugin } = requireMx();
