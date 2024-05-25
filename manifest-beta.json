@@ -1,7 +1,7 @@
 {
   "id": "media-extended",
   "name": "Media Extended",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "minAppVersion": "1.5.7",
   "description": "Media(Video/Audio) Playback Enhancement for Obsidian.md",
   "author": "AidenLx",
